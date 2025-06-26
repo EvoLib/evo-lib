@@ -29,7 +29,8 @@ jobs:
             mypy \
             pytest \
             docformatter \
-            types-PyYAML
+            types-PyYAML \
+            matplotlib
 
       - name: Run black
         run: black --check evolib/ tests/
