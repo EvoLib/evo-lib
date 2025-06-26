@@ -1,22 +1,55 @@
-# EvoLib
+# EvoLib – A Modular Toolkit for Evolutionary Computation
 
-**EvoLib** is a modular and extensible Python framework for evolutionary algorithms. It supports a wide range of strategies including adaptive mutation, dynamic crossover, and various selection and replacement methods. Its YAML-based configuration and clear structure make it ideal for research, teaching, and experimentation.
+<p align="center">
+  <img src="https://github.com/EvoLib/evolib/blob/main/assets/evolib_256.png" alt="EvoLib Logo" width="256"/>
+</p>
 
-## ✨ Features
 
-- ✅ (μ + λ) and (μ, λ) evolution strategies
-- ✅ Multiple mutation strategies: constant, exponential decay, adaptive (global/individual/gene-level)
-- ✅ Selection methods: tournament, rank-based, roulette, SUS, truncation, Boltzmann
-- ✅ Crossover operators: BLX-alpha, arithmetic, SBX, intermediate, heuristic, differential evolution
-- ✅ Vector-based and neural network representations
-- ✅ Full tracking of fitness and diversity over generations
-- ✅ YAML-based configuration for reproducible experiments
-- ✅ Easily extensible via plug-in operator loading (`registry.py`)
-- ✅ Clean, PEP8-compliant codebase
-
+**EvoLib** is a modular and extensible framework for implementing and analyzing evolutionary algorithms in Python.\
+It supports classical strategies such as (μ, λ) and (μ + λ) Evolution Strategies, Genetic Algorithms, and Neuroevolution – with a strong focus on clarity, modularity, and didactic value.
 
 ---
 
+## 🚀 Features
+
+- Individual- and population-level adaptive mutation strategies
+- Modular selection methods: tournament, rank-based, roulette, SUS, truncation, Boltzmann
+- Multiple crossover operators: heuristic, arithmetic, differential, SBX, etc.
+- Configurable via YAML: clean separation of individual and population setups
+- Benchmark functions: Sphere, Rosenbrock, Rastrigin, Ackley, Griewank, etc.
+- Built-in loss functions (MSE, MAE, Huber, Cross-Entropy)
+- Plotting utilities for fitness trends, mutation tracking, diversity
+- Designed for extensibility: clean core/operator/utils split
+- Sphinx-based documentation (coming soon)
+
+### 🧠 Planned: Neural Networks & Neuroevolution
+
+Support for neural network-based individuals and neuroevolution strategies is currently in development.
+
+> ⚠️ **This project is in early development (alpha)**. Interfaces and structure may change.
+
+---
+
+<p align="center">
+  <img src="https://github.com/EvoLib/evo-lib/blob/main/examples/05_advanced_topics/08_frames_vector_obstacles/08_vector_control_obstacles.gif" alt="Sample Plott" width="512"/>
+</p>
+
+---
+
+## 📂 Directory Structure
+
+```
+evolib/
+├── core/           # Population, Individual
+├── operators/      # Crossover, mutation, selection, replacement
+├── utils/          # Losses, plotting, config loaders, benchmarks
+├── globals/        # Enums and constants
+├── config/         # YAML config files
+├── examples/       # Educational and benchmark scripts
+└── api.py          # Central access point (auto-generated)
+```
+
+---
 
 ## 📦 Installation
 
@@ -24,76 +57,47 @@
 pip install evolib
 ```
 
-## 🧬 Example: Function Minimization
+Requirements: Python 3.9+ and packages in `requirements.txt`.
+
+---
+
+## 🧪 Quickstart Example
 
 ```python
-from evolib.core.population import Pop
-from evolib.strategy import evolve_mu_lambda
-from my_custom_module import my_fitness_function, my_mutation_function
+from evolib import Pop, Indiv, evolve_mu_lambda, mse_loss, sphere
 
-pop = Pop("config.yaml")
-pop.initialize_random_population()
+def fitness(indiv: Indiv) -> None:
+    indiv.fitness = mse_loss(0.0, sphere(indiv.para))
 
-pop.set_functions(
-    fitness_function=my_fitness_function,
-    mutation_function=my_mutation_function,
-)
-
+pop = Pop(config_path="config/population.yaml")
 for _ in range(pop.max_generations):
-    evolve_mu_lambda(pop, my_fitness_function, my_mutation_function)
+    evolve_mu_lambda(pop, fitness)
+    print(pop)
 ```
 
-## ⚙️ Configuration Example (`config.yaml`)
+For full examples, see 📁[`examples/`](https://github.com/EvoLib/evo-lib/tree/main/examples) – including plotting, adaptive mutation, and benchmarking.
 
-```yaml
-parent_pool_size: 50
-offspring_pool_size: 200
-max_generations: 100
-representation: VECTOR
+---
 
-mutation:
-  strategy: adaptive_individual
-  min_rate: 0.01
-  max_rate: 0.5
-  min_strength: 0.01
-  max_strength: 0.3
+## 📚 Use Cases
 
-crossover:
-  strategy: blend
-  rate: 0.7
-```
+- Evolutionary benchmark optimization
+- Parameter tuning
+- Algorithm comparisons
+- Teaching material for evolutionary computation
+- Neuroevolution
 
-## 📈 Logging & Visualization
+---
 
-EvoLib logs a range of metrics per generation, including:
+## 🪪 License
 
-- Best, worst, mean, median fitness
-- Fitness standard deviation and IQR
-- Mutation and crossover parameters
-- Diversity metrics (IQR, normalized std, etc.)
-These logs can be visualized with tools such as `matplotlib`, `seaborn`, or `pandas`.
+This project is licensed under the [MIT License](https://github.com/EvoLib/evo-lib/blob/main/LICENSE).
 
-## 🔌 Extensibility
+---
 
-New operators can be added under `evolib/operators/` and referenced dynamically:
+## 🙏 Acknowledgments
 
-```python
-from evolib.registry import load_strategy
-
-my_selection = load_strategy("selection", "tournament")
-```
-
-Valid categories: `"selection"`, `"mutation"`, `"crossover"`, `"replacement"`
-
-## 🧪 Running Tests
-
-```bash
-pytest tests/
-```
-
-## 📜 License
-
-MIT License — free for academic, personal use.
+Inspired by classical evolutionary computation techniques and designed for clarity, modularity, and pedagogical use.
 
 
 ```{toctree}
