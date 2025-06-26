@@ -12,6 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Install dependencies
+        run: |
+          pip install -e .
+          pip install black isort flake8 mypy docformatter pytest types-PyYAML
+
       - name: Checkout code
         uses: actions/checkout@v3
 
