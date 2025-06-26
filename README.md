@@ -16,17 +16,14 @@ It supports classical strategies such as (μ, λ) and (μ + λ) Evolution Strate
 
 ---
 
-## 🚀 Features
+## 🚀 Key Features
 
-- Individual- and population-level adaptive mutation strategies
-- Modular selection methods: tournament, rank-based, roulette, SUS, truncation, Boltzmann
-- Multiple crossover operators: heuristic, arithmetic, differential, SBX, etc.
-- Configurable via YAML: clean separation of individual and population setups
-- Benchmark functions: Sphere, Rosenbrock, Rastrigin, Ackley, Griewank, etc.
-- Built-in loss functions (MSE, MAE, Huber, Cross-Entropy)
-- Plotting utilities for fitness trends, mutation tracking, diversity
-- Designed for extensibility: clean core/operator/utils split
-- Sphinx-based documentation (coming soon)
+- 🧬 **Configurable Evolution**: Define evolutionary strategies via simple YAML files.
+- 🧪 **Modular Design**: Easily swap mutation, selection, and crossover strategies.
+- 📈 **Built-in Logging**: Fitness tracking and history recording out-of-the-box.
+- 🎓 **Educational Focus**: Clear, didactic examples and extensible code structure.
+- 🤖 **Future-Ready**: Neuroevolution and neural representations coming soon.
+- ✅ **Type-Checked**: With [mypy](https://mypy-lang.org/) and PEP8 compliance.
 
 ### 🧠 Planned: Neural Networks & Neuroevolution
 
@@ -67,7 +64,7 @@ Requirements: Python 3.9+ and packages in `requirements.txt`.
 
 ---
 
-## 🧪 Quickstart Example
+## 🧪 Example Usage
 
 ```python
 from evolib import Pop, evolve_mu_lambda
@@ -87,16 +84,52 @@ For full examples, see 📁[`examples/`](./examples/) – including plotting, ad
 
 ---
 
-## 📚 Use Cases
+## ⚙️ Configuration Example (.yaml)
 
-- Evolutionary benchmark optimization
-- Parameter tuning
-- Algorithm comparisons
-- Teaching material for evolutionary computation
-- Neuroevolution
+```aml
+parent_pool_size: 10
+offspring_pool_size: 40
+max_generations: 100
+max_indiv_age: 3
+num_elites: 1
+
+mutation:
+  strategy: adaptive_individual
+  init_rate: 0.8
+  min_rate: 0.2
+  max_rate: 1.0
+  init_strength: 0.5
+  min_strength: 0.01
+  max_strength: 1.0
+
+crossover:
+  strategy: none
+```
 
 ---
 
+## 📚 Use Cases
+
+EvoLib is designed to support a wide range of applications, including:
+
+- ✅ **Benchmark optimization**: Solve classic problems like Sphere, Rastrigin, Ackley, etc.
+- 🧪 **Hyperparameter tuning**: Use evolutionary strategies to optimize black-box functions.
+- 🧬 **Strategy comparison**: Test and evaluate different mutation, selection, and crossover methods.
+- 🎓 **Educational use**: Clear API and examples for teaching evolutionary computation concepts.
+- 🧠 **Neuroevolution (planned)**: Evolve neural networks and control policies (structure & weights).
+
+---
+
+## 🧠 Roadmap
+
+- [x] Adaptive Mutation (global, individual, per-parameter)
+- [x] Flexible Crossover Strategies (BLX, intermediate, none)
+- [x] Strategy Comparisons via Examples
+- [ ] Neural Network Representations
+- [ ] Neuroevolution
+- [ ] Visualization Tools for Evolution Progress
+
+---
 
 ## 📚 Documentation 
 
