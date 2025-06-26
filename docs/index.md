@@ -34,7 +34,7 @@ Support for neural network-based individuals and neuroevolution strategies is cu
 ---
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/main/examples/05_advanced_topics/08_frames_vector_obstacles/08_vector_control_obstacles.gif" alt="Sample Plott" width="512"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evolib/main/examples/05_advanced_topics/08_frames_vector_obstacles/08_vector_control_obstacles.gif" alt="Sample" width="512"/>
 </p>
 
 ---
@@ -147,7 +147,7 @@ This project is licensed under the [MIT License](https://github.com/EvoLib/evo-l
 
 Inspired by classical evolutionary computation techniques and designed for clarity, modularity, and pedagogical use.
 
-
+---
 
 ```{toctree}
 :maxdepth: 2
