@@ -32,7 +32,7 @@ It supports classical strategies such as (μ, λ) and (μ + λ) Evolution Strate
 
 Support for neural network-based individuals and neuroevolution strategies is currently in development.
 
-> ⚠️ **This project is in early development (alpha)**. Interfaces and structure may change. Feedback and contributions are welcome.
+> ⚠️ **This project is in early development (alpha)**. Interfaces and structure may change.
 
 ---
 
