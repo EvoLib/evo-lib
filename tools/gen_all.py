@@ -75,5 +75,6 @@ if __name__ == "__main__":
     write_output(target_path, imports, symbols)
 
     print(
-        f"Written {len(imports)} import lines and {len(symbols)} symbols to {target_path}"
+        f"Written {len(imports)} import lines and {len(symbols)}"
+        f"symbols to {target_path}"
     )

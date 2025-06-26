@@ -1,11 +1,9 @@
-import numpy as np
-
 from evolib.core.individual import Indiv
 from evolib.core.population import Pop
 from evolib.operators.selection import selection_tournament
 
 
-def test_selection_tournament_index():
+def test_selection_tournament_index() -> None:
     # Dummy-Population aufbauen
     pop = Pop(config_path="./tests/population.yaml")
     pop.indivs = []

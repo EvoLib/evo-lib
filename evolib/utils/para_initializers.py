@@ -17,8 +17,9 @@ Functions:
     init_constant_vector(value, dim): Creates constant vector.
 """
 
-import numpy as np
 from typing import Callable
+
+import numpy as np
 
 
 def init_uniform_vector(bounds: tuple[float, float], dim: int) -> Callable:
@@ -32,6 +33,7 @@ def init_uniform_vector(bounds: tuple[float, float], dim: int) -> Callable:
     Returns:
         Callable: A function pop -> para (list[float]) to be used in initialization.
     """
+
     def initializer(_: object) -> list[float]:
         return np.random.uniform(bounds[0], bounds[1], size=dim).tolist()
 
@@ -50,6 +52,7 @@ def init_normal_vector(mu: float, sigma: float, dim: int) -> Callable:
     Returns:
         Callable: A function pop -> para (list[float]) to be used in initialization.
     """
+
     def initializer(_: object) -> list[float]:
         return np.random.normal(loc=mu, scale=sigma, size=dim).tolist()
 
@@ -67,6 +70,7 @@ def init_constant_vector(value: float, dim: int) -> Callable:
     Returns:
         Callable: A function pop -> para (list[float]) to be used in initialization.
     """
+
     def initializer(_: object) -> list[float]:
         return [value] * dim
 

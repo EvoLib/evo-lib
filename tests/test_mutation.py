@@ -4,7 +4,7 @@ from evolib.core.individual import Indiv
 from evolib.operators.mutation import mutate_gauss
 
 
-def test_mutate_gauss_changes_values():
+def test_mutate_gauss_changes_values() -> None:
     indiv = Indiv(para=np.zeros(3))
     before = indiv.para.copy()
     mutated = mutate_gauss(indiv.para, mutation_strength=0.1, bounds=(-1, 1))
