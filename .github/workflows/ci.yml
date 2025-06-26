@@ -1,0 +1,44 @@
+# .github/workflows/ci.yml
+name: Code Quality and Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install -e .
+          pip install black isort flake8 mypy docformatter pytest
+
+      - name: Run black
+        run: black --check evolib/ tests/
+
+      - name: Run isort
+        run: isort --check-only evolib/ tests/
+
+      - name: Run flake8
+        run: flake8 evolib/ tests/
+
+      - name: Run mypy
+        run: mypy evolib/
+
+      - name: Run pytest
+        run: pytest tests/
+
+      - name: Run docformatter
+        run: docformatter --check --recursive evolib tests
