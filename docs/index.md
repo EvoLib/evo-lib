@@ -1,10 +1,5 @@
 # EvoLib – A Modular Toolkit for Evolutionary Computation
 
-<p align="center">
-  <img src="https://github.com/EvoLib/evolib/blob/main/assets/evolib_256.png" alt="EvoLib Logo" width="256"/>
-</p>
-
-
 **EvoLib** is a modular and extensible framework for implementing and analyzing evolutionary algorithms in Python.\
 It supports classical strategies such as (μ, λ) and (μ + λ) Evolution Strategies, Genetic Algorithms, and Neuroevolution – with a strong focus on clarity, modularity, and didactic value.
 
@@ -27,12 +22,6 @@ It supports classical strategies such as (μ, λ) and (μ + λ) Evolution Strate
 Support for neural network-based individuals and neuroevolution strategies is currently in development.
 
 > ⚠️ **This project is in early development (alpha)**. Interfaces and structure may change.
-
----
-
-<p align="center">
-  <img src="https://github.com/EvoLib/evo-lib/blob/main/examples/05_advanced_topics/08_frames_vector_obstacles/08_vector_control_obstacles.gif" alt="Sample Plott" width="512"/>
-</p>
 
 ---
 
