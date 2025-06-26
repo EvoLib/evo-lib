@@ -70,15 +70,17 @@ Requirements: Python 3.9+ and packages in `requirements.txt`.
 ## 🧪 Quickstart Example
 
 ```python
-from evolib import Pop, Indiv, evolve_mu_lambda, mse_loss, sphere
+from evolib import Pop, evolve_mu_lambda
+from my_custom_mutation import mutate_custom
+from my_fitness import fitness_function
 
-def fitness(indiv: Indiv) -> None:
-    indiv.fitness = mse_loss(0.0, sphere(indiv.para))
-
-pop = Pop(config_path="config/population.yaml")
-for _ in range(pop.max_generations):
-    evolve_mu_lambda(pop, fitness)
-    print(pop)
+pop = Pop(config_path="config/my_experiment.yaml")
+pop.set_functions(
+    fitness_function=fitness_function,
+    mutation_function=mutate_custom
+)
+pop.initialize_random_population(initializer=my_initializer)
+evolve_mu_lambda(pop)
 ```
 
 For full examples, see 📁[`examples/`](./examples/) – including plotting, adaptive mutation, and benchmarking.
