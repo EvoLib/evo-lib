@@ -85,9 +85,9 @@ For full examples, see 📁[`examples/`](./examples/) – including plotting, ad
 ---
 
 
-📚 Documentation for EvoLib is available at:
+## 📚 Documentation 
 
-👉 https://evolib.readthedocs.io/en/latest/
+Documentation for EvoLib is available at: 👉 https://evolib.readthedocs.io/en/latest/
 
 ---
 
