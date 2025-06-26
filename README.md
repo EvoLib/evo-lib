@@ -84,6 +84,13 @@ For full examples, see 📁[`examples/`](./examples/) – including plotting, ad
 
 ---
 
+
+📚 Documentation for EvoLib is available at:
+
+👉 https://evolib.readthedocs.io/en/latest/
+
+---
+
 ## 🪪 License
 
 This project is licensed under the [MIT License](./LICENSE).
