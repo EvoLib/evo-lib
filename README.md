@@ -27,6 +27,10 @@ It supports classical strategies such as (μ, λ) and (μ + λ) Evolution Strate
 - Designed for extensibility: clean core/operator/utils split
 - Sphinx-based documentation (coming soon)
 
+## 🧠 Planned: Neural Networks & Neuroevolution
+
+Support for neural network-based individuals and neuroevolution strategies is currently in development.
+
 ---
 
 <p align="center">
