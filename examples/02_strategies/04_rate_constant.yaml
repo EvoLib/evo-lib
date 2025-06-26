@@ -1,0 +1,14 @@
+# Sample configuration
+
+parent_pool_size: 40
+offspring_pool_size: 40
+representation: "vector"
+
+max_generations: 20
+max_indiv_age: 0
+num_elites: 1
+
+mutation:
+  strategy: "constant"
+  rate: 0.3
+  strength: 0.5

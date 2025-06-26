@@ -1,0 +1,12 @@
+parent_pool_size: 20
+offspring_pool_size: 40
+max_generations: 100
+max_indiv_age: 0
+num_elites: 1
+
+representation: vector
+
+mutation:
+  strategy: constant
+  rate: 1.0
+  strength: 0.1

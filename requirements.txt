@@ -1,0 +1,11 @@
+# Kernpakete
+numpy>=1.24
+pyyaml>=6.0
+pandas=>2.3.0
+
+
+# Optional: pygame-basierte Umgebungen
+pygame>=2.5
+
+# Optional: physics-based environments
+pymunk>=6.4

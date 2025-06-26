@@ -1,0 +1,12 @@
+parent_pool_size: 100
+offspring_pool_size: 700
+max_generations: 1000
+num_elites: 10
+max_indiv_age: 0
+
+representation: vector
+
+mutation:
+  strategy: adaptive_per_parameter
+  min_strength: 0.000001
+  max_strength: 1.0

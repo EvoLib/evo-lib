@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evolib"
+version = "0.1.0adev3"
+description = "A modular framework for evolutionary strategies and neuroevolution."
+authors = [
+    { name = "EvoLib", email = "evolib@dismail.de" }
+]
+license = { file = "LICENSE.md" }
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy >=1.24",
+    "pyyaml >=6.0",
+    "pandas >=2.3.0"
+]
+
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+
+[project.optional-dependencies]
+dev = ["pygame", "pymunk"]
+docs = [
+  "sphinx",
+  "sphinx-rtd-theme",
+  "myst-parser",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["evolib*"]
+
+# Tool-Konfigurationen
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+warn_unused_ignores = true
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+
+[tool.docformatter]
+wrap-summaries = 88
+wrap-descriptions = 88
+pre-summary-newline = true
+
+[tool.pylint]
+max-line-length = 88
+disable = [
+    "missing-docstring",
+    "invalid-name",
+    "too-few-public-methods",
+    "too-many-arguments",
+    "too-many-instance-attributes",
+    "too-many-locals"
+]
+

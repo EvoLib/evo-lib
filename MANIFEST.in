@@ -1,0 +1,24 @@
+# Basisdokumente
+include README.md
+include LICENSE.md
+include pyproject.toml
+
+# YAML-Konfigurationsdateien (z. B. population.yaml)
+recursive-include evolib/config *.yaml
+
+# Python-Dateien explizit (meist redundant, aber robust)
+recursive-include evolib *.py
+
+# Beispielcode oder Notebooks (optional, wenn du `examples/` hinzufügst)
+recursive-include examples *.py
+recursive-include examples *.ipynb
+
+# Dokumentation, falls du in Zukunft eine Doku-Quelle z. B. in /docs hast
+recursive-include docs *.md *.rst *.py
+prune docs/_build
+
+# Falls Sphinx-Doku mit statischen Assets
+recursive-include docs/_static *
+
+# Paketspezifische README-Dateien (z. B. in Teilmodulen)
+recursive-include evolib **/README.md
