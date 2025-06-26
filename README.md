@@ -7,9 +7,8 @@
 [![Project Status: Alpha](https://img.shields.io/badge/status-alpha-orange.svg)](https://github.com/EvoLib/evo-lib)
 
 <p align="center">
-  <img src="https://github.com/EvoLib/evolib/blob/main/assets/evolib_256.png" alt="EvoLib Logo" width="256"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evolib/main/assets/evolib_256.png" alt="EvoLib Logo" width="256"/>
 </p>
-
 
 **EvoLib** is a modular and extensible framework for implementing and analyzing evolutionary algorithms in Python.\
 It supports classical strategies such as (μ, λ) and (μ + λ) Evolution Strategies, Genetic Algorithms, and Neuroevolution – with a strong focus on clarity, modularity, and didactic value.
@@ -34,7 +33,7 @@ Support for neural network-based individuals and neuroevolution strategies is cu
 ---
 
 <p align="center">
-  <img src="https://github.com/EvoLib/evo-lib/blob/main/examples/05_advanced_topics/08_frames_vector_obstacles/08_vector_control_obstacles.gif" alt="Sample Plott" width="512"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/05_advanced_topics/08_frames_vector_obstacles/08_vector_control_obstacles.gif" alt="Sample Plott" width="512"/>
 </p>
 
 ---
@@ -80,7 +79,7 @@ pop.initialize_random_population(initializer=my_initializer)
 evolve_mu_lambda(pop)
 ```
 
-For full examples, see 📁[`examples/`](./examples/) – including plotting, adaptive mutation, and benchmarking.
+For full examples, see 📁[`examples/`](https://github.com/EvoLib/evo-lib/tree/main/examples) – including plotting, adaptive mutation, and benchmarking.
 
 ---
 
@@ -139,7 +138,7 @@ Documentation for EvoLib is available at: 👉 https://evolib.readthedocs.io/en/
 
 ## 🪪 License
 
-This project is licensed under the [MIT License](./LICENSE).
+This project is licensed under the [MIT License](https://github.com/EvoLib/evo-lib/tree/main/LICENSE).
 
 ---
 
