@@ -4,6 +4,7 @@
 [![Code Quality & Tests](https://github.com/EvoLib/evo-lib/actions/workflows/ci.yml/badge.svg)](https://github.com/EvoLib/evo-lib/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PyPI version](https://badge.fury.io/py/evolib.svg)](https://pypi.org/project/evolib/)
+[![Project Status: Alpha](https://img.shields.io/badge/status-alpha-orange.svg)](https://github.com/EvoLib/evo-lib)
 
 <p align="center">
   <img src="https://github.com/EvoLib/evolib/blob/main/assets/evolib_256.png" alt="EvoLib Logo" width="256"/>
@@ -30,6 +31,8 @@ It supports classical strategies such as (μ, λ) and (μ + λ) Evolution Strate
 ### 🧠 Planned: Neural Networks & Neuroevolution
 
 Support for neural network-based individuals and neuroevolution strategies is currently in development.
+
+> ⚠️ **This project is in early development (alpha)**. Interfaces and structure may change. Feedback and contributions are welcome.
 
 ---
 
@@ -108,4 +111,3 @@ This project is licensed under the [MIT License](./LICENSE).
 ## 🙏 Acknowledgments
 
 Inspired by classical evolutionary computation techniques and designed for clarity, modularity, and pedagogical use.
-
