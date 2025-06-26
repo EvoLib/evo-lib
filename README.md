@@ -1,5 +1,9 @@
 # EvoLib – A Modular Toolkit for Evolutionary Computation
 
+[![Docs Status](https://readthedocs.org/projects/evolib/badge/?version=latest)](https://evolib.readthedocs.io/en/latest/)
+[![Code Quality & Tests](https://github.com/EvoLib/evo-lib/actions/workflows/ci.yml/badge.svg)](https://github.com/EvoLib/evo-lib/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![PyPI version](https://badge.fury.io/py/evolib.svg)](https://pypi.org/project/evolib/)
 
 <p align="center">
   <img src="https://github.com/EvoLib/evolib/blob/main/assets/evolib_256.png" alt="EvoLib Logo" width="256"/>
