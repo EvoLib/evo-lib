@@ -1,12 +1,17 @@
 # SPDX-License-Identifier: MIT
 def validate_mutation_config(cfg: dict, strategy: str) -> None:
     required_fields = {
-        "constant": ["rate", "strength"],
-        "exponential_decay": ["min_rate", "max_rate", "min_strength", "max_strength"],
+        "constant": ["probability", "strength"],
+        "exponential_decay": [
+            "min_probability",
+            "max_probability",
+            "min_strength",
+            "max_strength",
+        ],
         "adaptive_global": [
-            "init_rate",
-            "min_rate",
-            "max_rate",
+            "init_probability",
+            "min_probability",
+            "max_probability",
             "init_strength",
             "min_strength",
             "max_strength",
@@ -15,7 +20,12 @@ def validate_mutation_config(cfg: dict, strategy: str) -> None:
             "increase_factor",
             "decrease_factor",
         ],
-        "adaptive_individual": ["min_rate", "max_rate", "min_strength", "max_strength"],
+        "adaptive_individual": [
+            "min_probability",
+            "max_probability",
+            "min_strength",
+            "max_strength",
+        ],
         "adaptive_per_parameter": ["min_strength", "max_strength"],
     }
 
@@ -29,10 +39,10 @@ def validate_mutation_config(cfg: dict, strategy: str) -> None:
 
 def validate_crossover_config(cfg: dict, strategy: str) -> None:
     required_fields = {
-        "constant": [],  # keine Pflichtfelder
-        "exponential_decay": ["min_rate", "max_rate"],
-        "adaptive_global": ["init_rate", "min_rate", "max_rate"],
-        "adaptive_individual": ["min_rate", "max_rate"],
+        "constant": [],
+        "exponential_decay": ["min_probability", "max_probability"],
+        "adaptive_global": ["init_probability", "min_probability", "max_probability"],
+        "adaptive_individual": ["min_probability", "max_probability"],
     }
 
     if strategy not in required_fields:

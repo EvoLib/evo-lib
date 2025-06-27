@@ -106,7 +106,7 @@ def crossover_simulated_binary(
     parent1: np.ndarray,
     parent2: np.ndarray,
     eta: float = 20,
-    crossover_rate: float = 0.7,
+    crossover_probability: float = 0.7,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Perform Simulated Binary Crossover (SBX) on two parent vectors.
@@ -118,7 +118,7 @@ def crossover_simulated_binary(
         parent1 (np.ndarray): First parent vector.
         parent2 (np.ndarray): Second parent vector.
         eta (float): Distribution index (controls spread; higher = closer to parents).
-        crossover_rate (float): Probability to apply crossover. If not applied,
+        crossover_probability (float): Probability to apply crossover. If not applied,
         parents are copied.
 
     Returns:
@@ -133,7 +133,7 @@ def crossover_simulated_binary(
     if len(parent1) != len(parent2):
         raise ValueError("Parent vectors must have the same length.")
 
-    if random.random() >= crossover_rate:
+    if random.random() >= crossover_probability:
         return parent1.copy(), parent2.copy()
 
     child1 = np.zeros_like(parent1)
@@ -162,7 +162,7 @@ def crossover_intermediate(
     parent1: np.ndarray,
     parent2: np.ndarray,
     d: float = 0.25,
-    crossover_rate: float = 0.7,
+    crossover_probability: float = 0.7,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Perform intermediate crossover with extended alpha range on two parent vectors.
@@ -191,7 +191,7 @@ def crossover_intermediate(
     if len(parent1) != len(parent2):
         raise ValueError("Parent vectors must have the same length.")
 
-    if random.random() >= crossover_rate:
+    if random.random() >= crossover_probability:
         return parent1.copy(), parent2.copy()
 
     child1 = np.zeros_like(parent1)
@@ -211,7 +211,7 @@ def crossover_heuristic(
     parent1: np.ndarray,
     parent2: np.ndarray,
     fitness_func: Callable[[np.ndarray], float],
-    crossover_rate: float = 0.7,
+    crossover_probability: float = 0.7,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Perform heuristic crossover on two parent vectors.
@@ -224,7 +224,7 @@ def crossover_heuristic(
         parent2 (np.ndarray): Second parent vector.
         fitness_func (Callable): Fitness evaluation function. Should
         return lower values for better individuals.
-        crossover_rate (float): Probability of performing crossover.
+        crossover_probability (float): Probability of performing crossover.
         Otherwise, parents are returned unchanged.
 
     Returns:
@@ -240,7 +240,7 @@ def crossover_heuristic(
     if len(parent1) != len(parent2):
         raise ValueError("Parent vectors must have the same length.")
 
-    if random.random() >= crossover_rate:
+    if random.random() >= crossover_probability:
         return parent1.copy(), parent2.copy()
 
     # Ensure parent2 is the better (lower fitness) individual

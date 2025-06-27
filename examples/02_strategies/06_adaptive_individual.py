@@ -55,7 +55,7 @@ def initialize_population(pop: Pop) -> None:
         new_indiv.mutation_strength = random.uniform(
             pop.min_mutation_strength, pop.max_mutation_strength
         )
-        new_indiv.mutation_rate = 1.0
+        new_indiv.mutation_probability = 1.0
         pop.tau_update_function(new_indiv)  # computes tau based on length of para
         pop.add_indiv(new_indiv)
 

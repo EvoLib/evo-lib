@@ -8,5 +8,5 @@ representation: vector
 
 mutation:
   strategy: constant
-  rate: 1.0
+  probability: 1.0
   strength: 0.02

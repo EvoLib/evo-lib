@@ -49,8 +49,8 @@ def mutate_indiv(
 
     min_strength = getattr(pop, "min_mutation_strength", strength)
     max_strength = getattr(pop, "max_mutation_strength", strength)
-    min_rate = getattr(pop, "min_mutation_rate", rate)
-    max_rate = getattr(pop, "max_mutation_rate", rate)
+    min_probability = getattr(pop, "min_mutation_probability", rate)
+    max_probability = getattr(pop, "max_mutation_probability", rate)
 
     mutation_function(
         indiv,
@@ -59,8 +59,8 @@ def mutate_indiv(
             min_strength,
             max_strength,
             rate,
-            min_rate,
-            max_rate,
+            min_probability,
+            max_probability,
             bounds,
         ),
     )
@@ -113,7 +113,7 @@ def get_mutation_parameters(pop: Pop, indiv: Indiv) -> tuple[float, float]:
         indiv (Indiv): The individual whose mutation parameters may be used.
 
     Returns:
-        tuple[float, float]: (mutation_rate, mutation_strength)
+        tuple[float, float]: (mutation_probability, mutation_strength)
 
     Raises:
         ValueError: If required individual parameters are missing or strategy is
@@ -126,31 +126,31 @@ def get_mutation_parameters(pop: Pop, indiv: Indiv) -> tuple[float, float]:
         MutationStrategy.EXPONENTIAL_DECAY,
         MutationStrategy.ADAPTIVE_GLOBAL,
     }:
-        return pop.mutation_rate, pop.mutation_strength
+        return pop.mutation_probability, pop.mutation_strength
 
     if strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
-        if indiv.mutation_rate is None or indiv.mutation_strength is None:
+        if indiv.mutation_probability is None or indiv.mutation_strength is None:
             raise ValueError(
                 "Individual mutation parameters must be initialized before use "
                 "when using ADAPTIVE_INDIVIDUAL strategy."
             )
-        return indiv.mutation_rate, indiv.mutation_strength
+        return indiv.mutation_probability, indiv.mutation_strength
 
     if strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
         # Use average of per-parameter strengths, fallback 0.0
         strengths = indiv.mutation_strengths
         avg_strength = sum(strengths) / len(strengths) if strengths else 0.0
-        return indiv.mutation_rate or 0.0, avg_strength
+        return indiv.mutation_probability or 0.0, avg_strength
 
     raise ValueError(f"Unsupported mutation strategy: {strategy}")
 
 
 def update_mutation_parameters(pop: Pop) -> None:
     if pop.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
-        pop.mutation_rate = _exponential_mutation_rate(pop)
+        pop.mutation_probability = _exponential_mutation_rate(pop)
         pop.mutation_strength = _exponential_mutation_strength(pop)
     elif pop.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
-        pop.mutation_rate = _adaptive_mutation_rate(pop)
+        pop.mutation_probability = _adaptive_mutation_rate(pop)
         pop.mutation_strength = _adaptive_mutation_strength(pop)
 
 
@@ -181,8 +181,11 @@ def _exponential_mutation_rate(pop: Pop) -> float:
     Returns:
         float: The adjusted mutation rate.
     """
-    k = np.log(pop.max_mutation_rate / pop.min_mutation_rate) / pop.max_generations
-    return pop.max_mutation_rate * np.exp(-k * pop.generation_num)
+    k = (
+        np.log(pop.max_mutation_probability / pop.min_mutation_probability)
+        / pop.max_generations
+    )
+    return pop.max_mutation_probability * np.exp(-k * pop.generation_num)
 
 
 def _adaptive_mutation_rate(pop: Pop, alpha: float = 0.1) -> float:
@@ -205,18 +208,18 @@ def _adaptive_mutation_rate(pop: Pop, alpha: float = 0.1) -> float:
     pop.diversity_ema = (1 - alpha) * pop.diversity_ema + alpha * pop.diversity
 
     # Mutationsrate adaptieren
-    rate = pop.mutation_rate
-    increased = rate * pop.increase_factor
-    decreased = rate * pop.decrease_factor
+    probability = pop.mutation_probability
+    increased = probability * pop.mutation_inc_factor
+    decreased = probability * pop.mutation_dec_factor
 
     if pop.diversity_ema < pop.min_diversity_threshold:
-        new_rate = min(pop.max_mutation_rate, increased)
+        new_probability = min(pop.max_mutation_probability, increased)
     elif pop.diversity_ema > pop.max_diversity_threshold:
-        new_rate = max(pop.min_mutation_rate, decreased)
+        new_probability = max(pop.min_mutation_probability, decreased)
     else:
-        new_rate = rate
+        new_probability = probability
 
-    return new_rate
+    return new_probability
 
 
 def _adaptive_mutation_strength(pop: Pop, alpha: float = 0.1) -> float:
@@ -240,8 +243,8 @@ def _adaptive_mutation_strength(pop: Pop, alpha: float = 0.1) -> float:
 
     # Mutationsstrength adaptieren
     strength = pop.mutation_strength
-    increased = strength * pop.increase_factor
-    decreased = strength * pop.decrease_factor
+    increased = strength * pop.mutation_inc_factor
+    decreased = strength * pop.mutation_dec_factor
 
     if pop.diversity_ema < pop.min_diversity_threshold:
         new_strength = min(pop.max_mutation_strength, increased)
@@ -343,7 +346,7 @@ def adapt_mutation_strengths(indiv: Indiv, params: MutationParams) -> list[float
 
 def adapt_mutation_rate(indiv: Indiv, params: MutationParams) -> float:
     """
-    Applies log-normal scaling and clipping to an individual's mutation_rate.
+    Applies log-normal scaling and clipping to an individual's mutation_probability.
 
     Args:
         indiv (Indiv): The individual to update.
@@ -353,12 +356,16 @@ def adapt_mutation_rate(indiv: Indiv, params: MutationParams) -> float:
         float: The updated mutation rate.
     """
 
-    if indiv.mutation_rate is None:
-        raise ValueError("mutation_rate must be set before adaptation.")
+    if indiv.mutation_probability is None:
+        raise ValueError("mutation_probability must be set before adaptation.")
 
     if indiv.tau > 0:
-        indiv.mutation_rate *= scaled_mutation_factor(indiv.tau)
-        indiv.mutation_rate = float(
-            np.clip(indiv.mutation_rate, params.min_rate, params.max_rate)
+        indiv.mutation_probability *= scaled_mutation_factor(indiv.tau)
+        indiv.mutation_probability = float(
+            np.clip(
+                indiv.mutation_probability,
+                params.min_probability,
+                params.max_probability,
+            )
         )
-    return indiv.mutation_rate
+    return indiv.mutation_probability

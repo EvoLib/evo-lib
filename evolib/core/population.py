@@ -75,20 +75,20 @@ class Pop:
         self.mutation_strategy = MutationStrategy(cfg["mutation"]["strategy"])
 
         if self.mutation_strategy == MutationStrategy.CONSTANT:
-            self.mutation_rate = cfg["mutation"]["rate"]
+            self.mutation_probability = cfg["mutation"]["probability"]
             self.mutation_strength = cfg["mutation"]["strength"]
 
         if self.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
-            self.min_mutation_rate = cfg["mutation"]["min_rate"]
-            self.max_mutation_rate = cfg["mutation"]["max_rate"]
+            self.min_mutation_probability = cfg["mutation"]["min_probability"]
+            self.max_mutation_probability = cfg["mutation"]["max_probability"]
 
             self.min_mutation_strength = cfg["mutation"]["min_strength"]
             self.max_mutation_strength = cfg["mutation"]["max_strength"]
 
         if self.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
-            self.mutation_rate = cfg["mutation"]["init_rate"]
-            self.min_mutation_rate = cfg["mutation"]["min_rate"]
-            self.max_mutation_rate = cfg["mutation"]["max_rate"]
+            self.mutation_probability = cfg["mutation"]["init_probability"]
+            self.min_mutation_probability = cfg["mutation"]["min_probability"]
+            self.max_mutation_probability = cfg["mutation"]["max_probability"]
 
             self.mutation_strength = cfg["mutation"]["init_strength"]
             self.min_mutation_strength = cfg["mutation"]["min_strength"]
@@ -97,25 +97,25 @@ class Pop:
             self.min_diversity_threshold = cfg["mutation"]["min_diversity_threshold"]
             self.max_diversity_threshold = cfg["mutation"]["max_diversity_threshold"]
 
-            self.increase_factor = cfg["mutation"]["increase_factor"]
-            self.decrease_factor = cfg["mutation"]["decrease_factor"]
+            self.mutation_inc_factor = cfg["mutation"]["increase_factor"]
+            self.mutation_dec_factor = cfg["mutation"]["decrease_factor"]
 
         if self.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
-            self.mutation_rate = None
+            self.mutation_probability = None
             self.mutation_strength = None
 
-            self.min_mutation_rate = cfg["mutation"]["min_rate"]
-            self.max_mutation_rate = cfg["mutation"]["max_rate"]
+            self.min_mutation_probability = cfg["mutation"]["min_probability"]
+            self.max_mutation_probability = cfg["mutation"]["max_probability"]
 
             self.min_mutation_strength = cfg["mutation"]["min_strength"]
             self.max_mutation_strength = cfg["mutation"]["max_strength"]
 
         if self.mutation_strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
-            self.mutation_rate = None
+            self.mutation_probability = None
             self.mutation_strength = None
 
-            self.min_mutation_rate = None
-            self.max_mutation_rate = None
+            self.min_mutation_probability = None
+            self.max_mutation_probability = None
 
             self.min_mutation_strength = cfg["mutation"]["min_strength"]
             self.max_mutation_strength = cfg["mutation"]["max_strength"]
@@ -124,27 +124,30 @@ class Pop:
         crossover_cfg = cfg.get("crossover", None)
         if crossover_cfg is None:
             self.crossover_strategy = CrossoverStrategy.NONE
-            self.crossover_rate = 0.0
+            self.crossover_probability = None
         else:
             self.crossover_strategy = CrossoverStrategy(cfg["crossover"]["strategy"])
-            if self.crossover_strategy == MutationStrategy.CONSTANT:
-                self.crossover_rate = cfg["crossover"].get("rate", 1.0)
-                self.crossover_strength = cfg["crossover"].get("strength", 1.0)
+            if self.crossover_strategy == CrossoverStrategy.CONSTANT:
+                self.crossover_probability = cfg["crossover"]["probability"]
 
-            if self.crossover_strategy == MutationStrategy.EXPONENTIAL_DECAY:
-                self.min_crossover_rate = cfg["crossover"]["min_rate"]
-                self.max_crossover_rate = cfg["crossover"]["max_rate"]
+            if self.crossover_strategy == CrossoverStrategy.EXPONENTIAL_DECAY:
+                self.min_crossover_probability = cfg["crossover"]["min_probability"]
+                self.max_crossover_probability = cfg["crossover"]["max_probability"]
 
-            if self.crossover_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
-                self.crossover_rate = cfg["crossover"]["init_rate"]
-                self.min_crossover_rate = cfg["crossover"]["min_rate"]
-                self.max_crossover_rate = cfg["crossover"]["max_rate"]
+            if self.crossover_strategy == CrossoverStrategy.ADAPTIVE_GLOBAL:
+                self.crossover_probability = cfg["crossover"]["init_probability"]
+                self.min_crossover_probability = cfg["crossover"]["min_probability"]
+                self.max_crossover_probability = cfg["crossover"]["max_probability"]
 
-            if self.crossover_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
-                self.crossover_rate = None
+                self.min_diversity_threshold = cfg["crossover"][
+                    "min_diversity_threshold"
+                ]
+                self.max_diversity_threshold = cfg["crossover"][
+                    "max_diversity_threshold"
+                ]
 
-                self.min_crossover_rate = cfg["crossover"]["min_rate"]
-                self.max_crossover_rate = cfg["crossover"]["max_rate"]
+                self.crossover_inc_factor = cfg["crossover"]["increase_factor"]
+                self.crossover_dec_factor = cfg["crossover"]["decrease_factor"]
 
         # Representation
         if self.representation == Representation.NEURAL:
@@ -162,12 +165,12 @@ class Pop:
                 "std_fitness",
                 "iqr_fitness",
                 "diversity",
-                "mutation_rate",
+                "mutation_probability",
                 "mutation_strength",
-                "mutation_rate_mean",
+                "mutation_probability_mean",
                 "mutation_strength_mean",
-                "crossover_rate",
-                "crossover_rate_mean",
+                "crossover_probability",
+                "crossover_probability_mean",
             ]
         )
         self.generation_num = 0
@@ -272,10 +275,12 @@ class Pop:
                 print(f"max_diversity_threshold: {self.max_diversity_threshold}")
 
         if verbosity >= 3:
-            if self.mutation_rate_effective is not None:
-                print(f"mutation_rate: {self.mutation_rate_effective:.3f}")
+            if self.mutation_probability_effective is not None:
+                print(
+                    f"mutation_probability: {self.mutation_probability_effective:.3f}"
+                )
             else:
-                print("mutation_rate: n/a")
+                print("mutation_probability: n/a")
 
             if self.mutation_strength_effective is not None:
                 print(f"mutation_strength: {self.mutation_strength_effective:.3f}")
@@ -291,9 +296,9 @@ class Pop:
                 print("mutation_strength_bias: n/a")
 
             if self.crossover_rate_effective is not None:
-                print(f"crossover_rate: {self.crossover_rate_effective:.3f}")
+                print(f"crossover_probability: {self.crossover_rate_effective:.3f}")
             else:
-                print("crossover_rate: n/a")
+                print("crossover_probability: n/a")
 
         if verbosity == 10:
             self.print_indivs()
@@ -433,7 +438,7 @@ class Pop:
 
         fitnesses = self.get_fitness_array()
 
-        if not fitnesses:
+        if fitnesses.size == 0:
             raise ValueError("No valid fitness values to compute statistics.")
 
         self.best_fitness = min(fitnesses)
@@ -445,22 +450,22 @@ class Pop:
         self.diversity = self.fitness_diversity(method=DiversityMethod.IQR)
 
         if self.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
-            mutation_rates_mean = np.mean(
-                np.array([indiv.mutation_rate for indiv in self.indivs])
+            mutation_probabilities_mean = np.mean(
+                np.array([indiv.mutation_probability for indiv in self.indivs])
             )
             mutation_strengths_mean = np.mean(
                 np.array([indiv.mutation_strength for indiv in self.indivs])
             )
             if self.crossover_strategy != CrossoverStrategy.NONE:
-                crossover_rates_mean = np.mean(
-                    np.array([indiv.crossover_rate for indiv in self.indivs])
+                crossover_probabilities_mean = np.mean(
+                    np.array([indiv.crossover_probability for indiv in self.indivs])
                 )
             else:
-                crossover_rates_mean = None
+                crossover_probabilities_mean = None
         else:
-            mutation_rates_mean = None
+            mutation_probabilities_mean = None
             mutation_strengths_mean = None
-            crossover_rates_mean = None
+            crossover_probabilities_mean = None
 
         # Logging
         self.history_logger.log(
@@ -472,12 +477,12 @@ class Pop:
                 "median_fitness": self.median_fitness,
                 "std_fitness": self.std_fitness,
                 "iqr_fitness": self.iqr_fitness,
-                "mutation_rate": self.mutation_rate_effective,
+                "mutation_probability": self.mutation_probability_effective,
                 "mutation_strength": self.mutation_strength_effective,
-                "mutation_rate_mean": mutation_rates_mean,
+                "mutation_probability_mean": mutation_probabilities_mean,
                 "mutation_strength_mean": mutation_strengths_mean,
-                "crossover_rate_mean": crossover_rates_mean,
-                "crossover_rate": self.crossover_rate_effective,
+                "crossover_probability_mean": crossover_probabilities_mean,
+                "crossover_probability": self.crossover_rate_effective,
                 "diversity": self.diversity,
             }
         )
@@ -523,14 +528,14 @@ class Pop:
         self.history_logger.reset()
 
     @property
-    def mutation_rate_effective(self) -> float | None:
+    def mutation_probability_effective(self) -> float | None:
         """Return the global mutation rate if defined for the current strategy."""
         if self.mutation_strategy in {
             MutationStrategy.CONSTANT,
             MutationStrategy.EXPONENTIAL_DECAY,
             MutationStrategy.ADAPTIVE_GLOBAL,
         }:
-            return self.mutation_rate
+            return self.mutation_probability
         return None
 
     @property
@@ -547,8 +552,12 @@ class Pop:
     @property
     def crossover_rate_effective(self) -> float | None:
         """Return the global crossover rate if defined for the current strategy."""
-        if self.crossover_strategy != CrossoverStrategy.ADAPTIVE_INDIVIDUAL:
-            return self.crossover_rate
+        if self.crossover_strategy in {
+            CrossoverStrategy.CONSTANT,
+            CrossoverStrategy.EXPONENTIAL_DECAY,
+            CrossoverStrategy.ADAPTIVE_GLOBAL,
+        }:
+            return self.crossover_probability
         return None
 
     @property

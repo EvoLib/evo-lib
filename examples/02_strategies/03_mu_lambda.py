@@ -48,7 +48,7 @@ def print_population(pop: Pop, title: str) -> None:
     for i, indiv in enumerate(pop.indivs):
         print(
             f"  Indiv {i}: Parameter = {indiv.para:.4f},"
-            "Fitness = {indiv.fitness:.6f}"
+            f"Fitness = {indiv.fitness:.6f}"
         )
 
 

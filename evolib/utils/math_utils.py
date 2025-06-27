@@ -42,10 +42,10 @@ def clip(value: float, min_value: float, max_value: float) -> float:
 
     Args:
         value (float): Current mutation rate value.
-        min_rate (float): Minimum allowed rate.
-        max_rate (float): Maximum allowed rate.
+        min_value (float): Minimum allowed value.
+        max_value (float): Maximum allowed value.
 
     Returns:
-        float: Clipped mutation rate.
+        float: Clipped value.
     """
     return float(np.clip(value, min_value, max_value))

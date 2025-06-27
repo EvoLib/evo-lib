@@ -35,7 +35,6 @@ class CrossoverStrategy(Enum):
     NONE = "none"
     EXPONENTIAL_DECAY = "exponential_decay"
     ADAPTIVE_GLOBAL = "adaptive_global"
-    ADAPTIVE_INDIVIDUAL = "adaptive_individual"
     CONSTANT = "constant"
 
 

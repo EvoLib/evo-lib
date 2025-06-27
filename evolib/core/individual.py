@@ -20,7 +20,7 @@ Typical use cases include:
 Attributes:
     para (any): Parameter vector.
     fitness (float | None): Fitness value assigned after evaluation.
-    mutation_rate (float | None): Optional per-individual mutation rate.
+    mutation_probability (float | None): Optional per-individual mutation rate.
     mutation_strength (float | None): Optional per-individual mutation strength.
 
 Classes:
@@ -45,7 +45,7 @@ class Indiv:
         parent_idx (Optional[int]): Index of the parent individual.
         mutation_strength (float): Mutation strength.
         mutation_strength_bias (float): Bias term for mutation strength.
-        mutation_rate (float): Mutation rate.
+        mutation_probability (float): Mutation rate.
     """
 
     __slots__ = (
@@ -57,9 +57,9 @@ class Indiv:
         "parent_idx",
         "mutation_strength",
         "mutation_strengths",
-        "mutation_rate",
+        "mutation_probability",
         "mutation_strength_bias",
-        "crossover_rate",
+        "crossover_probability",
         "tau",
         "extra_metrics",
     )
@@ -83,8 +83,8 @@ class Indiv:
         self.mutation_strength: float | None = None
         self.mutation_strengths: list[float] | None = None
         self.mutation_strength_bias: float | None = None
-        self.mutation_rate: float | None = None
-        self.crossover_rate: float | None = None
+        self.mutation_probability: float | None = None
+        self.crossover_probability: float | None = None
 
         self.tau = 0.0
 
@@ -95,10 +95,10 @@ class Indiv:
 
     def print_status(self) -> None:
         """Prints information about the individual."""
-        mutation_rate = getattr(self, "mutation_rate", None)
+        mutation_probability = getattr(self, "mutation_probability", None)
         mutation_strength = getattr(self, "mutation_strength", None)
         mutation_strength_bias = getattr(self, "mutation_strength_bias", None)
-        crossover_rate = getattr(self, "crossover_rate", None)
+        crossover_probability = getattr(self, "crossover_probability", None)
 
         print("Individual:")
         print(f"  Fitness: {self.fitness}")
@@ -110,10 +110,10 @@ class Indiv:
             print(f"  Mutation Strength: {mutation_strength:.4f}")
         if mutation_strength_bias is not None:
             print(f"  Mutation Strength Bias: {mutation_strength_bias:.4f}")
-        if mutation_rate is not None:
-            print(f"  Mutation Rate: {mutation_rate:.4f}")
-        if crossover_rate is not None:
-            print(f"  Crossover Rate: {crossover_rate:.4f}")
+        if mutation_probability is not None:
+            print(f"  Mutation Rate: {mutation_probability:.4f}")
+        if crossover_probability is not None:
+            print(f"  Crossover Rate: {crossover_probability:.4f}")
 
     def to_dict(self) -> Dict:
         """Return a dictionary with selected attributes for logging or serialization."""
@@ -122,7 +122,7 @@ class Indiv:
             "age": self.age,
             "mutation_strength": self.mutation_strength,
             "mutation_strength_bias": self.mutation_strength_bias,
-            "mutation_rate": self.mutation_rate,
+            "mutation_probability": self.mutation_probability,
         }
 
     def is_parent(self) -> bool:

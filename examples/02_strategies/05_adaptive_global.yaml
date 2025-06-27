@@ -10,9 +10,9 @@ num_elites: 1
 
 mutation:
   strategy: "adaptive_global"
-  init_rate: 0.3
-  min_rate: 0.3
-  max_rate: 0.3
+  init_probability: 0.3
+  min_probability: 0.3
+  max_probability: 0.3
 
   init_strength: 0.3
   min_strength: 0.1

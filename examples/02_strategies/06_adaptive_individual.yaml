@@ -11,6 +11,6 @@ mutation:
   strategy: adaptive_individual
   min_strength: 0.1
   max_strength: 0.8
-  min_rate: 0.3
-  max_rate: 0.3
+  min_probability: 0.3
+  max_probability: 0.3
 

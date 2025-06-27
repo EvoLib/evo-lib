@@ -5,7 +5,7 @@ Plotting utilities for visualizing evolutionary progress.
 This module provides functions for visualizing:
 - Fitness statistics (best, mean, median, std)
 - Diversity over time
-- Mutation rate and strength trends
+- Mutation probability and strength trends
 - Fitness comparison
 """
 
@@ -32,8 +32,8 @@ def plot_history(
     """
     General-purpose plotting function for evolutionary history metrics.
 
-    Supports multiple metrics (e.g. fitness, diversity, mutation rate) and comparison
-    across runs.
+    Supports multiple metrics (e.g. fitness, diversity, mutation )probability and
+    comparison across runs.
 
     Args:
         histories (pd.DataFrame | list[pd.DataFrame]): Single or multiple history
@@ -157,10 +157,10 @@ def plot_mutation_trends(
     log: bool = False,
     save_path: Optional[str] = None,
 ) -> None:
-    """Wrapper to plot mutation rate and/or strength trends over time."""
+    """Wrapper to plot mutation and/or strength trends over time."""
     metrics = []
-    if "mutation_rate_mean" in history.columns:
-        metrics.append("mutation_rate_mean")
+    if "mutation_probability_mean" in history.columns:
+        metrics.append("mutation_probability_mean")
     if "mutation_strength_mean" in history.columns:
         metrics.append("mutation_strength_mean")
 

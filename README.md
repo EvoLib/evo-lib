@@ -94,9 +94,9 @@ num_elites: 1
 
 mutation:
   strategy: adaptive_individual
-  init_rate: 0.8
-  min_rate: 0.2
-  max_rate: 1.0
+  init_probability: 0.8
+  min_probability: 0.2
+  max_probability: 1.0
   init_strength: 0.5
   min_strength: 0.01
   max_strength: 1.0
