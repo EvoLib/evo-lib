@@ -1,4 +1,4 @@
-# EvoLib – A Modular Toolkit for Evolutionary Computation
+# EvoLib – A Modular Framework for Evolutionary Computation
 
 [![Docs Status](https://readthedocs.org/projects/evolib/badge/?version=latest)](https://evolib.readthedocs.io/en/latest/)
 [![Code Quality & Tests](https://github.com/EvoLib/evo-lib/actions/workflows/ci.yml/badge.svg)](https://github.com/EvoLib/evo-lib/actions/workflows/ci.yml)
