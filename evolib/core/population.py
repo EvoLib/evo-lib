@@ -191,16 +191,15 @@ class Pop:
     def lambda_(self) -> int:
         return self.offspring_pool_size
 
-    def initialize_random_population(
+    def initialize_population(
         self, initializer: Callable[["Pop"], Any] | None = None
     ) -> None:
         """
-        Create a new random population using the given parameter initializer.
+        Initializes the population using the provided para initializer function.
 
         Args:
-            initializer (Callable[[Pop], Any], optional): Function that generates
-                a valid `para` object for each individual.
-                If None, individuals are created with `para=None`.
+            initializer (Callable[[Pop], ParaBase], optional):
+                Function to generate Para instances for each individual.
         """
         self.clear_indivs()
         for _ in range(self.mu):
