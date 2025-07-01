@@ -1,13 +1,19 @@
-# Getting Started minimal Configuration
 parent_pool_size: 10
 offspring_pool_size: 10
-representation: "vector"
-
 max_generations: 0
 max_indiv_age: 0
 num_elites: 0
+
+
+representation:
+  type: vector
+  initializer: random_initializer
+  dim: 10
+  tau: 0.1
+
 
 mutation:
   strategy: "constant"
   strength: 0.01
   probability: 1.0
+

@@ -3,121 +3,29 @@
 from evolib.core.individual import Indiv
 from evolib.core.population import Pop, compute_fitness_diversity
 from evolib.globals.numeric import DEFAULT_FLOAT_DTYPE, EPSILON, MAX_FLOAT, MIN_FLOAT
-from evolib.interfaces.enums import (
-    CrossoverStrategy,
-    DiversityMethod,
-    MutationStrategy,
-    Origin,
-    Representation,
-    Strategy,
-)
+from evolib.initializers.registry import ParaInitializer, get_initializer, initializer_registry, register_initializer
+from evolib.initializers.vector_initializers import fixed_initializer, normal_initializer, random_initializer, vector_adaptive_initializer, zero_initializer
+from evolib.interfaces.enums import CrossoverStrategy, DiversityMethod, MutationStrategy, Origin, Strategy
 from evolib.interfaces.structs import MutationParams
-from evolib.interfaces.types import (
-    CrossoverFunction,
-    FitnessFunction,
-    MutationFunction,
-    ParaInitializer,
-    TauUpdateFunction,
-)
-from evolib.operators.crossover import (
-    crossover_arithmetic,
-    crossover_blend_alpha,
-    crossover_differential,
-    crossover_heuristic,
-    crossover_intermediate,
-    crossover_simulated_binary,
-)
-from evolib.operators.mutation import (
-    adapt_mutation_rate,
-    adapt_mutation_strength,
-    adapt_mutation_strengths,
-    get_mutation_parameters,
-    mutate_gauss,
-    mutate_indiv,
-    mutate_offspring,
-    mutation_gene_level,
-    update_mutation_parameters,
-)
-from evolib.operators.replacement import (
-    replace_generational,
-    replace_mu_lambda,
-    replace_random,
-    replace_steady_state,
-    replace_truncation,
-    replace_weighted_stochastic,
-)
+from evolib.interfaces.types import CrossoverFunction, FitnessFunction, MutationFunction, ParaInitializer, TauUpdateFunction
+from evolib.operators.crossover import crossover_arithmetic, crossover_blend_alpha, crossover_differential, crossover_heuristic, crossover_intermediate, crossover_simulated_binary
+from evolib.operators.mutation import adapt_mutation_rate, adapt_mutation_strength, adapt_mutation_strengths, get_mutation_parameters, mutate_gauss, mutate_indiv, mutate_offspring, mutation_gene_level, update_mutation_parameters
+from evolib.operators.replacement import replace_generational, replace_mu_lambda, replace_random, replace_steady_state, replace_truncation, replace_weighted_stochastic
 from evolib.operators.reproduction import create_offspring_mu_lambda
-from evolib.operators.selection import (
-    selection_boltzmann,
-    selection_random,
-    selection_rank_based,
-    selection_roulette,
-    selection_sus,
-    selection_tournament,
-    selection_truncation,
-)
+from evolib.operators.selection import selection_boltzmann, selection_random, selection_rank_based, selection_roulette, selection_sus, selection_tournament, selection_truncation
 from evolib.operators.strategy import evolve_mu_lambda
-from evolib.utils.benchmarks import (
-    ackley,
-    ackley_2d,
-    ackley_3d,
-    griewank,
-    griewank_2d,
-    griewank_3d,
-    rastrigin,
-    rastrigin_2d,
-    rastrigin_3d,
-    rosenbrock,
-    rosenbrock_2d,
-    rosenbrock_3d,
-    schwefel,
-    schwefel_2d,
-    schwefel_3d,
-    simple_quadratic,
-    sphere,
-    sphere_2d,
-    sphere_3d,
-)
+from evolib.representation.base import ParaBase
+from evolib.representation.vector import ParaVector
+from evolib.utils.benchmarks import ackley, ackley_2d, ackley_3d, griewank, griewank_2d, griewank_3d, rastrigin, rastrigin_2d, rastrigin_3d, rosenbrock, rosenbrock_2d, rosenbrock_3d, schwefel, schwefel_2d, schwefel_3d, simple_quadratic, sphere, sphere_2d, sphere_3d
 from evolib.utils.config_loader import load_config
-from evolib.utils.config_validator import (
-    validate_crossover_config,
-    validate_full_config,
-    validate_mutation_config,
-    validate_replacement_config,
-    validate_selection_config,
-)
+from evolib.utils.config_validator import validate_crossover_config, validate_full_config, validate_mutation_config, validate_replacement_config, validate_selection_config
 from evolib.utils.copy_indiv import copy_indiv
 from evolib.utils.default_tau_update import default_update_tau
 from evolib.utils.history_logger import HistoryLogger
-from evolib.utils.loss_functions import (
-    binary_cross_entropy_loss,
-    categorical_cross_entropy_loss,
-    cross_entropy_loss,
-    huber_loss,
-    mae_loss,
-    mse_loss,
-)
+from evolib.utils.loss_functions import binary_cross_entropy_loss, categorical_cross_entropy_loss, cross_entropy_loss, huber_loss, mae_loss, mse_loss
 from evolib.utils.math_utils import clip, clip_mutation_strength, scaled_mutation_factor
-from evolib.utils.para_initializers import (
-    init_constant_vector,
-    init_normal_vector,
-    init_uniform_vector,
-)
-from evolib.utils.plotting import (
-    plot_diversity,
-    plot_fitness,
-    plot_fitness_comparison,
-    plot_history,
-    plot_mutation_trends,
-    save_current_plot,
-)
-from evolib.utils.registry import (
-    ERR_INVALID_NAME,
-    ERR_NO_GET_STRATEGY,
-    ERR_UNKNOWN_CATEGORY,
-    MODULE_MAP,
-    load_strategy,
-)
+from evolib.utils.plotting import plot_diversity, plot_fitness, plot_fitness_comparison, plot_history, plot_mutation_trends, save_current_plot
+from evolib.utils.registry import ERR_INVALID_NAME, ERR_NO_GET_STRATEGY, ERR_UNKNOWN_CATEGORY, MODULE_MAP, load_strategy
 
 __all__ = [
     "CrossoverFunction",
@@ -138,9 +46,11 @@ __all__ = [
     "MutationParams",
     "MutationStrategy",
     "Origin",
+    "ParaBase",
     "ParaInitializer",
+    "ParaInitializer",
+    "ParaVector",
     "Pop",
-    "Representation",
     "Strategy",
     "TauUpdateFunction",
     "ackley",
@@ -165,14 +75,14 @@ __all__ = [
     "crossover_simulated_binary",
     "default_update_tau",
     "evolve_mu_lambda",
+    "fixed_initializer",
+    "get_initializer",
     "get_mutation_parameters",
     "griewank",
     "griewank_2d",
     "griewank_3d",
     "huber_loss",
-    "init_constant_vector",
-    "init_normal_vector",
-    "init_uniform_vector",
+    "initializer_registry",
     "load_config",
     "load_strategy",
     "mae_loss",
@@ -181,14 +91,17 @@ __all__ = [
     "mutate_indiv",
     "mutate_offspring",
     "mutation_gene_level",
+    "normal_initializer",
     "plot_diversity",
     "plot_fitness",
     "plot_fitness_comparison",
     "plot_history",
     "plot_mutation_trends",
+    "random_initializer",
     "rastrigin",
     "rastrigin_2d",
     "rastrigin_3d",
+    "register_initializer",
     "replace_generational",
     "replace_mu_lambda",
     "replace_random",
@@ -220,4 +133,6 @@ __all__ = [
     "validate_mutation_config",
     "validate_replacement_config",
     "validate_selection_config",
+    "vector_adaptive_initializer",
+    "zero_initializer",
 ]

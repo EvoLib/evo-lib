@@ -38,11 +38,6 @@ class CrossoverStrategy(Enum):
     CONSTANT = "constant"
 
 
-class Representation(Enum):
-    NEURAL = "neural"
-    VECTOR = "vector"
-
-
 class DiversityMethod(Enum):
     IQR = "iqr"
     RELATIVE_IQR = "relative_iqr"  # (IQR / median)

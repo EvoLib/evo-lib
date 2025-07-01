@@ -3,9 +3,7 @@
 individual.py - Definition and functionality of evolutionary individuals.
 
 This module defines the `Indiv` class, representing a single individual
-within a population used in evolutionary algorithms. Each individual
-contains a parameter vector, fitness value, and potentially other
-adaptive traits such as mutation rate or strength.
+within a population used in evolutionary algorithms.
 
 It supports initialization, parameter bounds, fitness assignment,
 and cloning operations. The design enables use in both simple and
@@ -43,9 +41,6 @@ class Indiv:
         max_age (Optional[int]): Maximum allowed age of the individual.
         origin (str): Origin of the individual ('parent' or 'child').
         parent_idx (Optional[int]): Index of the parent individual.
-        mutation_strength (float): Mutation strength.
-        mutation_strength_bias (float): Bias term for mutation strength.
-        mutation_probability (float): Mutation rate.
     """
 
     __slots__ = (
@@ -55,12 +50,6 @@ class Indiv:
         "max_age",
         "origin",
         "parent_idx",
-        "mutation_strength",
-        "mutation_strengths",
-        "mutation_probability",
-        "mutation_strength_bias",
-        "crossover_probability",
-        "tau",
         "extra_metrics",
     )
 
@@ -80,14 +69,6 @@ class Indiv:
         self.origin: Origin = Origin.PARENT
         self.parent_idx: Optional[int] = None
 
-        self.mutation_strength: float | None = None
-        self.mutation_strengths: list[float] | None = None
-        self.mutation_strength_bias: float | None = None
-        self.mutation_probability: float | None = None
-        self.crossover_probability: float | None = None
-
-        self.tau = 0.0
-
         self.extra_metrics = {}
 
     def __lt__(self, other: "Indiv") -> bool:
@@ -95,10 +76,6 @@ class Indiv:
 
     def print_status(self) -> None:
         """Prints information about the individual."""
-        mutation_probability = getattr(self, "mutation_probability", None)
-        mutation_strength = getattr(self, "mutation_strength", None)
-        mutation_strength_bias = getattr(self, "mutation_strength_bias", None)
-        crossover_probability = getattr(self, "crossover_probability", None)
 
         print("Individual:")
         print(f"  Fitness: {self.fitness}")
@@ -106,23 +83,16 @@ class Indiv:
         print(f"  Max Age: {self.max_age}")
         print(f"  Origin: {self.origin}")
         print(f"  Parent Index: {self.parent_idx}")
-        if mutation_strength is not None:
-            print(f"  Mutation Strength: {mutation_strength:.4f}")
-        if mutation_strength_bias is not None:
-            print(f"  Mutation Strength Bias: {mutation_strength_bias:.4f}")
-        if mutation_probability is not None:
-            print(f"  Mutation Rate: {mutation_probability:.4f}")
-        if crossover_probability is not None:
-            print(f"  Crossover Rate: {crossover_probability:.4f}")
+
+        # delegate to para.print_status()
+        if hasattr(self.para, "print_status"):
+            self.para.print_status()
 
     def to_dict(self) -> Dict:
         """Return a dictionary with selected attributes for logging or serialization."""
         return {
             "fitness": self.fitness,
             "age": self.age,
-            "mutation_strength": self.mutation_strength,
-            "mutation_strength_bias": self.mutation_strength_bias,
-            "mutation_probability": self.mutation_probability,
         }
 
     def is_parent(self) -> bool:

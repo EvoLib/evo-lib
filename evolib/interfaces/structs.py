@@ -9,7 +9,7 @@ class MutationParams:
     strength: float
     min_strength: float
     max_strength: float
-    probibility: float
+    probability: float
     min_probability: float
     max_probability: float
     bounds: tuple[float, float]

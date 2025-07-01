@@ -6,25 +6,32 @@ class HistoryLogger:
     """
     A flexible logger for recording per-generation statistics during evolutionary runs.
 
-    Ensures consistent columns and handles missing values gracefully.
+    Automatically handles dynamic columns to support polymorphic ParaBase.get_history().
     """
 
-    def __init__(self, columns: list[str]):
+    def __init__(self, columns: list[str] | None = None):
         """
         Args:
-            columns (list[str]): List of column names expected in each log entry.
+            columns (list[str] | None): Optional initial list of expected columns.
+                                        Will be extended automatically if needed.
         """
-        self.columns = columns
-        self.history = pd.DataFrame(columns=columns)
+        self.columns = columns if columns is not None else []
+        self.history = pd.DataFrame(columns=self.columns)
 
     def log(self, data: dict) -> None:
         """
-        Logs a new row of generation data, automatically aligning to the known columns.
+        Logs a new row of generation data, automatically adding new columns if needed.
 
         Args:
             data (dict): Dictionary of values to log for the current generation.
         """
-        row = pd.Series(data).reindex(self.columns)
+        new_keys = [k for k in data if k not in self.history.columns]
+        if new_keys:
+            for key in new_keys:
+                self.history[key] = pd.NA
+                self.columns.append(key)
+
+        row = pd.Series(data)
         self.history.loc[len(self.history)] = row
 
     def to_dataframe(self) -> pd.DataFrame:

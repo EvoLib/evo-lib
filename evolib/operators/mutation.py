@@ -89,21 +89,6 @@ def mutate_offspring(
         mutate_indiv(pop, indiv, mutation_function, bounds)
 
 
-def mutation_gene_level(indiv: Indiv, params: MutationParams) -> None:
-    if indiv.mutation_strengths is None:
-        raise ValueError("mutation_strengths must be set for gene-level adaptation.")
-
-    for i in range(len(indiv.para)):
-        # Selbstadaptiv (log-normal)
-        indiv.mutation_strengths[i] *= np.exp(indiv.tau * np.random.normal())
-        indiv.mutation_strengths[i] = np.clip(
-            indiv.mutation_strengths[i], params.min_strength, params.max_strength
-        )
-
-        # Mutation anwenden
-        indiv.para[i] += np.random.normal(0, indiv.mutation_strengths[i])
-
-
 def get_mutation_parameters(pop: Pop, indiv: Indiv) -> tuple[float, float]:
     """
     Retrieve the effective mutation parameters (rate, strength) for a given individual.
