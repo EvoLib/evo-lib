@@ -279,7 +279,7 @@ def mutate_gauss(
     return mutated
 
 
-def adapt_mutation_strength(indiv: Indiv, params: MutationParams) -> float:
+def adapted_strength(params: MutationParams) -> float:
     """
     Applies log-normal scaling and clipping to an individual's mutation_strength.
 
@@ -290,15 +290,9 @@ def adapt_mutation_strength(indiv: Indiv, params: MutationParams) -> float:
     Returns:
         float: The updated mutation strength.
     """
-    if indiv.mutation_strength is None:
-        raise ValueError("mutation_strength must be set before adaptation.")
 
-    if indiv.tau > 0:
-        indiv.mutation_strength *= scaled_mutation_factor(indiv.tau)
-        indiv.mutation_strength = float(
-            np.clip(indiv.mutation_strength, params.min_strength, params.max_strength)
-        )
-    return indiv.mutation_strength
+    adapted = params.strength * np.exp(paramstau * np.random.normal())
+    return float(np.clip(adapted, params.min_strength, params.max_strength))
 
 
 def adapt_mutation_strengths(indiv: Indiv, params: MutationParams) -> list[float]:

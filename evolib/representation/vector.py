@@ -2,6 +2,7 @@ import numpy as np
 
 from evolib.interfaces.structs import MutationParams
 from evolib.representation.base import ParaBase
+from evolib.operators.mutation import adapt_mutation_strength
 
 
 class ParaVector(ParaBase):
@@ -73,10 +74,8 @@ class ParaVector(ParaBase):
         if not hasattr(self, "mutation_strength"):
             raise AttributeError("mutation_strength not defined in this ParaVector.")
 
-        self.mutation_strength *= np.exp(self.tau * np.random.normal())
-        self.mutation_strength = np.clip(
-            self.mutation_strength, params.min_strength, params.max_strength
-        )
+        self.mutation_strength = adapted_strength(params)
+
 
     def adapt_para_mutation_strengths(self, params: MutationParams) -> None:
         """
