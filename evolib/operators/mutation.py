@@ -295,56 +295,17 @@ def adapted_strength(params: MutationParams) -> float:
     return float(np.clip(adapted, params.min_strength, params.max_strength))
 
 
-def adapt_mutation_strengths(indiv: Indiv, params: MutationParams) -> list[float]:
-    """
-    Applies log-normal adaptation to each gene-specific mutation strength.
-
-    Args:
-        indiv (Indiv): The individual with a mutation_strengths list.
-        params (MutationParams): Contains min/max strength and tau.
-
-    Returns:
-        list[float]: The updated list of mutation strengths (σ_i).
-    """
-    if indiv.mutation_strengths is None:
-        raise ValueError("mutation_strengths must be set for per-parameter adaptation.")
-
-    if indiv.tau <= 0:
-        return indiv.mutation_strengths
-
-    for i in range(len(indiv.mutation_strengths)):
-        indiv.mutation_strengths[i] *= np.exp(indiv.tau * np.random.normal())
-        indiv.mutation_strengths[i] = float(
-            np.clip(
-                indiv.mutation_strengths[i], params.min_strength, params.max_strength
-            )
-        )
-
-    return indiv.mutation_strengths
-
-
-def adapt_mutation_rate(indiv: Indiv, params: MutationParams) -> float:
+def adapted_probability(params: MutationParams) -> float:
     """
     Applies log-normal scaling and clipping to an individual's mutation_probability.
 
     Args:
         indiv (Indiv): The individual to update.
-        params (MutationParams): Contains tau, min/max rate, etc.
+        params (MutationParams): Contains tau, min/max strength, etc.
 
     Returns:
-        float: The updated mutation rate.
+        float: The updated mutation probability.
     """
 
-    if indiv.mutation_probability is None:
-        raise ValueError("mutation_probability must be set before adaptation.")
-
-    if indiv.tau > 0:
-        indiv.mutation_probability *= scaled_mutation_factor(indiv.tau)
-        indiv.mutation_probability = float(
-            np.clip(
-                indiv.mutation_probability,
-                params.min_probability,
-                params.max_probability,
-            )
-        )
-    return indiv.mutation_probability
+    adapted = params.probability * np.exp(paramstau * np.random.normal())
+    return float(np.clip(adapted, params.min_probability, params.max_probability))

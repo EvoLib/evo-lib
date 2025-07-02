@@ -9,8 +9,8 @@ class MutationParams:
     strength: float
     min_strength: float
     max_strength: float
-    probability: float
-    min_probability: float
-    max_probability: float
+    probabality: float
+    min_probabality: float
+    max_probabality: float
     bounds: tuple[float, float]
     bias: Optional[float] = None
