@@ -27,74 +27,27 @@ from evolib.interfaces.types import (
 from evolib.utils.math_utils import scaled_mutation_factor
 
 
-def mutate_indiv(
-    pop: Pop,
-    indiv: Indiv,
-    mutation_function: MutationFunction,
-    bounds: tuple[float, float] = (-1, 1),
-) -> None:
-    """
-    Apply mutation to a single individual based on the population's mutation strategy.
-
-    Delegates the actual mutation logic to the provided `mutation_function`,
-    using mutation parameters derived from the population and individual context.
-
-    Args:
-        pop (Pop): Population object providing mutation configuration.
-        indiv (Indiv): The individual to mutate.
-        mutation_function (Callable): The function that mutates individual parameters.
-        bounds (tuple): Tuple (min, max) limiting mutated parameter values.
-    """
-    rate, strength = get_mutation_parameters(pop, indiv)
-
-    min_strength = getattr(pop, "min_mutation_strength", strength)
-    max_strength = getattr(pop, "max_mutation_strength", strength)
-    min_probability = getattr(pop, "min_mutation_probability", rate)
-    max_probability = getattr(pop, "max_mutation_probability", rate)
-
-    mutation_function(
-        indiv,
-        MutationParams(
-            strength,
-            min_strength,
-            max_strength,
-            rate,
-            min_probability,
-            max_probability,
-            bounds,
-        ),
-    )
-
-
-def mutate_offspring(
-    pop: Pop,
-    offspring: List[Indiv],
-    mutation_function: MutationFunction,
-    bounds: tuple[float, float] = (-1, 1),
-) -> None:
+def mutate_offspring( pop: Pop, offspring: List[Indiv],) -> None:
     """
     Applies mutation to all individuals in the offspring list.
 
     Args:
         pop (Pop): The population object containing mutation configuration.
         offspring (List[Indiv]): List of individuals to mutate.
-        mutation_function (Callable): The mutation function applied to each parameter.
-        bounds (tuple): Lower and upper bounds for parameter values.
     """
 
     # Update global mutation parameters (only if strategy requires it)
     update_mutation_parameters(pop)
 
     for indiv in offspring:
-        mutate_indiv(pop, indiv, mutation_function, bounds)
+        indiv.mutate()
 
 
-def get_mutation_parameters(pop: Pop, indiv: Indiv) -> tuple[float, float]:
+def get_mutation_parameters(indiv: Indiv) -> tuple[float, float]:
     """
     Retrieve the effective mutation parameters (rate, strength) for a given individual.
 
     Args:
-        pop (Pop): The population providing the mutation strategy and global defaults.
         indiv (Indiv): The individual whose mutation parameters may be used.
 
     Returns:
@@ -104,73 +57,31 @@ def get_mutation_parameters(pop: Pop, indiv: Indiv) -> tuple[float, float]:
         ValueError: If required individual parameters are missing or strategy is
         unsupported.
     """
-    strategy = pop.mutation_strategy
+    strategy = indiv.para.mutation_strategy
 
     if strategy in {
         MutationStrategy.CONSTANT,
         MutationStrategy.EXPONENTIAL_DECAY,
         MutationStrategy.ADAPTIVE_GLOBAL,
     }:
-        return pop.mutation_probability, pop.mutation_strength
+        return indiv.para.mutation_probability, indiv.para.mutation_strength
 
     if strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
-        if indiv.mutation_probability is None or indiv.mutation_strength is None:
+        if indiv.para.mutation_probability is None or indiv.para.mutation_strength is None:
             raise ValueError(
                 "Individual mutation parameters must be initialized before use "
                 "when using ADAPTIVE_INDIVIDUAL strategy."
             )
-        return indiv.mutation_probability, indiv.mutation_strength
+        return indiv.para.mutation_probability, indiv.para.mutation_strength
 
     if strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
         # Use average of per-parameter strengths, fallback 0.0
-        strengths = indiv.mutation_strengths
+        strengths = indiv.para.mutation_strengths
         avg_strength = sum(strengths) / len(strengths) if strengths else 0.0
-        return indiv.mutation_probability or 0.0, avg_strength
+        return indiv.para.mutation_probability or 0.0, avg_strength
 
     raise ValueError(f"Unsupported mutation strategy: {strategy}")
 
-
-def update_mutation_parameters(pop: Pop) -> None:
-    if pop.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
-        pop.mutation_probability = _exponential_mutation_rate(pop)
-        pop.mutation_strength = _exponential_mutation_strength(pop)
-    elif pop.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
-        pop.mutation_probability = _adaptive_mutation_rate(pop)
-        pop.mutation_strength = _adaptive_mutation_strength(pop)
-
-
-def _exponential_mutation_strength(pop: Pop) -> float:
-    """
-    Calculates exponentially decaying mutation strength over generations.
-
-    Args:
-        pop (Pop): The population object containing mutation parameters.
-
-    Returns:
-        float: The adjusted mutation strength.
-    """
-    k = (
-        np.log(pop.max_mutation_strength / pop.min_mutation_strength)
-        / pop.max_generations
-    )
-    return pop.max_mutation_strength * np.exp(-k * pop.generation_num)
-
-
-def _exponential_mutation_rate(pop: Pop) -> float:
-    """
-    Calculates exponentially decaying mutation rate over generations.
-
-    Args:
-        pop (Pop): The population object containing mutation parameters.
-
-    Returns:
-        float: The adjusted mutation rate.
-    """
-    k = (
-        np.log(pop.max_mutation_probability / pop.min_mutation_probability)
-        / pop.max_generations
-    )
-    return pop.max_mutation_probability * np.exp(-k * pop.generation_num)
 
 
 def _adaptive_mutation_rate(pop: Pop, alpha: float = 0.1) -> float:
@@ -279,7 +190,7 @@ def mutate_gauss(
     return mutated
 
 
-def adapted_strength(params: MutationParams) -> float:
+def adapted_mutation_strength(params: MutationParams) -> float:
     """
     Applies log-normal scaling and clipping to an individual's mutation_strength.
 
@@ -295,7 +206,7 @@ def adapted_strength(params: MutationParams) -> float:
     return float(np.clip(adapted, params.min_strength, params.max_strength))
 
 
-def adapted_probability(params: MutationParams) -> float:
+def adapted_mutation_probability(params: MutationParams) -> float:
     """
     Applies log-normal scaling and clipping to an individual's mutation_probability.
 

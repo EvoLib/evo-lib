@@ -2,30 +2,35 @@ import numpy as np
 
 from evolib.interfaces.structs import MutationParams
 from evolib.representation.base import ParaBase
-from evolib.operators.mutation import adapt_mutation_strength
+from evolib.operators.mutation import adapted_mutation_strength
 
 
 class ParaVector(ParaBase):
-    def __init__(
-        self,
-        vector: np.ndarray,
-        mutation_strength: float | None = None,
-        mutation_probability: float | None = None,
-        tau: float = 0.0,
-        para_mutation_strengths: np.ndarray | None = None,
-    ):
+    def __init__(self) -> None:
 
-        self.vector = vector
-        self.mutation_strength = mutation_strength
-        self.mutation_probability = mutation_probability
-        self.tau = tau
-        self.para_mutation_strengths = (
-            para_mutation_strengths
-            if para_mutation_strengths is not None
-            else np.full(len(vector), 0.1)  # Defaultwert kann angepasst werden
-        )
+        self.mutation_strategy = None
+        self.mutation_strength = None
+        self.mutation_probability = None
+        self.tau = 0.0
+        self.para_mutation_strengths = None
+        self.bounds = None
 
-    def mutate(self, params: MutationParams) -> None:
+        self.vector = np.zeros(1)
+        self.min_mutation_strength = None
+        self.max_mutation_strength = None
+        self.min_mutation_probability = None
+        self.max_mutation_probability = None
+        self.mutation_inc_factor = None
+        self.mutation_dec_factor = None
+        self.min_diversity_threshold = None
+        self.max_diversity_threshold = None
+
+        self.crossover_strategy = None
+        self.crossover_probability = None
+        self.crossover_inc_factor = None
+        self.crossover_dec_factor = None
+
+    def mutate(self) -> None:
         """
         Applies Gaussian mutation to the parameter vector.
 
@@ -39,12 +44,12 @@ class ParaVector(ParaBase):
             )
         else:
             noise = np.random.normal(
-                loc=0.0, scale=params.strength, size=len(self.vector)
+                loc=0.0, scale=self.mutation_strength, size=len(self.vector)
             )
             mask = np.random.rand(len(self.vector)) < self.mutation_probability
             self.vector += noise * mask
 
-        self.vector = np.clip(self.vector, *params.bounds)
+        self.vector = np.clip(self.vector, self.bounds)
 
     def update_tau(self) -> None:
         """
@@ -154,3 +159,46 @@ class ParaVector(ParaBase):
             )
 
         return history
+
+    def update_mutation_parameters(self, generation: int) -> None:
+        """Update mutation parameters based on strategy and generation."""
+        if self.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
+            self.mutation_strength = _exponential_mutation_strength(generation)
+            self.mutation_probability = _exponential_mutation_probability(generation)
+
+        elif self.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
+            self.mutation_probability = 0 #TODO
+            self.mutation_strength = 0 #TODO
+
+
+    def _exponential_mutation_strength(self, generation: int) -> float:
+        """
+        Calculates exponentially decaying mutation strength over generations.
+
+        Args:
+            generation: int: 
+
+        Returns:
+            float: The adjusted mutation strength.
+        """
+        k = (
+            np.log(self.max_mutation_strength / self.min_mutation_strength)
+            / self.max_generations
+        )
+        return self.max_mutation_strength * np.exp(-k * generation)
+
+    def _exponential_mutation_probability(generation: int) -> float:
+        """
+        Calculates exponentially decaying mutation probablility over generations.
+
+        Args:
+            generation: int
+
+        Returns:
+            float: The adjusted mutation rate.
+        """
+        k = (
+            np.log(self.max_mutation_probability / self.min_mutation_probability)
+            / self.max_generations
+        )
+        return self.max_mutation_probability * np.exp(-k * self.generation_num)

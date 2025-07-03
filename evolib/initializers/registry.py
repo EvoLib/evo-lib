@@ -9,7 +9,7 @@ from collections.abc import Callable
 from evolib.representation.base import ParaBase
 
 # Typalias für Initializer-Funktionen
-ParaInitializer = Callable[[dict], Callable[[Pop], ParaBase]]
+ParaInitializer = Callable[[dict], Callable[["Pop"], ParaBase]]
 
 # Zentrales Registry-Objekt
 initializer_registry: dict[str, ParaInitializer] = {}

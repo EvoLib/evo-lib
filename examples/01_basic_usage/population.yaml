@@ -8,8 +8,9 @@ num_elites: 0
 representation:
   type: vector
   initializer: random_initializer
-  dim: 10
+  dim: 4
   tau: 0.1
+  bounds: [-1.0, 1.0]
 
 
 mutation:

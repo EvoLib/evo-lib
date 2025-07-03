@@ -21,7 +21,6 @@ from evolib.interfaces.enums import (
 )
 from evolib.interfaces.types import (
     FitnessFunction,
-    MutationFunction,
     TauUpdateFunction,
 )
 from evolib.utils.config_loader import load_config
@@ -33,16 +32,12 @@ class Pop:
     """Represents a population for evolutionary optimization, including configuration,
     statistics, and operator integration."""
 
-    def __init__(
-        self, config_path: str, mutation_function: MutationFunction | None = None
-    ):
+    def __init__(self, config_path: str):
         """
         Initialize a population from a YAML config file.
 
         Args:
         config_path (str): Path to the population configuration file.
-        mutation_function (MutationFunction, optional): Custom mutation function
-        override.
         """
 
         cfg = load_config(config_path)
@@ -53,7 +48,7 @@ class Pop:
 
         initializer_name = self.representation_cfg["initializer"]
         initializer_factory = get_initializer(initializer_name)
-        self.para_initializer = initializer_factory(self.representation_cfg)
+        self.para_initializer = initializer_factory(cfg)
 
         self.indivs: List[Any] = []
 
@@ -72,7 +67,6 @@ class Pop:
 
         # User-defined functions
         self.fitness_function: FitnessFunction | None = None
-        self.mutation_function: MutationFunction | None = mutation_function
 
         # Mutation
         self.mutation_strategy = MutationStrategy(cfg["mutation"]["strategy"])
@@ -135,7 +129,6 @@ class Pop:
     def set_functions(
         self,
         fitness_function: FitnessFunction,
-        mutation_function: MutationFunction,
     ) -> None:
         """
         Registers core evolutionary functions used during evolution.
@@ -148,7 +141,6 @@ class Pop:
             `tau` based on `para`.
         """
         self.fitness_function = fitness_function
-        self.mutation_function = mutation_function
 
     def print_status(self, verbosity: int = 1) -> None:
         """
@@ -204,7 +196,8 @@ class Pop:
 
     def create_indiv(self) -> Indiv:
         """Create a new individual using default settings."""
-        return Indiv()
+        para = self.para_initializer(self)
+        return Indiv(para=para)
 
     def add_indiv(self, new_indiv: Indiv | None = None) -> None:
         """

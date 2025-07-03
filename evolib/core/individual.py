@@ -74,6 +74,16 @@ class Indiv:
     def __lt__(self, other: "Indiv") -> bool:
         return self.fitness < other.fitness
 
+    def mutate(self) -> None:
+        """
+        Apply mutation to this individual.
+
+        Delegates the mutation process to the underlying parameter object `para`.
+        This ensures that mutation behavior is defined polymorphically in the 
+        specific `ParaBase` subclass (e.g. `ParaVector`, `ParaNet`, ...).
+        """
+        self.para.mutate()
+
     def print_status(self) -> None:
         """Prints information about the individual."""
 

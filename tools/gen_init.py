@@ -19,4 +19,4 @@ if __name__ == "__main__":
 
     root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("evolib")
     walk_and_touch(root)
-    print("✅ Empty __init__.py files created where missing.")
+    print("Empty __init__.py files created where missing.")

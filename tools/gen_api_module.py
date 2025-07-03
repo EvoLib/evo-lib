@@ -77,12 +77,12 @@ if __name__ == "__main__":
     api_file = base_dir / "api.py"
     init_file = base_dir / "__init__.py"
 
-    print("🔍 Scanning modules in", base_dir)
+    print("Scanning modules in", base_dir)
     modules = find_all_modules(base_dir)
 
-    print(f"📦 Found {len(modules)} modules")
+    print(f"Found {len(modules)} modules")
     api_symbols = write_api_file(modules, api_file)
 
-    print("🧩 Generating __init__.py ...")
+    print("Generating __init__.py ...")
     write_init_file(api_symbols, init_file)
-    print("✅ Done.")
+    print("Done.")
