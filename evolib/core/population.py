@@ -128,7 +128,7 @@ class Pop:
 
     def set_functions(
         self,
-        fitness_function: FitnessFunction,
+        fitness_function: FitnessFunction
     ) -> None:
         """
         Registers core evolutionary functions used during evolution.

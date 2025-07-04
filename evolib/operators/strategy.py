@@ -32,8 +32,10 @@ def evolve_mu_lambda(
         ValueError: If the strategy is invalid or the population is empty.
     """
     if pop.fitness_function is None:
-        raise ValueError("No fitness function set in population."
-                        "Use pop.set_functions() before evolving.")
+        raise ValueError(
+            "No fitness function set in population."
+            "Use pop.set_functions() before evolving."
+        )
     if strategy not in [Strategy.MU_PLUS_LAMBDA, Strategy.MU_COMMA_LAMBDA]:
         raise ValueError(
             "Invalid strategy. Use Strategy.MU_PLUS_LAMBDA or Strategy.MU_COMMA_LAMBDA."

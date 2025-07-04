@@ -1,6 +1,6 @@
 parent_pool_size: 2
 offspring_pool_size: 4
-max_generations: 0
+max_generations: 10
 max_indiv_age: 0
 num_elites: 0
 

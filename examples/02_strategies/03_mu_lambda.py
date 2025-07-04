@@ -22,51 +22,34 @@ from evolib import (
 def my_fitness(indiv: Indiv) -> None:
     """Simple fitness function using the quadratic benchmark and MSE loss."""
     expected = 0.0
-    predicted = simple_quadratic(indiv.para)
+    predicted = simple_quadratic(indiv.para.vector)
     indiv.fitness = mse_loss(expected, predicted)
-
-
-# User-defined mutation function
-def my_mutation(indiv: Indiv, params: MutationParams) -> None:
-    """
-    Mutates the individual's parameters using Gaussian mutation.
-
-    Args:
-        indiv (Indiv): The individual to mutate.
-        params (MutationParams): Mutation context object that includes:
-            - strength (float): Standard deviation of the Gaussian mutation.
-            - bounds (tuple[float, float]): Value limits for the mutation.
-            - rate (Optional[float]): (Unused) mutation rate, if applicable.
-            - bias (Optional[float]): (Unused) bias mutation strength for
-              neural networks.
-    """
-    indiv.para = mutate_gauss(indiv.para, params.strength, params.bounds)
 
 
 def print_population(pop: Pop, title: str) -> None:
     print(f"{title}")
     for i, indiv in enumerate(pop.indivs):
         print(
-            f"  Indiv {i}: Parameter = {indiv.para:.4f},"
+            f"  Indiv {i}: Parameter = {indiv.para.vector},"
             f"Fitness = {indiv.fitness:.6f}"
         )
 
 
 # Load configuration and initialize population
-my_pop = Pop(config_path="population.yaml")
+pop = Pop(config_path="population.yaml")
 
-for _ in range(my_pop.parent_pool_size):
-    new_indiv = my_pop.create_indiv()
-    new_indiv.para = random.uniform(-3, 3)  # Scalar parameter
-    my_pop.add_indiv(new_indiv)
+# Initialize population                                                                  
+pop.initialize_population() 
 
+# Set fitnessfuction
+pop.set_functions(fitness_function=my_fitness)
 
-for indiv in my_pop.indivs:
-    my_fitness(indiv)
+# Evaluate fitness                                                                       
+pop.evaluate_fitness()
 
-print_population(my_pop, "Initial Parents")
+print_population(pop, "Initial Parents")
 
 # Mu Plus Lambda
-for gen in range(my_pop.max_generations):
-    evolve_mu_lambda(my_pop, my_fitness, my_mutation, strategy=Strategy.MU_PLUS_LAMBDA)
-    my_pop.print_status()
+for gen in range(pop.max_generations):
+    evolve_mu_lambda(pop, strategy=Strategy.MU_PLUS_LAMBDA)
+    pop.print_status()

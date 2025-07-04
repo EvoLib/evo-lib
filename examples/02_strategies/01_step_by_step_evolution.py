@@ -36,9 +36,8 @@ def my_fitness(indiv: Indiv) -> None:
 # Load configuration and initialize population
 pop = Pop(config_path="population.yaml")
 
-for _ in range(pop.parent_pool_size):
-    indiv = pop.create_indiv()
-    pop.add_indiv(indiv)
+# Initialize population
+pop.initialize_population()
 
 print("Parents:")
 for i, indiv in enumerate(pop.indivs):
