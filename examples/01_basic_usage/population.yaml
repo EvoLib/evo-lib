@@ -9,7 +9,6 @@ representation:
   type: vector
   initializer: random_initializer
   dim: 4
-  tau: 0.1
   bounds: [-1.0, 1.0]
 
 

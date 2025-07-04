@@ -8,17 +8,7 @@ This example demonstrates how to:
 - Evaluate fitness before and after mutation
 """
 
-import random
-
-from evolib import (
-    Indiv,
-    MutationParams,
-    Pop,
-    mse_loss,
-    mutate_gauss,
-    mutate_offspring,
-    simple_quadratic,
-)
+from evolib import Indiv, Pop, mse_loss, simple_quadratic
 
 
 # User-defined fitness function that is passed to the evolution loop.
@@ -39,44 +29,33 @@ def my_fitness(indiv: Indiv) -> None:
               neural networks.
     """
     expected = 0.0
-    predicted = simple_quadratic(indiv.para)
+    predicted = simple_quadratic(indiv.para.vector)
     indiv.fitness = mse_loss(expected, predicted)
 
 
-# User-defined mutation function passed to mutate_offspring().
-# This allows full flexibility in how mutations are applied.
-# Here, we use Gaussian mutation on scalar parameters.
-def my_mutation(indiv: Indiv, params: MutationParams) -> None:
-    """
-    Mutates the individual's parameters using Gaussian mutation.
-
-    Args:
-        target_indiv (Indiv): The individual to mutate.
-        mutation_strength (float): The mutation strength.
-        bounds (tuple): Value bounds (min, max) for mutation.
-    """
-    indiv.para = mutate_gauss(indiv.para, params.strength, params.bounds)
-
-
 # Load configuration and initialize population
-pop = Pop(config_path="population.yaml")
+pop = Pop(config_path="04_fitness.yaml")
 
 for _ in range(pop.parent_pool_size):
     indiv = pop.create_indiv()
-    indiv.para = random.uniform(-0.5, 0.5)  # Scalar parameter
     pop.add_indiv(indiv)
 
 # Evaluate fitness before mutation
 print("Before mutation:")
 for i, indiv in enumerate(pop.indivs):
     my_fitness(indiv)
-    print(f"  Indiv {i}: Parameter = {indiv.para:.4f}, Fitness = {indiv.fitness:.6f}")
+    print(
+        f"  Indiv {i}: Parameter = {indiv.para.vector}, Fitness = {indiv.fitness:.6f}"
+    )
 
 # Apply mutation
-mutate_offspring(pop, pop.indivs, my_mutation, bounds=(-1, 1))
+for indiv in pop.indivs:
+    indiv.mutate()
 
 # Evaluate fitness after mutation
 print("\nAfter mutation:")
 for i, indiv in enumerate(pop.indivs):
     my_fitness(indiv)
-    print(f"  Indiv {i}: Parameter = {indiv.para:.4f}, Fitness = {indiv.fitness:.6f}")
+    print(
+        f"  Indiv {i}: Parameter = {indiv.para.vector}, Fitness = {indiv.fitness:.6f}"
+    )

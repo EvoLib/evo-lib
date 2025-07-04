@@ -7,7 +7,6 @@ import numpy as np
 
 from evolib.core.population import Pop
 from evolib.initializers.registry import register_initializer
-from evolib.interfaces.enums import CrossoverStrategy, MutationStrategy
 from evolib.representation.vector import ParaVector
 
 

@@ -38,6 +38,9 @@ class ParaVector(ParaBase):
         If self.para_mutation_strengths is defined, gene-specific strengths are used.
         Otherwise, the global mutation strength from params.strength is applied.
         """
+        if self.mutation_strength is None:
+            raise ValueError("mutation_strength must be defined for global mutation.")
+
         if self.para_mutation_strengths is not None:
             # Adaptive per-parameter
             self.vector += np.random.normal(
@@ -80,7 +83,7 @@ class ParaVector(ParaBase):
         if not hasattr(self, "mutation_strength"):
             raise AttributeError("mutation_strength not defined in this ParaVector.")
 
-        self.mutation_strength = adapted_strength(params)
+        self.mutation_strength = adapted_mutation_strength(params)
 
     def adapt_para_mutation_strengths(self, params: MutationParams) -> None:
         """
@@ -94,13 +97,6 @@ class ParaVector(ParaBase):
         )
         self.para_mutation_strengths = np.clip(
             self.para_mutation_strengths, params.min_strength, params.max_strength
-        )
-
-    def copy(self) -> "ParaVector":
-        return ParaVector(
-            vector=self.vector.copy(),
-            tau=self.tau,
-            para_mutation_strengths=self.para_mutation_strengths.copy(),
         )
 
     def print_status(self) -> None:
@@ -163,8 +159,9 @@ class ParaVector(ParaBase):
     def update_mutation_parameters(self, generation: int) -> None:
         """Update mutation parameters based on strategy and generation."""
         if self.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
-            self.mutation_strength = _exponential_mutation_strength(generation)
-            self.mutation_probability = _exponential_mutation_probability(generation)
+            self.mutation_strength = self._exponential_mutation_strength(generation)
+            self.mutation_probability = self._exponential_mutation_probability(
+                                                                            generation)
 
         elif self.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
             self.mutation_probability = 0  # TODO
@@ -186,7 +183,7 @@ class ParaVector(ParaBase):
         )
         return self.max_mutation_strength * np.exp(-k * generation)
 
-    def _exponential_mutation_probability(generation: int) -> float:
+    def _exponential_mutation_probability(self, generation: int) -> float:
         """
         Calculates exponentially decaying mutation probablility over generations.
 
@@ -203,9 +200,7 @@ class ParaVector(ParaBase):
         return self.max_mutation_probability * np.exp(-k * self.generation_num)
 
     def apply_config(self, cfg: dict) -> None:
-        """
-        Apply configuration dictionary to this ParaVector instance.
-        """
+        """Apply configuration dictionary to this ParaVector instance."""
         representation_cfg = cfg.get("representation", {})
         self.representation = representation_cfg["type"]
         self.dim = representation_cfg["dim"]
