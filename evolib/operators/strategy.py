@@ -12,7 +12,6 @@ from evolib.operators.reproduction import create_offspring_mu_lambda
 
 def evolve_mu_lambda(
     pop: Pop,
-    fitness_function: Callable[[Indiv], None],
     *,
     strategy: Strategy = Strategy.MU_PLUS_LAMBDA,
     bounds: tuple[float, float] = (-5, 5),
@@ -24,8 +23,6 @@ def evolve_mu_lambda(
 
     Args:
         pop (Pop): The current population.
-        fitness_function (Callable): Function to evaluate the fitness of an individual.
-        mutation_function (Callable): Function to mutate an individual.
         strategy (Strategy): The strategy to use: MU_PLUS_LAMBDA or MU_COMMA_LAMBDA.
         bounds (tuple): Tuple specifying the mutation bounds (min, max).
         max_age (int): Maximum allowed age for individuals (used in MU_COMMA_LAMBDA).
@@ -34,7 +31,9 @@ def evolve_mu_lambda(
     Raises:
         ValueError: If the strategy is invalid or the population is empty.
     """
-
+    if pop.fitness_function is None:
+        raise ValueError("No fitness function set in population."
+                        "Use pop.set_functions() before evolving.")
     if strategy not in [Strategy.MU_PLUS_LAMBDA, Strategy.MU_COMMA_LAMBDA]:
         raise ValueError(
             "Invalid strategy. Use Strategy.MU_PLUS_LAMBDA or Strategy.MU_COMMA_LAMBDA."
@@ -44,8 +43,7 @@ def evolve_mu_lambda(
 
     # Optional: Evaluate parents if elites are to be kept in comma strategy
     if strategy == Strategy.MU_COMMA_LAMBDA and pop.num_elites > 0:
-        for indiv in pop.indivs:
-            fitness_function(indiv)
+        pop.evaluate_fitness()
 
     # CREATE OFFSPRING
     offspring = create_offspring_mu_lambda(pop.indivs, pop.offspring_pool_size)
@@ -57,15 +55,13 @@ def evolve_mu_lambda(
         combined = pop.indivs + offspring
 
         # Evaluate fitness of all
-        for indiv in combined:
-            fitness_function(indiv)
+        pop.evaluate_indivs(combined)
 
         # Select the best individuals
         replace_truncation(pop, combined)
     else:  # MU_COMMA_LAMBDA
         # Evaluate offspring fitness
-        for indiv in offspring:
-            fitness_function(indiv)
+        pop.evaluate_indivs(offspring)
 
         # REPLACE PARENTS
         replace_generational(pop, offspring, max_age=max_age)
