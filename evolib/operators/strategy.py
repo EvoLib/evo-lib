@@ -13,7 +13,6 @@ from evolib.operators.reproduction import create_offspring_mu_lambda
 def evolve_mu_lambda(
     pop: Pop,
     fitness_function: Callable[[Indiv], None],
-    mutation_function: MutationFunction,
     *,
     strategy: Strategy = Strategy.MU_PLUS_LAMBDA,
     bounds: tuple[float, float] = (-5, 5),
@@ -52,7 +51,7 @@ def evolve_mu_lambda(
     offspring = create_offspring_mu_lambda(pop.indivs, pop.offspring_pool_size)
 
     # OFFSPRING MUTATION
-    mutate_offspring(pop, offspring, mutation_function, bounds=bounds)
+    mutate_offspring(pop, offspring)
 
     if strategy == Strategy.MU_PLUS_LAMBDA:
         combined = pop.indivs + offspring

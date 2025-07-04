@@ -142,6 +142,20 @@ class Pop:
         """
         self.fitness_function = fitness_function
 
+    def evaluate_fitness(self) -> None:
+        """Evaluate the fitness function for all individuals in the population."""
+        if self.fitness_function is None:
+            raise ValueError("No fitness function has been set.")
+        for indiv in self.indivs:
+            self.fitness_function(indiv)
+
+    def evaluate_indivs(self, indivs: list[Indiv]) -> None:
+        """Evaluate fitness for a custom list of individuals."""
+        if self.fitness_function is None:
+            raise ValueError("No fitness function has been set.")
+        for indiv in indivs:
+            self.fitness_function(indiv)
+
     def print_status(self, verbosity: int = 1) -> None:
         """
         Prints information about the population based on the verbosity level.

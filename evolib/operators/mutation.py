@@ -39,10 +39,10 @@ def mutate_offspring(
         offspring (List[Indiv]): List of individuals to mutate.
     """
 
-    # Update global mutation parameters (only if strategy requires it)
-    update_mutation_parameters(pop)
 
     for indiv in offspring:
+        # Update global mutation parameters (only if strategy requires it)
+        indiv.para.update_mutation_parameters(pop.generation_num)
         indiv.mutate()
 
 
