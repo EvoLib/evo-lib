@@ -79,7 +79,7 @@ class Indiv:
         Apply mutation to this individual.
 
         Delegates the mutation process to the underlying parameter object `para`.
-        This ensures that mutation behavior is defined polymorphically in the 
+        This ensures that mutation behavior is defined polymorphically in the
         specific `ParaBase` subclass (e.g. `ParaVector`, `ParaNet`, ...).
         """
         self.para.mutate()

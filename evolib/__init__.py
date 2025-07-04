@@ -1,6 +1,6 @@
 # Auto-generated from api.py by gen_api_module.py
 
-from .api import CrossoverFunction, CrossoverStrategy, DEFAULT_FLOAT_DTYPE, DiversityMethod, EPSILON, ERR_INVALID_NAME, ERR_NO_GET_STRATEGY, ERR_UNKNOWN_CATEGORY, FitnessFunction, HistoryLogger, Indiv, MAX_FLOAT, MIN_FLOAT, MODULE_MAP, MutationFunction, MutationParams, MutationStrategy, Origin, ParaBase, ParaInitializer, ParaInitializer, ParaVector, Pop, Strategy, TauUpdateFunction, ackley, ackley_2d, ackley_3d, adapted_mutation_probability, adapted_mutation_strength, apply_config, binary_cross_entropy_loss, categorical_cross_entropy_loss, clip, clip_mutation_strength, compute_fitness_diversity, copy_indiv, create_offspring_mu_lambda, cross_entropy_loss, crossover_arithmetic, crossover_blend_alpha, crossover_differential, crossover_heuristic, crossover_intermediate, crossover_simulated_binary, evolve_mu_lambda, fixed_initializer, get_initializer, get_mutation_parameters, griewank, griewank_2d, griewank_3d, huber_loss, initializer_registry, load_config, load_strategy, mae_loss, mse_loss, mutate_gauss, mutate_offspring, normal_initializer, plot_diversity, plot_fitness, plot_fitness_comparison, plot_history, plot_mutation_trends, random_initializer, rastrigin, rastrigin_2d, rastrigin_3d, register_initializer, replace_generational, replace_mu_lambda, replace_random, replace_steady_state, replace_truncation, replace_weighted_stochastic, rosenbrock, rosenbrock_2d, rosenbrock_3d, save_current_plot, scaled_mutation_factor, schwefel, schwefel_2d, schwefel_3d, selection_boltzmann, selection_random, selection_rank_based, selection_roulette, selection_sus, selection_tournament, selection_truncation, simple_quadratic, sphere, sphere_2d, sphere_3d, update_mutation_parameters, validate_crossover_config, validate_full_config, validate_mutation_config, validate_replacement_config, validate_selection_config, vector_adaptive_initializer, zero_initializer
+from .api import CrossoverFunction, CrossoverStrategy, DEFAULT_FLOAT_DTYPE, DiversityMethod, EPSILON, ERR_INVALID_NAME, ERR_NO_GET_STRATEGY, ERR_UNKNOWN_CATEGORY, FitnessFunction, HistoryLogger, Indiv, MAX_FLOAT, MIN_FLOAT, MODULE_MAP, MutationFunction, MutationParams, MutationStrategy, Origin, ParaBase, ParaInitializer, ParaInitializer, ParaVector, Pop, Strategy, TauUpdateFunction, ackley, ackley_2d, ackley_3d, adapted_mutation_probability, adapted_mutation_strength, binary_cross_entropy_loss, categorical_cross_entropy_loss, clip, clip_mutation_strength, compute_fitness_diversity, copy_indiv, create_offspring_mu_lambda, cross_entropy_loss, crossover_arithmetic, crossover_blend_alpha, crossover_differential, crossover_heuristic, crossover_intermediate, crossover_simulated_binary, evolve_mu_lambda, fixed_initializer, get_initializer, get_mutation_parameters, griewank, griewank_2d, griewank_3d, huber_loss, initializer_registry, load_config, load_strategy, mae_loss, mse_loss, mutate_gauss, mutate_offspring, normal_initializer, plot_diversity, plot_fitness, plot_fitness_comparison, plot_history, plot_mutation_trends, random_initializer, rastrigin, rastrigin_2d, rastrigin_3d, register_initializer, replace_generational, replace_mu_lambda, replace_random, replace_steady_state, replace_truncation, replace_weighted_stochastic, rosenbrock, rosenbrock_2d, rosenbrock_3d, save_current_plot, scaled_mutation_factor, schwefel, schwefel_2d, schwefel_3d, selection_boltzmann, selection_random, selection_rank_based, selection_roulette, selection_sus, selection_tournament, selection_truncation, simple_quadratic, sphere, sphere_2d, sphere_3d, validate_crossover_config, validate_full_config, validate_mutation_config, validate_replacement_config, validate_selection_config, vector_adaptive_initializer, zero_initializer
 
 __all__ = [
     "CrossoverFunction",
@@ -33,7 +33,6 @@ __all__ = [
     "ackley_3d",
     "adapted_mutation_probability",
     "adapted_mutation_strength",
-    "apply_config",
     "binary_cross_entropy_loss",
     "categorical_cross_entropy_loss",
     "clip",
@@ -99,7 +98,6 @@ __all__ = [
     "sphere",
     "sphere_2d",
     "sphere_3d",
-    "update_mutation_parameters",
     "validate_crossover_config",
     "validate_full_config",
     "validate_mutation_config",

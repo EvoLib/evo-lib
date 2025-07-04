@@ -12,7 +12,6 @@ import random
 
 from evolib import Indiv, Pop
 
-
 # Load example configuration for the population
 pop = Pop(config_path="population.yaml")
 
@@ -20,10 +19,10 @@ pop = Pop(config_path="population.yaml")
 my_indiv = pop.create_indiv()
 
 # Show parameter before mutation
-print(f"Before mutation: {my_indiv.para}")
+print(f"Before mutation: {my_indiv.para.get_status()}")
 
 # Apply mutation
 my_indiv.mutate()
 
 # Show parameter after mutation
-print(f"After mutation:  {my_indiv.para}")
+print(f"After mutation:  {my_indiv.para.get_status()}")

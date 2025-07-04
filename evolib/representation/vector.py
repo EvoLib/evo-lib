@@ -1,8 +1,9 @@
 import numpy as np
 
 from evolib.interfaces.structs import MutationParams
-from evolib.representation.base import ParaBase
 from evolib.operators.mutation import adapted_mutation_strength
+from evolib.representation.base import ParaBase
+from evolib.interfaces.enums import CrossoverStrategy, MutationStrategy
 
 
 class ParaVector(ParaBase):
@@ -49,7 +50,7 @@ class ParaVector(ParaBase):
             mask = np.random.rand(len(self.vector)) < self.mutation_probability
             self.vector += noise * mask
 
-        self.vector = np.clip(self.vector, self.bounds)
+        self.vector = np.clip(self.vector, *self.bounds)
 
     def update_tau(self) -> None:
         """
@@ -80,7 +81,6 @@ class ParaVector(ParaBase):
             raise AttributeError("mutation_strength not defined in this ParaVector.")
 
         self.mutation_strength = adapted_strength(params)
-
 
     def adapt_para_mutation_strengths(self, params: MutationParams) -> None:
         """
@@ -167,16 +167,15 @@ class ParaVector(ParaBase):
             self.mutation_probability = _exponential_mutation_probability(generation)
 
         elif self.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
-            self.mutation_probability = 0 #TODO
-            self.mutation_strength = 0 #TODO
-
+            self.mutation_probability = 0  # TODO
+            self.mutation_strength = 0  # TODO
 
     def _exponential_mutation_strength(self, generation: int) -> float:
         """
         Calculates exponentially decaying mutation strength over generations.
 
         Args:
-            generation: int: 
+            generation: int:
 
         Returns:
             float: The adjusted mutation strength.
@@ -202,3 +201,82 @@ class ParaVector(ParaBase):
             / self.max_generations
         )
         return self.max_mutation_probability * np.exp(-k * self.generation_num)
+
+    def apply_config(self, cfg: dict) -> None:
+        """
+        Apply configuration dictionary to this ParaVector instance.
+        """
+        representation_cfg = cfg.get("representation", {})
+        self.representation = representation_cfg["type"]
+        self.dim = representation_cfg["dim"]
+        self.tau = representation_cfg.get("tau", 0.0)
+        self.bounds = representation_cfg["bounds"]
+
+        # Mutation
+        mutation_cfg = cfg.get("mutation", {})
+        self.mutation_strategy = MutationStrategy(
+            mutation_cfg.get("strategy", "constant")
+        )
+
+        if self.mutation_strategy == MutationStrategy.CONSTANT:
+            self.mutation_probability = mutation_cfg["probability"]
+            self.mutation_strength = mutation_cfg["strength"]
+
+        elif self.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
+            self.min_mutation_probability = mutation_cfg["min_probability"]
+            self.max_mutation_probability = mutation_cfg["max_probability"]
+            self.min_mutation_strength = mutation_cfg["min_strength"]
+            self.max_mutation_strength = mutation_cfg["max_strength"]
+
+        elif self.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
+            self.mutation_probability = mutation_cfg["init_probability"]
+            self.min_mutation_probability = mutation_cfg["min_probability"]
+            self.max_mutation_probability = mutation_cfg["max_probability"]
+
+            self.mutation_strength = mutation_cfg["init_strength"]
+            self.min_mutation_strength = mutation_cfg["min_strength"]
+            self.max_mutation_strength = mutation_cfg["max_strength"]
+
+            self.min_diversity_threshold = mutation_cfg["min_diversity_threshold"]
+            self.max_diversity_threshold = mutation_cfg["max_diversity_threshold"]
+
+            self.mutation_inc_factor = mutation_cfg["increase_factor"]
+            self.mutation_dec_factor = mutation_cfg["decrease_factor"]
+
+        elif self.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
+            self.mutation_probability = None
+            self.mutation_strength = None
+
+            self.min_mutation_probability = mutation_cfg["min_probability"]
+            self.max_mutation_probability = mutation_cfg["max_probability"]
+            self.min_mutation_strength = mutation_cfg["min_strength"]
+            self.max_mutation_strength = mutation_cfg["max_strength"]
+
+        elif self.mutation_strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
+            self.mutation_probability = None
+            self.mutation_strength = None
+            self.min_mutation_probability = None
+            self.max_mutation_probability = None
+            self.min_mutation_strength = mutation_cfg["min_strength"]
+            self.max_mutation_strength = mutation_cfg["max_strength"]
+
+        # Crossover
+        crossover_cfg = cfg.get("crossover", None)
+        if crossover_cfg is None:
+            self.crossover_strategy = CrossoverStrategy.NONE
+            self.crossover_probability = None
+        else:
+            self.crossover_strategy = CrossoverStrategy(cfg["crossover"]["strategy"])
+            if self.crossover_strategy == CrossoverStrategy.CONSTANT:
+                self.crossover_probability = cfg["crossover"]["probability"]
+
+            elif self.crossover_strategy == CrossoverStrategy.EXPONENTIAL_DECAY:
+                self.min_crossover_probability = cfg["crossover"]["min_probability"]
+                self.max_crossover_probability = cfg["crossover"]["max_probability"]
+
+            elif self.crossover_strategy == CrossoverStrategy.ADAPTIVE_GLOBAL:
+                self.crossover_probability = cfg["crossover"]["init_probability"]
+                self.min_crossover_probability = cfg["crossover"]["min_probability"]
+                self.max_crossover_probability = cfg["crossover"]["max_probability"]
+                self.crossover_inc_factor = cfg["crossover"]["increase_factor"]
+                self.crossover_dec_factor = cfg["crossover"]["decrease_factor"]

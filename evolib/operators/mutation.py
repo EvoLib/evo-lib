@@ -27,7 +27,10 @@ from evolib.interfaces.types import (
 from evolib.utils.math_utils import scaled_mutation_factor
 
 
-def mutate_offspring( pop: Pop, offspring: List[Indiv],) -> None:
+def mutate_offspring(
+    pop: Pop,
+    offspring: List[Indiv],
+) -> None:
     """
     Applies mutation to all individuals in the offspring list.
 
@@ -67,7 +70,10 @@ def get_mutation_parameters(indiv: Indiv) -> tuple[float, float]:
         return indiv.para.mutation_probability, indiv.para.mutation_strength
 
     if strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
-        if indiv.para.mutation_probability is None or indiv.para.mutation_strength is None:
+        if (
+            indiv.para.mutation_probability is None
+            or indiv.para.mutation_strength is None
+        ):
             raise ValueError(
                 "Individual mutation parameters must be initialized before use "
                 "when using ADAPTIVE_INDIVIDUAL strategy."
@@ -81,7 +87,6 @@ def get_mutation_parameters(indiv: Indiv) -> tuple[float, float]:
         return indiv.para.mutation_probability or 0.0, avg_strength
 
     raise ValueError(f"Unsupported mutation strategy: {strategy}")
-
 
 
 def _adaptive_mutation_rate(pop: Pop, alpha: float = 0.1) -> float:

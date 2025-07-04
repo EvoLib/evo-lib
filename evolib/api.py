@@ -4,12 +4,12 @@ from evolib.core.individual import Indiv
 from evolib.core.population import Pop, compute_fitness_diversity
 from evolib.globals.numeric import DEFAULT_FLOAT_DTYPE, EPSILON, MAX_FLOAT, MIN_FLOAT
 from evolib.initializers.registry import ParaInitializer, get_initializer, initializer_registry, register_initializer
-from evolib.initializers.vector_initializers import apply_config, fixed_initializer, normal_initializer, random_initializer, vector_adaptive_initializer, zero_initializer
+from evolib.initializers.vector_initializers import fixed_initializer, normal_initializer, random_initializer, vector_adaptive_initializer, zero_initializer
 from evolib.interfaces.enums import CrossoverStrategy, DiversityMethod, MutationStrategy, Origin, Strategy
 from evolib.interfaces.structs import MutationParams
 from evolib.interfaces.types import CrossoverFunction, FitnessFunction, MutationFunction, ParaInitializer, TauUpdateFunction
 from evolib.operators.crossover import crossover_arithmetic, crossover_blend_alpha, crossover_differential, crossover_heuristic, crossover_intermediate, crossover_simulated_binary
-from evolib.operators.mutation import adapted_mutation_probability, adapted_mutation_strength, get_mutation_parameters, mutate_gauss, mutate_offspring, update_mutation_parameters
+from evolib.operators.mutation import adapted_mutation_probability, adapted_mutation_strength, get_mutation_parameters, mutate_gauss, mutate_offspring
 from evolib.operators.replacement import replace_generational, replace_mu_lambda, replace_random, replace_steady_state, replace_truncation, replace_weighted_stochastic
 from evolib.operators.reproduction import create_offspring_mu_lambda
 from evolib.operators.selection import selection_boltzmann, selection_random, selection_rank_based, selection_roulette, selection_sus, selection_tournament, selection_truncation
@@ -57,7 +57,6 @@ __all__ = [
     "ackley_3d",
     "adapted_mutation_probability",
     "adapted_mutation_strength",
-    "apply_config",
     "binary_cross_entropy_loss",
     "categorical_cross_entropy_loss",
     "clip",
@@ -123,7 +122,6 @@ __all__ = [
     "sphere",
     "sphere_2d",
     "sphere_3d",
-    "update_mutation_parameters",
     "validate_crossover_config",
     "validate_full_config",
     "validate_mutation_config",
