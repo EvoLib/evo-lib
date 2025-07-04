@@ -2,8 +2,7 @@
 Example 01-02 - Mutation
 
 This example demonstrates:
-- How to create an individual and a population using configuration files.
-- How to define a custom mutation function.
+- How to create a population using configuration files.
 - How to apply mutation using the `mutate` interface of EvoLib.
 - How parameter values change as a result of mutation.
 """

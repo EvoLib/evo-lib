@@ -3,7 +3,6 @@ Example 01-01 - Getting Started with EvoLib
 
 This example demonstrates:
 - How to load configuration files
-- How to initialize a population
 - How to create and add an individual
 - How to display configuration details
 """
