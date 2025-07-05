@@ -29,7 +29,6 @@ from evolib import (
 )
 
 
-# User-defined fitness function
 def my_fitness(indiv: Indiv) -> None:
     expected = [1.0, 1.0, 1.0, 1.0]
     predicted = rosenbrock(indiv.para.vector)
