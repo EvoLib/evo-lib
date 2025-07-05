@@ -349,6 +349,13 @@ class Pop:
         self.median_fitness = np.median(fitnesses)
         self.iqr_fitness = np.percentile(fitnesses, 75) - np.percentile(fitnesses, 25)
         self.diversity = self.fitness_diversity(method=DiversityMethod.IQR)
+        
+        if self.diversity_ema is None:
+            self.diversity_ema = self.diversity
+        else:
+            alpha = 0.1
+            self.diversity_ema = (1 - alpha) * (self.diversity_ema 
+                                                + alpha * self.diversity)
 
         # Logging
         row = {
@@ -420,7 +427,8 @@ class Pop:
         """
         for indiv in self.indivs:
             indiv.para.update_mutation_parameters(self.generation_num,
-                                                  self.max_generations)
+                                                  self.max_generations,
+                                                  self.diversity_ema)
 
 ##############################################################################
 

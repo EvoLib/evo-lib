@@ -156,7 +156,9 @@ class ParaVector(ParaBase):
 
         return history
 
-    def update_mutation_parameters(self, generation: int, max_generations: int) -> None:
+    def update_mutation_parameters(
+        self, generation: int, max_generations: int, diversity_ema: float | None = None
+    ) -> None:
         """Update mutation parameters based on strategy and generation."""
         if self.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
             self.mutation_strength = self._exponential_mutation_strength(
@@ -167,8 +169,12 @@ class ParaVector(ParaBase):
             )
 
         elif self.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
-            self.mutation_probability = 0  # TODO
-            self.mutation_strength = 0  # TODO
+            if diversity_ema is None:
+                raise ValueError(
+                    "diversity_ema must be provided" "for ADAPTIVE_GLOBAL strategy"
+                )
+            self.mutation_probability = self._adaptive_mutation_probability(diversity_ema)
+            self.mutation_strength = self._adaptive_mutation_strength(diversity_ema)
 
     def _exponential_mutation_strength(self, generation: int, max_generations) -> float:
         """
@@ -203,6 +209,56 @@ class ParaVector(ParaBase):
             / max_generations
         )
         return self.max_mutation_probability * np.exp(-k * generation)
+
+    def _adaptive_mutation_strength(self, diversity_ema: float) -> float:
+        """
+        Calculates adapted mutation strength based on population diversity EMA.
+
+        Uses configured thresholds and scaling factors.
+
+        Args:
+            diversity_ema (float): Exponentially smoothed population diversity.
+
+        Returns:
+            float: Updated mutation strength.
+        """
+        if diversity_ema < self.min_diversity_threshold:
+            return min(
+                self.max_mutation_strength,
+                self.mutation_strength * self.mutation_inc_factor,
+            )
+        elif diversity_ema > self.max_diversity_threshold:
+            return max(
+                self.min_mutation_strength,
+                self.mutation_strength * self.mutation_dec_factor,
+            )
+        else:
+            return self.mutation_strength
+
+    def _adaptive_mutation_probability(self, diversity_ema: float) -> float:
+        """
+        Calculates adapted mutation probability based on population diversity EMA.
+
+        Uses configured thresholds and scaling factors.
+
+        Args:
+            diversity_ema (float): Exponentially smoothed population diversity.
+
+        Returns:
+            float: Updated mutation probability.
+        """
+        if diversity_ema < self.min_diversity_threshold:
+            return min(
+                self.max_mutation_probability,
+                self.mutation_probability * self.mutation_inc_factor,
+            )
+        elif diversity_ema > self.max_diversity_threshold:
+            return max(
+                self.min_mutation_probability,
+                self.mutation_probability * self.mutation_dec_factor,
+            )
+        else:
+            return self.mutation_probability
 
     def apply_config(self, cfg: dict) -> None:
         """Apply configuration dictionary to this ParaVector instance."""
