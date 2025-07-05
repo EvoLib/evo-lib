@@ -7,21 +7,20 @@ This example demonstrates:
 - How parameter values change as a result of mutation.
 """
 
-import random
-
 from evolib import Indiv, Pop
 
 # Load example configuration for the population
+# Uses the mutation strategy defined in population.yaml (e.g. constant or exponential)
 pop = Pop(config_path="population.yaml")
 
 # Create a single individual
-my_indiv = pop.create_indiv()
+indiv = pop.create_indiv()
 
 # Show parameter before mutation
-print(f"Before mutation: {my_indiv.para.get_status()}")
+print(f"Before mutation: {indiv.para.get_status()}")
 
 # Apply mutation
-my_indiv.mutate()
+indiv.mutate()
 
 # Show parameter after mutation
-print(f"After mutation:  {my_indiv.para.get_status()}")
+print(f"After mutation:  {indiv.para.get_status()}")

@@ -17,16 +17,7 @@ from evolib import Indiv, Pop, mse_loss, simple_quadratic
 def my_fitness(indiv: Indiv) -> None:
     """
     Simple fitness function using the quadratic benchmark and MSE loss.
-
-    Args:
-        indiv (Indiv): The individual to evaluate. The function should
-        assign the computed fitness to `target_indiv.fitness`.
-        params (MutationParams): Mutation context object that includes:
-            - strength (float): Standard deviation of the Gaussian mutation.
-            - bounds (tuple[float, float]): Value limits for the mutation.
-            - rate (Optional[float]): (Unused) mutation rate, if applicable.
-            - bias (Optional[float]): (Unused) bias mutation strength for
-              neural networks.
+    Assigns fitness based on distance to 0.0 (global minimum).
     """
     expected = 0.0
     predicted = simple_quadratic(indiv.para.vector)

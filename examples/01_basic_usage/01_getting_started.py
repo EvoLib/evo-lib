@@ -18,3 +18,6 @@ pop.add_indiv(indiv)
 
 # print population information
 pop.print_status(verbosity=10)
+
+# print indiv information
+indiv.print_status()
