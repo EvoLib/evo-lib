@@ -11,12 +11,10 @@ resulting fitness progression over generations.
 
 from evolib import (
     Indiv,
-    MutationParams,
     Pop,
     Strategy,
     evolve_mu_lambda,
     mse_loss,
-    mutate_gauss,
     rosenbrock,
 )
 
@@ -27,25 +25,21 @@ def my_fitness(indiv: Indiv) -> None:
     predicted = rosenbrock(indiv.para.vector)
     indiv.fitness = mse_loss(expected, predicted)
 
-
-def initialize_population(pop: Pop) -> None:
-    pop.initialize_population()
-    pop.set_functions(fitness_function=my_fitness)
-    pop.evaluate_fitness()
-
 def run_experiment(config_path: str) -> None:
     pop = Pop(config_path)
-    initialize_population(pop)
+    pop.initialize_population()
+    pop.set_functions(fitness_function=my_fitness)
 
     for _ in range(pop.max_generations):
         evolve_mu_lambda(pop, strategy=Strategy.MU_PLUS_LAMBDA)
 
-        pop.print_status(verbosity=3)
+        pop.print_status(verbosity=10)
         print()
 
+
 # Run multiple experiments
-print("With static mutation strength:\n")
-run_experiment(config_path="04_rate_constant.yaml")
+#print("With static mutation strength:\n")
+#run_experiment(config_path="04_rate_constant.yaml")
 
 print("\n\nWith exponential decay mutation strength:\n")
 run_experiment(config_path="04_exponential_decay.yaml")

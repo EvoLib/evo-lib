@@ -1,9 +1,9 @@
 import numpy as np
 
+from evolib.interfaces.enums import CrossoverStrategy, MutationStrategy
 from evolib.interfaces.structs import MutationParams
 from evolib.operators.mutation import adapted_mutation_strength
 from evolib.representation.base import ParaBase
-from evolib.interfaces.enums import CrossoverStrategy, MutationStrategy
 
 
 class ParaVector(ParaBase):
@@ -156,25 +156,21 @@ class ParaVector(ParaBase):
 
         return history
 
-    def update_mutation_parameters(self, 
-                                   generation: int,
-                                   max_generations: int) -> None:
+    def update_mutation_parameters(self, generation: int, max_generations: int) -> None:
         """Update mutation parameters based on strategy and generation."""
         if self.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
-            self.mutation_strength = (
-                self._exponential_mutation_strength(generation, max_generations)
-                )
-            self.mutation_probability = (
-                self._exponential_mutation_probability(generation, max_generations)
-                )
+            self.mutation_strength = self._exponential_mutation_strength(
+                generation, max_generations
+            )
+            self.mutation_probability = self._exponential_mutation_probability(
+                generation, max_generations
+            )
 
         elif self.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
             self.mutation_probability = 0  # TODO
             self.mutation_strength = 0  # TODO
 
-    def _exponential_mutation_strength(self,
-                                       generation: int,
-                                       max_generations) -> float:
+    def _exponential_mutation_strength(self, generation: int, max_generations) -> float:
         """
         Calculates exponentially decaying mutation strength over generations.
 
@@ -190,8 +186,9 @@ class ParaVector(ParaBase):
         )
         return self.max_mutation_strength * np.exp(-k * generation)
 
-    def _exponential_mutation_probability(self, generation: int,
-                                          max_generations) -> float:
+    def _exponential_mutation_probability(
+        self, generation: int, max_generations
+    ) -> float:
         """
         Calculates exponentially decaying mutation probablility over generations.
 

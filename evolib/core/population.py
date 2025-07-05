@@ -407,6 +407,20 @@ class Pop:
 
         self.history_logger.reset()
 
+    def update_mutation_parameters(self) -> None:
+        """
+        Triggers per-generation mutation parameter updates for all individuals
+        in the population via their `para` objects.
+
+        This ensures that all individuals – including parents – are updated
+        consistently based on current generation number.
+
+        Uses a polymorphic call to `para.update_mutation_parameters()`, preserving
+        encapsulation.
+        """
+        for indiv in self.indivs:
+            indiv.para.update_mutation_parameters(self.generation_num,
+                                                  self.max_generations)
 
 ##############################################################################
 

@@ -47,6 +47,9 @@ def evolve_mu_lambda(
     if strategy == Strategy.MU_COMMA_LAMBDA and pop.num_elites > 0:
         pop.evaluate_fitness()
 
+    # Update mutation parameters
+    pop.update_mutation_parameters()
+
     # CREATE OFFSPRING
     offspring = create_offspring_mu_lambda(pop.indivs, pop.offspring_pool_size)
 
