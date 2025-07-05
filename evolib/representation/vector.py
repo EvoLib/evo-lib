@@ -156,18 +156,25 @@ class ParaVector(ParaBase):
 
         return history
 
-    def update_mutation_parameters(self, generation: int) -> None:
+    def update_mutation_parameters(self, 
+                                   generation: int,
+                                   max_generations: int) -> None:
         """Update mutation parameters based on strategy and generation."""
         if self.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
-            self.mutation_strength = self._exponential_mutation_strength(generation)
-            self.mutation_probability = self._exponential_mutation_probability(
-                                                                            generation)
+            self.mutation_strength = (
+                self._exponential_mutation_strength(generation, max_generations)
+                )
+            self.mutation_probability = (
+                self._exponential_mutation_probability(generation, max_generations)
+                )
 
         elif self.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
             self.mutation_probability = 0  # TODO
             self.mutation_strength = 0  # TODO
 
-    def _exponential_mutation_strength(self, generation: int) -> float:
+    def _exponential_mutation_strength(self,
+                                       generation: int,
+                                       max_generations) -> float:
         """
         Calculates exponentially decaying mutation strength over generations.
 
@@ -179,11 +186,12 @@ class ParaVector(ParaBase):
         """
         k = (
             np.log(self.max_mutation_strength / self.min_mutation_strength)
-            / self.max_generations
+            / max_generations
         )
         return self.max_mutation_strength * np.exp(-k * generation)
 
-    def _exponential_mutation_probability(self, generation: int) -> float:
+    def _exponential_mutation_probability(self, generation: int,
+                                          max_generations) -> float:
         """
         Calculates exponentially decaying mutation probablility over generations.
 
@@ -195,9 +203,9 @@ class ParaVector(ParaBase):
         """
         k = (
             np.log(self.max_mutation_probability / self.min_mutation_probability)
-            / self.max_generations
+            / max_generations
         )
-        return self.max_mutation_probability * np.exp(-k * self.generation_num)
+        return self.max_mutation_probability * np.exp(-k * generation)
 
     def apply_config(self, cfg: dict) -> None:
         """Apply configuration dictionary to this ParaVector instance."""

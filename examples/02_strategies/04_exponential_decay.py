@@ -24,49 +24,24 @@ from evolib import (
 # User-defined fitness function
 def my_fitness(indiv: Indiv) -> None:
     expected = [1.0, 1.0, 1.0, 1.0]
-    predicted = rosenbrock(indiv.para)
+    predicted = rosenbrock(indiv.para.vector)
     indiv.fitness = mse_loss(expected, predicted)
 
 
-# User-defined mutation function
-def my_mutation(indiv: Indiv, params: MutationParams) -> None:
-    """
-    Mutates the individual's parameters using Gaussian mutation.
-
-    Args:
-        indiv (Indiv): The individual to mutate.
-        params (MutationParams): Mutation context object that includes:
-            - strength (float): Standard deviation of the Gaussian mutation.
-            - bounds (tuple[float, float]): Value limits for the mutation.
-            - rate (Optional[float]): (Unused) mutation rate, if applicable.
-            - bias (Optional[float]): (Unused) bias mutation strength for
-              neural networks.
-    """
-    for idx, _ in enumerate(indiv.para):
-        indiv.para[idx] = mutate_gauss(indiv.para[idx], params.strength, params.bounds)
-
-
 def initialize_population(pop: Pop) -> None:
-    for _ in range(pop.parent_pool_size):
-        new_indiv = pop.create_indiv()
-        new_indiv.para = [-2.0, 2.0, -1.5, 1.5]  # for better comparison reasons
-        pop.add_indiv(new_indiv)
-    for indiv in pop.indivs:
-        my_fitness(indiv)
-
+    pop.initialize_population()
+    pop.set_functions(fitness_function=my_fitness)
+    pop.evaluate_fitness()
 
 def run_experiment(config_path: str) -> None:
-    my_pop = Pop(config_path)
-    initialize_population(my_pop)
+    pop = Pop(config_path)
+    initialize_population(pop)
 
-    for _ in range(my_pop.max_generations):
-        evolve_mu_lambda(
-            my_pop, my_fitness, my_mutation, strategy=Strategy.MU_PLUS_LAMBDA
-        )
+    for _ in range(pop.max_generations):
+        evolve_mu_lambda(pop, strategy=Strategy.MU_PLUS_LAMBDA)
 
-        my_pop.print_status(verbosity=3)
+        pop.print_status(verbosity=3)
         print()
-
 
 # Run multiple experiments
 print("With static mutation strength:\n")

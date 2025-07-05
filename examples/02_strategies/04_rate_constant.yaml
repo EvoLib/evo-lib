@@ -2,11 +2,17 @@
 
 parent_pool_size: 40
 offspring_pool_size: 40
-representation: "vector"
 
 max_generations: 20
 max_indiv_age: 0
 num_elites: 1
+
+representation: 
+  type: "vector"
+  initializer: fixed_initializer
+  values: [-2.0, 2.0, -1.5, 1.5]
+  dim: 4
+  bounds: [-1.0, 1.0]
 
 mutation:
   strategy: "constant"

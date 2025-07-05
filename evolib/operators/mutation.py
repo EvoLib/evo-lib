@@ -42,7 +42,7 @@ def mutate_offspring(
 
     for indiv in offspring:
         # Update global mutation parameters (only if strategy requires it)
-        indiv.para.update_mutation_parameters(pop.generation_num)
+        indiv.para.update_mutation_parameters(pop.generation_num, pop.max_generations)
         indiv.mutate()
 
 
