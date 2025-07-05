@@ -1,9 +1,9 @@
 # Sample configuration
 
-parent_pool_size: 2
-offspring_pool_size: 2
+parent_pool_size: 40
+offspring_pool_size: 40
 
-max_generations: 2
+max_generations: 20
 max_indiv_age: 0
 num_elites: 1
 

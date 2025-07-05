@@ -25,6 +25,7 @@ def my_fitness(indiv: Indiv) -> None:
     predicted = rosenbrock(indiv.para.vector)
     indiv.fitness = mse_loss(expected, predicted)
 
+
 def run_experiment(config_path: str) -> None:
     pop = Pop(config_path)
     pop.initialize_population()
@@ -33,13 +34,13 @@ def run_experiment(config_path: str) -> None:
     for _ in range(pop.max_generations):
         evolve_mu_lambda(pop, strategy=Strategy.MU_PLUS_LAMBDA)
 
-        pop.print_status(verbosity=10)
-        print()
+        pop.print_status(verbosity=1)
+        print(f"   MutationStrength: {pop.indivs[0].para.mutation_strength:.4f}")
 
 
 # Run multiple experiments
-#print("With static mutation strength:\n")
-#run_experiment(config_path="04_rate_constant.yaml")
+print("With static mutation strength:\n")
+run_experiment(config_path="04_rate_constant.yaml")
 
 print("\n\nWith exponential decay mutation strength:\n")
 run_experiment(config_path="04_exponential_decay.yaml")
