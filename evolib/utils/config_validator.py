@@ -21,8 +21,6 @@ def validate_mutation_config(cfg: dict, strategy: str) -> None:
             "decrease_factor",
         ],
         "adaptive_individual": [
-            "min_probability",
-            "max_probability",
             "min_strength",
             "max_strength",
         ],

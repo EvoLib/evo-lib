@@ -136,7 +136,7 @@ def adapted_mutation_strength(params: MutationParams) -> float:
         float: The updated mutation strength.
     """
 
-    adapted = params.strength * np.exp(paramstau * np.random.normal())
+    adapted = params.strength * np.exp(params.tau * np.random.normal())
     return float(np.clip(adapted, params.min_strength, params.max_strength))
 
 

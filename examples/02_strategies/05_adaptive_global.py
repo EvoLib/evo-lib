@@ -10,16 +10,24 @@ Key Elements:
 - The benchmark problem is based on the 4-dimensional Rosenbrock function.
 - Fitness is computed as the mean squared error between predicted and expected values.
 - Gaussian mutation is applied to each individual’s parameters.
+
+
+Configurations Compared:
+04_rate_constant.yaml:
+    Mutation strategy: CONSTANT
+    Strength & rate remain unchanged across generations
+
+05_adaptive_global.yaml:
+    Mutation strategy: ADAPTIVE_GLOBAL
+    Strength & rate are adjusted based on diversity (EMA)
 """
 
 from evolib import (
     Indiv,
-    MutationParams,
     Pop,
     Strategy,
     evolve_mu_lambda,
     mse_loss,
-    mutate_gauss,
     rosenbrock,
 )
 
@@ -40,15 +48,20 @@ def run_experiment(config_path: str) -> None:
         evolve_mu_lambda(pop, strategy=Strategy.MU_PLUS_LAMBDA)
 
         pop.print_status(verbosity=1)
-        print(f"   DiversityEMA: {pop.diversity_ema:.4f}  | "
-              f"MinDiversityThreshold: {pop.indivs[0].para.min_diversity_threshold} | "
-              f"MaxDiversityThreshold: {pop.indivs[0].para.max_diversity_threshold}")
-        print(f"   MutationStrength: {pop.indivs[0].para.mutation_strength:.4f}")
+        best = pop.best()
+        print(
+            f"   DiversityEMA: {pop.diversity_ema:.4f}  | "
+            f"MinDiversityThreshold: {best.para.min_diversity_threshold} | "
+            f"MaxDiversityThreshold: {best.para.max_diversity_threshold}"
+        )
+        print(f"   MutationStrength: {best.para.mutation_strength:.4f}")
 
 
-# Run multiple experiments
-print("With static mutation strength:\n")
-run_experiment(config_path="04_rate_constant.yaml")
+# Configuration with constant mutation strength
+print("Case A: Constant mutation strength\n")
+run_experiment(config_path="05_rate_constant.yaml")
 
-print("\n\nWith adaptive mutation strength:\n")
+# Use an adaptive global mutation strategy (modifies strength & probability
+# depending on diversity)
+print("\n\nCase B: Adaptive global mutation strength:\n")
 run_experiment(config_path="05_adaptive_global.yaml")

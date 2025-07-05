@@ -50,7 +50,10 @@ class ParaVector(ParaBase):
             noise = np.random.normal(
                 loc=0.0, scale=self.mutation_strength, size=len(self.vector)
             )
-            mask = np.random.rand(len(self.vector)) < self.mutation_probability
+            if self.mutation_probability is None:
+                mask = np.ones(len(self.vector))
+            else:
+                mask = np.random.rand(len(self.vector)) < self.mutation_probability
             self.vector += noise * mask
 
         self.vector = np.clip(self.vector, *self.bounds)
@@ -62,8 +65,8 @@ class ParaVector(ParaBase):
         This implements a simple self-adaptation rule:
         tau = 1 / sqrt(n), where n = number of parameters.
         """
-        if self.tau is not None and hasattr(self, "__len__"):
-            n = len(self)
+        if self.tau is not None:
+            n = len(self.vector)
             self.tau = 1.0 / np.sqrt(n) if n > 0 else 0.0
 
     def adapt_mutation_strength(self, params: MutationParams) -> None:
@@ -173,8 +176,33 @@ class ParaVector(ParaBase):
                 raise ValueError(
                     "diversity_ema must be provided" "for ADAPTIVE_GLOBAL strategy"
                 )
-            self.mutation_probability = self._adaptive_mutation_probability(diversity_ema)
+            self.mutation_probability = self._adaptive_mutation_probability(
+                diversity_ema
+            )
             self.mutation_strength = self._adaptive_mutation_strength(diversity_ema)
+
+        elif self.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
+            # Ensure tau is initialized
+            self.update_tau()
+
+            # Ensure mutation_strength is initialized
+            if self.mutation_strength is None:
+                self.mutation_strength = np.random.uniform(
+                    self.min_mutation_strength, self.max_mutation_strength
+                )
+
+            # Perform adaptive update
+            params = MutationParams(
+                strength=self.mutation_strength,
+                min_strength=self.min_mutation_strength,
+                max_strength=self.max_mutation_strength,
+                probability=1.0,  # unused here
+                bounds=self.bounds,
+                bias=None,
+                tau=self.tau,
+            )
+
+            self.adapt_mutation_strength(params)
 
     def _exponential_mutation_strength(self, generation: int, max_generations) -> float:
         """
@@ -303,10 +331,9 @@ class ParaVector(ParaBase):
             self.mutation_probability = None
             self.mutation_strength = None
 
-            self.min_mutation_probability = mutation_cfg["min_probability"]
-            self.max_mutation_probability = mutation_cfg["max_probability"]
             self.min_mutation_strength = mutation_cfg["min_strength"]
             self.max_mutation_strength = mutation_cfg["max_strength"]
+            self.update_tau()
 
         elif self.mutation_strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
             self.mutation_probability = None
