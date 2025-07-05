@@ -1,14 +1,20 @@
-# Simple sample configuration
+# Sample configuration
 
 parent_pool_size: 40
 offspring_pool_size: 40
-representation: "vector"
 
 max_generations: 100
 max_indiv_age: 0
 num_elites: 1
 
+representation:
+  type: "vector"
+  initializer: fixed_initializer
+  values: [-2.0, 2.0, -1.5, 1.5]
+  dim: 4
+  bounds: [-5.0, 5.0]
+
 mutation:
   strategy: "constant"
+  probability: 0.3
   strength: 0.1
-  rate: 0.3
