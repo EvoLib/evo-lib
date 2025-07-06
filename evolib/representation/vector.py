@@ -38,7 +38,7 @@ class ParaVector(ParaBase):
         If self.para_mutation_strengths is defined, gene-specific strengths are used.
         Otherwise, the global mutation strength from params.strength is applied.
         """
-        if self.mutation_strength is None:
+        if self.mutation_strength is None and self.randomize_mutation_strengths is None:
             raise ValueError("mutation_strength must be defined for global mutation.")
 
         if self.para_mutation_strengths is not None:
@@ -95,6 +95,11 @@ class ParaVector(ParaBase):
         This corresponds to the self-adaptive mutation strategy where each parameter
         dimension maintains its own mutation strength (sigma_i).
         """
+
+        if self.para_mutation_strengths is None:
+            raise ValueError("para_mutation_strengths must be initialized"
+                "before adaptation.")
+
         self.para_mutation_strengths *= np.exp(
             self.tau * np.random.normal(size=len(self.vector))
         )
@@ -203,6 +208,29 @@ class ParaVector(ParaBase):
             )
 
             self.adapt_mutation_strength(params)
+    
+        elif self.mutation_strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
+            if self.tau == 0.0 or self.tau is None:
+                self.update_tau()
+
+            if self.para_mutation_strengths is None:
+                self.para_mutation_strengths = np.random.uniform(
+                    self.min_mutation_strength,
+                    self.max_mutation_strength,
+                    size=len(self.vector),
+                )
+
+            params = MutationParams(
+                strength=1.0,  # unused
+                min_strength=self.min_mutation_strength,
+                max_strength=self.max_mutation_strength,
+                probability=1.0,  # unused
+                bounds=self.bounds,
+                tau=self.tau,
+            )
+
+            self.adapt_para_mutation_strengths(params)
+
 
     def _exponential_mutation_strength(self, generation: int, max_generations) -> float:
         """
@@ -295,6 +323,7 @@ class ParaVector(ParaBase):
         self.dim = representation_cfg["dim"]
         self.tau = representation_cfg.get("tau", 0.0)
         self.bounds = representation_cfg["bounds"]
+        self.init_bounds = representation_cfg.get("init_bounds", self.bounds)
 
         # Mutation
         mutation_cfg = cfg.get("mutation", {})
@@ -342,6 +371,9 @@ class ParaVector(ParaBase):
             self.max_mutation_probability = None
             self.min_mutation_strength = mutation_cfg["min_strength"]
             self.max_mutation_strength = mutation_cfg["max_strength"]
+            self.randomize_mutation_strengths = representation_cfg.get(
+               "randomize_mutation_strengths", False
+            )
 
         # Crossover
         crossover_cfg = cfg.get("crossover", None)
