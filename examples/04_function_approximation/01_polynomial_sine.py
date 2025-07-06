@@ -64,10 +64,8 @@ def run_experiment() -> None:
     pop.initialize_population()
     pop.set_functions(fitness_function=fitness_function)
 
-
     for gen in range(pop.max_generations):
-        evolve_mu_lambda(pop, strategy=Strategy.MU_COMMA_LAMBDA
-        )
+        evolve_mu_lambda(pop, strategy=Strategy.MU_COMMA_LAMBDA)
         pop.print_status(verbosity=1)
         pop.sort_by_fitness()
         plot_approximation(pop.indivs[0], gen)

@@ -15,7 +15,7 @@ def random_initializer(cfg: dict) -> Callable[[Pop], ParaVector]:
     def init_fn(_: Pop) -> ParaVector:
         pv = ParaVector()
         pv.apply_config(cfg)
-        pv.vector = np.random.uniform(pv.bounds[0], pv.bounds[1], size=pv.dim)
+        pv.vector = np.random.uniform(pv.init_bounds[0], pv.init_bounds[1], size=pv.dim)
         return pv
 
     return init_fn
@@ -69,8 +69,10 @@ def vector_adaptive_initializer(cfg: dict) -> Callable[[Pop], ParaVector]:
             )
         else:
             if pv.mutation_strength is None:
-                raise ValueError("mutation_strength must be defined for non-random"
-                                 "initialization of para_mutation_strengths.")
+                raise ValueError(
+                    "mutation_strength must be defined for non-random"
+                    "initialization of para_mutation_strengths."
+                )
             pv.para_mutation_strengths = np.full(pv.dim, pv.mutation_strength)
         return pv
 

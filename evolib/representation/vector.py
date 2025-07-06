@@ -97,8 +97,9 @@ class ParaVector(ParaBase):
         """
 
         if self.para_mutation_strengths is None:
-            raise ValueError("para_mutation_strengths must be initialized"
-                "before adaptation.")
+            raise ValueError(
+                "para_mutation_strengths must be initialized" "before adaptation."
+            )
 
         self.para_mutation_strengths *= np.exp(
             self.tau * np.random.normal(size=len(self.vector))
@@ -208,7 +209,7 @@ class ParaVector(ParaBase):
             )
 
             self.adapt_mutation_strength(params)
-    
+
         elif self.mutation_strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
             if self.tau == 0.0 or self.tau is None:
                 self.update_tau()
@@ -230,7 +231,6 @@ class ParaVector(ParaBase):
             )
 
             self.adapt_para_mutation_strengths(params)
-
 
     def _exponential_mutation_strength(self, generation: int, max_generations) -> float:
         """
@@ -372,7 +372,7 @@ class ParaVector(ParaBase):
             self.min_mutation_strength = mutation_cfg["min_strength"]
             self.max_mutation_strength = mutation_cfg["max_strength"]
             self.randomize_mutation_strengths = representation_cfg.get(
-               "randomize_mutation_strengths", False
+                "randomize_mutation_strengths", False
             )
 
         # Crossover
