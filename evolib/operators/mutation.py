@@ -19,7 +19,6 @@ from typing import List
 import numpy as np
 
 from evolib.core.population import Indiv, Pop
-from evolib.interfaces.enums import MutationStrategy
 from evolib.interfaces.types import MutationParams
 
 
@@ -37,49 +36,6 @@ def mutate_offspring(
 
     for indiv in offspring:
         indiv.mutate()
-
-
-def get_mutation_parameters(indiv: Indiv) -> tuple[float, float]:
-    """
-    Retrieve the effective mutation parameters (rate, strength) for a given individual.
-
-    Args:
-        indiv (Indiv): The individual whose mutation parameters may be used.
-
-    Returns:
-        tuple[float, float]: (mutation_probability, mutation_strength)
-
-    Raises:
-        ValueError: If required individual parameters are missing or strategy is
-        unsupported.
-    """
-    strategy = indiv.para.mutation_strategy
-
-    if strategy in {
-        MutationStrategy.CONSTANT,
-        MutationStrategy.EXPONENTIAL_DECAY,
-        MutationStrategy.ADAPTIVE_GLOBAL,
-    }:
-        return indiv.para.mutation_probability, indiv.para.mutation_strength
-
-    if strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
-        if (
-            indiv.para.mutation_probability is None
-            or indiv.para.mutation_strength is None
-        ):
-            raise ValueError(
-                "Individual mutation parameters must be initialized before use "
-                "when using ADAPTIVE_INDIVIDUAL strategy."
-            )
-        return indiv.para.mutation_probability, indiv.para.mutation_strength
-
-    if strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
-        # Use average of per-parameter strengths, fallback 0.0
-        strengths = indiv.para.mutation_strengths
-        avg_strength = sum(strengths) / len(strengths) if strengths else 0.0
-        return indiv.para.mutation_probability or 0.0, avg_strength
-
-    raise ValueError(f"Unsupported mutation strategy: {strategy}")
 
 
 def adapted_mutation_strength(params: MutationParams) -> float:

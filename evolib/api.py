@@ -42,7 +42,6 @@ from evolib.operators.crossover import (
 from evolib.operators.mutation import (
     adapted_mutation_probability,
     adapted_mutation_strength,
-    get_mutation_parameters,
     mutate_offspring,
 )
 from evolib.operators.replacement import (
@@ -170,7 +169,6 @@ __all__ = [
     "evolve_mu_lambda",
     "fixed_initializer",
     "get_initializer",
-    "get_mutation_parameters",
     "griewank",
     "griewank_2d",
     "griewank_3d",
