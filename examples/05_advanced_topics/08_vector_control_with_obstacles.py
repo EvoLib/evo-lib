@@ -1,15 +1,14 @@
 """
-Example 05-04 (Obstacle Variant) – Vector-Based Control with Obstacle Avoidance.
+Example 05-08 – Vector Control with Obstacle Avoidance (Modern API)
 
-This version adds circular obstacles the agent must avoid while reaching the target.
-Collisions are penalized quadratically, while the primary goal remains minimizing
-distance.
+This variant adds circular obstacles to the vector control task.
+The agent is penalized for colliding with obstacles while trying to reach the goal.
 """
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, MutationParams, Pop, evolve_mu_lambda
+from evolib import Indiv, Pop, evolve_mu_lambda
 
 SAVE_FRAMES = True
 FRAME_FOLDER = "08_frames_vector_obstacles"
@@ -19,16 +18,16 @@ NUM_STEPS = 8
 TARGET = np.array([5.0, 5.0])
 START = np.array([0.0, 0.0])
 MAX_SPEED = 1.0
+PENALTY_FACTOR = 100.0
 
-# Obstacle(s): list of (center, radius)
+# List of circular obstacles: (center, radius)
 OBSTACLES = [
     (np.array([2.5, 2.5]), 1.0),
     (np.array([4.0, 1.5]), 0.5),
 ]
-PENALTY_FACTOR = 100.0
 
 
-# Simulation
+# Trajectory simulation with obstacle awareness
 def simulate_trajectory(para: np.ndarray) -> np.ndarray:
     pos = START.copy()
     path = [pos.copy()]
@@ -40,7 +39,7 @@ def simulate_trajectory(para: np.ndarray) -> np.ndarray:
     return np.array(path)
 
 
-# Collision Detection
+# Penalty for obstacle collision
 def collision_penalty(path: np.ndarray) -> float:
     penalty = 0.0
     for p in path:
@@ -51,39 +50,21 @@ def collision_penalty(path: np.ndarray) -> float:
     return PENALTY_FACTOR * penalty
 
 
-# Fitness Function
+# Fitness: distance to target + collision penalty
 def fitness_function(indiv: Indiv) -> None:
-    path = simulate_trajectory(indiv.para)
+    path = simulate_trajectory(indiv.para.vector)
     final_pos = path[-1]
     dist = np.linalg.norm(final_pos - TARGET)
     penalty = collision_penalty(path)
     indiv.fitness = float(dist + penalty)
 
 
-# Mutation
-def mutation(indiv: Indiv, params: MutationParams) -> None:
-    for i in range(len(indiv.para)):
-        if np.random.rand() < params.rate:
-            indiv.para[i] += np.random.normal(0, params.strength)
-
-
-# Initialization
-def initialize_population(pop: Pop) -> None:
-    for _ in range(pop.parent_pool_size):
-        new_indiv = pop.create_indiv()
-        new_indiv.para = np.random.uniform(-0.5, 0.5, size=NUM_STEPS * 2)
-        pop.add_indiv(new_indiv)
-
-    for indiv in pop.indivs:
-        fitness_function(indiv)
-
-
-# Plotting
+# Plot best individual's path with obstacles
 def plot_trajectory(indiv: Indiv, generation: int) -> None:
-    path = simulate_trajectory(indiv.para)
+    path = simulate_trajectory(indiv.para.vector)
 
     plt.figure(figsize=(5, 5))
-    plt.plot(path[:, 0], path[:, 1], "o-", color="blue", label="Agent path")
+    plt.plot(path[:, 0], path[:, 1], "o-", color="blue", label="Agent Path")
     plt.plot(*START, "ks", label="Start")
     plt.plot(*TARGET, "r*", label="Target", markersize=10)
 
@@ -105,16 +86,16 @@ def plot_trajectory(indiv: Indiv, generation: int) -> None:
     plt.close()
 
 
-# Main
+# Main loop
 def run_experiment() -> None:
     pop = Pop(CONFIG_FILE)
-    pop.set_functions(fitness_function, mutation)
-    initialize_population(pop)
+    pop.initialize_population()
+    pop.set_functions(fitness_function=fitness_function)
 
     for gen in range(pop.max_generations):
-        evolve_mu_lambda(pop, fitness_function, mutation)
+        evolve_mu_lambda(pop)
         pop.sort_by_fitness()
-        plot_trajectory(pop.indivs[0], gen)
+        plot_trajectory(pop.best(), gen)
         pop.print_status(verbosity=1)
 
 
