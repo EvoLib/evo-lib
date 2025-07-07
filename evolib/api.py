@@ -43,7 +43,6 @@ from evolib.operators.mutation import (
     adapted_mutation_probability,
     adapted_mutation_strength,
     get_mutation_parameters,
-    mutate_gauss,
     mutate_offspring,
 )
 from evolib.operators.replacement import (
@@ -181,7 +180,6 @@ __all__ = [
     "load_strategy",
     "mae_loss",
     "mse_loss",
-    "mutate_gauss",
     "mutate_offspring",
     "normal_initializer",
     "plot_diversity",

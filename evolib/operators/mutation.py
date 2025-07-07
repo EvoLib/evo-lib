@@ -14,7 +14,7 @@ Expected mutation functions must operate on the parameter level and implement
 mutation probability checks internally.
 """
 
-from typing import List, Optional
+from typing import List
 
 import numpy as np
 
@@ -80,44 +80,6 @@ def get_mutation_parameters(indiv: Indiv) -> tuple[float, float]:
         return indiv.para.mutation_probability or 0.0, avg_strength
 
     raise ValueError(f"Unsupported mutation strategy: {strategy}")
-
-
-def mutate_gauss(
-    x: np.ndarray,
-    mutation_strength: Optional[float] = 0.05,
-    bounds: tuple[float, float] = (-1.0, 1.0),
-) -> np.ndarray:
-    """
-    Mutates a scalar or vector value by adding Gaussian noise.
-
-    Args:
-        x (np.ndarray): Input value or parameter vector.
-        mutation_strength (float | None): Strength of the Gaussian noise.
-            May be None if unset (e.g., before adaptive mutation initialization),
-            in which case a ValueError is raised. This allows flexible typing in
-            user code that passes uninitialized individuals.
-        bounds (tuple): Lower and upper clipping bounds.
-
-    Raises:
-        ValueError: If mutation_strength is None or not positive.
-    """
-    # Validate inputs
-    if not isinstance(x, np.ndarray):
-        x = np.asarray(x)
-        # raise ValueError("Input x must be a NumPy array")
-    if mutation_strength is None or mutation_strength <= 0:
-        raise ValueError("mutation_strength must be a positive float")
-    if not (isinstance(bounds, tuple) and len(bounds) == 2 and bounds[0] <= bounds[1]):
-        raise ValueError("bounds must be a tuple (min, max) with min <= max")
-
-    # Generate Gaussian noise with the same shape as x
-    noise = np.random.normal(0, mutation_strength, size=x.shape)
-
-    # Add noise and clip to bounds
-    mutated = x + noise
-    mutated = np.clip(mutated, bounds[0], bounds[1])
-
-    return mutated
 
 
 def adapted_mutation_strength(params: MutationParams) -> float:
