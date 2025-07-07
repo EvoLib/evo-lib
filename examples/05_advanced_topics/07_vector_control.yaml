@@ -1,12 +1,17 @@
-parent_pool_size: 30
-offspring_pool_size: 60
-max_generations: 200
-max_indiv_age: 0
-num_elites: 2
-
-representation: vector
+representation:
+  type: vector
+  dim: 16  # NUM_STEPS * 2
+  bounds: [-1.0, 1.0]
+  init_bounds: [-0.5, 0.5]
+  initializer: "random_initializer"
 
 mutation:
   strategy: constant
+  strength: 0.2
   probability: 1.0
-  strength: 0.1
+
+parent_pool_size: 20
+offspring_pool_size: 60
+max_generations: 100
+max_indiv_age: 0
+num_elites: 1
