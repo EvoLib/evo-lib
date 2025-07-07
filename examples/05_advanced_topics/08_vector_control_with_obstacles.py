@@ -1,8 +1,8 @@
 """
 Example 05-08 – Vector Control with Obstacle Avoidance (Modern API)
 
-This variant adds circular obstacles to the vector control task.
-The agent is penalized for colliding with obstacles while trying to reach the goal.
+This variant adds circular obstacles to the vector control task. The agent is penalized
+for colliding with obstacles while trying to reach the goal.
 """
 
 import matplotlib.pyplot as plt

@@ -1,9 +1,8 @@
 """
 Example 05-07 – Vector-Based Control Task (No Neural Net)
 
-This example shows how a parameter vector directly controls an agent
-moving through 2D space. The goal is to reach a target point using a
-sequence of velocity vectors.
+This example shows how a parameter vector directly controls an agent moving through 2D
+space. The goal is to reach a target point using a sequence of velocity vectors.
 """
 
 import matplotlib.pyplot as plt
@@ -34,7 +33,7 @@ def simulate_trajectory(para: np.ndarray) -> np.ndarray:
 # Fitness function: distance to target
 def fitness_function(indiv: Indiv) -> None:
     final_pos = simulate_trajectory(indiv.para.vector)
-    indiv.fitness = np.linalg.norm(final_pos - TARGET)
+    indiv.fitness = float(np.linalg.norm(final_pos - TARGET))
 
 
 # Plot trajectory of best individual
@@ -46,10 +45,11 @@ def plot_trajectory(indiv: Indiv, generation: int) -> None:
         vy = np.clip(indiv.para.vector[t * 2 + 1], -MAX_SPEED, MAX_SPEED)
         pos += np.array([vx, vy])
         traj.append(pos.copy())
-    traj = np.array(traj)
+
+    traj_arr = np.array(traj)
 
     plt.figure(figsize=(5, 5))
-    plt.plot(traj[:, 0], traj[:, 1], "o-", label="Agent Path", color="blue")
+    plt.plot(traj_arr[:, 0], traj_arr[:, 1], "o-", label="Agent Path", color="blue")
     plt.plot(*START, "ks", label="Start")
     plt.plot(*TARGET, "r*", label="Target", markersize=10)
     plt.xlim(-1, 6)

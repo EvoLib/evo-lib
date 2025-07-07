@@ -51,7 +51,9 @@ def plot_generation(indiv: Indiv, generation: int) -> None:
     plt.figure(figsize=(6, 4))
     plt.plot(X_DENSE, Y_TRUE, label="Target", color="black")
     plt.plot(X_DENSE, y_pred, label="Best Approx", color="red")
-    plt.scatter(X_SUPPORT, indiv.para.vector, color="blue", s=10, label="Support Points")
+    plt.scatter(
+        X_SUPPORT, indiv.para.vector, color="blue", s=10, label="Support Points"
+    )
     plt.title(f"Generation {generation}")
     plt.ylim(-1.2, 1.2)
     plt.legend()

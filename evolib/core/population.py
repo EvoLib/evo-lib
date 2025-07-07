@@ -21,7 +21,6 @@ from evolib.interfaces.enums import (
 )
 from evolib.interfaces.types import (
     FitnessFunction,
-    TauUpdateFunction,
 )
 from evolib.utils.config_loader import load_config
 from evolib.utils.config_validator import validate_full_config

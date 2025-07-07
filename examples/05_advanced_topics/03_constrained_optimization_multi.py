@@ -16,9 +16,9 @@ FRAME_FOLDER = "03_frames_constrained_multi"
 CONFIG_FILE = "01_constrained_optimization.yaml"
 
 # Constraint definitions
-MAX_RADIUS = 1.5               # Circle constraint: x² + y² ≤ r²
-X_MIN, X_MAX = -2.0, 2.0       # Box: x ∈ [X_MIN, X_MAX]
-Y_MIN, Y_MAX = -1.0, 1.0       # y ∈ [Y_MIN, Y_MAX]
+MAX_RADIUS = 1.5  # Circle constraint: x² + y² ≤ r²
+X_MIN, X_MAX = -2.0, 2.0  # Box: x ∈ [X_MIN, X_MAX]
+Y_MIN, Y_MAX = -1.0, 1.0  # y ∈ [Y_MIN, Y_MAX]
 PENALTY_FACTOR = 100.0
 
 

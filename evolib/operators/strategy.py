@@ -1,10 +1,7 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Callable
-
-from evolib.core.population import Indiv, Pop
+from evolib.core.population import Pop
 from evolib.interfaces.enums import Strategy
-from evolib.interfaces.types import MutationFunction
 from evolib.operators.mutation import mutate_offspring
 from evolib.operators.replacement import replace_generational, replace_truncation
 from evolib.operators.reproduction import create_offspring_mu_lambda

@@ -1,9 +1,11 @@
 """
 Example 05-04 – Multi-Objective Optimization: Fit vs. Smoothness.
 
-This example demonstrates a scalarized multi-objective fitness function,
-balancing data fit (MSE) and smoothness (second derivative).
+This example demonstrates a scalarized multi-objective fitness function, balancing data
+fit (MSE) and smoothness (second derivative).
 """
+
+from typing import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -29,7 +31,7 @@ def compute_smoothness(y: np.ndarray) -> float:
 
 
 # Fitness Function (scalarized but logs both)
-def make_fitness_function(x_support: np.ndarray):
+def make_fitness_function(x_support: np.ndarray) -> Callable:
     def fitness_function(indiv: Indiv) -> None:
         y_support = indiv.para.vector
         y_pred = np.interp(X_EVAL, x_support, y_support)
@@ -50,7 +52,9 @@ def plot_generation(indiv: Indiv, generation: int, x_support: np.ndarray) -> Non
     plt.figure(figsize=(6, 4))
     plt.plot(X_EVAL, Y_TRUE, label="Target", color="black")
     plt.plot(X_EVAL, y_pred, label="Best Approximation", color="red")
-    plt.scatter(x_support, indiv.para.vector, color="blue", s=10, label="Support Points")
+    plt.scatter(
+        x_support, indiv.para.vector, color="blue", s=10, label="Support Points"
+    )
     plt.title(f"Generation {generation}")
     plt.ylim(-1.2, 1.2)
     plt.legend()
@@ -93,4 +97,3 @@ def run_experiment() -> None:
 
 if __name__ == "__main__":
     run_experiment()
-

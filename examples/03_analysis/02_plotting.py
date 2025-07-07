@@ -17,7 +17,6 @@ from evolib import (
     mse_loss,
     simple_quadratic,
 )
-
 from evolib.utils.plotting import plot_fitness
 
 

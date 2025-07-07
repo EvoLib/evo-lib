@@ -20,11 +20,7 @@ import numpy as np
 
 from evolib.core.population import Indiv, Pop
 from evolib.interfaces.enums import MutationStrategy
-from evolib.interfaces.structs import MutationParams
-from evolib.interfaces.types import (
-    MutationFunction,
-)
-from evolib.utils.math_utils import scaled_mutation_factor
+from evolib.interfaces.types import MutationParams
 
 
 def mutate_offspring(
@@ -135,6 +131,8 @@ def adapted_mutation_strength(params: MutationParams) -> float:
     Returns:
         float: The updated mutation strength.
     """
+    if params.tau is None:
+        raise ValueError("tau must not be None for adaptive mutation strength")
 
     adapted = params.strength * np.exp(params.tau * np.random.normal())
     return float(np.clip(adapted, params.min_strength, params.max_strength))
@@ -152,5 +150,8 @@ def adapted_mutation_probability(params: MutationParams) -> float:
         float: The updated mutation probability.
     """
 
-    adapted = params.probability * np.exp(paramstau * np.random.normal())
+    if params.tau is None:
+        raise ValueError("tau must not be None for adaptive mutation strength")
+
+    adapted = params.probability * np.exp(params.tau * np.random.normal())
     return float(np.clip(adapted, params.min_probability, params.max_probability))

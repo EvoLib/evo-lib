@@ -11,14 +11,7 @@ Requirements:
 - 'population.yaml' must be present in the current working directory
 """
 
-from evolib import (
-    Indiv,
-    Pop,
-    Strategy,
-    evolve_mu_lambda,
-    mse_loss,
-    simple_quadratic
-)
+from evolib import Indiv, Pop, Strategy, evolve_mu_lambda, mse_loss, simple_quadratic
 
 
 def my_fitness(indiv: Indiv) -> None:

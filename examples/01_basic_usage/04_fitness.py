@@ -17,6 +17,7 @@ from evolib import Indiv, Pop, mse_loss, simple_quadratic
 def my_fitness(indiv: Indiv) -> None:
     """
     Simple fitness function using the quadratic benchmark and MSE loss.
+
     Assigns fitness based on distance to 0.0 (global minimum).
     """
     expected = 0.0

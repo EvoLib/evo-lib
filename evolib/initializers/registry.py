@@ -1,16 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from evolib.core.population import Pop
-
-from collections.abc import Callable
-
-from evolib.representation.base import ParaBase
-
-# Typalias für Initializer-Funktionen
-ParaInitializer = Callable[[dict], Callable[["Pop"], ParaBase]]
+from evolib.interfaces.types import ParaInitializer
 
 # Zentrales Registry-Objekt
 initializer_registry: dict[str, ParaInitializer] = {}

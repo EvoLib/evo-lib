@@ -2,11 +2,10 @@
 Example 04-06 – Adaptive Individual Mutation vs. Static Mutation.
 
 This example compares the effectiveness of adaptive mutation at the individual level
-with a static mutation strength. Each individual has its own mutation strength and
-tau value that adapts over time.
+with a static mutation strength. Each individual has its own mutation strength and tau
+value that adapts over time.
 """
 
-import matplotlib.pyplot as plt
 import pandas as pd
 
 from evolib import (
@@ -15,8 +14,8 @@ from evolib import (
     Strategy,
     evolve_mu_lambda,
     mse_loss,
+    plot_fitness_comparison,
     rosenbrock,
-    plot_fitness_comparison
 )
 
 

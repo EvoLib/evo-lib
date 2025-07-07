@@ -15,7 +15,6 @@ Requirements:
 working directory
 """
 
-
 from evolib import (
     Indiv,
     Pop,

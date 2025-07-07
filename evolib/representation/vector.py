@@ -9,53 +9,84 @@ from evolib.representation.base import ParaBase
 class ParaVector(ParaBase):
     def __init__(self) -> None:
 
-        self.mutation_strategy = None
-        self.mutation_strength = None
-        self.mutation_probability = None
-        self.tau = 0.0
-        self.para_mutation_strengths = None
-        self.bounds = None
+        # Mutationstrategy
+        self.mutation_strategy: MutationStrategy | None = None
 
-        self.vector = np.zeros(1)
-        self.min_mutation_strength = None
-        self.max_mutation_strength = None
-        self.min_mutation_probability = None
-        self.max_mutation_probability = None
-        self.mutation_inc_factor = None
-        self.mutation_dec_factor = None
-        self.min_diversity_threshold = None
-        self.max_diversity_threshold = None
+        # Global Mutationparameter
+        self.mutation_strength: float | None = None
+        self.mutation_probability: float | None = None
+        self.tau: float = 0.0
 
-        self.crossover_strategy = None
-        self.crossover_probability = None
-        self.crossover_inc_factor = None
-        self.crossover_dec_factor = None
+        # Per-Parameter Mutationparameter
+        self.para_mutation_strengths: np.ndarray | None = None
+        self.randomize_mutation_strengths: bool | None = None
+
+        # Bounds of parameter (z. B. [-1, 1])
+        self.bounds: tuple[float, float] | None = None
+        self.init_bounds: tuple[float, float] | None = None
+
+        # Parametervektor
+        self.vector: np.ndarray = np.zeros(1)
+
+        # Bounds for mutation (min/max)
+        self.min_mutation_strength: float | None = None
+        self.max_mutation_strength: float | None = None
+        self.min_mutation_probability: float | None = None
+        self.max_mutation_probability: float | None = None
+
+        # Diversity based Adaptionfaktors
+        self.mutation_inc_factor: float | None = None
+        self.mutation_dec_factor: float | None = None
+        self.min_diversity_threshold: float | None = None
+        self.max_diversity_threshold: float | None = None
+
+        # Crossover
+        self.crossover_strategy: CrossoverStrategy | None = None
+        self.crossover_probability: float | None = None
+        self.min_crossover_probability: float | None = None
+        self.max_crossover_probability: float | None = None
+        self.crossover_inc_factor: float | None = None
+        self.crossover_dec_factor: float | None = None
 
     def mutate(self) -> None:
         """
         Applies Gaussian mutation to the parameter vector.
 
-        If self.para_mutation_strengths is defined, gene-specific strengths are used.
-        Otherwise, the global mutation strength from params.strength is applied.
+        If `para_mutation_strengths` is defined, per-parameter mutation is used.
+        Otherwise, global mutation strength and optional mutation probability
+        determine mutation behavior.
+
+        Ensures type safety and runtime correctness.
         """
-        if self.mutation_strength is None and self.randomize_mutation_strengths is None:
-            raise ValueError("mutation_strength must be defined for global mutation.")
 
         if self.para_mutation_strengths is not None:
-            # Adaptive per-parameter
-            self.vector += np.random.normal(
-                loc=0.0, scale=self.para_mutation_strengths, size=len(self.vector)
-            )
-        else:
+            # Adaptive per-parameter mutation
             noise = np.random.normal(
-                loc=0.0, scale=self.mutation_strength, size=len(self.vector)
+                loc=0.0,
+                scale=self.para_mutation_strengths,
+                size=len(self.vector),
             )
-            if self.mutation_probability is None:
-                mask = np.ones(len(self.vector))
-            else:
-                mask = np.random.rand(len(self.vector)) < self.mutation_probability
+            self.vector += noise
+
+        else:
+            # Global mutation path (scalar mutation_strength required)
+            if self.mutation_strength is None:
+                raise ValueError(
+                    "mutation_strength must be defined for global mutation."
+                )
+
+            noise = np.random.normal(
+                loc=0.0,
+                scale=self.mutation_strength,
+                size=len(self.vector),
+            )
+
+            prob = self.mutation_probability or 1.0  # garantiert float
+            mask = (np.random.rand(len(self.vector)) < prob).astype(np.float64)
             self.vector += noise * mask
 
+        # Clip to bounds
+        assert self.bounds is not None
         self.vector = np.clip(self.vector, *self.bounds)
 
     def update_tau(self) -> None:
@@ -191,6 +222,12 @@ class ParaVector(ParaBase):
             # Ensure tau is initialized
             self.update_tau()
 
+            if self.min_mutation_strength is None or self.max_mutation_strength is None:
+                raise ValueError(
+                    "min_mutation_strength and max_mutation_strength" "must be defined."
+                )
+            if self.bounds is None:
+                raise ValueError("bounds must be set")
             # Ensure mutation_strength is initialized
             if self.mutation_strength is None:
                 self.mutation_strength = np.random.uniform(
@@ -203,6 +240,8 @@ class ParaVector(ParaBase):
                 min_strength=self.min_mutation_strength,
                 max_strength=self.max_mutation_strength,
                 probability=1.0,  # unused here
+                min_probability=0.0,  # unused here
+                max_probability=0.0,  # unused here
                 bounds=self.bounds,
                 bias=None,
                 tau=self.tau,
@@ -213,6 +252,14 @@ class ParaVector(ParaBase):
         elif self.mutation_strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
             if self.tau == 0.0 or self.tau is None:
                 self.update_tau()
+
+            if self.min_mutation_strength is None or self.max_mutation_strength is None:
+                raise ValueError(
+                    "min_mutation_strength and max_mutation_strength" "must be defined."
+                )
+
+            if self.bounds is None:
+                raise ValueError("bounds must be set")
 
             if self.para_mutation_strengths is None:
                 self.para_mutation_strengths = np.random.uniform(
@@ -226,13 +273,17 @@ class ParaVector(ParaBase):
                 min_strength=self.min_mutation_strength,
                 max_strength=self.max_mutation_strength,
                 probability=1.0,  # unused
+                min_probability=0.0,  # unused here
+                max_probability=0.0,  # unused here
                 bounds=self.bounds,
                 tau=self.tau,
             )
 
             self.adapt_para_mutation_strengths(params)
 
-    def _exponential_mutation_strength(self, generation: int, max_generations) -> float:
+    def _exponential_mutation_strength(
+        self, generation: int, max_generations: int
+    ) -> float:
         """
         Calculates exponentially decaying mutation strength over generations.
 
@@ -242,6 +293,10 @@ class ParaVector(ParaBase):
         Returns:
             float: The adjusted mutation strength.
         """
+        if self.min_mutation_strength is None or self.max_mutation_strength is None:
+            raise ValueError(
+                "min_mutation_strength and max_mutation_strength" "must be defined."
+            )
         k = (
             np.log(self.max_mutation_strength / self.min_mutation_strength)
             / max_generations
@@ -249,7 +304,7 @@ class ParaVector(ParaBase):
         return self.max_mutation_strength * np.exp(-k * generation)
 
     def _exponential_mutation_probability(
-        self, generation: int, max_generations
+        self, generation: int, max_generations: int
     ) -> float:
         """
         Calculates exponentially decaying mutation probablility over generations.
@@ -260,6 +315,14 @@ class ParaVector(ParaBase):
         Returns:
             float: The adjusted mutation rate.
         """
+        if (
+            self.min_mutation_probability is None
+            or self.max_mutation_probability is None
+        ):
+            raise ValueError(
+                "min_mutation_probability and max_mutation_probability"
+                "must be defined."
+            )
         k = (
             np.log(self.max_mutation_probability / self.min_mutation_probability)
             / max_generations
@@ -278,6 +341,21 @@ class ParaVector(ParaBase):
         Returns:
             float: Updated mutation strength.
         """
+        if self.min_diversity_threshold is None or self.max_diversity_threshold is None:
+            raise ValueError(
+                "min_diversity_threshold and min_diversity_threshold" "must be defined."
+            )
+        if self.min_mutation_strength is None or self.max_mutation_strength is None:
+            raise ValueError(
+                "min_mutation_strength and max_mutation_strength" "must be defined."
+            )
+        if self.mutation_strength is None:
+            raise ValueError("mutation_strength must be defined for global mutation.")
+        if self.mutation_inc_factor is None or self.mutation_dec_factor is None:
+            raise ValueError(
+                "mutation_inc_factor and mutation_dec_factor" "must be defined."
+            )
+
         if diversity_ema < self.min_diversity_threshold:
             return min(
                 self.max_mutation_strength,
@@ -303,6 +381,27 @@ class ParaVector(ParaBase):
         Returns:
             float: Updated mutation probability.
         """
+        if self.min_diversity_threshold is None or self.max_diversity_threshold is None:
+            raise ValueError(
+                "min_diversity_threshold and min_diversity_threshold" "must be defined."
+            )
+        if (
+            self.min_mutation_probability is None
+            or self.max_mutation_probability is None
+        ):
+            raise ValueError(
+                "min_mutation_probability and max_mutation_probability"
+                "must be defined."
+            )
+        if self.mutation_probability is None:
+            raise ValueError(
+                "mutation_probability must be defined for global mutation."
+            )
+        if self.mutation_inc_factor is None or self.mutation_dec_factor is None:
+            raise ValueError(
+                "mutation_inc_factor and mutation_dec_factor" "must be defined."
+            )
+
         if diversity_ema < self.min_diversity_threshold:
             return min(
                 self.max_mutation_probability,

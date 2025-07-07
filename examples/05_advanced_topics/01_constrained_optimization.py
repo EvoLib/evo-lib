@@ -12,7 +12,7 @@ Constraint violation is penalized quadratically.
 import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, MutationParams, Pop, evolve_mu_lambda
+from evolib import Indiv, Pop, evolve_mu_lambda
 
 SAVE_FRAMES = True
 FRAME_FOLDER = "01_frames_constrained"

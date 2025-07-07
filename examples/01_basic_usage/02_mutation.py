@@ -7,7 +7,7 @@ This example demonstrates:
 - How parameter values change as a result of mutation.
 """
 
-from evolib import Indiv, Pop
+from evolib import Pop
 
 # Load example configuration for the population
 # Uses the mutation strategy defined in population.yaml (e.g. constant or exponential)

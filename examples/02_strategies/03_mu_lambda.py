@@ -4,16 +4,12 @@ Example 2.2 - Mu Lambd
 This example demonstrates the basic Mu Plus Lambda and Mu Comma Lambda evolution:
 """
 
-import random
-
 from evolib import (
     Indiv,
-    MutationParams,
     Pop,
     Strategy,
     evolve_mu_lambda,
     mse_loss,
-    mutate_gauss,
     simple_quadratic,
 )
 
@@ -38,13 +34,13 @@ def print_population(pop: Pop, title: str) -> None:
 # Load configuration and initialize population
 pop = Pop(config_path="population.yaml")
 
-# Initialize population                                                                  
-pop.initialize_population() 
+# Initialize population
+pop.initialize_population()
 
 # Set fitnessfuction
 pop.set_functions(fitness_function=my_fitness)
 
-# Evaluate fitness                                                                       
+# Evaluate fitness
 pop.evaluate_fitness()
 
 print_population(pop, "Initial Parents")

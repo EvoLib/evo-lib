@@ -1,9 +1,16 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Any, Protocol
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from evolib.core.population import Pop  # noqa: F401
+
+from collections.abc import Callable
+from typing import Protocol
 
 from evolib.core.individual import Indiv
 from evolib.interfaces.structs import MutationParams
+from evolib.representation.base import ParaBase
 
 
 class FitnessFunction(Protocol):
@@ -18,8 +25,11 @@ class TauUpdateFunction(Protocol):
     def __call__(self, indiv: Indiv) -> None: ...
 
 
+ParaInitFunction = Callable[["Pop"], ParaBase]
+
+
 class ParaInitializer(Protocol):
-    def __call__(self) -> Any: ...
+    def __call__(self, cfg: dict) -> ParaInitFunction: ...
 
 
 class CrossoverFunction(Protocol):

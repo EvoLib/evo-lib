@@ -77,5 +77,3 @@ def run_experiment() -> None:
 
 if __name__ == "__main__":
     run_experiment()
-
-

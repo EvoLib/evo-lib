@@ -1,14 +1,14 @@
 """
 Example 05-05 – Fitness Landscape Exploration with Path.
 
-This variant plots the trajectory of the best individual over a 2D fitness surface.
-It visualizes how evolution progresses over generations.
+This variant plots the trajectory of the best individual over a 2D fitness surface. It
+visualizes how evolution progresses over generations.
 """
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, Pop, evolve_mu_lambda, ackley_2d
+from evolib import Indiv, Pop, ackley_2d, evolve_mu_lambda
 
 CONFIG_FILE = "05_fitness_landscape_exploration.yaml"
 SAVE_FRAMES = True

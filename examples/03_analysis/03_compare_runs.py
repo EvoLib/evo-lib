@@ -29,8 +29,6 @@ def run_experiment(mutation_strength: float) -> pd.DataFrame:
     pop.initialize_population()
     pop.set_functions(fitness_function=my_fitness)
 
-    pop.mutation_strength = mutation_strength
-
     for _ in range(pop.max_generations):
         evolve_mu_lambda(pop, strategy=Strategy.MU_PLUS_LAMBDA)
 

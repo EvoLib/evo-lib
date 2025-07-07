@@ -93,7 +93,7 @@ def run(pop: Pop, *, use_crossover: bool, selection_method: str) -> pd.DataFrame
             my_crossover(offspring)
 
         # MUTATION
-        mutate_offspring(pop, offspring, mutation_function, bounds=(-2, 2))
+        mutate_offspring(pop, offspring)
 
         # FITNESS EVALUATION
         for indiv in offspring:

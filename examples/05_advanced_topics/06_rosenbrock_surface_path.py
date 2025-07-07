@@ -1,8 +1,8 @@
 """
 Example 05-06 – Rosenbrock Surface with Optimization Path.
 
-Visualizes the 2D Rosenbrock function as a 3D surface and tracks the path
-of the best solution over time.
+Visualizes the 2D Rosenbrock function as a 3D surface and tracks the path of the best
+solution over time.
 """
 
 import matplotlib.pyplot as plt
@@ -42,7 +42,9 @@ def plot_surface_with_path(generation: int, best: Indiv) -> None:
 
     # Global optimum
     opt_x, opt_y = 1.0, 1.0
-    ax.scatter(opt_x, opt_y, rosenbrock_2d(opt_x, opt_y), color="green", s=60, label="Optimum")
+    ax.scatter(
+        opt_x, opt_y, rosenbrock_2d(opt_x, opt_y), color="green", s=60, label="Optimum"
+    )
 
     # Current best
     x, y = best.para.vector

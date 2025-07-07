@@ -6,12 +6,14 @@ strategies. This approach avoids polynomial instability and works with any inter
 method.
 """
 
-import numpy as np
+from typing import Callable
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 from evolib import (
-    Pop,
     Indiv,
+    Pop,
     evolve_mu_lambda,
 )
 
@@ -25,21 +27,26 @@ CONFIG_FILE = "02_sine_point_approximation.yaml"
 
 
 # Fitness
-def fitness_function(indiv: Indiv) -> None:
-    y_support = indiv.para.vector
-    y_pred = np.interp(X_DENSE, X_SUPPORT, y_support)
-    weights = 1.0 + 0.4 * np.abs(np.cos(X_DENSE))
-    indiv.fitness = np.average((Y_TRUE - y_pred) ** 2, weights=weights)
+def make_fitness_function(x_support: np.ndarray) -> Callable:
+    def fitness_function(indiv: Indiv) -> None:
+        y_support = indiv.para.vector
+        y_pred = np.interp(X_DENSE, x_support, y_support)
+        weights = 1.0 + 0.4 * np.abs(np.cos(X_DENSE))
+        indiv.fitness = np.average((Y_TRUE - y_pred) ** 2, weights=weights)
+
+    return fitness_function
 
 
 # Visualisierung
-def plot_generation(indiv: Indiv, generation: int) -> None:
-    y_pred = np.interp(X_DENSE, X_SUPPORT, indiv.para.vector)
+def plot_generation(indiv: Indiv, generation: int, x_support: np.ndarray) -> None:
+    y_pred = np.interp(X_DENSE, x_support, indiv.para.vector)
 
     plt.figure(figsize=(6, 4))
     plt.plot(X_DENSE, Y_TRUE, label="Target: sin(x)", color="black")
     plt.plot(X_DENSE, y_pred, label="Best Approx", color="red")
-    plt.scatter(X_SUPPORT, indiv.para.vector, color="blue", s=10, label="support points")
+    plt.scatter(
+        x_support, indiv.para.vector, color="blue", s=10, label="support points"
+    )
     plt.title(f"Generation {generation}")
     plt.ylim(-1.2, 1.2)
     plt.legend()
@@ -52,19 +59,18 @@ def plot_generation(indiv: Indiv, generation: int) -> None:
 
 # Main
 def run_experiment() -> None:
-    global X_SUPPORT
-
     pop = Pop(CONFIG_FILE)
     pop.initialize_population()
-    pop.set_functions(fitness_function=fitness_function)
 
     num_support_points = pop.representation_cfg["dim"]
-    X_SUPPORT = np.linspace(0, 2 * np.pi, num_support_points)
+    x_support = np.linspace(0, 2 * np.pi, num_support_points)
+
+    pop.set_functions(fitness_function=make_fitness_function(x_support))
 
     for gen in range(pop.max_generations):
         evolve_mu_lambda(pop)
         pop.sort_by_fitness()
-        plot_generation(pop.indivs[0], gen)
+        plot_generation(pop.indivs[0], gen, x_support)
         pop.print_status(verbosity=1)
 
 
