@@ -1,5 +1,5 @@
 """
-Example 05-03 (Multi-Constraint) - Constrained Optimization with Multiple Constraints.
+Example 05-03 - Constrained Optimization with Multiple Constraints.
 
 This example demonstrates how to apply multiple constraints in evolutionary
 optimization. It uses both a circular and a rectangular constraint region and applies
@@ -9,22 +9,22 @@ penalties when any constraint is violated.
 import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, MutationParams, Pop, evolve_mu_lambda
+from evolib import Indiv, Pop, evolve_mu_lambda
 
 SAVE_FRAMES = True
 FRAME_FOLDER = "03_frames_constrained_multi"
 CONFIG_FILE = "01_constrained_optimization.yaml"
 
-# Constraints
-MAX_RADIUS = 1.5  # Circle constraint: x² + y² ≤ r²
-X_MIN, X_MAX = -2.0, 2.0  # Rectangular box: x ∈ [X_MIN, X_MAX]
-Y_MIN, Y_MAX = -1.0, 1.0  # y ∈ [Y_MIN, Y_MAX]
+# Constraint definitions
+MAX_RADIUS = 1.5               # Circle constraint: x² + y² ≤ r²
+X_MIN, X_MAX = -2.0, 2.0       # Box: x ∈ [X_MIN, X_MAX]
+Y_MIN, Y_MAX = -1.0, 1.0       # y ∈ [Y_MIN, Y_MAX]
 PENALTY_FACTOR = 100.0
 
 
 # Fitness Function
 def fitness_function(indiv: Indiv) -> None:
-    x, y = indiv.para
+    x, y = indiv.para.vector
     value = (x - 1) ** 2 + (y + 2) ** 2
 
     penalties = []
@@ -34,7 +34,7 @@ def fitness_function(indiv: Indiv) -> None:
     if circle_violation > 0:
         penalties.append(circle_violation)
 
-    # Rectangle (box) constraints
+    # Box constraints
     if x < X_MIN:
         penalties.append(X_MIN - x)
     if x > X_MAX:
@@ -48,31 +48,15 @@ def fitness_function(indiv: Indiv) -> None:
     indiv.fitness = value + total_penalty
 
 
-# Mutation
-def mutation(indiv: Indiv, params: MutationParams) -> None:
-    for i in range(len(indiv.para)):
-        if np.random.rand() < params.rate:
-            indiv.para[i] += np.random.normal(0, params.strength)
-
-
-# Initialization
-def initialize_population(pop: Pop) -> None:
-    for _ in range(pop.parent_pool_size):
-        new_indiv = pop.create_indiv()
-        new_indiv.para = np.random.uniform(-3, 3, size=2)
-        pop.add_indiv(new_indiv)
-
-    for indiv in pop.indivs:
-        fitness_function(indiv)
-
-
 # Plotting
 def plot_generation(indiv: Indiv, generation: int) -> None:
     fig, ax = plt.subplots(figsize=(5, 5))
 
-    # Constraint areas
+    # Circle constraint
     circle = plt.Circle((0, 0), MAX_RADIUS, color="black", fill=False, linestyle="--")
     ax.add_patch(circle)
+
+    # Box constraint
     rect = plt.Rectangle(
         (X_MIN, Y_MIN),
         X_MAX - X_MIN,
@@ -83,10 +67,11 @@ def plot_generation(indiv: Indiv, generation: int) -> None:
     )
     ax.add_patch(rect)
 
-    # Points
-    x, y = indiv.para
+    # Best solution
+    x, y = indiv.para.vector
     ax.plot(x, y, "ro", label="Best Solution")
 
+    # Ideal constrained solution
     target = np.array([1.0, -2.0])
     direction = target / np.linalg.norm(target)
     best_on_circle = direction * MAX_RADIUS
@@ -94,9 +79,9 @@ def plot_generation(indiv: Indiv, generation: int) -> None:
 
     ax.set_xlim(-3, 3)
     ax.set_ylim(-3, 3)
+    ax.set_title(f"Generation {generation}")
     ax.set_aspect("equal")
     ax.grid(True)
-    ax.set_title(f"Generation {generation}")
     ax.legend()
 
     if SAVE_FRAMES:
@@ -107,13 +92,13 @@ def plot_generation(indiv: Indiv, generation: int) -> None:
 # Main
 def run_experiment() -> None:
     pop = Pop(CONFIG_FILE)
-    pop.set_functions(fitness_function, mutation)
-    initialize_population(pop)
+    pop.initialize_population()
+    pop.set_functions(fitness_function=fitness_function)
 
     for gen in range(pop.max_generations):
-        evolve_mu_lambda(pop, fitness_function, mutation)
+        evolve_mu_lambda(pop)
         pop.sort_by_fitness()
-        plot_generation(pop.indivs[0], gen)
+        plot_generation(pop.best(), gen)
         pop.print_status(verbosity=1)
 
 
