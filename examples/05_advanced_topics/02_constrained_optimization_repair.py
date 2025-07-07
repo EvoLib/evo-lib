@@ -1,72 +1,51 @@
 """
-Example 05-01 (Repair) - Constrained Optimization with Projection.
+Example 05-02 - Constrained Optimization with Repair Strategy.
 
-This version uses a repair strategy instead of penalty functions. After mutation, any
-individual that violates the circular constraint is projected back onto the boundary of
-the valid region (a circle of radius r).
+This variant uses a geometric repair mechanism instead of penalty terms.
+After mutation, any solution outside the constraint circle is projected
+back onto the boundary.
 """
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, MutationParams, Pop, evolve_mu_lambda
+from evolib import Indiv, Pop, evolve_mu_lambda
 
 SAVE_FRAMES = True
 FRAME_FOLDER = "02_frames_constrained_repair"
 CONFIG_FILE = "01_constrained_optimization.yaml"
 
-MAX_RADIUS = 1.5  # constraint: x² + y² ≤ r²
+# Constraint: x² + y² ≤ r²
+MAX_RADIUS = 1.5
 
 
-# Repair Mechanism
-def repair_to_circle(para: np.ndarray, radius: float = MAX_RADIUS) -> np.ndarray:
-    norm = np.linalg.norm(para)
+# Repair Mechanism: Project back onto constraint circle if needed
+def repair_to_circle(vec: np.ndarray, radius: float = MAX_RADIUS) -> np.ndarray:
+    norm = np.linalg.norm(vec)
     if norm <= radius:
-        return para
-    return para * (radius / norm)
+        return vec
+    return vec * (radius / norm)
 
 
-# Fitness Function (no penalty needed)
+# Fitness Function (no penalty, assumes repaired vector)
 def fitness_function(indiv: Indiv) -> None:
-    x, y = indiv.para
+    indiv.para.vector = repair_to_circle(indiv.para.vector)  # apply repair
+    x, y = indiv.para.vector
     indiv.fitness = (x - 1) ** 2 + (y + 2) ** 2
-
-
-# Mutation with Repair
-def mutation(indiv: Indiv, params: MutationParams) -> None:
-    for i in range(len(indiv.para)):
-        if np.random.rand() < params.rate:
-            indiv.para[i] += np.random.normal(0, params.strength)
-
-    # Apply repair after mutation
-    indiv.para = repair_to_circle(indiv.para)
-
-
-# Initialization
-def initialize_population(pop: Pop) -> None:
-    for _ in range(pop.parent_pool_size):
-        new_indiv = pop.create_indiv()
-
-        # start potentially outside, repair before fitness
-        raw = np.random.uniform(-3, 3, size=2)
-        new_indiv.para = repair_to_circle(raw)
-        pop.add_indiv(new_indiv)
-
-    for indiv in pop.indivs:
-        fitness_function(indiv)
 
 
 # Plotting
 def plot_generation(indiv: Indiv, generation: int) -> None:
     fig, ax = plt.subplots(figsize=(5, 5))
 
+    # Constraint boundary
     circle = plt.Circle((0, 0), MAX_RADIUS, color="black", fill=False, linestyle="--")
     ax.add_patch(circle)
 
-    x, y = indiv.para
+    x, y = indiv.para.vector
     ax.plot(x, y, "ro", label="Best Solution")
 
-    # Optional: plot constrained theoretical optimum
+    # Theoretical optimum on boundary (direction to target)
     target = np.array([1.0, -2.0])
     best_on_circle = target / np.linalg.norm(target) * MAX_RADIUS
     ax.plot(*best_on_circle, "go", label="Constrained Optimum")
@@ -86,11 +65,11 @@ def plot_generation(indiv: Indiv, generation: int) -> None:
 # Main
 def run_experiment() -> None:
     pop = Pop(CONFIG_FILE)
-    pop.set_functions(fitness_function, mutation)
-    initialize_population(pop)
+    pop.initialize_population()
+    pop.set_functions(fitness_function=fitness_function)
 
     for gen in range(pop.max_generations):
-        evolve_mu_lambda(pop, fitness_function, mutation)
+        evolve_mu_lambda(pop)
         pop.sort_by_fitness()
         plot_generation(pop.indivs[0], gen)
         pop.print_status(verbosity=1)
@@ -98,3 +77,5 @@ def run_experiment() -> None:
 
 if __name__ == "__main__":
     run_experiment()
+
+
