@@ -14,7 +14,6 @@ import numpy as np
 
 from evolib import Indiv, MutationParams, Pop, evolve_mu_lambda
 
-# --- Setup --- #
 SAVE_FRAMES = True
 FRAME_FOLDER = "01_frames_constrained"
 CONFIG_FILE = "01_constrained_optimization.yaml"
@@ -24,9 +23,9 @@ MAX_RADIUS = 1.5
 PENALTY_FACTOR = 100.0
 
 
-# --- Fitness Function --- #
+# Fitness Function
 def fitness_function(indiv: Indiv) -> None:
-    x, y = indiv.para
+    x, y = indiv.para.vector
     value = (x - 1) ** 2 + (y + 2) ** 2  # e.g., distance to target point (1, -2)
     constraint = x**2 + y**2
 
@@ -38,25 +37,7 @@ def fitness_function(indiv: Indiv) -> None:
     indiv.fitness = value + penalty
 
 
-# --- Mutation --- #
-def mutation(indiv: Indiv, params: MutationParams) -> None:
-    for i in range(len(indiv.para)):
-        if np.random.rand() < params.rate:
-            indiv.para[i] += np.random.normal(0, params.strength)
-
-
-# --- Initialization --- #
-def initialize_population(pop: Pop) -> None:
-    for _ in range(pop.parent_pool_size):
-        new_indiv = pop.create_indiv()
-        new_indiv.para = np.random.uniform(-3.0, 3.0, size=2)
-        pop.add_indiv(new_indiv)
-
-    for indiv in pop.indivs:
-        fitness_function(indiv)
-
-
-# --- Plotting --- #
+# Plotting
 def plot_generation(indiv: Indiv, generation: int) -> None:
     fig, ax = plt.subplots(figsize=(5, 5))
 
@@ -65,7 +46,7 @@ def plot_generation(indiv: Indiv, generation: int) -> None:
     ax.add_patch(circle)
 
     # Aktuelles bestes Individuum
-    x, y = indiv.para
+    x, y = indiv.para.vector
     ax.plot(x, y, "ro", label="Best Solution")
 
     # Theorie: bestmöglicher Punkt auf dem Kreis in Richtung Ziel (1, -2)
@@ -88,14 +69,14 @@ def plot_generation(indiv: Indiv, generation: int) -> None:
     plt.close()
 
 
-# --- Main --- #
+# Main
 def run_experiment() -> None:
     pop = Pop(CONFIG_FILE)
-    pop.set_functions(fitness_function, mutation)
-    initialize_population(pop)
+    pop.initialize_population()
+    pop.set_functions(fitness_function=fitness_function)
 
     for gen in range(pop.max_generations):
-        evolve_mu_lambda(pop, fitness_function, mutation)
+        evolve_mu_lambda(pop)
         pop.sort_by_fitness()
         plot_generation(pop.indivs[0], gen)
         pop.print_status(verbosity=1)
