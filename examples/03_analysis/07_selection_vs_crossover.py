@@ -1,17 +1,10 @@
 """
-07_crossover_vs_selection.py.
+Example 05-07 – Selection vs. Crossover.
 
-Compares the impact of selection (Tournament vs. Roulette) and crossover
+Compares selection method (Tournament vs. Roulette) and crossover (None vs. BLX-alpha)
 in a (μ + λ) Evolution Strategy using constant mutation strength.
 
-Fitness function: deviation from [1.0, 1.0, 1.0, 1.0] using the Rosenbrock function
-and MSE loss.
-
-Four configurations are compared:
-1. No crossover + Tournament selection
-2. No crossover + Roulette selection
-3. BLX-Alpha crossover + Tournament selection
-4. BLX-Alpha crossover + Roulette selection
+Fitness: deviation from target vector using Rosenbrock + MSE loss.
 """
 
 from typing import List
@@ -21,12 +14,10 @@ import pandas as pd
 
 from evolib import (
     Indiv,
-    MutationParams,
     Pop,
     create_offspring_mu_lambda,
     crossover_blend_alpha,
     mse_loss,
-    mutate_offspring,
     plot_fitness_comparison,
     replace_mu_lambda,
     rosenbrock,
@@ -34,48 +25,35 @@ from evolib import (
     selection_tournament,
 )
 
-BOUNDS = (-2.0, 2.0)
 DIM = 100
+CONFIG = "07_selection_vs_crossover_static.yaml"
 
 
+# Fitness function
 def my_fitness(indiv: Indiv) -> None:
-    # Assigns fitness based on Rosenbrock deviation from [1.0, 1.0, 1.0, 1.0]
-    expected = [1.0] * DIM
-    predicted = rosenbrock(indiv.para)
-    indiv.fitness = mse_loss(expected, predicted)
+    target = np.ones(DIM)
+    predicted = rosenbrock(indiv.para.vector)
+    indiv.fitness = mse_loss(target, predicted)
 
 
-def mutation_function(indiv: Indiv, params: MutationParams) -> None:
-    # Simple Gaussian mutation.
-    noise = np.random.normal(0, params.strength, size=len(indiv.para))
-    indiv.para += noise
-    indiv.para = np.clip(indiv.para, params.bounds[0], params.bounds[1])
-
-
+# Optional crossover (BLX-alpha)
 def my_crossover(offspring: List[Indiv]) -> None:
-
     for i in range(0, len(offspring) - 1, 2):
         p1, p2 = offspring[i], offspring[i + 1]
-        child1_para, child2_para = crossover_blend_alpha(
-            np.array(p1.para), np.array(p2.para)
-        )
-        offspring[i].para = child1_para
-        offspring[i + 1].para = child2_para
+        c1_vec, c2_vec = crossover_blend_alpha(p1.para.vector, p2.para.vector)
+        p1.para.vector = c1_vec
+        p2.para.vector = c2_vec
 
 
-def initialize_indivs(pop: Pop, dim: int = DIM) -> None:
-    # Initializes population with uniformly random individuals.
-    bounds = (-2.0, 2.0)
-    for _ in range(pop.parent_pool_size):
-        indiv = pop.create_indiv()
-        indiv.para = np.random.uniform(bounds[0], bounds[1], size=dim)
+# Initialization using Pop API
+def initialize(pop: Pop) -> None:
+    pop.initialize_population()
+    for indiv in pop.indivs:
         my_fitness(indiv)
-        pop.add_indiv(indiv)
 
 
+# Evolution run
 def run(pop: Pop, *, use_crossover: bool, selection_method: str) -> pd.DataFrame:
-    # Runs the evolution process for a single configuration.
-
     for _ in range(pop.max_generations):
         # SELECTION
         if selection_method == "tournament":
@@ -88,25 +66,26 @@ def run(pop: Pop, *, use_crossover: bool, selection_method: str) -> pd.DataFrame
         # REPRODUCTION
         offspring = create_offspring_mu_lambda(parents, pop.offspring_pool_size)
 
-        # OPTIONAL CROSSOVER
+        # CROSSOVER
         if use_crossover:
             my_crossover(offspring)
 
-        # MUTATION
-        mutate_offspring(pop, offspring)
+        # MUTATION (via ParaVector)
+        for indiv in offspring:
+            indiv.mutate()
 
-        # FITNESS EVALUATION
+        # FITNESS
         for indiv in offspring:
             my_fitness(indiv)
 
-        # REPLACEMENT (μ + λ)
+        # REPLACEMENT
         replace_mu_lambda(pop, offspring)
-
         pop.update_statistics()
 
     return pop.history_logger.to_dataframe()
 
 
+# Labels & runs
 labels = [
     "no_crossover_tournament",
     "no_crossover_roulette",
@@ -119,13 +98,12 @@ for label in labels:
     selection_type = "tournament" if "tournament" in label else "roulette"
     use_crossover = "crossover" in label
 
-    pop = Pop("07_selection_vs_crossover_static.yaml")
-
-    initialize_indivs(pop)
-
+    pop = Pop(CONFIG)
+    initialize(pop)
     df = run(pop, use_crossover=use_crossover, selection_method=selection_type)
     runs[label] = df
 
+# Final plot
 plot_fitness_comparison(
     histories=list(runs.values()),
     labels=list(runs.keys()),

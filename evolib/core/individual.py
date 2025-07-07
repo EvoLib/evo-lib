@@ -15,12 +15,6 @@ Typical use cases include:
 - Adaptive mutation schemes on a per-individual basis.
 - Integration into population-level operations (selection, crossover, etc.).
 
-Attributes:
-    para (any): Parameter vector.
-    fitness (float | None): Fitness value assigned after evaluation.
-    mutation_probability (float | None): Optional per-individual mutation rate.
-    mutation_strength (float | None): Optional per-individual mutation strength.
-
 Classes:
     Indiv: Core data structure for evolutionary optimization.
 """
