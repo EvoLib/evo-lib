@@ -11,8 +11,7 @@ This example demonstrates the basic steps of evolutionary algorithms, including:
 - Performing selection to retain the best individuals
 
 Requirements:
-- 'population.yaml' and 'individual.yaml' must be present in the current
-working directory
+    'population.yaml' must be present in the current working directory
 """
 
 from evolib import (

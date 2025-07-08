@@ -1,15 +1,18 @@
 # SPDX-License-Identifier: MIT
 
 import random
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import numpy as np
 
-from evolib.core.population import Indiv, Pop
+if TYPE_CHECKING:
+    from evolib.core.population import Pop
+
+from evolib.core.population import Indiv
 from evolib.interfaces.enums import Origin
 
 
-def replace_truncation(pop: Pop, offspring: List[Indiv]) -> None:
+def replace_truncation(pop: "Pop", offspring: List[Indiv]) -> None:
     """
     Replaces the current population with the fittest individuals from the offspring
     using truncation selection.
@@ -31,7 +34,7 @@ def replace_truncation(pop: Pop, offspring: List[Indiv]) -> None:
     pop.indivs = sorted_offspring[: pop.parent_pool_size]
 
 
-def replace_mu_lambda(pop: Pop, offspring: List[Indiv]) -> None:
+def replace_mu_lambda(pop: "Pop", offspring: List[Indiv]) -> None:
     """
     Replaces the population with new offspring using the mu+lambda strategy, followed by
     resetting the parent index and origin of the individuals.
@@ -48,7 +51,7 @@ def replace_mu_lambda(pop: Pop, offspring: List[Indiv]) -> None:
         indiv.origin = Origin.PARENT
 
 
-def replace_generational(pop: Pop, offspring: List[Indiv], max_age: int = 0) -> None:
+def replace_generational(pop: "Pop", offspring: List[Indiv], max_age: int = 0) -> None:
     """
     Replace the population with new offspring, optionally preserving elite individuals.
     Can mimic steady-state if num_elite is high.
@@ -102,7 +105,7 @@ def replace_generational(pop: Pop, offspring: List[Indiv], max_age: int = 0) -> 
 
 
 def replace_steady_state(
-    pop: Pop, offspring: List[Indiv], num_replace: int = 0
+    pop: "Pop", offspring: List[Indiv], num_replace: int = 0
 ) -> None:
     """
     Replace the worst individuals in the population with new offspring using steady-
@@ -148,7 +151,7 @@ def replace_steady_state(
     pop.indivs[-num_replace:] = sorted_offspring[:num_replace]
 
 
-def replace_random(pop: Pop, offspring: List[Indiv]) -> None:
+def replace_random(pop: "Pop", offspring: List[Indiv]) -> None:
     """
     Replace random individuals in the population with new offspring. Optionally
     preserving elite individuals.
@@ -195,7 +198,7 @@ def replace_random(pop: Pop, offspring: List[Indiv]) -> None:
 
 
 def replace_weighted_stochastic(
-    pop: Pop, offspring: List[Indiv], temperature: float = 1.0
+    pop: "Pop", offspring: List[Indiv], temperature: float = 1.0
 ) -> None:
     """
     Replaces individuals in the population with offspring, using a probability weighted

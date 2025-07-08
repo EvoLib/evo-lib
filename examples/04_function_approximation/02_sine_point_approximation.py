@@ -11,11 +11,7 @@ from typing import Callable
 import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import (
-    Indiv,
-    Pop,
-    evolve_mu_plus_lambda,
-)
+from evolib import Indiv, Pop
 
 # Parameters
 X_DENSE = np.linspace(0, 2 * np.pi, 400)
@@ -67,9 +63,8 @@ def run_experiment() -> None:
     pop.set_functions(fitness_function=make_fitness_function(x_support))
 
     for gen in range(pop.max_generations):
-        evolve_mu_plus_lambda(pop)
-        pop.sort_by_fitness()
-        plot_generation(pop.indivs[0], gen, x_support)
+        pop.run_one_generation(sort=True)
+        plot_generation(pop.best(), gen, x_support)
         pop.print_status(verbosity=1)
 
 

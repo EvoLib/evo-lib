@@ -4,6 +4,9 @@ max_generations: 1000
 num_elites: 10
 max_indiv_age: 0
 
+evolution:
+  strategy: "mu_comma_lambda"
+
 representation: 
   type: "vector"
   initializer: vector_adaptive

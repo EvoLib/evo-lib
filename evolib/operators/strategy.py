@@ -21,14 +21,16 @@ Functions:
 All strategies are compatible with `strategy_registry` and `pop.run_one_generation()`.
 """
 
+from typing import TYPE_CHECKING
 
-from evolib.core.population import Pop
+if TYPE_CHECKING:
+    from evolib.core.population import Pop
 from evolib.operators.mutation import mutate_offspring
 from evolib.operators.replacement import replace_generational, replace_truncation
 from evolib.operators.reproduction import create_offspring_mu_lambda
 
 
-def evolve_mu_plus_lambda(pop: Pop) -> None:
+def evolve_mu_plus_lambda(pop: "Pop") -> None:
     """Elites and selected parents generate offspring, then mu best individuals are
     selected from parents + offspring."""
 
@@ -60,7 +62,7 @@ def evolve_mu_plus_lambda(pop: Pop) -> None:
     pop.update_statistics()
 
 
-def evolve_mu_comma_lambda(pop: Pop) -> None:
+def evolve_mu_comma_lambda(pop: "Pop") -> None:
     """Parents generate offspring, but only offspring compete for the next generation
     (no elitism)."""
 

@@ -1,3 +1,12 @@
+parent_pool_size: 20
+offspring_pool_size: 60
+max_generations: 100
+max_indiv_age: 0
+num_elites: 1
+
+evolution:
+  strategy: "mu_plus_lambda"
+
 representation:
   type: vector
   dim: 100
@@ -8,9 +17,3 @@ mutation:
   strategy: constant
   strength: 0.3
   probability: 1.0
-
-parent_pool_size: 20
-offspring_pool_size: 60
-max_generations: 100
-max_indiv_age: 0
-num_elites: 1

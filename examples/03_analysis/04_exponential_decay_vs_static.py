@@ -19,7 +19,6 @@ import pandas as pd
 from evolib import (
     Indiv,
     Pop,
-    evolve_mu_plus_lambda,
     mse_loss,
     plot_fitness_comparison,
     rosenbrock,
@@ -38,7 +37,7 @@ def run_experiment(config_path: str) -> pd.DataFrame:
     pop.set_functions(fitness_function=my_fitness)
 
     for _ in range(pop.max_generations):
-        evolve_mu_plus_lambda(pop)
+        pop.run_one_generation()
 
     history = pop.history_logger.to_dataframe()
     print(history)

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
-from evolib import Indiv, Pop, evolve_mu_plus_lambda, rosenbrock_2d
+from evolib import Indiv, Pop, rosenbrock_2d
 
 CONFIG_FILE = "06_rosenbrock_surface_path.yaml"
 FRAME_FOLDER = "06_frames_rosenbrock"
@@ -80,8 +80,7 @@ def run_experiment() -> None:
     pop.set_functions(fitness_function=fitness_function)
 
     for gen in range(pop.max_generations):
-        evolve_mu_plus_lambda(pop)
-        pop.sort_by_fitness()
+        pop.run_one_generation(sort=True)
         plot_surface_with_path(gen, pop.best())
         pop.print_status(verbosity=1)
 

@@ -18,9 +18,9 @@ from evolib.initializers.vector_initializers import (
 from evolib.interfaces.enums import (
     CrossoverStrategy,
     DiversityMethod,
+    EvolutionStrategy,
     MutationStrategy,
     Origin,
-    Strategy,
 )
 from evolib.interfaces.structs import MutationParams
 from evolib.interfaces.types import (
@@ -44,6 +44,7 @@ from evolib.operators.mutation import (
     adapted_mutation_strength,
     mutate_offspring,
 )
+from evolib.operators.registry import strategy_registry
 from evolib.operators.replacement import (
     replace_generational,
     replace_mu_lambda,
@@ -86,7 +87,7 @@ from evolib.utils.benchmarks import (
     sphere_2d,
     sphere_3d,
 )
-from evolib.utils.config_loader import load_config
+from evolib.utils.config_loader import T, get_enum, load_config
 from evolib.utils.config_validator import (
     validate_crossover_config,
     validate_full_config,
@@ -130,6 +131,7 @@ __all__ = [
     "ERR_INVALID_NAME",
     "ERR_NO_GET_STRATEGY",
     "ERR_UNKNOWN_CATEGORY",
+    "EvolutionStrategy",
     "FitnessFunction",
     "HistoryLogger",
     "Indiv",
@@ -145,7 +147,7 @@ __all__ = [
     "ParaInitializer",
     "ParaVector",
     "Pop",
-    "Strategy",
+    "T",
     "TauUpdateFunction",
     "ackley",
     "ackley_2d",
@@ -169,6 +171,7 @@ __all__ = [
     "evolve_mu_comma_lambda",
     "evolve_mu_plus_lambda",
     "fixed_initializer",
+    "get_enum",
     "get_initializer",
     "griewank",
     "griewank_2d",
@@ -216,6 +219,7 @@ __all__ = [
     "sphere",
     "sphere_2d",
     "sphere_3d",
+    "strategy_registry",
     "validate_crossover_config",
     "validate_full_config",
     "validate_mutation_config",

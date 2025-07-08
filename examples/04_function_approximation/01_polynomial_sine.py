@@ -17,7 +17,6 @@ import numpy as np
 from evolib import (
     Indiv,
     Pop,
-    evolve_mu_comma_lambda,
 )
 
 # Configuration
@@ -63,10 +62,9 @@ def run_experiment() -> None:
     pop.set_functions(fitness_function=fitness_function)
 
     for gen in range(pop.max_generations):
-        evolve_mu_comma_lambda(pop)
+        pop.run_one_generation(sort=True)
         pop.print_status(verbosity=1)
-        pop.sort_by_fitness()
-        plot_approximation(pop.indivs[0], gen)
+        plot_approximation(pop.best(), gen)
 
 
 if __name__ == "__main__":

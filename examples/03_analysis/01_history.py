@@ -7,11 +7,18 @@ It introduces:
 - Logging of per-generation statistics (e.g., best, mean, std)
 - Accessing and printing the history as a DataFrame
 
+Note:
+  In earlier examples, we explicitly called strategy functions like
+  `evolve_mu_plus_lambda(pop)` to make the underlying logic transparent.
+  Starting from this point, we use the encapsulated `pop.run_one_generation()` method
+  to reflect a more modular and extensible design, where the strategy is defined via
+  configuration.
+
 Requirements:
-- 'population.yaml' must be present in the current working directory
+    'population.yaml' must be present in the current working directory
 """
 
-from evolib import Indiv, Pop, Strategy, evolve_mu_lambda, mse_loss, simple_quadratic
+from evolib import Indiv, Pop, mse_loss, simple_quadratic
 
 
 def my_fitness(indiv: Indiv) -> None:
@@ -31,17 +38,16 @@ def print_population(pop: Pop, title: str) -> None:
 
 
 # Load configuration and initialize population
-my_pop = Pop(config_path="population.yaml")
-my_pop.initialize_population()
-my_pop.set_functions(fitness_function=my_fitness)
+pop = Pop(config_path="population.yaml")
+pop.set_functions(fitness_function=my_fitness)
 
-print_population(my_pop, "Initial Parents")
+print_population(pop, "Initial Parents")
 
 # Mu Plus Lambda
-for gen in range(my_pop.max_generations):
-    evolve_mu_lambda(my_pop, strategy=Strategy.MU_PLUS_LAMBDA)
+for gen in range(pop.max_generations):
+    pop.run_one_generation()
 
-history = my_pop.history_logger.to_dataframe()
+history = pop.history_logger.to_dataframe()
 print(
     history[
         [

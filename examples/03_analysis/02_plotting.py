@@ -12,8 +12,6 @@ It demonstrates how to:
 from evolib import (
     Indiv,
     Pop,
-    Strategy,
-    evolve_mu_lambda,
     mse_loss,
     simple_quadratic,
 )
@@ -27,16 +25,15 @@ def my_fitness(indiv: Indiv) -> None:
 
 
 # Setup
-my_pop = Pop(config_path="population.yaml")
-my_pop.initialize_population()
-my_pop.set_functions(fitness_function=my_fitness)
+pop = Pop(config_path="population.yaml")
+pop.set_functions(fitness_function=my_fitness)
 
 # Evolution
-for _ in range(my_pop.max_generations):
-    evolve_mu_lambda(my_pop, strategy=Strategy.MU_PLUS_LAMBDA)
+for _ in range(pop.max_generations):
+    pop.run_one_generation()
 
 # History to DataFrame
-history = my_pop.history_logger.to_dataframe()
+history = pop.history_logger.to_dataframe()
 
 # Plotting
 plot_fitness(history, show=True, save_path="./figures/02_plotting.png")

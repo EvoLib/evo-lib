@@ -4,6 +4,9 @@ offspring_pool_size: 40
 max_generations: 100
 max_indiv_age: 0
 
+evolution:
+  strategy: "mu_plus_lambda"
+
 num_elites: 1
 representation: 
   type: vector

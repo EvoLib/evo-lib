@@ -4,8 +4,7 @@ Example 02-02 - Mu Lambda Step
 This example demonstrates a basic Mu Plus Lambda and Mu Comma Lambda evolution step:
 
 Requirements:
-- 'population.yaml' and 'individual.yaml' must be present in the
-current working directory
+    'population.yaml' must be present in the current working directory
 """
 
 from evolib import (

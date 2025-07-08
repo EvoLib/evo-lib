@@ -1,3 +1,9 @@
+parent_pool_size: 10
+offspring_pool_size: 30
+max_generations: 100
+max_indiv_age: 0
+num_elites: 1
+
 representation:
   type: vector
   dim: 2
@@ -5,13 +11,10 @@ representation:
   initializer: fixed_initializer
   values: [-2.0, -2.0]
 
+evolution:
+  strategy: "mu_plus_lambda"
+
 mutation:
   strategy: constant
   strength: 0.2
   probability: 1.0
-
-parent_pool_size: 10
-offspring_pool_size: 30
-max_generations: 100
-max_indiv_age: 0
-num_elites: 1

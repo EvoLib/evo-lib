@@ -4,6 +4,9 @@ max_generations: 100
 max_indiv_age: 0
 num_elites: 1
 
+evolution:
+  strategy: "mu_plus_lambda"
+
 representation: 
   type: vector
   initializer: random_initializer

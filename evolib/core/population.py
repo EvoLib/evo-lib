@@ -16,13 +16,15 @@ from evolib.initializers.registry import get_initializer
 from evolib.interfaces.enums import (
     CrossoverStrategy,
     DiversityMethod,
+    EvolutionStrategy,
     MutationStrategy,
     Origin,
 )
 from evolib.interfaces.types import (
     FitnessFunction,
 )
-from evolib.utils.config_loader import load_config
+from evolib.operators.registry import strategy_registry
+from evolib.utils.config_loader import get_enum, load_config
 from evolib.utils.config_validator import validate_full_config
 from evolib.utils.history_logger import HistoryLogger
 
@@ -63,12 +65,26 @@ class Pop:
         self.selection_strategy = None
         self.pairing_strategy = None
         self.crossover_strategy = None
+        self.evolution_strategy = None
 
         # User-defined functions
         self.fitness_function: FitnessFunction | None = None
 
+        # Evolution
+        evolution_cfg = cfg.get("evolution", None)
+        if evolution_cfg is not None:
+            self.evolution_strategy = get_enum(
+                EvolutionStrategy,
+                evolution_cfg.get("strategy", "mu_plus_lambda"),
+                "evolution strategy",
+            )
+        else:
+            self.evolution_strategy = None
+
         # Mutation
-        self.mutation_strategy = MutationStrategy(cfg["mutation"]["strategy"])
+        self.mutation_strategy = get_enum(
+            MutationStrategy, cfg["mutation"]["strategy"], "mutation strategy"
+        )
 
         # Crossover
         crossover_cfg = cfg.get("crossover", None)
@@ -430,6 +446,35 @@ class Pop:
             indiv.para.update_mutation_parameters(
                 self.generation_num, self.max_generations, self.diversity_ema
             )
+
+    def run_one_generation(
+        self, strategy: EvolutionStrategy | None = None, sort: bool = False
+    ) -> None:
+        """
+        Executes a single evolutionary generation using the selected strategy.
+
+        Args:
+            strategy (EvolutionStrategy | None): Optional override for the evolution
+            strategy.
+            If None, uses the strategy defined during initialization.
+
+        Raises:
+            ValueError: If no strategy is defined or the strategy is unknown.
+        """
+        if strategy is None:
+            strategy = self.evolution_strategy
+
+        if strategy is None:
+            raise ValueError("Evolution Strategy must be defined")
+
+        fn = strategy_registry.get(strategy)
+        if fn is None:
+            raise ValueError(f"Unknown strategy: {strategy}")
+
+        fn(self)
+
+        if sort:
+            self.sort_by_fitness()
 
 
 ##############################################################################

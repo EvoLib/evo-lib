@@ -14,16 +14,19 @@ Expected mutation functions must operate on the parameter level and implement
 mutation probability checks internally.
 """
 
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import numpy as np
 
-from evolib.core.population import Indiv, Pop
+if TYPE_CHECKING:
+    from evolib.core.population import Pop
+
+from evolib.core.population import Indiv
 from evolib.interfaces.types import MutationParams
 
 
 def mutate_offspring(
-    pop: Pop,
+    pop: "Pop",
     offspring: List[Indiv],
 ) -> None:
     """

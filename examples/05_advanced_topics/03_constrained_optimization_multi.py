@@ -9,7 +9,7 @@ penalties when any constraint is violated.
 import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, Pop, evolve_mu_plus_lambda
+from evolib import Indiv, Pop
 
 SAVE_FRAMES = True
 FRAME_FOLDER = "03_frames_constrained_multi"
@@ -95,8 +95,7 @@ def run_experiment() -> None:
     pop.set_functions(fitness_function=fitness_function)
 
     for gen in range(pop.max_generations):
-        evolve_mu_plus_lambda(pop)
-        pop.sort_by_fitness()
+        pop.run_one_generation(sort=True)
         plot_generation(pop.best(), gen)
         pop.print_status(verbosity=1)
 
