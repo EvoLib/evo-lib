@@ -11,8 +11,8 @@ current working directory
 from evolib import (
     Indiv,
     Pop,
-    Strategy,
-    evolve_mu_lambda,
+    evolve_mu_comma_lambda,
+    evolve_mu_plus_lambda,
     mse_loss,
     simple_quadratic,
 )
@@ -35,11 +35,13 @@ def print_population(pop: Pop, title: str) -> None:
         )
 
 
-# Load configuration and initialize population
+# Automatically creates and initializes the population.
+# Note: Use initialize=False to delay or customize population setup.
 pop = Pop(config_path="population.yaml")
 
+
 # Initialize population
-pop.initialize_population()
+# pop.initialize_population()
 
 # Set fitnessfuction
 pop.set_functions(fitness_function=my_fitness)
@@ -50,11 +52,11 @@ pop.evaluate_fitness()
 print_population(pop, "Initial Parents")
 
 # Mu Plus Lambda
-evolve_mu_lambda(pop, strategy=Strategy.MU_PLUS_LAMBDA)
+evolve_mu_plus_lambda(pop)
 
 print_population(pop, "After Mu Plus Lambda")
 
 # Mu Komma Lambda
-evolve_mu_lambda(pop, strategy=Strategy.MU_COMMA_LAMBDA)
+evolve_mu_comma_lambda(pop)
 
 print_population(pop, "After Mu Comma Lambda")

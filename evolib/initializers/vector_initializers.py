@@ -77,8 +77,6 @@ def vector_adaptive_initializer(cfg: dict) -> Callable[[Pop], ParaVector]:
             raise ValueError(
                 "min_mutation_strength and max_mutation_strength" "must be defined."
             )
-        if pv.para_mutation_strengths is None:
-            raise ValueError("para_mutation_strengths mus be defined")
 
         pv.vector = np.random.uniform(pv.init_bounds[0], pv.init_bounds[1], size=pv.dim)
         if pv.randomize_mutation_strengths:

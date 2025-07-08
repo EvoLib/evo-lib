@@ -19,8 +19,7 @@ Configuration:
 from evolib import (
     Indiv,
     Pop,
-    Strategy,
-    evolve_mu_lambda,
+    evolve_mu_plus_lambda,
     mse_loss,
     rosenbrock,
 )
@@ -35,11 +34,10 @@ def my_fitness(indiv: Indiv) -> None:
 
 def run_experiment(config_path: str) -> None:
     pop = Pop(config_path)
-    pop.initialize_population()
     pop.set_functions(fitness_function=my_fitness)
 
     for _ in range(pop.max_generations):
-        evolve_mu_lambda(pop, strategy=Strategy.MU_PLUS_LAMBDA)
+        evolve_mu_plus_lambda(pop)
 
         pop.print_status(verbosity=1)
         best = pop.best()

@@ -98,7 +98,7 @@ for label in labels:
     selection_type = "tournament" if "tournament" in label else "roulette"
     use_crossover = "crossover" in label
 
-    pop = Pop(CONFIG)
+    pop = Pop(CONFIG, initialize=False)
     initialize(pop)
     df = run(pop, use_crossover=use_crossover, selection_method=selection_type)
     runs[label] = df

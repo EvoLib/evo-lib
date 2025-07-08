@@ -17,8 +17,7 @@ import numpy as np
 from evolib import (
     Indiv,
     Pop,
-    Strategy,
-    evolve_mu_lambda,
+    evolve_mu_comma_lambda,
 )
 
 # Configuration
@@ -61,11 +60,10 @@ def plot_approximation(indiv: Indiv, generation: int) -> None:
 # Main
 def run_experiment() -> None:
     pop = Pop(CONFIG_FILE)
-    pop.initialize_population()
     pop.set_functions(fitness_function=fitness_function)
 
     for gen in range(pop.max_generations):
-        evolve_mu_lambda(pop, strategy=Strategy.MU_COMMA_LAMBDA)
+        evolve_mu_comma_lambda(pop)
         pop.print_status(verbosity=1)
         pop.sort_by_fitness()
         plot_approximation(pop.indivs[0], gen)

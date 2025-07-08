@@ -7,8 +7,7 @@ This example demonstrates the basic Mu Plus Lambda and Mu Comma Lambda evolution
 from evolib import (
     Indiv,
     Pop,
-    Strategy,
-    evolve_mu_lambda,
+    evolve_mu_plus_lambda,
     mse_loss,
     simple_quadratic,
 )
@@ -31,11 +30,8 @@ def print_population(pop: Pop, title: str) -> None:
         )
 
 
-# Load configuration and initialize population
-pop = Pop(config_path="population.yaml")
-
-# Initialize population
-pop.initialize_population()
+# Create and initializes the population.
+pop = Pop("population.yaml")
 
 # Set fitnessfuction
 pop.set_functions(fitness_function=my_fitness)
@@ -47,5 +43,5 @@ print_population(pop, "Initial Parents")
 
 # Mu Plus Lambda
 for gen in range(pop.max_generations):
-    evolve_mu_lambda(pop, strategy=Strategy.MU_PLUS_LAMBDA)
+    evolve_mu_plus_lambda(pop)
     pop.print_status()

@@ -14,7 +14,7 @@ import numpy as np
 from evolib import (
     Indiv,
     Pop,
-    evolve_mu_lambda,
+    evolve_mu_plus_lambda,
 )
 
 # Parameters
@@ -60,7 +60,6 @@ def plot_generation(indiv: Indiv, generation: int, x_support: np.ndarray) -> Non
 # Main
 def run_experiment() -> None:
     pop = Pop(CONFIG_FILE)
-    pop.initialize_population()
 
     num_support_points = pop.representation_cfg["dim"]
     x_support = np.linspace(0, 2 * np.pi, num_support_points)
@@ -68,7 +67,7 @@ def run_experiment() -> None:
     pop.set_functions(fitness_function=make_fitness_function(x_support))
 
     for gen in range(pop.max_generations):
-        evolve_mu_lambda(pop)
+        evolve_mu_plus_lambda(pop)
         pop.sort_by_fitness()
         plot_generation(pop.indivs[0], gen, x_support)
         pop.print_status(verbosity=1)

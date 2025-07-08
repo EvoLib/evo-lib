@@ -10,7 +10,7 @@ from typing import Callable
 import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, Pop, evolve_mu_lambda
+from evolib import Indiv, Pop, evolve_mu_plus_lambda
 
 SAVE_FRAMES = True
 FRAME_FOLDER = "04_frames_multiobjective"
@@ -68,7 +68,6 @@ def plot_generation(indiv: Indiv, generation: int, x_support: np.ndarray) -> Non
 # Main
 def run_experiment() -> None:
     pop = Pop(CONFIG_FILE)
-    pop.initialize_population()
 
     dim = pop.representation_cfg["dim"]
     x_support = np.linspace(0, 2 * np.pi, dim)
@@ -76,7 +75,7 @@ def run_experiment() -> None:
     pop.set_functions(fitness_function=make_fitness_function(x_support))
 
     for gen in range(pop.max_generations):
-        evolve_mu_lambda(pop)
+        evolve_mu_plus_lambda(pop)
         pop.sort_by_fitness()
         plot_generation(pop.best(), gen, x_support)
         pop.print_status(verbosity=1)

@@ -31,7 +31,7 @@ class Pop:
     """Represents a population for evolutionary optimization, including configuration,
     statistics, and operator integration."""
 
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: str, initialize: bool = True):
         """
         Initialize a population from a YAML config file.
 
@@ -98,6 +98,10 @@ class Pop:
         self.iqr_fitness = 0.0
         self.diversity = 0.0
         self.diversity_ema = 0.0
+
+        # Autoinitialize Population
+        if initialize is True:
+            self.initialize_population()
 
     @property
     def mu(self) -> int:

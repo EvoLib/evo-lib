@@ -8,7 +8,7 @@ visualizes how evolution progresses over generations.
 import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, Pop, ackley_2d, evolve_mu_lambda
+from evolib import Indiv, Pop, ackley_2d, evolve_mu_plus_lambda
 
 CONFIG_FILE = "05_fitness_landscape_exploration.yaml"
 SAVE_FRAMES = True
@@ -65,13 +65,12 @@ def plot_fitness_landscape_with_path(
 # Main experiment loop
 def run_experiment() -> None:
     pop = Pop(CONFIG_FILE)
-    pop.initialize_population()
     pop.set_functions(fitness_function=fitness_function)
 
     path_points: list[tuple[float, float]] = []
 
     for gen in range(pop.max_generations):
-        evolve_mu_lambda(pop)
+        evolve_mu_plus_lambda(pop)
         pop.sort_by_fitness()
 
         best = pop.best()

@@ -10,8 +10,7 @@ import pandas as pd
 from evolib import (
     Indiv,
     Pop,
-    Strategy,
-    evolve_mu_lambda,
+    evolve_mu_plus_lambda,
     mse_loss,
     simple_quadratic,
 )
@@ -26,11 +25,10 @@ def my_fitness(indiv: Indiv) -> None:
 
 def run_experiment(mutation_strength: float) -> pd.DataFrame:
     pop = Pop(config_path="population.yaml")
-    pop.initialize_population()
     pop.set_functions(fitness_function=my_fitness)
 
     for _ in range(pop.max_generations):
-        evolve_mu_lambda(pop, strategy=Strategy.MU_PLUS_LAMBDA)
+        evolve_mu_plus_lambda(pop)
 
     return pop.history_logger.to_dataframe()
 

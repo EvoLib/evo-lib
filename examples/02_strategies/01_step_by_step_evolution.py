@@ -32,11 +32,14 @@ def my_fitness(indiv: Indiv) -> None:
     indiv.fitness = mse_loss(expected, predicted)
 
 
-# Load configuration and initialize population
+# Create and initialize the population (default behavior).
 pop = Pop(config_path="population.yaml")
 
-# Initialize population
-pop.initialize_population()
+# Advanced usage:
+# You can disable automatic initialization if needed (e.g., for testing or
+# custom setups).
+# pop = Pop(config_path="01_config.yaml", initialize=False)
+# pop.initialize_population()
 
 print("Parents:")
 for i, indiv in enumerate(pop.indivs):

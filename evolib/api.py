@@ -62,7 +62,7 @@ from evolib.operators.selection import (
     selection_tournament,
     selection_truncation,
 )
-from evolib.operators.strategy import evolve_mu_lambda
+from evolib.operators.strategy import evolve_mu_comma_lambda, evolve_mu_plus_lambda
 from evolib.representation.base import ParaBase
 from evolib.representation.vector import ParaVector
 from evolib.utils.benchmarks import (
@@ -166,7 +166,8 @@ __all__ = [
     "crossover_heuristic",
     "crossover_intermediate",
     "crossover_simulated_binary",
-    "evolve_mu_lambda",
+    "evolve_mu_comma_lambda",
+    "evolve_mu_plus_lambda",
     "fixed_initializer",
     "get_initializer",
     "griewank",
