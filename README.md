@@ -66,31 +66,34 @@ Requirements: Python 3.9+ and packages in `requirements.txt`.
 ## 🧪 Example Usage
 
 ```python
-from evolib import Pop, evolve_mu_lambda
-from my_custom_mutation import mutate_custom
+from evolib import Pop
 from my_fitness import fitness_function
+from my_mutation import mutate_custom
 
 pop = Pop(config_path="config/my_experiment.yaml")
-pop.set_functions(
-    fitness_function=fitness_function,
-    mutation_function=mutate_custom
-)
-pop.initialize_random_population(initializer=my_initializer)
-evolve_mu_lambda(pop)
+pop.set_functions(fitness_function=fitness_function,
+                  mutation_function=mutate_custom)
+pop.initialize_population()
+
+for _ in range(pop.max_generations):
+    pop.run_one_generation()
 ```
 
 For full examples, see 📁[`examples/`](https://github.com/EvoLib/evo-lib/tree/main/examples) – including plotting, adaptive mutation, and benchmarking.
 
 ---
 
-## ⚙️ Configuration Example (.yaml)
+# ⚙️ Configuration Example (.yaml)
 
-```aml
+```yaml
 parent_pool_size: 10
 offspring_pool_size: 40
 max_generations: 100
 max_indiv_age: 3
 num_elites: 1
+
+evolution:
+  strategy: mu_plus_lambda
 
 mutation:
   strategy: adaptive_individual
