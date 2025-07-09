@@ -95,9 +95,6 @@ num_elites: 1
 evolution:
   strategy: mu_plus_lambda
 
-selection:
-    strategy: rank_linear
-
 mutation:
   strategy: adaptive_individual
   init_probability: 0.8
