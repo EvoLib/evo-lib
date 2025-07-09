@@ -18,13 +18,7 @@ Key Elements:
 
 import pandas as pd
 
-from evolib import (
-    Indiv,
-    Pop,
-    mse_loss,
-    plot_fitness_comparison,
-    rosenbrock,
-)
+from evolib import Indiv, Pop, mse_loss, plot_fitness_comparison, rosenbrock
 
 
 def my_fitness(indiv: Indiv) -> None:

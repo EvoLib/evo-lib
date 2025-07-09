@@ -9,13 +9,7 @@ The script runs two experiments with different population configurations and pri
 resulting fitness progression over generations.
 """
 
-from evolib import (
-    Indiv,
-    Pop,
-    evolve_mu_plus_lambda,
-    mse_loss,
-    rosenbrock,
-)
+from evolib import Indiv, Pop, evolve_mu_plus_lambda, mse_loss, rosenbrock
 
 
 # User-defined fitness function

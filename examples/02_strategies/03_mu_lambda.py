@@ -4,13 +4,7 @@ Example 2.2 - Mu Lambd
 This example demonstrates the basic Mu Plus Lambda and Mu Comma Lambda evolution:
 """
 
-from evolib import (
-    Indiv,
-    Pop,
-    evolve_mu_plus_lambda,
-    mse_loss,
-    simple_quadratic,
-)
+from evolib import Indiv, Pop, evolve_mu_plus_lambda, mse_loss, simple_quadratic
 
 
 # User-defined fitness function

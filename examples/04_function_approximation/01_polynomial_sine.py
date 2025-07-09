@@ -14,10 +14,7 @@ animation).
 import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import (
-    Indiv,
-    Pop,
-)
+from evolib import Indiv, Pop
 
 # Configuration
 TARGET_FUNC = np.sin

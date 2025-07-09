@@ -7,12 +7,7 @@ This example demonstrates how to run the same optimization with different settin
 
 import pandas as pd
 
-from evolib import (
-    Indiv,
-    Pop,
-    mse_loss,
-    simple_quadratic,
-)
+from evolib import Indiv, Pop, mse_loss, simple_quadratic
 from evolib.utils.plotting import plot_fitness_comparison
 
 

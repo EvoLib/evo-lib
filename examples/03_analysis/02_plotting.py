@@ -9,12 +9,7 @@ It demonstrates how to:
 - Interpret trends using matplotlib
 """
 
-from evolib import (
-    Indiv,
-    Pop,
-    mse_loss,
-    simple_quadratic,
-)
+from evolib import Indiv, Pop, mse_loss, simple_quadratic
 from evolib.utils.plotting import plot_fitness
 
 
