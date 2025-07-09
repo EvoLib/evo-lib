@@ -155,3 +155,47 @@ def evolve_steady_state(pop: "Pop") -> None:
 
     # Update population statistics (including aging, diversity, fitness metrics)
     pop.update_statistics()
+
+
+def evolve_flexible(pop: "Pop") -> None:
+    """
+    Modular evolution step using externally configured operators:
+    - selection
+    - crossover (optional)
+    - mutation
+    - replacement
+
+    Assumes that `Pop` has:
+    - a configured `selection_fn`
+    - a valid `fitness_function`
+    - a pre-built `_replacement_fn` (e.g., from ReplacementStrategy)
+    """
+    if pop.fitness_function is None:
+        raise ValueError("No fitness function set in population.")
+    if not pop.indivs:
+        raise ValueError("Population is empty.")
+    if pop.selection_fn is None:
+        raise ValueError("Selection function not configured.")
+    if pop._replacement_fn is None:
+        raise ValueError("Replacement function not configured.")
+
+    # Selection
+    parents = pop.select_parents(pop.lambda_)
+
+    # Reproduction
+    offspring = generate_cloned_offspring(parents, pop.lambda_)
+
+    # Mutation & Crossover Parameters
+    pop.update_parameters()
+
+    # Mutation
+    mutate_offspring(pop, offspring)
+
+    # Evaluate
+    pop.evaluate_indivs(offspring)
+
+    # Replacement (via configured strategy)
+    pop._replacement_fn(pop, offspring)
+
+    # Update statistics
+    pop.update_statistics()

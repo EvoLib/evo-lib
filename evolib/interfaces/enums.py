@@ -28,6 +28,7 @@ class EvolutionStrategy(Enum):
     MU_PLUS_LAMBDA = "mu_plus_lambda"
     MU_COMMA_LAMBDA = "mu_comma_lambda"
     STEADY_STATE = "steady_state"
+    FLEXIBLE = "flexible"
 
 
 class MutationStrategy(Enum):

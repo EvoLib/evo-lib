@@ -22,6 +22,7 @@ across one generation.
 from evolib.interfaces.enums import EvolutionStrategy
 from evolib.interfaces.types import EvolutionStrategyFunction
 from evolib.operators.strategy import (
+    evolve_flexible,
     evolve_mu_comma_lambda,
     evolve_mu_plus_lambda,
     evolve_steady_state,
@@ -31,4 +32,5 @@ strategy_registry: dict[EvolutionStrategy, EvolutionStrategyFunction] = {
     EvolutionStrategy.MU_PLUS_LAMBDA: evolve_mu_plus_lambda,
     EvolutionStrategy.MU_COMMA_LAMBDA: evolve_mu_comma_lambda,
     EvolutionStrategy.STEADY_STATE: evolve_steady_state,
+    EvolutionStrategy.FLEXIBLE: evolve_flexible,
 }
