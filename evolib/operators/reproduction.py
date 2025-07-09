@@ -9,18 +9,25 @@ from evolib.interfaces.enums import Origin
 from evolib.utils.copy_indiv import copy_indiv
 
 
-def create_offspring_mu_lambda(parents: List[Any], lambda_: int) -> List[Any]:
+def generate_cloned_offspring(parents: List[Any], lambda_: int) -> List[Any]:
     """
-    Generates offspring individuals by randomly selecting parents (with replacement).
+    Creates lambda_ cloned offspring by randomly selecting parents with replacement.
 
-    Used in (μ, λ) evolution strategies.
+    Each offspring is a deep copy of a randomly chosen parent, with age reset and
+    fitness set to MAX_FLOAT. This method performs no crossover or mutation and
+    is typically used in evolutionary strategies such as (mu, lambda), (mu + lambda),
+    or steady-state evolution to initialize raw offspring before variation operators
+    are applied.
 
     Args:
-        parents (List[Any]): List of selected parent individuals.
-        lambda_ (int): Number of offspring to generate.
+        parents (List[Any]): List of parent individuals to clone from.
+        lambda_ (int): Number of offspring to create.
 
     Returns:
-        List[Any]: List of offspring individuals.
+        List[Any]: List of cloned offspring individuals.
+
+    Raises:
+        ValueError: If the parent list is empty or lambda_ is not positive.
     """
     if not parents:
         raise ValueError("parents cannot be empty")

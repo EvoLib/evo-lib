@@ -17,7 +17,7 @@ Requirements:
 from evolib import (
     Indiv,
     Pop,
-    create_offspring_mu_lambda,
+    generate_cloned_offspring,
     mse_loss,
     simple_quadratic,
 )
@@ -49,7 +49,7 @@ for i, indiv in enumerate(pop.indivs):
 
 
 # Generate Offspring
-offspring = create_offspring_mu_lambda(pop.indivs, pop.offspring_pool_size)
+offspring = generate_cloned_offspring(pop.indivs, pop.offspring_pool_size)
 
 # Evaluate fitness before mutation
 print("\nOffspring before mutation:")

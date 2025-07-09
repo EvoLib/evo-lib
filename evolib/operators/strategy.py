@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from evolib.core.population import Pop
 from evolib.operators.mutation import mutate_offspring
 from evolib.operators.replacement import replace_generational, replace_truncation
-from evolib.operators.reproduction import create_offspring_mu_lambda
+from evolib.operators.reproduction import generate_cloned_offspring
 
 
 def evolve_mu_plus_lambda(pop: "Pop") -> None:
@@ -46,7 +46,7 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
     pop.update_mutation_parameters()
 
     # CREATE OFFSPRING
-    offspring = create_offspring_mu_lambda(pop.indivs, pop.offspring_pool_size)
+    offspring = generate_cloned_offspring(pop.indivs, pop.offspring_pool_size)
 
     # OFFSPRING MUTATION
     mutate_offspring(pop, offspring)
@@ -80,7 +80,7 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
     pop.update_mutation_parameters()
 
     # CREATE OFFSPRING
-    offspring = create_offspring_mu_lambda(pop.indivs, pop.offspring_pool_size)
+    offspring = generate_cloned_offspring(pop.indivs, pop.offspring_pool_size)
 
     # OFFSPRING MUTATION
     mutate_offspring(pop, offspring)

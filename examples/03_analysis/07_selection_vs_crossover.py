@@ -15,8 +15,8 @@ import pandas as pd
 from evolib import (
     Indiv,
     Pop,
-    create_offspring_mu_lambda,
     crossover_blend_alpha,
+    generate_cloned_offspring,
     mse_loss,
     plot_fitness_comparison,
     replace_mu_lambda,
@@ -64,7 +64,7 @@ def run(pop: Pop, *, use_crossover: bool, selection_method: str) -> pd.DataFrame
             raise ValueError("Unknown selection method")
 
         # REPRODUCTION
-        offspring = create_offspring_mu_lambda(parents, pop.offspring_pool_size)
+        offspring = generate_cloned_offspring(parents, pop.offspring_pool_size)
 
         # CROSSOVER
         if use_crossover:

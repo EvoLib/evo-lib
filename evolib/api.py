@@ -53,7 +53,7 @@ from evolib.operators.replacement import (
     replace_truncation,
     replace_weighted_stochastic,
 )
-from evolib.operators.reproduction import create_offspring_mu_lambda
+from evolib.operators.reproduction import generate_cloned_offspring
 from evolib.operators.selection import (
     selection_boltzmann,
     selection_random,
@@ -160,7 +160,6 @@ __all__ = [
     "clip_mutation_strength",
     "compute_fitness_diversity",
     "copy_indiv",
-    "create_offspring_mu_lambda",
     "cross_entropy_loss",
     "crossover_arithmetic",
     "crossover_blend_alpha",
@@ -171,6 +170,7 @@ __all__ = [
     "evolve_mu_comma_lambda",
     "evolve_mu_plus_lambda",
     "fixed_initializer",
+    "generate_cloned_offspring",
     "get_enum",
     "get_initializer",
     "griewank",
