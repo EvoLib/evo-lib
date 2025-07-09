@@ -19,9 +19,11 @@ from evolib.interfaces.enums import (
     EvolutionStrategy,
     MutationStrategy,
     Origin,
+    ReplacementStrategy,
     SelectionStrategy,
 )
-from evolib.interfaces.types import FitnessFunction, SelectionFunction
+from evolib.interfaces.types import FitnessFunction, ReplaceFunction, SelectionFunction
+from evolib.registry.replacement_registry import build_replacement_registry
 from evolib.registry.selection_registry import selection_registry
 from evolib.registry.strategy_registry import strategy_registry
 from evolib.utils.config_loader import get_enum, load_config
@@ -67,6 +69,8 @@ class Pop:
         self.pairing_strategy = None
         self.crossover_strategy = None
         self.evolution_strategy = None
+        self.replacement_strategy: Optional[ReplacementStrategy] = None
+        self._replacement_fn: Optional[ReplaceFunction] = None
 
         # User-defined functions
         self.fitness_function: FitnessFunction | None = None
@@ -92,6 +96,21 @@ class Pop:
         else:
             self.selection_strategy = None
             self.selection_fn = None
+
+        # Replacement
+        replacement_cfg = cfg.get("replacement", None)
+        if replacement_cfg is not None:
+            self.replacement_strategy = get_enum(
+                ReplacementStrategy, replacement_cfg["strategy"], "replacement strategy"
+            )
+
+            self._replacement_registry = build_replacement_registry(cfg["replacement"])
+            self._replacement_fn = self._replacement_registry[self.replacement_strategy]
+
+        else:
+            self.replacement_strategy = None
+            self._replacement_registry = {}
+            self._replacement_fn = None
 
         # Mutation
         self.mutation_strategy = get_enum(
@@ -443,6 +462,19 @@ class Pop:
 
         self.history_logger.reset()
 
+    def update_parameters(self) -> None:
+        """
+        Update all strategy-dependent parameters for the current generation.
+
+        Calls both `update_mutation_parameters()` and `update_crossover_parameters()`.
+
+        Raises:
+            ValueError or AttributeError if the population or its individuals
+            are invalid.
+        """
+        self.update_mutation_parameters()
+        self.update_crossover_parameters()
+
     def update_mutation_parameters(self) -> None:
         """
         Triggers per-generation mutation parameter updates for all individuals in the
@@ -457,6 +489,38 @@ class Pop:
         for indiv in self.indivs:
             indiv.para.update_mutation_parameters(
                 self.generation_num, self.max_generations, self.diversity_ema
+            )
+
+    def update_crossover_parameters(self) -> None:
+        """
+        Triggers per-generation update of crossover parameters for all individuals.
+
+        Applies strategy-dependent crossover control (e.g. exponential decay or
+        adaptive global), using generation number and population diversity.
+
+        Raises:
+            ValueError: If population is uninitialized or empty.
+            AttributeError: If an individual lacks a valid 'para' object with method
+                            'update_crossover_parameters'.
+        """
+        if not self.indivs:
+            raise ValueError(
+                "Population is empty – cannot update crossover parameters."
+            )
+
+        for indiv in self.indivs:
+            if not hasattr(indiv, "para") or not hasattr(
+                indiv.para, "update_crossover_parameters"
+            ):
+                raise AttributeError(
+                    "Individual is missing a valid 'para' object "
+                    "with 'update_crossover_parameters' method."
+                )
+
+            indiv.para.update_crossover_parameters(
+                self.generation_num,
+                self.max_generations,
+                self.diversity_ema,
             )
 
     def run_one_generation(

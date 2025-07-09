@@ -63,3 +63,11 @@ class SelectionStrategy(Enum):
     BOLTZMANN = "boltzmann"
     TRUNCATION = "truncation"
     RANDOM = "random"
+
+
+class ReplacementStrategy(Enum):
+    GENERATIONAL = "generational"
+    TRUNCATION = "truncation"
+    STEADY_STATE = "steady_state"
+    RANDOM = "random"
+    STOCHASTIC = "stochastic"

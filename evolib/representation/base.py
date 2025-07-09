@@ -22,3 +22,12 @@ class ParaBase(ABC):
         mutation control.
         """
         pass
+
+    def update_crossover_parameters(
+        self, generation: int, max_generations: int, diversity_ema: float | None = None
+    ) -> None:
+        """
+        Optional: Override in subclasses that support strategy-dependent
+        crossover control.
+        """
+        pass

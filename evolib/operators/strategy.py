@@ -47,8 +47,8 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
     if not pop.indivs:
         raise ValueError("Population is empty.")
 
-    # Update mutation parameters
-    pop.update_mutation_parameters()
+    # Update mutation/crossover parameters
+    pop.update_parameters()
 
     # CREATE OFFSPRING
     offspring = generate_cloned_offspring(pop.indivs, pop.offspring_pool_size)
@@ -81,8 +81,8 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
 
     pop.evaluate_fitness()
 
-    # Update mutation parameters
-    pop.update_mutation_parameters()
+    # Update mutation/crossover parameters
+    pop.update_parameters()
 
     # CREATE OFFSPRING
     offspring = generate_cloned_offspring(pop.indivs, pop.offspring_pool_size)
@@ -141,8 +141,8 @@ def evolve_steady_state(pop: "Pop") -> None:
     # Generate cloned offspring
     offspring = generate_cloned_offspring(parents, pop.lambda_)
 
-    # Update mutation parameters (e.g., adaptive τ or σ)
-    pop.update_mutation_parameters()
+    # Update mutation/crossover parameters
+    pop.update_parameters()
 
     # Mutate offspring
     mutate_offspring(pop, offspring)

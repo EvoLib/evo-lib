@@ -14,6 +14,7 @@ from evolib.representation.base import ParaBase
 
 EvolutionStrategyFunction = Callable[["Pop"], None]
 SelectionFunction = Callable[["Pop", int], list["Indiv"]]
+ReplaceFunction = Callable[["Pop", list["Indiv"]], None]
 
 
 class FitnessFunction(Protocol):

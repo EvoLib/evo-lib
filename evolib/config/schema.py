@@ -3,12 +3,13 @@
 
 from typing import Optional, Tuple
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from evolib.interfaces.enums import (
     CrossoverStrategy,
     EvolutionStrategy,
     MutationStrategy,
+    ReplacementStrategy,
     RepresentationType,
     SelectionStrategy,
 )
@@ -57,6 +58,21 @@ class SelectionConfig(BaseModel):
     fitness_maximization: Optional[bool] = False
 
 
+class ReplacementConfig(BaseModel):
+    strategy: ReplacementStrategy = Field(
+        ..., description="Replacement strategy to use for survivor selection."
+    )
+
+    num_replace: Optional[int] = Field(
+        default=None,
+        description="Number of individuals to replace (only used by steady_state).",
+    )
+
+    temperature: Optional[float] = Field(
+        default=None, description="Temperature for stochastic (softmax) replacement."
+    )
+
+
 class FullConfig(BaseModel):
     parent_pool_size: int
     offspring_pool_size: int
@@ -68,3 +84,4 @@ class FullConfig(BaseModel):
     crossover: Optional[CrossoverConfig] = None
     evolution: Optional[EvolutionConfig] = None
     selection: Optional[SelectionConfig] = None
+    replacement: Optional[ReplacementConfig] = None

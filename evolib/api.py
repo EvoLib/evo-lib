@@ -5,6 +5,7 @@ from evolib.config.schema import (
     EvolutionConfig,
     FullConfig,
     MutationConfig,
+    ReplacementConfig,
     RepresentationConfig,
     SelectionConfig,
 )
@@ -29,6 +30,7 @@ from evolib.interfaces.enums import (
     EvolutionStrategy,
     MutationStrategy,
     Origin,
+    ReplacementStrategy,
     RepresentationType,
     SelectionStrategy,
 )
@@ -40,6 +42,7 @@ from evolib.interfaces.types import (
     MutationFunction,
     ParaInitFunction,
     ParaInitializer,
+    ReplaceFunction,
     SelectionFunction,
     TauUpdateFunction,
 )
@@ -79,6 +82,7 @@ from evolib.operators.strategy import (
     evolve_mu_plus_lambda,
     evolve_steady_state,
 )
+from evolib.registry.replacement_registry import build_replacement_registry
 from evolib.registry.selection_registry import selection_registry
 from evolib.registry.strategy_registry import strategy_registry
 from evolib.representation.base import ParaBase
@@ -163,6 +167,9 @@ __all__ = [
     "ParaInitializer",
     "ParaVector",
     "Pop",
+    "ReplaceFunction",
+    "ReplacementConfig",
+    "ReplacementStrategy",
     "RepresentationConfig",
     "RepresentationType",
     "SelectionConfig",
@@ -176,6 +183,7 @@ __all__ = [
     "adapted_mutation_probability",
     "adapted_mutation_strength",
     "binary_cross_entropy_loss",
+    "build_replacement_registry",
     "categorical_cross_entropy_loss",
     "clip",
     "clip_mutation_strength",

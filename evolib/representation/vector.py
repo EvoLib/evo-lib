@@ -281,6 +281,30 @@ class ParaVector(ParaBase):
 
             self.adapt_para_mutation_strengths(params)
 
+    def update_crossover_parameters(
+        self, generation: int, max_generations: int, diversity_ema: float | None = None
+    ) -> None:
+        """
+        Update crossover parameters based on strategy and diversity (if applicable).
+
+        Supports exponential decay and adaptive global crossover strategies.
+        """
+        if self.crossover_strategy == CrossoverStrategy.EXPONENTIAL_DECAY:
+            self.crossover_probability = self._exponential_crossover_probability(
+                generation, max_generations
+            )
+
+        elif self.crossover_strategy == CrossoverStrategy.ADAPTIVE_GLOBAL:
+            if diversity_ema is None:
+                raise ValueError(
+                    "diversity_ema must be provided for ADAPTIVE_GLOBAL"
+                    "crossover strategy"
+                )
+
+            self.crossover_probability = self._adaptive_crossover_probability(
+                diversity_ema
+            )
+
     def _exponential_mutation_strength(
         self, generation: int, max_generations: int
     ) -> float:
@@ -414,6 +438,71 @@ class ParaVector(ParaBase):
             )
         else:
             return self.mutation_probability
+
+    def _adaptive_crossover_probability(self, diversity_ema: float) -> float:
+        """
+        Calculates adapted crossover probability based on population diversity EMA.
+
+        Uses configured thresholds and scaling factors.
+
+        Args:
+            diversity_ema (float): Exponentially smoothed population diversity.
+
+        Returns:
+            float: Updated crossover probability.
+        """
+        if self.min_diversity_threshold is None or self.max_diversity_threshold is None:
+            raise ValueError(
+                "min_diversity_threshold and max_diversity_threshold" "must be defined."
+            )
+
+        if (
+            self.min_crossover_probability is None
+            or self.max_crossover_probability is None
+        ):
+            raise ValueError(
+                "min_crossover_probability and max_crossover_probability"
+                "must be defined."
+            )
+
+        if self.crossover_probability is None:
+            raise ValueError("crossover_probability must be defined.")
+
+        if self.crossover_inc_factor is None or self.crossover_dec_factor is None:
+            raise ValueError(
+                "crossover_inc_factor and crossover_dec_factor must be" "defined."
+            )
+
+        if diversity_ema < self.min_diversity_threshold:
+            return min(
+                self.max_crossover_probability,
+                self.crossover_probability * self.crossover_inc_factor,
+            )
+        elif diversity_ema > self.max_diversity_threshold:
+            return max(
+                self.min_crossover_probability,
+                self.crossover_probability * self.crossover_dec_factor,
+            )
+        else:
+            return self.crossover_probability
+
+    def _exponential_crossover_probability(
+        self, generation: int, max_generations: int
+    ) -> float:
+
+        if (
+            self.min_crossover_probability is None
+            or self.max_crossover_probability is None
+        ):
+            raise ValueError(
+                "min_crossover_probability and max_crossover_probability"
+                "must be defined."
+            )
+        k = (
+            np.log(self.max_crossover_probability / self.min_crossover_probability)
+            / max_generations
+        )
+        return self.max_crossover_probability * np.exp(-k * generation)
 
     def apply_config(self, cfg: dict) -> None:
         """Apply configuration dictionary to this ParaVector instance."""
