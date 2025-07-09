@@ -63,7 +63,11 @@ from evolib.operators.selection import (
     selection_tournament,
     selection_truncation,
 )
-from evolib.operators.strategy import evolve_mu_comma_lambda, evolve_mu_plus_lambda
+from evolib.operators.strategy import (
+    evolve_mu_comma_lambda,
+    evolve_mu_plus_lambda,
+    evolve_steady_state,
+)
 from evolib.representation.base import ParaBase
 from evolib.representation.vector import ParaVector
 from evolib.utils.benchmarks import (
@@ -169,6 +173,7 @@ __all__ = [
     "crossover_simulated_binary",
     "evolve_mu_comma_lambda",
     "evolve_mu_plus_lambda",
+    "evolve_steady_state",
     "fixed_initializer",
     "generate_cloned_offspring",
     "get_enum",

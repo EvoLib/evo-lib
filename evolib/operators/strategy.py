@@ -25,8 +25,13 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from evolib.core.population import Pop
+
 from evolib.operators.mutation import mutate_offspring
-from evolib.operators.replacement import replace_generational, replace_truncation
+from evolib.operators.replacement import (
+    replace_generational,
+    replace_steady_state,
+    replace_truncation,
+)
 from evolib.operators.reproduction import generate_cloned_offspring
 
 
@@ -91,4 +96,51 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
     # REPLACE PARENTS
     replace_generational(pop, offspring)
 
+    pop.update_statistics()
+
+
+def evolve_steady_state(pop: "Pop") -> None:
+    """
+    Steady-State Evolution Strategy.
+
+    In each generation, only a subset of individuals is replaced with offspring,
+    while the rest of the population (including elites) is retained.
+
+    Workflow:
+    - Select parents
+    - Generate offspring via cloning and crossover (if enabled)
+    - Mutate offspring based on the current mutation strategy
+    - Evaluate fitness of offspring
+    - Replace the worst individuals (excluding elites) with offspring
+
+    Notes:
+    - The number of replaced individuals per generation is defined by `pop.lambda_`
+    - Elites (top `pop.num_elites` individuals) are preserved
+    - All individuals age automatically via `pop.update_statistics()`
+
+    Raises:
+        ValueError: If population is uninitialized or fitness function is missing
+    """
+    if pop.fitness_function is None:
+        raise ValueError("No fitness function set. Use pop.set_functions() first.")
+    if not pop.indivs:
+        raise ValueError("Population is empty.")
+
+    # Select parents and generate offspring
+    parents = pop.indivs
+    offspring = generate_cloned_offspring(parents, pop.lambda_)
+
+    # Update mutation parameters (e.g., adaptive τ or σ)
+    pop.update_mutation_parameters()
+
+    # Mutate offspring
+    mutate_offspring(pop, offspring)
+
+    # Evaluate offspring fitness
+    pop.evaluate_indivs(offspring)
+
+    # Replace worst individuals (excluding elites)
+    replace_steady_state(pop, offspring, num_replace=pop.lambda_)
+
+    # Update population statistics (including aging, diversity, fitness metrics)
     pop.update_statistics()
