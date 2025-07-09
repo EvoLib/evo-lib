@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "EvoLib"
 author = "EvoLib"
 copyright = "2025, EvoLib"
-release = "0.1.0adev5"
+release = "0.1.0adev9"
 
 extensions = [
     "sphinx.ext.autodoc",

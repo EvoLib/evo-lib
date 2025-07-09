@@ -1,4 +1,4 @@
-# EvoLib – A Modular Toolkit for Evolutionary Computation
+# EvoLib – A Modular Framework for Evolutionary Computation
 
 [![Docs Status](https://readthedocs.org/projects/evolib/badge/?version=latest)](https://evolib.readthedocs.io/en/latest/)
 [![Code Quality & Tests](https://github.com/EvoLib/evo-lib/actions/workflows/ci.yml/badge.svg)](https://github.com/EvoLib/evo-lib/actions/workflows/ci.yml)
@@ -9,7 +9,6 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/EvoLib/evolib/main/assets/evolib_256.png" alt="EvoLib Logo" width="256"/>
 </p>
-
 
 **EvoLib** is a modular and extensible framework for implementing and analyzing evolutionary algorithms in Python.\
 It supports classical strategies such as (μ, λ) and (μ + λ) Evolution Strategies, Genetic Algorithms, and Neuroevolution – with a strong focus on clarity, modularity, and didactic value.
@@ -34,7 +33,7 @@ Support for neural network-based individuals and neuroevolution strategies is cu
 ---
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/EvoLib/evolib/main/examples/05_advanced_topics/08_frames_vector_obstacles/08_vector_control_obstacles.gif" alt="Sample" width="512"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/05_advanced_topics/08_frames_vector_obstacles/08_vector_control_obstacles.gif" alt="Sample Plott" width="512"/>
 </p>
 
 ---
@@ -67,31 +66,34 @@ Requirements: Python 3.9+ and packages in `requirements.txt`.
 ## 🧪 Example Usage
 
 ```python
-from evolib import Pop, evolve_mu_lambda
-from my_custom_mutation import mutate_custom
+from evolib import Pop
 from my_fitness import fitness_function
+from my_mutation import mutate_custom
 
 pop = Pop(config_path="config/my_experiment.yaml")
-pop.set_functions(
-    fitness_function=fitness_function,
-    mutation_function=mutate_custom
-)
-pop.initialize_random_population(initializer=my_initializer)
-evolve_mu_lambda(pop)
+pop.set_functions(fitness_function=fitness_function,
+                  mutation_function=mutate_custom)
+pop.initialize_population()
+
+for _ in range(pop.max_generations):
+    pop.run_one_generation()
 ```
 
 For full examples, see 📁[`examples/`](https://github.com/EvoLib/evo-lib/tree/main/examples) – including plotting, adaptive mutation, and benchmarking.
 
 ---
 
-## ⚙️ Configuration Example (.yaml)
+# ⚙️ Configuration Example (.yaml)
 
-```aml
+```yaml
 parent_pool_size: 10
 offspring_pool_size: 40
 max_generations: 100
 max_indiv_age: 3
 num_elites: 1
+
+evolution:
+  strategy: mu_plus_lambda
 
 mutation:
   strategy: adaptive_individual
@@ -146,8 +148,6 @@ This project is licensed under the [MIT License](https://github.com/EvoLib/evo-l
 ## 🙏 Acknowledgments
 
 Inspired by classical evolutionary computation techniques and designed for clarity, modularity, and pedagogical use.
-
----
 
 ```{toctree}
 :maxdepth: 2

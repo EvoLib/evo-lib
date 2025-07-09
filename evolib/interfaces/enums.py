@@ -18,6 +18,12 @@ class Origin(Enum):
     OFFSPRING = "offspring"
 
 
+class RepresentationType(Enum):
+    VECTOR = "vector"
+    # NET = "net"
+    # HYBRID = "hybrid"
+
+
 class EvolutionStrategy(Enum):
     MU_PLUS_LAMBDA = "mu_plus_lambda"
     MU_COMMA_LAMBDA = "mu_comma_lambda"
