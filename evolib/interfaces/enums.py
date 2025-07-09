@@ -21,6 +21,7 @@ class Origin(Enum):
 class EvolutionStrategy(Enum):
     MU_PLUS_LAMBDA = "mu_plus_lambda"
     MU_COMMA_LAMBDA = "mu_comma_lambda"
+    STEADY_STATE = "steady_state"
 
 
 class MutationStrategy(Enum):
@@ -45,3 +46,14 @@ class DiversityMethod(Enum):
     VAR = "var"
     RANGE = "range"
     NORMALIZED_STD = "normalized_std"
+
+
+class SelectionStrategy(Enum):
+    TOURNAMENT = "tournament"
+    ROULETTE = "roulette"
+    RANK_LINEAR = "rank_linear"
+    RANK_EXPONENTIAL = "rank_exponential"
+    SUS = "sus"
+    BOLTZMANN = "boltzmann"
+    TRUNCATION = "truncation"
+    RANDOM = "random"

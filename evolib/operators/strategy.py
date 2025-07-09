@@ -125,9 +125,20 @@ def evolve_steady_state(pop: "Pop") -> None:
         raise ValueError("No fitness function set. Use pop.set_functions() first.")
     if not pop.indivs:
         raise ValueError("Population is empty.")
+    if pop.selection_fn is None:
+        raise ValueError(
+            "Selection strategy is required for steady_state evolution"
+            "but not provided.\n"
+            "Add e.g.:\n"
+            "selection:\n"
+            "  strategy: tournament\n"
+            "to your YAML configuration."
+        )
 
-    # Select parents and generate offspring
-    parents = pop.indivs
+    # Select parents (configurable)
+    parents = pop.select_parents(pop.lambda_)
+
+    # Generate cloned offspring
     offspring = generate_cloned_offspring(parents, pop.lambda_)
 
     # Update mutation parameters (e.g., adaptive τ or σ)

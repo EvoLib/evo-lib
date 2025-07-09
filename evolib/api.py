@@ -21,14 +21,17 @@ from evolib.interfaces.enums import (
     EvolutionStrategy,
     MutationStrategy,
     Origin,
+    SelectionStrategy,
 )
 from evolib.interfaces.structs import MutationParams
 from evolib.interfaces.types import (
     CrossoverFunction,
+    EvolutionStrategyFunction,
     FitnessFunction,
     MutationFunction,
     ParaInitFunction,
     ParaInitializer,
+    SelectionFunction,
     TauUpdateFunction,
 )
 from evolib.operators.crossover import (
@@ -44,7 +47,6 @@ from evolib.operators.mutation import (
     adapted_mutation_strength,
     mutate_offspring,
 )
-from evolib.operators.registry import strategy_registry
 from evolib.operators.replacement import (
     replace_generational,
     replace_mu_lambda,
@@ -68,6 +70,8 @@ from evolib.operators.strategy import (
     evolve_mu_plus_lambda,
     evolve_steady_state,
 )
+from evolib.registry.selection_registry import selection_registry
+from evolib.registry.strategy_registry import strategy_registry
 from evolib.representation.base import ParaBase
 from evolib.representation.vector import ParaVector
 from evolib.utils.benchmarks import (
@@ -136,6 +140,7 @@ __all__ = [
     "ERR_NO_GET_STRATEGY",
     "ERR_UNKNOWN_CATEGORY",
     "EvolutionStrategy",
+    "EvolutionStrategyFunction",
     "FitnessFunction",
     "HistoryLogger",
     "Indiv",
@@ -151,6 +156,8 @@ __all__ = [
     "ParaInitializer",
     "ParaVector",
     "Pop",
+    "SelectionFunction",
+    "SelectionStrategy",
     "T",
     "TauUpdateFunction",
     "ackley",
@@ -216,6 +223,7 @@ __all__ = [
     "selection_boltzmann",
     "selection_random",
     "selection_rank_based",
+    "selection_registry",
     "selection_roulette",
     "selection_sus",
     "selection_tournament",

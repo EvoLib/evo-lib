@@ -7,7 +7,7 @@ defined and dynamically loaded, this class coordinates their application over
 generations.
 """
 
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Optional
 
 import numpy as np
 
@@ -19,11 +19,11 @@ from evolib.interfaces.enums import (
     EvolutionStrategy,
     MutationStrategy,
     Origin,
+    SelectionStrategy,
 )
-from evolib.interfaces.types import (
-    FitnessFunction,
-)
-from evolib.operators.registry import strategy_registry
+from evolib.interfaces.types import FitnessFunction, SelectionFunction
+from evolib.registry.selection_registry import selection_registry
+from evolib.registry.strategy_registry import strategy_registry
 from evolib.utils.config_loader import get_enum, load_config
 from evolib.utils.config_validator import validate_full_config
 from evolib.utils.history_logger import HistoryLogger
@@ -63,6 +63,7 @@ class Pop:
         # Strategies (initially None – set externally later)
         self.mutation_strategy = None
         self.selection_strategy = None
+        self.selection_fn: Optional[SelectionFunction] = None
         self.pairing_strategy = None
         self.crossover_strategy = None
         self.evolution_strategy = None
@@ -80,6 +81,17 @@ class Pop:
             )
         else:
             self.evolution_strategy = None
+
+        # Selection
+        selection_cfg = cfg.get("selection", None)
+        if selection_cfg is not None:
+            self.selection_strategy = get_enum(
+                SelectionStrategy, selection_cfg["strategy"], "selection strategy"
+            )
+            self.selection_fn = selection_registry[self.selection_strategy]
+        else:
+            self.selection_strategy = None
+            self.selection_fn = None
 
         # Mutation
         self.mutation_strategy = get_enum(
@@ -475,6 +487,22 @@ class Pop:
 
         if sort:
             self.sort_by_fitness()
+
+    def select_parents(self, num_parents: int) -> list[Indiv]:
+        """
+        Selects parents using the configured selection strategy.
+
+        Args:
+            num_parents (int): Number of parents to select.
+
+        Returns:
+            list[Indiv]: Selected parents (deep copies).
+        """
+
+        if self.selection_fn is None:
+            raise ValueError("Selection Strategy must be defined")
+
+        return self.selection_fn(self, num_parents)
 
 
 ##############################################################################

@@ -17,12 +17,14 @@ return deep copies of selected parents.
 
 import copy
 import random
-from typing import Any, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
 
 import numpy as np
 
 from evolib.core.individual import Indiv
-from evolib.core.population import Pop
+
+if TYPE_CHECKING:
+    from evolib.core.population import Pop
 
 
 def _calculate_rank_probabilities(
@@ -62,7 +64,7 @@ def _calculate_rank_probabilities(
 
 
 def selection_tournament(
-    pop: Pop,
+    pop: "Pop",
     num_parents: int,
     tournament_size: int = 3,
     remove_selected: bool = False,
@@ -132,7 +134,7 @@ def selection_tournament(
 
 
 def selection_rank_based(
-    pop: Pop,
+    pop: "Pop",
     *,
     num_parents: int,
     mode: str = "linear",
@@ -224,7 +226,7 @@ def selection_rank_based(
     return selected_parents
 
 
-def selection_random(pop: Pop, remove_selected: bool = False) -> List[Indiv]:
+def selection_random(pop: "Pop", remove_selected: bool = False) -> List[Indiv]:
     """
     Performs random selection to select offspring from a population.
 
@@ -265,7 +267,7 @@ def selection_random(pop: Pop, remove_selected: bool = False) -> List[Indiv]:
 
 
 def selection_roulette(
-    pop: Pop, num_parents: int, fitness_maximization: bool = False
+    pop: "Pop", num_parents: int, fitness_maximization: bool = False
 ) -> List[Any]:
     """
     Selects parents using fitness-proportional roulette wheel selection.
@@ -299,7 +301,7 @@ def selection_roulette(
 
 
 def selection_sus(
-    pop: Pop, num_parents: int, fitness_maximization: bool = False
+    pop: "Pop", num_parents: int, fitness_maximization: bool = False
 ) -> List[Any]:
     """
     Selects individuals using Stochastic Universal Sampling (SUS).
@@ -344,7 +346,7 @@ def selection_sus(
 
 
 def selection_boltzmann(
-    pop: Pop,
+    pop: "Pop",
     num_parents: int,
     temperature: float = 1.0,
     fitness_maximization: bool = False,
@@ -385,7 +387,7 @@ def selection_boltzmann(
 
 
 def selection_truncation(
-    pop: Pop, num_parents: int, fitness_maximization: bool = False
+    pop: "Pop", num_parents: int, fitness_maximization: bool = False
 ) -> List[Any]:
     """
     Selects the top individuals (by fitness) deterministically.
