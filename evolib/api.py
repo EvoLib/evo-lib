@@ -78,6 +78,7 @@ from evolib.operators.selection import (
     selection_truncation,
 )
 from evolib.operators.strategy import (
+    evolve_flexible,
     evolve_mu_comma_lambda,
     evolve_mu_plus_lambda,
     evolve_steady_state,
@@ -196,6 +197,7 @@ __all__ = [
     "crossover_heuristic",
     "crossover_intermediate",
     "crossover_simulated_binary",
+    "evolve_flexible",
     "evolve_mu_comma_lambda",
     "evolve_mu_plus_lambda",
     "evolve_steady_state",
