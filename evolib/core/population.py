@@ -279,10 +279,6 @@ class Pop:
 
         Args:
             indiv (Indiv): The individual to be removed.
-            include_none (bool): If True, include None values in the array
-                                (as object dtype).
-                                If False, exclude individuals with undefined fitness.
-                                 Default is False.
         """
 
         if not isinstance(indiv, Indiv):
@@ -401,8 +397,8 @@ class Pop:
             self.diversity_ema = self.diversity
         else:
             alpha = 0.1
-            self.diversity_ema = (1 - alpha) * (
-                self.diversity_ema + alpha * self.diversity
+            self.diversity_ema = (1 - alpha) * self.diversity_ema + (
+                alpha * self.diversity
             )
 
         # Logging

@@ -1,6 +1,6 @@
 # Basisdokumente
 include README.md
-include LICENSE.md
+include LICENSE
 include pyproject.toml
 
 # YAML-Konfigurationsdateien (z. B. population.yaml)
@@ -8,6 +8,7 @@ recursive-include evolib/config *.yaml
 
 # Python-Dateien explizit (meist redundant, aber robust)
 recursive-include evolib *.py
+include evolib/py.typed
 
 # Beispielcode oder Notebooks (optional, wenn du `examples/` hinzufügst)
 recursive-include examples *.py

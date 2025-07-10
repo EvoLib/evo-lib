@@ -9,7 +9,7 @@ description = "A modular framework for evolutionary strategies and neuroevolutio
 authors = [
     { name = "EvoLib", email = "evolib@dismail.de" }
 ]
-license = { file = "LICENSE.md" }
+license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -39,6 +39,9 @@ docs = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["evolib*"]
+
+[tool.setuptools.package-data]
+"evolib" = ["py.typed"]
 
 # Tool-Konfigurationen
 [tool.black]
