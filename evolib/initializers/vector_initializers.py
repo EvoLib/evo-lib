@@ -5,12 +5,13 @@ from typing import Callable
 
 import numpy as np
 
+from evolib.config.schema import FullConfig
 from evolib.core.population import Pop
 from evolib.initializers.registry import register_initializer
 from evolib.representation.vector import ParaVector
 
 
-def random_initializer(cfg: dict) -> Callable[[Pop], ParaVector]:
+def random_initializer(cfg: FullConfig) -> Callable[[Pop], ParaVector]:
 
     def init_fn(_: Pop) -> ParaVector:
         pv = ParaVector()
@@ -27,7 +28,7 @@ def random_initializer(cfg: dict) -> Callable[[Pop], ParaVector]:
     return init_fn
 
 
-def zero_initializer(cfg: dict) -> Callable[[Pop], ParaVector]:
+def zero_initializer(cfg: FullConfig) -> Callable[[Pop], ParaVector]:
 
     def init_fn(_: Pop) -> ParaVector:
         pv = ParaVector()
@@ -38,8 +39,8 @@ def zero_initializer(cfg: dict) -> Callable[[Pop], ParaVector]:
     return init_fn
 
 
-def fixed_initializer(cfg: dict) -> Callable[[Pop], ParaVector]:
-    values = np.array(cfg["representation"]["values"])
+def fixed_initializer(cfg: FullConfig) -> Callable[[Pop], ParaVector]:
+    values = np.array(cfg.representation)
 
     def init_fn(_: Pop) -> ParaVector:
         pv = ParaVector()
@@ -50,9 +51,9 @@ def fixed_initializer(cfg: dict) -> Callable[[Pop], ParaVector]:
     return init_fn
 
 
-def normal_initializer(cfg: dict) -> Callable[[Pop], ParaVector]:
-    mean = float(cfg.get("mean", 0.0))
-    std = float(cfg.get("std", 1.0))
+def normal_initializer(cfg: FullConfig) -> Callable[[Pop], ParaVector]:
+    mean = float(cfg.representation.mean or 0.0)
+    std = float(cfg.representation.std or 1.0)
 
     def init_fn(_: Pop) -> ParaVector:
         pv = ParaVector()
@@ -63,7 +64,7 @@ def normal_initializer(cfg: dict) -> Callable[[Pop], ParaVector]:
     return init_fn
 
 
-def vector_adaptive_initializer(cfg: dict) -> Callable[[Pop], ParaVector]:
+def vector_adaptive_initializer(cfg: FullConfig) -> Callable[[Pop], ParaVector]:
 
     def init_fn(_: Pop) -> ParaVector:
         pv = ParaVector()

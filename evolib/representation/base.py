@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 
+from evolib.config.schema import FullConfig
+
 
 class ParaBase(ABC):
     @abstractmethod
-    def apply_config(self, cfg: dict) -> None: ...
+    def apply_config(self, cfg: FullConfig) -> None: ...
 
     @abstractmethod
     def mutate(self) -> None: ...

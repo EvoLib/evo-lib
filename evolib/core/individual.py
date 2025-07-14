@@ -78,6 +78,16 @@ class Indiv:
         """
         self.para.mutate()
 
+    def crossover(self) -> None:
+        """
+        Apply crossover to this individual.
+
+        Delegates the crossover process to the underlying parameter object `para`.
+        This ensures that crossover behavior is defined polymorphically in the
+        specific `ParaBase` subclass (e.g. `ParaVector`, `ParaNet`, ...).
+        """
+        self.para.crossover()
+
     def print_status(self) -> None:
         """Prints information about the individual."""
 

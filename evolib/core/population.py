@@ -11,23 +11,21 @@ from typing import Any, Callable, List, Optional
 
 import numpy as np
 
+from evolib.config.schema import FullConfig
 from evolib.core.individual import Indiv
 from evolib.initializers.registry import get_initializer
 from evolib.interfaces.enums import (
     CrossoverStrategy,
     DiversityMethod,
     EvolutionStrategy,
-    MutationStrategy,
     Origin,
     ReplacementStrategy,
-    SelectionStrategy,
 )
 from evolib.interfaces.types import FitnessFunction, ReplaceFunction, SelectionFunction
 from evolib.registry.replacement_registry import build_replacement_registry
-from evolib.registry.selection_registry import selection_registry
+from evolib.registry.selection_registry import build_selection_registry
 from evolib.registry.strategy_registry import strategy_registry
-from evolib.utils.config_loader import get_enum, load_config
-from evolib.utils.config_validator import validate_full_config
+from evolib.utils.config_loader import load_config
 from evolib.utils.history_logger import HistoryLogger
 
 
@@ -43,24 +41,23 @@ class Pop:
         config_path (str): Path to the population configuration file.
         """
 
-        cfg = load_config(config_path)
-        validate_full_config(cfg)
+        cfg: FullConfig = load_config(config_path)
 
         self.full_config = cfg
-        self.representation_cfg = cfg["representation"]
+        self.representation_cfg = cfg.representation
 
-        initializer_name = self.representation_cfg["initializer"]
+        initializer_name = self.representation_cfg.initializer
         initializer_factory = get_initializer(initializer_name)
         self.para_initializer = initializer_factory(cfg)
 
         self.indivs: List[Any] = []
 
         # Core parameters
-        self.parent_pool_size = cfg["parent_pool_size"]
-        self.offspring_pool_size = cfg["offspring_pool_size"]
-        self.max_generations = cfg["max_generations"]
-        self.max_indiv_age = cfg["max_indiv_age"]
-        self.num_elites = cfg["num_elites"]
+        self.parent_pool_size = cfg.parent_pool_size
+        self.offspring_pool_size = cfg.offspring_pool_size
+        self.max_generations = cfg.max_generations
+        self.max_indiv_age = cfg.max_indiv_age
+        self.num_elites = cfg.num_elites
 
         # Strategies (initially None – set externally later)
         self.mutation_strategy = None
@@ -76,35 +73,21 @@ class Pop:
         self.fitness_function: FitnessFunction | None = None
 
         # Evolution
-        evolution_cfg = cfg.get("evolution", None)
-        if evolution_cfg is not None:
-            self.evolution_strategy = get_enum(
-                EvolutionStrategy,
-                evolution_cfg.get("strategy", "mu_plus_lambda"),
-                "evolution strategy",
-            )
+        if cfg.evolution is not None:
+            self.evolution_strategy = cfg.evolution.strategy
         else:
             self.evolution_strategy = None
 
         # Selection
-        selection_cfg = cfg.get("selection", None)
-        if selection_cfg is not None:
-            self.selection_strategy = get_enum(
-                SelectionStrategy, selection_cfg["strategy"], "selection strategy"
-            )
-            self.selection_fn = selection_registry[self.selection_strategy]
-        else:
-            self.selection_strategy = None
-            self.selection_fn = None
+        if cfg.selection is not None:
+            self.selection_strategy = cfg.selection.strategy
+            self._selection_registry = build_selection_registry(cfg.selection)
+            self.selection_fn = self._selection_registry[self.selection_strategy]
 
         # Replacement
-        replacement_cfg = cfg.get("replacement", None)
-        if replacement_cfg is not None:
-            self.replacement_strategy = get_enum(
-                ReplacementStrategy, replacement_cfg["strategy"], "replacement strategy"
-            )
-
-            self._replacement_registry = build_replacement_registry(cfg["replacement"])
+        if cfg.replacement is not None:
+            self.replacement_strategy = cfg.replacement.strategy
+            self._replacement_registry = build_replacement_registry(cfg.replacement)
             self._replacement_fn = self._replacement_registry[self.replacement_strategy]
 
         else:
@@ -113,13 +96,12 @@ class Pop:
             self._replacement_fn = None
 
         # Mutation
-        self.mutation_strategy = get_enum(
-            MutationStrategy, cfg["mutation"]["strategy"], "mutation strategy"
-        )
+        self.mutation_strategy = cfg.mutation.strategy
 
         # Crossover
-        crossover_cfg = cfg.get("crossover", None)
-        if crossover_cfg is None:
+        if cfg.crossover is not None:
+            self.crossover_strategy = cfg.crossover.strategy
+        else:
             self.crossover_strategy = CrossoverStrategy.NONE
             self.crossover_probability = None
 

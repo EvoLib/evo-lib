@@ -18,7 +18,9 @@ from evolib.interfaces.enums import (
 class MutationConfig(BaseModel):
     strategy: MutationStrategy
     strength: Optional[float] = None
+    init_probability: Optional[float] = None
     probability: Optional[float] = None
+    init_strength: Optional[float] = None
     min_strength: Optional[float] = None
     max_strength: Optional[float] = None
     min_probability: Optional[float] = None
@@ -32,6 +34,7 @@ class MutationConfig(BaseModel):
 class CrossoverConfig(BaseModel):
     strategy: CrossoverStrategy
     probability: Optional[float] = None
+    init_probability: Optional[float] = None
     min_probability: Optional[float] = None
     max_probability: Optional[float] = None
     increase_factor: Optional[float] = None
@@ -45,6 +48,9 @@ class RepresentationConfig(BaseModel):
     initializer: str
     randomize_mutation_strengths: Optional[bool] = False
     init_bounds: Optional[Tuple[float, float]] = None
+    tau: Optional[float] = 0.0
+    mean: Optional[float] = 0.0
+    std: Optional[float] = 0.0
 
 
 class EvolutionConfig(BaseModel):

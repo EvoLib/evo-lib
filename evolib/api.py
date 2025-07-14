@@ -84,7 +84,7 @@ from evolib.operators.strategy import (
     evolve_steady_state,
 )
 from evolib.registry.replacement_registry import build_replacement_registry
-from evolib.registry.selection_registry import selection_registry
+from evolib.registry.selection_registry import build_selection_registry
 from evolib.registry.strategy_registry import strategy_registry
 from evolib.representation.base import ParaBase
 from evolib.representation.vector import ParaVector
@@ -110,7 +110,6 @@ from evolib.utils.benchmarks import (
     sphere_3d,
 )
 from evolib.utils.config_loader import T, get_enum, load_config
-from evolib.utils.config_validator import validate_full_config
 from evolib.utils.copy_indiv import copy_indiv
 from evolib.utils.history_logger import HistoryLogger
 from evolib.utils.loss_functions import (
@@ -185,6 +184,7 @@ __all__ = [
     "adapted_mutation_strength",
     "binary_cross_entropy_loss",
     "build_replacement_registry",
+    "build_selection_registry",
     "categorical_cross_entropy_loss",
     "clip",
     "clip_mutation_strength",
@@ -243,7 +243,6 @@ __all__ = [
     "selection_boltzmann",
     "selection_random",
     "selection_rank_based",
-    "selection_registry",
     "selection_roulette",
     "selection_sus",
     "selection_tournament",
@@ -253,7 +252,6 @@ __all__ = [
     "sphere_2d",
     "sphere_3d",
     "strategy_registry",
-    "validate_full_config",
     "vector_adaptive_initializer",
     "zero_initializer",
 ]

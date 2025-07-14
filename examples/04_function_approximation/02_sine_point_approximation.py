@@ -57,7 +57,7 @@ def plot_generation(indiv: Indiv, generation: int, x_support: np.ndarray) -> Non
 def run_experiment() -> None:
     pop = Pop(CONFIG_FILE)
 
-    num_support_points = pop.representation_cfg["dim"]
+    num_support_points = pop.full_config.representation.dim
     x_support = np.linspace(0, 2 * np.pi, num_support_points)
 
     pop.set_functions(fitness_function=make_fitness_function(x_support))

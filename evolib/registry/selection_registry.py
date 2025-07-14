@@ -11,6 +11,9 @@ Usage:
 Each function returns a list of selected parents (deep copies).
 """
 
+from functools import partial
+
+from evolib.config.schema import SelectionConfig
 from evolib.interfaces.enums import SelectionStrategy
 from evolib.interfaces.types import SelectionFunction
 from evolib.operators.selection import (
@@ -23,17 +26,45 @@ from evolib.operators.selection import (
     selection_truncation,
 )
 
-selection_registry: dict[SelectionStrategy, SelectionFunction] = {
-    SelectionStrategy.TOURNAMENT: selection_tournament,
-    SelectionStrategy.ROULETTE: selection_roulette,
-    SelectionStrategy.RANK_LINEAR: lambda pop, n: selection_rank_based(
-        pop, num_parents=n, mode="linear"
-    ),
-    SelectionStrategy.RANK_EXPONENTIAL: lambda pop, n: selection_rank_based(
-        pop, num_parents=n, mode="exponential"
-    ),
-    SelectionStrategy.SUS: selection_sus,
-    SelectionStrategy.BOLTZMANN: selection_boltzmann,
-    SelectionStrategy.TRUNCATION: selection_truncation,
-    SelectionStrategy.RANDOM: lambda pop, n: selection_random(pop)[:n],
-}
+
+def build_selection_registry(
+    cfg: SelectionConfig,
+) -> dict[SelectionStrategy, SelectionFunction]:
+    """Create a selection registry with strategy-specific parameters bound from
+    config."""
+    return {
+        SelectionStrategy.TOURNAMENT: partial(
+            selection_tournament,
+            tournament_size=cfg.tournament_size or 3,
+            fitness_maximization=cfg.fitness_maximization or False,
+        ),
+        SelectionStrategy.ROULETTE: partial(
+            selection_roulette,
+            fitness_maximization=cfg.fitness_maximization or False,
+        ),
+        SelectionStrategy.RANK_LINEAR: partial(
+            selection_rank_based,
+            mode="linear",
+            fitness_maximization=cfg.fitness_maximization or False,
+        ),
+        SelectionStrategy.RANK_EXPONENTIAL: partial(
+            selection_rank_based,
+            mode="exponential",
+            exp_base=cfg.exp_base or 2.0,
+            fitness_maximization=cfg.fitness_maximization or False,
+        ),
+        SelectionStrategy.SUS: partial(
+            selection_sus,
+            fitness_maximization=cfg.fitness_maximization or False,
+        ),
+        SelectionStrategy.BOLTZMANN: partial(
+            selection_boltzmann,
+            temperature=cfg.exp_base or 1.0,
+            fitness_maximization=cfg.fitness_maximization or False,
+        ),
+        SelectionStrategy.TRUNCATION: partial(
+            selection_truncation,
+            fitness_maximization=cfg.fitness_maximization or False,
+        ),
+        SelectionStrategy.RANDOM: lambda pop, n: selection_random(pop)[:n],
+    }

@@ -3,36 +3,29 @@
 
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Type, TypeVar
+from typing import Type, TypeVar
 
 import yaml
+
+from evolib.config.schema import FullConfig
 
 T = TypeVar("T", bound=Enum)
 
 
-def load_config(path: str) -> Dict[str, Any]:
+def load_config(path: str | Path) -> FullConfig:
     """
-    Lädt eine YAML-Datei und gibt den Inhalt als Dictionary zurück.
+    Loads and parses a YAML configuration file into a validated FullConfig object.
 
     Args:
-        path: Pfad zur YAML-Konfigurationsdatei.
+        path (str | Path): Path to YAML file.
 
     Returns:
-        Dictionary mit den Konfigurationswerten.
-
-    Raises:
-        FileNotFoundError: Wenn die Datei nicht existiert.
-        yaml.YAMLError: Wenn ein YAML-Parsing-Fehler auftritt.
+        FullConfig: Fully validated configuration object.
     """
-    file_path = Path(path)
-    if not file_path.exists():
-        raise FileNotFoundError(f"Konfigurationsdatei nicht gefunden: {str(file_path)}")
+    with open(path, "r") as file:
+        raw_cfg = yaml.safe_load(file)
 
-    with file_path.open("r", encoding="utf-8") as f:
-        try:
-            return yaml.safe_load(f)
-        except yaml.YAMLError as e:
-            raise ValueError(f"Fehler beim Parsen der YAML-Datei: {e}") from e
+    return FullConfig(**raw_cfg)
 
 
 def get_enum(enum_class: Type[T], value: str, field_name: str) -> T:
