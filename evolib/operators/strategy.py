@@ -27,11 +27,7 @@ if TYPE_CHECKING:
     from evolib.core.population import Pop
 
 from evolib.operators.mutation import mutate_offspring
-from evolib.operators.replacement import (
-    replace_generational,
-    replace_steady_state,
-    replace_truncation,
-)
+from evolib.operators.replacement import replace_mu_lambda, replace_steady_state
 from evolib.operators.reproduction import generate_cloned_offspring
 
 
@@ -62,7 +58,7 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
     pop.evaluate_indivs(combined)
 
     # Select the best individuals
-    replace_truncation(pop, combined)
+    replace_mu_lambda(pop, combined)
 
     pop.update_statistics()
 
@@ -94,7 +90,7 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
     pop.evaluate_indivs(offspring)
 
     # REPLACE PARENTS
-    replace_generational(pop, offspring)
+    replace_mu_lambda(pop, offspring)
 
     pop.update_statistics()
 

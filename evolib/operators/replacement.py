@@ -10,16 +10,30 @@ if TYPE_CHECKING:
 
 from evolib.core.population import Indiv
 from evolib.interfaces.enums import Origin
+from evolib.utils.fitness import sort_by_fitness
 
 
-def replace_truncation(pop: "Pop", offspring: List[Indiv]) -> None:
+def replace_truncation(
+    pop: "Pop", offspring: List[Indiv], fitness_maximization: bool = False
+) -> None:
     """
-    Replaces the current population with the fittest individuals from the offspring
-    using truncation selection.
+    Replacement via truncation: select the top μ individuals from a given list
+    (e.g., offspring or parents + offspring) based on fitness.
+
+    This strategy performs a pure replacement without elitism, aging,
+    or additional constraints.
+
+    Suitable for:
+    - (μ, λ) strategies
+    - (μ + λ) strategies without elitism
+    - educational purposes (clean, minimal logic)
+
+    See also: `replace_generational` for elitism and aging support.
 
     Args:
         pop (Pop): The population object whose individuals will be replaced.
         offspring (List[Indiv]): A list of newly generated offspring individuals.
+        fitness_maximization: If True, higher fitness is better.
     """
 
     if not offspring:
@@ -28,13 +42,15 @@ def replace_truncation(pop: "Pop", offspring: List[Indiv]) -> None:
         raise ValueError("Not enough offspring to fill the parent pool.")
 
     # Sort offspring by fitness in ascending order (assuming lower is better)
-    sorted_offspring = sorted(offspring, key=lambda indiv: indiv.fitness)
+    sorted_offspring = sort_by_fitness(offspring, maximize=fitness_maximization)
 
     # Truncate to the desired number of parents
     pop.indivs = sorted_offspring[: pop.parent_pool_size]
 
 
-def replace_mu_lambda(pop: "Pop", offspring: List[Indiv]) -> None:
+def replace_mu_lambda(
+    pop: "Pop", offspring: List[Indiv], fitness_maximization: bool = False
+) -> None:
     """
     Replaces the population with new offspring using the mu+lambda strategy, followed by
     resetting the parent index and origin of the individuals.
@@ -44,14 +60,19 @@ def replace_mu_lambda(pop: "Pop", offspring: List[Indiv]) -> None:
         offspring (List[Indiv]): A list of newly generated offspring individuals.
     """
 
-    replace_truncation(pop, offspring)
+    replace_truncation(pop, offspring, fitness_maximization)
 
     for indiv in pop.indivs:
         indiv.parent_idx = None
         indiv.origin = Origin.PARENT
 
 
-def replace_generational(pop: "Pop", offspring: List[Indiv], max_age: int = 0) -> None:
+def replace_generational(
+    pop: "Pop",
+    offspring: List[Indiv],
+    max_age: int = 0,
+    fitness_maximization: bool = False,
+) -> None:
     """
     Replace the population with new offspring, optionally preserving elite individuals.
     Can mimic steady-state if num_elite is high.
@@ -91,7 +112,7 @@ def replace_generational(pop: "Pop", offspring: List[Indiv], max_age: int = 0) -
 
     # Sort population and offspring by fitness (ascending)
     pop.sort_by_fitness()
-    offspring.sort(key=lambda indivs: indivs.fitness)
+    offspring = sort_by_fitness(offspring, maximize=fitness_maximization)
 
     if max_age > 0:
         pop.indivs.extend(offspring)
@@ -105,7 +126,10 @@ def replace_generational(pop: "Pop", offspring: List[Indiv], max_age: int = 0) -
 
 
 def replace_steady_state(
-    pop: "Pop", offspring: List[Indiv], num_replace: int = 0
+    pop: "Pop",
+    offspring: List[Indiv],
+    num_replace: int = 0,
+    fitness_maximization: bool = False,
 ) -> None:
     """
     Replace the worst individuals in the population with new offspring using steady-
@@ -141,11 +165,11 @@ def replace_steady_state(
             f"offspring ({len(offspring)})."
         )
 
-    # Sort population by ascending fitness
+    # Sort population by fitness
     pop.sort_by_fitness()
 
-    # Sort offspring by ascending fitness
-    sorted_offspring = sorted(offspring, key=lambda indiv: indiv.fitness)
+    # Sort offspring by fitness
+    sorted_offspring = sort_by_fitness(offspring, maximize=fitness_maximization)
 
     # Replace the worst individuals with new offspring
     pop.indivs[-num_replace:] = sorted_offspring[:num_replace]
@@ -198,7 +222,10 @@ def replace_random(pop: "Pop", offspring: List[Indiv]) -> None:
 
 
 def replace_weighted_stochastic(
-    pop: "Pop", offspring: List[Indiv], temperature: float = 1.0
+    pop: "Pop",
+    offspring: List[Indiv],
+    temperature: float = 1.0,
+    fitness_maximization: bool = False,
 ) -> None:
     """
     Replaces individuals in the population with offspring, using a probability weighted
@@ -215,12 +242,16 @@ def replace_weighted_stochastic(
     if len(offspring) > len(pop.indivs):
         raise ValueError("Offspring size cannot exceed population size.")
 
-    # Fitness-Array (niedrig besser)
+    # Fitness-Array
     fitness = np.array([indiv.fitness for indiv in pop.indivs])
 
     # Normiere mit Softmax über negatives Fitnessmaß
     # (damit schlechte höhere Wahrscheinlichkeit haben)
-    inverse_scaled = -fitness / temperature
+    if not fitness_maximization:
+        inverse_scaled = -fitness / temperature
+    else:
+        inverse_scaled = fitness / temperature
+
     probabilities = np.exp(
         inverse_scaled - np.max(inverse_scaled)
     )  # Für numerische Stabilität
