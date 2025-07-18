@@ -399,6 +399,7 @@ def selection_truncation(
     Returns:
         List[Any]: Selected individuals (deep copies).
     """
+
     if not pop.indivs:
         raise ValueError("Population is empty")
     if num_parents > len(pop.indivs):

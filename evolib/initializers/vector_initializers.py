@@ -40,7 +40,7 @@ def zero_initializer(cfg: FullConfig) -> Callable[[Pop], ParaVector]:
 
 
 def fixed_initializer(cfg: FullConfig) -> Callable[[Pop], ParaVector]:
-    values = np.array(cfg.representation)
+    values = np.array(cfg.representation.values)
 
     def init_fn(_: Pop) -> ParaVector:
         pv = ParaVector()

@@ -70,6 +70,7 @@ def run_experiment() -> None:
     pop = Pop(CONFIG_FILE)
 
     dim = pop.full_config.representation.dim
+    assert dim is not None
     x_support = np.linspace(0, 2 * np.pi, dim)
 
     pop.set_functions(fitness_function=make_fitness_function(x_support))

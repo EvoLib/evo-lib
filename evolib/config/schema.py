@@ -86,6 +86,7 @@ class EvolutionConfig(BaseModel):
 
 class SelectionConfig(BaseModel):
     strategy: SelectionStrategy
+    num_parents: Optional[int] = None
     tournament_size: Optional[int] = None
     exp_base: Optional[float] = None
     fitness_maximization: Optional[bool] = False

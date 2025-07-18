@@ -132,7 +132,14 @@ def evolve_steady_state(pop: "Pop") -> None:
         )
 
     # Select parents (configurable)
-    parents = pop.select_parents(pop.lambda_)
+    if (
+        pop.full_config.selection is not None
+        and pop.full_config.selection.num_parents is not None
+    ):
+        num_parents = pop.full_config.selection.num_parents
+    else:
+        num_parents = pop.offspring_pool_size
+    parents = pop.select_parents(num_parents)
 
     # Generate cloned offspring
     offspring = generate_cloned_offspring(parents, pop.lambda_)
@@ -175,8 +182,18 @@ def evolve_flexible(pop: "Pop") -> None:
     if pop._replacement_fn is None:
         raise ValueError("Replacement function not configured.")
 
+    # Fitness
+    pop.evaluate_fitness()
+
     # Selection
-    parents = pop.select_parents(pop.lambda_)
+    if (
+        pop.full_config.selection is not None
+        and pop.full_config.selection.num_parents is not None
+    ):
+        num_parents = pop.full_config.selection.num_parents
+    else:
+        num_parents = pop.offspring_pool_size
+    parents = pop.select_parents(num_parents)
 
     # Reproduction
     offspring = generate_cloned_offspring(parents, pop.lambda_)

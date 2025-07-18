@@ -286,10 +286,7 @@ class ParaVector(ParaBase):
         """Applies crossover to the parameter vector."""
         # TODO
 
-        prob = self.crossover_probability or 1.0  # garantiert float
-
-        print(prob)
-        exit(0)
+        # prob = self.crossover_probability or 1.0  # garantiert float
 
         # Clip to bounds
         assert self.bounds is not None
