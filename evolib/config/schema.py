@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MIT
 """Defines the pydantic schema for YAML-based configuration files in EvoLib."""
 
-from typing import Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from evolib.interfaces.enums import (
     CrossoverStrategy,
@@ -43,14 +43,41 @@ class CrossoverConfig(BaseModel):
 
 class RepresentationConfig(BaseModel):
     type: RepresentationType
-    dim: int
+    dim: Optional[int] = None
     bounds: Tuple[float, float]
     initializer: str
+    values: Optional[List[float]] = None  # Nur für fixed
     randomize_mutation_strengths: Optional[bool] = False
     init_bounds: Optional[Tuple[float, float]] = None
     tau: Optional[float] = 0.0
     mean: Optional[float] = 0.0
     std: Optional[float] = 0.0
+
+    @model_validator(mode="before")
+    @classmethod
+    def check_fixed_initializer(cls, data: dict[str, Any]) -> dict[str, Any]:
+        initializer = data.get("initializer")
+        dim = data.get("dim")
+        values = data.get("values")
+
+        if initializer == "fixed_initializer":
+            if not values:
+                raise ValueError(
+                    "When using 'fixed' initializer, " "'values' must be provided."
+                )
+            if dim is None:
+                data["dim"] = len(values)
+        else:
+            if dim is None:
+                raise ValueError(
+                    "Field 'dim' is required for initializers other " "than 'fixed'."
+                )
+            if values is not None:
+                raise ValueError(
+                    "Field 'values' must not be set unless initializer " "is 'fixed'."
+                )
+
+        return data
 
 
 class EvolutionConfig(BaseModel):
