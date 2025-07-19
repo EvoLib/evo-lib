@@ -135,11 +135,11 @@ def selection_tournament(
 
 def selection_rank_based(
     pop: "Pop",
-    *,
     num_parents: int,
+    *,
     mode: str = "linear",
     remove_selected: bool = False,
-    exp_base: float = 2.0,
+    exp_base: float = 1.0,
     fitness_maximization: bool = False,
 ) -> List[Any]:
     """
@@ -177,6 +177,11 @@ def selection_rank_based(
         )
     if exp_base <= 0:
         raise ValueError("exp_base must be greater than 0")
+
+    if mode == "exponential" and exp_base is None:
+        raise ValueError("exp_base must be set when using exponential rank selection.")
+
+    exp_base = 1.0
 
     fitnesses = [indiv.fitness for indiv in pop.indivs]
     if any(f is None or np.isnan(f) for f in fitnesses):
