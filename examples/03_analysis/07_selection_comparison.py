@@ -14,8 +14,13 @@ Included selection methods:
 - Random
 - Truncation
 
-Each method is defined via a separate YAML config file. After the runs, best fitness
-trajectories are plotted to visualize convergence behavior and selection pressure.
+Each method is defined via a separate YAML config file. All runs use the same
+offspring pool size (λ) and select 20 parents per generation (num_parents = 20),
+creating a moderate selection pressure. This helps highlight differences between
+selection strategies in terms of convergence behavior and robustness.
+
+After the runs, best fitness trajectories are plotted to visualize and compare
+selection performance.
 """
 
 import numpy as np

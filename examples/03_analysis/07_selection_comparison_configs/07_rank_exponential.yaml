@@ -18,6 +18,7 @@ representation:
 
 selection:
   strategy: rank_exponential
+  num_parents: 20
 
 mutation:
   strategy: "constant"

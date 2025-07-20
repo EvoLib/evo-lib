@@ -18,6 +18,7 @@ representation:
 
 selection:
   strategy: random
+  num_parents: 20
 
 mutation:
   strategy: "constant"
