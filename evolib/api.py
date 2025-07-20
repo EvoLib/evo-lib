@@ -25,6 +25,7 @@ from evolib.initializers.vector_initializers import (
     zero_initializer,
 )
 from evolib.interfaces.enums import (
+    CrossoverOperator,
     CrossoverStrategy,
     DiversityMethod,
     EvolutionStrategy,
@@ -111,6 +112,7 @@ from evolib.utils.benchmarks import (
 )
 from evolib.utils.config_loader import T, get_enum, load_config
 from evolib.utils.copy_indiv import copy_indiv
+from evolib.utils.fitness import sort_by_fitness
 from evolib.utils.history_logger import HistoryLogger
 from evolib.utils.loss_functions import (
     binary_cross_entropy_loss,
@@ -140,6 +142,7 @@ from evolib.utils.registry import (
 __all__ = [
     "CrossoverConfig",
     "CrossoverFunction",
+    "CrossoverOperator",
     "CrossoverStrategy",
     "DEFAULT_FLOAT_DTYPE",
     "DiversityMethod",
@@ -248,6 +251,7 @@ __all__ = [
     "selection_tournament",
     "selection_truncation",
     "simple_quadratic",
+    "sort_by_fitness",
     "sphere",
     "sphere_2d",
     "sphere_3d",

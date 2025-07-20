@@ -46,6 +46,15 @@ class CrossoverStrategy(Enum):
     CONSTANT = "constant"
 
 
+class CrossoverOperator(Enum):
+    BLX = "blx"
+    ARITHMETIC = "arithmetic"
+    SBX = "sbx"
+    INTERMEDIATE = "intermediate"
+    HEURISTIC = "heuristic"
+    DIFFERENTIAL = "differential"
+
+
 class DiversityMethod(Enum):
     IQR = "iqr"
     RELATIVE_IQR = "relative_iqr"  # (IQR / median)

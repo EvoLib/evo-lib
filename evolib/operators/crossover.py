@@ -8,9 +8,15 @@ vectors and adaptable to various evolutionary strategies.
 """
 
 import random
-from typing import Callable, List, Tuple, Union
+from typing import TYPE_CHECKING, Callable, List, Tuple, Union
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from evolib.core.individual import Indiv
+    from evolib.core.population import Pop
+
+from evolib.interfaces.enums import CrossoverStrategy
 
 
 def crossover_blend_alpha(
@@ -295,3 +301,35 @@ def crossover_differential(
             child[i] = mutant[i]
 
     return child, parent1.copy()
+
+
+def crossover_offspring(pop: "Pop", offspring: list["Indiv"]) -> None:
+    """
+    Applies pairwise crossover to cloned offspring individuals.
+
+    Notes:
+        - Offspring are assumed to be copied before this call.
+        - Individuals are paired (0,1), (2,3), ...
+        - Crossover is delegated to `indiv.para.crossover_with(partner.para)`
+        - If `crossover_strategy` is NONE or probability too low, nothing happens.
+        - This method does not return; offspring are modified in place.
+    """
+    if (
+        not offspring
+        or pop.crossover_strategy is None
+        or pop.crossover_strategy == CrossoverStrategy.NONE
+    ):
+        return
+
+    for i in range(0, len(offspring) - 1, 2):
+        a = offspring[i]
+        b = offspring[i + 1]
+
+        # Get crossover probability from para (individual)
+        prob = getattr(a.para, "crossover_probability", 1.0)
+        if prob is None or prob <= 0.0:
+            continue
+
+        # Perform crossover with given probability
+        if np.random.rand() < prob:
+            a.para.crossover_with(b.para)

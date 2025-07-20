@@ -1,9 +1,21 @@
 from abc import ABC, abstractmethod
+from typing import Callable, Union
+
+import numpy as np
 
 from evolib.config.schema import FullConfig
 
 
 class ParaBase(ABC):
+    def __init__(self) -> None:
+        self._crossover_fn: (
+            Callable[
+                [np.ndarray, np.ndarray],
+                Union[np.ndarray, tuple[np.ndarray, np.ndarray]],
+            ]
+            | None
+        ) = None
+
     @abstractmethod
     def apply_config(self, cfg: FullConfig) -> None: ...
 
@@ -33,3 +45,18 @@ class ParaBase(ABC):
         crossover control.
         """
         pass
+
+    def crossover_with(self, partner: "ParaBase") -> None:
+        """
+        Delegates crossover logic to the assigned strategy function.
+
+        Must be overridden if internal application logic differs.
+        """
+        if self._crossover_fn is None:
+            raise RuntimeError(
+                f"No crossover function defined for {self.__class__.__name__}"
+            )
+        raise NotImplementedError(
+            "crossover_with must be implemented in the concrete Para subclass "
+            "to interpret the result of _crossover_fn()."
+        )

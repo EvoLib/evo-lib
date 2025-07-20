@@ -6,6 +6,7 @@ from typing import Any, List, Optional, Tuple
 from pydantic import BaseModel, Field, model_validator
 
 from evolib.interfaces.enums import (
+    CrossoverOperator,
     CrossoverStrategy,
     EvolutionStrategy,
     MutationStrategy,
@@ -33,6 +34,7 @@ class MutationConfig(BaseModel):
 
 class CrossoverConfig(BaseModel):
     strategy: CrossoverStrategy
+    operator: Optional[CrossoverOperator] = None
     probability: Optional[float] = None
     init_probability: Optional[float] = None
     min_probability: Optional[float] = None

@@ -26,6 +26,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from evolib.core.population import Pop
 
+from evolib.operators.crossover import crossover_offspring
 from evolib.operators.mutation import mutate_offspring
 from evolib.operators.replacement import replace_mu_lambda, replace_steady_state
 from evolib.operators.reproduction import generate_cloned_offspring
@@ -48,6 +49,9 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
 
     # CREATE OFFSPRING
     offspring = generate_cloned_offspring(pop.indivs, pop.offspring_pool_size)
+
+    # Crossover
+    crossover_offspring(pop, offspring)
 
     # OFFSPRING MUTATION
     mutate_offspring(pop, offspring)
@@ -82,6 +86,9 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
 
     # CREATE OFFSPRING
     offspring = generate_cloned_offspring(pop.indivs, pop.offspring_pool_size)
+
+    # Crossover
+    crossover_offspring(pop, offspring)
 
     # OFFSPRING MUTATION
     mutate_offspring(pop, offspring)
@@ -147,6 +154,9 @@ def evolve_steady_state(pop: "Pop") -> None:
     # Update mutation/crossover parameters
     pop.update_parameters()
 
+    # Crossover
+    crossover_offspring(pop, offspring)
+
     # Mutate offspring
     mutate_offspring(pop, offspring)
 
@@ -197,6 +207,9 @@ def evolve_flexible(pop: "Pop") -> None:
 
     # Reproduction
     offspring = generate_cloned_offspring(parents, pop.lambda_)
+
+    # Crossover
+    crossover_offspring(pop, offspring)
 
     # Mutation & Crossover Parameters
     pop.update_parameters()

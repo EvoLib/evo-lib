@@ -1,7 +1,11 @@
 import numpy as np
 
 from evolib.config.schema import FullConfig
-from evolib.interfaces.enums import CrossoverStrategy, MutationStrategy
+from evolib.interfaces.enums import (
+    CrossoverOperator,
+    CrossoverStrategy,
+    MutationStrategy,
+)
 from evolib.interfaces.structs import MutationParams
 from evolib.operators.mutation import adapted_mutation_strength
 from evolib.representation.base import ParaBase
@@ -282,15 +286,35 @@ class ParaVector(ParaBase):
 
             self.adapt_para_mutation_strengths(params)
 
-    def crossover(self) -> None:
-        """Applies crossover to the parameter vector."""
-        # TODO
+    def crossover_with(self, partner: "ParaBase") -> None:
+        """
+        Applies crossover with another ParaBase-compatible instance.
 
-        # prob = self.crossover_probability or 1.0  # garantiert float
+        This method is specific to ParaVector and expects the partner to also be a
+        ParaVector. The internal _crossover_fn may return either a single offspring
+        vector or a tuple of two.
+        """
+        if not isinstance(partner, ParaVector):
+            return
 
-        # Clip to bounds
-        assert self.bounds is not None
-        self.vector = np.clip(self.vector, *self.bounds)
+        if self._crossover_fn is None:
+            return
+
+        result = self._crossover_fn(self.vector, partner.vector)
+
+        if isinstance(result, tuple):
+            child1, child2 = result
+        else:
+            child1 = child2 = result
+
+        if self.bounds is None or partner.bounds is None:
+            raise ValueError("Both participants must define bounds before crossover.")
+
+        min_val, max_val = self.bounds
+        self.vector = np.clip(child1, min_val, max_val)
+
+        min_val_p, max_val_p = partner.bounds
+        partner.vector = np.clip(child2, min_val_p, max_val_p)
 
     def update_crossover_parameters(
         self, generation: int, max_generations: int, diversity_ema: float | None = None
@@ -573,6 +597,7 @@ class ParaVector(ParaBase):
         # Crossover
         if cfg.crossover is None:
             self.crossover_strategy = CrossoverStrategy.NONE
+            self._crossover_fn = None
             self.crossover_probability = None
         else:
             self.crossover_strategy = CrossoverStrategy(cfg.crossover.strategy)
@@ -589,3 +614,28 @@ class ParaVector(ParaBase):
                 self.max_crossover_probability = cfg.crossover.max_probability
                 self.crossover_inc_factor = cfg.crossover.increase_factor
                 self.crossover_dec_factor = cfg.crossover.decrease_factor
+
+        # Choose an operator
+        if cfg.crossover is None or cfg.crossover.operator is None:
+            self._crossover_fn = None
+            return
+
+        crossover_op = cfg.crossover.operator
+
+        if crossover_op == CrossoverOperator.BLX:
+            from evolib.operators.crossover import crossover_blend_alpha
+
+            self._crossover_fn = lambda a, b: crossover_blend_alpha(a, b, alpha=0.5)
+
+        elif crossover_op == CrossoverOperator.ARITHMETIC:
+            from evolib.operators.crossover import crossover_arithmetic
+
+            self._crossover_fn = crossover_arithmetic
+
+        elif crossover_op == CrossoverOperator.SBX:
+            from evolib.operators.crossover import crossover_simulated_binary
+
+            self._crossover_fn = crossover_simulated_binary
+
+        else:
+            self._crossover_fn = None
