@@ -1,0 +1,29 @@
+# Simple sample configuration
+
+parent_pool_size: 50
+offspring_pool_size: 100
+
+max_generations: 50
+max_indiv_age: 0
+num_elites: 1
+
+evolution:
+  strategy: "flexible"
+
+representation:
+  type: vector
+  initializer: random_initializer
+  dim: 10
+  bounds: [-4.0, 4.0]
+
+selection:
+  strategy: rank_linear
+  num_parents: 40
+
+mutation:
+  strategy: "constant"
+  strength: 0.05
+  probability: 1.0
+
+replacement:
+  strategy: truncation

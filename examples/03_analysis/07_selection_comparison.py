@@ -55,14 +55,14 @@ def run(config_path: str) -> pd.DataFrame:
 
 # Labels & runs
 selection_strategies = {
-    "boltzmann": "./07_selection_comparison_configs/07_boltzmann.yaml",
-    "random": "./07_selection_comparison_configs/07_random.yaml",
-    "rank_linear": "./07_selection_comparison_configs/07_rank_linear.yaml",
-    "rank_exponential": "./07_selection_comparison_configs/07_rank_exponential.yaml",
-    "roulette": "./07_selection_comparison_configs/07_roulette.yaml",
-    "sus": "./07_selection_comparison_configs/07_sus.yaml",
-    "tournament": "./07_selection_comparison_configs/07_tournament.yaml",
-    "truncation": "./07_selection_comparison_configs/07_truncation.yaml",
+    "boltzmann": "./07_configs/07_boltzmann.yaml",
+    "random": "./07_configs/07_random.yaml",
+    "rank_linear": "./07_configs/07_rank_linear.yaml",
+    "rank_exponential": "./07_configs/07_rank_exponential.yaml",
+    "roulette": "./07_configs/07_roulette.yaml",
+    "sus": "./07_configs/07_sus.yaml",
+    "tournament": "./07_configs/07_tournament.yaml",
+    "truncation": "./07_configs/07_truncation.yaml",
 }
 
 runs = {}

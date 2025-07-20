@@ -41,9 +41,9 @@ def run(config_path: str) -> pd.DataFrame:
 
 # Variation over num_parents
 config_variants = {
-    "num_parents=10": "./08_selection_pressure_configs/08_selection_pressure_10.yaml",
-    "num_parents=20": "./08_selection_pressure_configs/08_selection_pressure_20.yaml",
-    "num_parents=40": "./08_selection_pressure_configs/08_selection_pressure_40.yaml",
+    "num_parents=10": "./08_configs/08_selection_pressure_10.yaml",
+    "num_parents=20": "./08_configs/08_selection_pressure_20.yaml",
+    "num_parents=40": "./08_configs/08_selection_pressure_40.yaml",
     "num_parents=80": "./08_selection_pressure_configs/08_selection_pressure_80.yaml",
 }
 
