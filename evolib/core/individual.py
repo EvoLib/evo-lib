@@ -45,6 +45,7 @@ class Indiv:
         "origin",
         "parent_idx",
         "extra_metrics",
+        "is_elite",
     )
 
     extra_metrics: dict[str, float]
@@ -62,6 +63,7 @@ class Indiv:
         self.max_age = 0
         self.origin: Origin = Origin.PARENT
         self.parent_idx: Optional[int] = None
+        self.is_elite: bool = False
 
         self.extra_metrics = {}
 

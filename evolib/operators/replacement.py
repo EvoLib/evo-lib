@@ -44,8 +44,14 @@ def replace_truncation(
     # Sort offspring by fitness in ascending order (assuming lower is better)
     sorted_offspring = sort_by_fitness(offspring, maximize=fitness_maximization)
 
-    # Truncate to the desired number of parents
-    pop.indivs = sorted_offspring[: pop.parent_pool_size]
+    # Keep current elites from previous generation
+    elites = pop.get_elites()
+
+    # Select remaining individuals
+    remaining = sorted_offspring[: pop.parent_pool_size - len(elites)]
+
+    # Combine elites + top offspring
+    pop.indivs = elites + remaining
 
 
 def replace_mu_lambda(
@@ -74,55 +80,52 @@ def replace_generational(
     fitness_maximization: bool = False,
 ) -> None:
     """
-    Replace the population with new offspring, optionally preserving elite individuals.
-    Can mimic steady-state if num_elite is high.
+    Replace the population with offspring, preserving elites and optionally applying
+    age-based filtering. Resulting population is sorted by fitness.
+
+    This function implements generational replacement with elitism and
+    optional aging. The final population size will be at most pop.parent_pool_size.
 
     Args:
-        pop (Pop): The population object whose individuals will be replaced.
-        offspring (List[Indiv]): A list of new offspring individuals.
-        max_age (int, optional): Maximum age for individuals. If set, individuals
-        older than this age will be removed.
-        Defaults to 0 (no age limit).
+        pop (Pop): The population object.
+        offspring (List[Indiv]): Newly generated offspring.
+        max_age (int): Maximum allowed individual age (0 = disabled).
+        fitness_maximization (bool): If True, higher fitness is better.
 
     Raises:
-        ValueError: If offspring is empty, num_elite is negative, or there are
-                    insufficient offspring
-                    to fill the population after preserving elites.
+        ValueError: On invalid configuration or population state.
     """
-
     if not offspring:
-        raise ValueError("Offspring list cannot be empty")
+        raise ValueError("Offspring list cannot be empty.")
     if pop.num_elites < 0:
-        raise ValueError(f"num_elite ({pop.num_elites}) cannot be negative")
+        raise ValueError(f"num_elites ({pop.num_elites}) cannot be negative.")
     if pop.num_elites > len(pop.indivs):
         raise ValueError(
-            f"num_elite ({pop.num_elites}) cannot exceed population"
-            f"size ({len(pop.indivs)})"
+            f"num_elites ({pop.num_elites}) cannot exceed population size "
+            f"({len(pop.indivs)})."
         )
     if max_age < 0:
-        raise ValueError("max_age must be greater than 0")
+        raise ValueError("max_age must be ≥ 0.")
 
-    # Calculate required offspring count after preserving elites
-    required_offspring = len(pop.indivs) - pop.num_elites
-    if required_offspring > len(offspring) and max_age == 0:
-        raise ValueError(
-            f"Insufficient offspring ({len(offspring)}) to fill population "
-            f"({len(pop.indivs)}) with {pop.num_elites} elites"
-        )
+    # Sort and mark elites
+    elites = pop.get_elites()
 
-    # Sort population and offspring by fitness (ascending)
-    pop.sort_by_fitness()
-    offspring = sort_by_fitness(offspring, maximize=fitness_maximization)
+    # Combine offspring with current population (needed for aging step)
+    combined = elites + offspring
 
+    # Filter by age if aging is active
     if max_age > 0:
-        pop.indivs.extend(offspring)
-        for indiv in pop.indivs[pop.num_elites :]:
-            if indiv.age >= max_age:
-                pop.indivs.remove(indiv)
-
+        survivors = [
+            indiv for indiv in combined if indiv.is_elite or indiv.age < max_age
+        ]
     else:
-        # Replace the population with offspring, keeping elites
-        pop.indivs[pop.num_elites :] = offspring[:required_offspring]
+        survivors = combined
+
+    # Sort by fitness (best first)
+    sorted_survivors = sort_by_fitness(survivors, maximize=fitness_maximization)
+
+    # Truncate to desired population size
+    pop.indivs = sorted_survivors[: pop.parent_pool_size]
 
 
 def replace_steady_state(
@@ -132,93 +135,114 @@ def replace_steady_state(
     fitness_maximization: bool = False,
 ) -> None:
     """
-    Replace the worst individuals in the population with new offspring using steady-
-    state strategy. Can mimic generational replacement if num_replace equals the
-    population size.
+    Replace the worst individuals in the population with offspring, preserving elite
+    individuals. Implements steady-state replacement.
 
     Args:
-        pop (Pop): The current population.
-        offspring (List[Indiv]): List of new individuals to iinsert into the population.
-        num_replace (int, optional): Number of individuals to replace.
-        Defaults to len(offspring).
+        pop (Pop): Current population.
+        offspring (List[Indiv]): New individuals to insert.
+        num_replace (int): Number of individuals to replace.
+            If 0, replaces len(offspring).
+        fitness_maximization (bool): Whether higher fitness is better.
 
     Raises:
-        ValueError: If num_replace exceeds population size or is negative, or if i
-        offspring is empty.
+        ValueError: If replacement configuration is invalid.
     """
     if not offspring:
-        raise ValueError("Offspring list cannot be empty")
+        raise ValueError("Offspring list cannot be empty.")
 
-    if num_replace is None:
+    if num_replace is None or num_replace <= 0:
         num_replace = len(offspring)
 
-    if num_replace <= 0:
-        raise ValueError("num_replace must be greater than 0.")
     if num_replace > len(pop.indivs):
         raise ValueError(
-            f"num_replace ({num_replace}) cannot exceed population"
-            f"size ({len(pop.indivs)})."
+            f"num_replace ({num_replace}) cannot exceed "
+            f"population size ({len(pop.indivs)})."
         )
     if num_replace > len(offspring):
         raise ValueError(
-            f"num_replace ({num_replace}) cannot exceed number of"
+            f"num_replace ({num_replace}) cannot exceed number of "
             f"offspring ({len(offspring)})."
         )
+    if pop.num_elites < 0:
+        raise ValueError(f"num_elites ({pop.num_elites}) cannot be negative.")
+    if pop.num_elites > len(pop.indivs):
+        raise ValueError(
+            f"num_elites ({pop.num_elites}) cannot exceed "
+            f"population size ({len(pop.indivs)})."
+        )
 
-    # Sort population by fitness
-    pop.sort_by_fitness()
+    # Get sorted elite individuals and mark them
+    elites = pop.get_elites()
 
-    # Sort offspring by fitness
+    # Define replaceable pool (non-elites only)
+    non_elites = [indiv for indiv in pop.indivs if not indiv.is_elite]
+
+    if num_replace > len(non_elites):
+        raise ValueError(
+            f"Not enough non-elites ({len(non_elites)}) to "
+            f"replace {num_replace} individuals."
+        )
+
+    # Sort non-elites by fitness (worst at the end)
+    sorted_non_elites = sort_by_fitness(non_elites, maximize=fitness_maximization)
+
+    # Replace worst non-elites with best offspring
     sorted_offspring = sort_by_fitness(offspring, maximize=fitness_maximization)
 
-    # Replace the worst individuals with new offspring
-    pop.indivs[-num_replace:] = sorted_offspring[:num_replace]
+    survivors = (
+        elites + sorted_non_elites[:-num_replace] + sorted_offspring[:num_replace]
+    )
+
+    # Final sort for consistency
+    survivors = sort_by_fitness(survivors, maximize=fitness_maximization)
+    pop.indivs = survivors
 
 
 def replace_random(pop: "Pop", offspring: List[Indiv]) -> None:
     """
-    Replace random individuals in the population with new offspring. Optionally
-    preserving elite individuals.
+    Replace random non-elite individuals in the population with new offspring.
+
+    Elites are preserved using `pop.get_elites()` and marked via `is_elite = True`.
 
     Args:
-        offspring (list): List of new individuals to add to the population.
+        pop (Pop): The population object.
+        offspring (List[Indiv]): New offspring individuals.
 
     Raises:
-        ValueError: If offspring is empty, num_elites is negative, or there are
-        insufficient offspring to fill the population after preserving elites.
-
-    Returns:
-        None (modifies pop.indivs in place).
+        ValueError: If offspring is empty or replacement is not possible.
     """
-
     if not offspring:
-        raise ValueError("Offspring list cannot be empty")
+        raise ValueError("Offspring list cannot be empty.")
     if pop.num_elites < 0:
-        raise ValueError(f"num_elite ({pop.num_elites}) cannot be negative")
+        raise ValueError(f"num_elites ({pop.num_elites}) cannot be negative.")
     if pop.num_elites > len(pop.indivs):
         raise ValueError(
-            f"num_elite ({pop.num_elites}) cannot exceed population"
-            f"size ({len(pop.indivs)})"
+            f"num_elites ({pop.num_elites}) cannot exceed "
+            f"population size ({len(pop.indivs)})."
         )
 
-    max_replaceable = len(pop.indivs) - pop.num_elites
-    if len(offspring) > max_replaceable:
+    # Retrieve and mark elites
+    elites = pop.get_elites()
+
+    # Determine non-elite pool
+    non_elites = [indiv for indiv in pop.indivs if not indiv.is_elite]
+
+    if len(offspring) > len(non_elites):
         raise ValueError(
-            f"Offspring size ({len(offspring)}) exceeds replaceable individuals "
-            f"({max_replaceable}) after preserving {pop.num_elites} elites"
+            f"Not enough non-elites ({len(non_elites)}) to "
+            f"replace {len(offspring)} individuals."
         )
 
-    #  Sort population by fitness (ascending)
-    pop.sort_by_fitness()
+    # Select random replacement positions in non-elite pool
+    replace_indices = random.sample(range(len(non_elites)), len(offspring))
 
-    # Wähle zufällige Indizes für die Ersetzung (nur nicht-elitäre Individuen)
-    replace_indices = random.sample(
-        range(pop.num_elites, len(pop.indivs)), len(offspring)
-    )
-
-    # Ersetze die ausgewählten Individuen mit offspring
+    # Apply replacement
     for i, idx in enumerate(replace_indices):
-        pop.indivs[idx] = offspring[i]
+        non_elites[idx] = offspring[i]
+
+    # Combine and sort final population
+    pop.indivs = elites + non_elites
 
 
 def replace_weighted_stochastic(
@@ -228,40 +252,64 @@ def replace_weighted_stochastic(
     fitness_maximization: bool = False,
 ) -> None:
     """
-    Replaces individuals in the population with offspring, using a probability weighted
-    by inverse fitness (lower fitness = more likely to survive).
+    Replace individuals in the population using inverse-fitness-weighted softmax
+    sampling, preserving elite individuals.
 
     Args:
         pop (Pop): The population object.
         offspring (List[Indiv]): List of new individuals.
-        temperature (float): Softness of selection (higher = more random).
-        Default is 1.0.
+        temperature (float): Softmax temperature (> 0).
+        fitness_maximization (bool): Whether higher fitness is better.
+
+    Raises:
+        ValueError: On invalid input or if not enough non-elites are available.
     """
     if not offspring:
         raise ValueError("Offspring list cannot be empty.")
-    if len(offspring) > len(pop.indivs):
-        raise ValueError("Offspring size cannot exceed population size.")
+    if temperature <= 0:
+        raise ValueError("Temperature must be greater than zero.")
+    if pop.num_elites < 0:
+        raise ValueError(f"num_elites ({pop.num_elites}) cannot be negative.")
+    if pop.num_elites > len(pop.indivs):
+        raise ValueError(
+            f"num_elites ({pop.num_elites}) cannot exceed population size "
+            f"({len(pop.indivs)})."
+        )
 
-    # Fitness-Array
-    fitness = np.array([indiv.fitness for indiv in pop.indivs])
+    # Retrieve and mark elites
+    elites = pop.get_elites()
 
-    # Normiere mit Softmax über negatives Fitnessmaß
-    # (damit schlechte höhere Wahrscheinlichkeit haben)
+    # Determine non-elite individuals
+    non_elites = [indiv for indiv in pop.indivs if not indiv.is_elite]
+
+    if len(offspring) > len(non_elites):
+        raise ValueError(
+            f"Cannot replace {len(offspring)} individuals; only {len(non_elites)} "
+            "non-elites available."
+        )
+
+    # Extract fitness values from non-elites
+    fitness = np.array([indiv.fitness for indiv in non_elites], dtype=np.float64)
+
+    # Compute inverse-scaled softmax probabilities
     if not fitness_maximization:
-        inverse_scaled = -fitness / temperature
+        scaled = -fitness / temperature
     else:
-        inverse_scaled = fitness / temperature
+        scaled = fitness / temperature
 
-    probabilities = np.exp(
-        inverse_scaled - np.max(inverse_scaled)
-    )  # Für numerische Stabilität
-    probabilities /= np.sum(probabilities)
+    exp_scores = np.exp(scaled - np.max(scaled))  # numerical stability
+    probabilities = exp_scores / np.sum(exp_scores)
 
-    # Wähle Indizes aus der Population, die ersetzt werden
+    # Sample unique indices in non-elites for replacement
     replace_indices = np.random.choice(
-        len(pop.indivs), size=len(offspring), replace=False, p=probabilities
+        len(non_elites), size=len(offspring), replace=False, p=probabilities
     )
 
-    # Ersetze ausgewählte Individuen
+    # Replace selected individuals
     for i, idx in enumerate(replace_indices):
-        pop.indivs[idx] = offspring[i]
+        non_elites[idx] = offspring[i]
+
+    # Recombine and sort
+    combined = elites + non_elites
+    combined = sort_by_fitness(combined, maximize=fitness_maximization)
+    pop.indivs = combined

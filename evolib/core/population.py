@@ -185,6 +185,18 @@ class Pop:
         for indiv in indivs:
             self.fitness_function(indiv)
 
+    def get_elites(self) -> list[Indiv]:
+        """Return a list of elite individuals and set their is_elite flag."""
+        # Reset is_elite for all
+        for indiv in self.indivs:
+            indiv.is_elite = False
+
+        self.sort_by_fitness()
+        elites = self.indivs[: self.num_elites]
+        for indiv in elites:
+            indiv.is_elite = True
+        return elites
+
     def print_status(self, verbosity: int = 1) -> None:
         """
         Prints information about the population based on the verbosity level.
