@@ -89,7 +89,7 @@ Population after Selection
 
 ---
 
-## 📁 03_analysis/
+## 📁 03_comparison/
 
 Tools for logging, plotting, and comparing multiple evolutionary runs:
 
@@ -99,11 +99,11 @@ Tools for logging, plotting, and comparing multiple evolutionary runs:
 
 ## Sample output
 <p align="center">
-  <img src="./03_analysis/figures/07_crossover_vs_selection.png" alt="Sample Plott" width="512"/>
+  <img src="./03_analysis/figures/07_selection_comparison.png" alt="Sample Plott" width="512"/>
 </p>
 
 
-📄 See: [`03_analysis/README.md`](03_analysis/README.md)
+📄 See: [`03_comparisons/README.md`](03_comparisons/README.md)
 
 ---
 ## 📁 04_function_aproximation/
