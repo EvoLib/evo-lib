@@ -18,8 +18,11 @@ Typical use cases include:
 Classes:
     Indiv: Core data structure for evolutionary optimization.
 """
+
 from copy import deepcopy
 from typing import Any, Dict, Optional
+
+import numpy as np
 
 from evolib.interfaces.enums import Origin
 
@@ -70,6 +73,20 @@ class Indiv:
     def __lt__(self, other: "Indiv") -> bool:
         return self.fitness < other.fitness
 
+    @property
+    def vector(self) -> np.ndarray:
+        """Return vector of first component (default convention)."""
+        if hasattr(self.para, "__iter__"):
+            return self.para[0].vector
+        return self.para.vector
+
+    @property
+    def dim(self) -> int:
+        """Return dimension of first component (default convention)."""
+        if hasattr(self.para, "__iter__"):
+            return self.para[0].dim
+        return self.para.dim
+
     def mutate(self) -> None:
         """
         Apply mutation to this individual.
@@ -78,7 +95,12 @@ class Indiv:
         This ensures that mutation behavior is defined polymorphically in the
         specific `ParaBase` subclass (e.g. `ParaVector`, `ParaNet`, ...).
         """
-        self.para.mutate()
+
+        if hasattr(self.para, "__iter__"):
+            for p in self.para:
+                p.mutate()
+        else:
+            self.para.mutate()
 
     def crossover(self) -> None:
         """
@@ -88,11 +110,20 @@ class Indiv:
         This ensures that crossover behavior is defined polymorphically in the
         specific `ParaBase` subclass (e.g. `ParaVector`, `ParaNet`, ...).
         """
-        self.para.crossover()
+        if hasattr(self.para, "__iter__"):
+            for p in self.para:
+                p.crossover()
+            else:
+                self.para.crossover()
+
+    def get_status(self) -> str:
+        """Get status string from all components."""
+        if hasattr(self.para, "get_status"):
+            return self.para.get_status()
+        return "para has no status method"
 
     def print_status(self) -> None:
         """Prints information about the individual."""
-
         print("Individual:")
         print(f"  Fitness: {self.fitness}")
         print(f"  Age: {self.age}")
@@ -100,9 +131,17 @@ class Indiv:
         print(f"  Origin: {self.origin}")
         print(f"  Parent Index: {self.parent_idx}")
 
-        # delegate to para.print_status()
-        if hasattr(self.para, "print_status"):
+        if hasattr(self.para, "__iter__"):
+            for i, p in enumerate(self.para):
+                print(f"  Component {i}:")
+                if hasattr(p, "print_status"):
+                    p.print_status()
+                else:
+                    print("    <no print_status>")
+        elif hasattr(self.para, "print_status"):
             self.para.print_status()
+        else:
+            print("  <no parameter status>")
 
     def to_dict(self) -> Dict:
         """Return a dictionary with selected attributes for logging or serialization."""
