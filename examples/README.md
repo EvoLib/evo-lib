@@ -99,7 +99,7 @@ Tools for logging, plotting, and comparing multiple evolutionary runs:
 
 ## Sample output
 <p align="center">
-  <img src="./03_comparison/figures/07_selection_comparison.png" alt="Sample Plott" width="512"/>
+  <img src="./03_comparisons/figures/07_selection_comparison.png" alt="Sample Plott" width="512"/>
 </p>
 
 
