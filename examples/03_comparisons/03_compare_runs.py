@@ -13,7 +13,7 @@ from evolib.utils.plotting import plot_fitness_comparison
 
 def my_fitness(indiv: Indiv) -> None:
     expected = 0.0
-    predicted = simple_quadratic(indiv.para.vector)
+    predicted = simple_quadratic(indiv.para["test-vector"].vector)
     indiv.fitness = mse_loss(expected, predicted)
 
 

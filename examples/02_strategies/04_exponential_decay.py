@@ -15,7 +15,7 @@ from evolib import Indiv, Pop, evolve_mu_plus_lambda, mse_loss, rosenbrock
 # User-defined fitness function
 def my_fitness(indiv: Indiv) -> None:
     expected = [1.0, 1.0, 1.0, 1.0]
-    predicted = rosenbrock(indiv.para.vector)
+    predicted = rosenbrock(indiv.para["test-vector"].vector)
     indiv.fitness = mse_loss(expected, predicted)
 
 
@@ -27,7 +27,10 @@ def run_experiment(config_path: str) -> None:
         evolve_mu_plus_lambda(pop)
 
         pop.print_status(verbosity=1)
-        print(f"   MutationStrength: {pop.indivs[0].para.mutation_strength:.4f}")
+        print(
+            f"   MutationStrength: "
+            f"{pop.indivs[0].para['test-vector'].mutation_strength:.4f}"
+        )
 
 
 # Run multiple experiments

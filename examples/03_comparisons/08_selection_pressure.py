@@ -24,8 +24,8 @@ np.random.seed(42)
 
 # Fitness function
 def my_fitness(indiv: Indiv) -> None:
-    target = np.zeros(indiv.para.dim)
-    predicted = rastrigin(indiv.para.vector)
+    target = np.zeros(indiv.para["test-vector"].dim)
+    predicted = rastrigin(indiv.para["test-vector"].vector)
     indiv.fitness = mse_loss(target, predicted)
 
 
@@ -44,7 +44,7 @@ config_variants = {
     "num_parents=10": "./08_configs/08_selection_pressure_10.yaml",
     "num_parents=20": "./08_configs/08_selection_pressure_20.yaml",
     "num_parents=40": "./08_configs/08_selection_pressure_40.yaml",
-    "num_parents=80": "./08_selection_pressure_configs/08_selection_pressure_80.yaml",
+    "num_parents=80": "./08_configs/08_selection_pressure_80.yaml",
 }
 
 runs = {}

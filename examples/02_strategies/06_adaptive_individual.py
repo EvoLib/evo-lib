@@ -22,7 +22,7 @@ from evolib import Indiv, Pop, evolve_mu_plus_lambda, mse_loss, rosenbrock
 # User-defined fitness function
 def my_fitness(indiv: Indiv) -> None:
     expected = [1.0, 1.0, 1.0, 1.0]
-    predicted = rosenbrock(indiv.para.vector)
+    predicted = rosenbrock(indiv.para["test-vector"].vector)
     indiv.fitness = mse_loss(expected, predicted)
 
 
@@ -35,8 +35,8 @@ def run_experiment(config_path: str) -> None:
 
         pop.print_status(verbosity=1)
         best = pop.best()
-        print(f"   tau: {best.para.tau:.4f}")
-        print(f"   MutationStrength: {best.para.mutation_strength:.4f}")
+        print(f"   tau: {best.para['test-vector'].tau:.4f}")
+        print(f"   MutationStrength: {best.para['test-vector'].mutation_strength:.4f}")
 
 
 print("Running adaptive_individual experiment with tau...\n")

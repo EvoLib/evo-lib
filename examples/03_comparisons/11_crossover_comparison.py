@@ -23,8 +23,8 @@ from evolib import (
 
 # Fitness: distance to target vector
 def my_fitness(indiv: Indiv) -> None:
-    target = np.ones(indiv.para.dim)
-    predicted = indiv.para.vector
+    target = np.ones(indiv.para["test-vector"].dim)
+    predicted = indiv.para["test-vector"].vector
     indiv.fitness = mse_loss(target, predicted)
 
 

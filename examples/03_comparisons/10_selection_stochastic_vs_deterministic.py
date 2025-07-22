@@ -40,8 +40,8 @@ random.seed(42)
 
 
 def fitness_function(indiv: Indiv) -> None:
-    target = np.zeros(indiv.para.dim)
-    predicted = rastrigin(indiv.para.vector)
+    target = np.zeros(indiv.para["test-vector"].dim)
+    predicted = rastrigin(indiv.para["test-vector"].vector)
     indiv.fitness = mse_loss(target, predicted)
 
 

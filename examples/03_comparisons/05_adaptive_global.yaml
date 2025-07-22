@@ -10,26 +10,27 @@ num_elites: 1
 evolution:
   strategy: "mu_plus_lambda"
 
-representation: 
-  type: "vector"
-  initializer: fixed_initializer
-  values: [-2.0, 2.0, -1.5, 1.5]
-  dim: 4
-  bounds: [-5.0, 5.0]
+modules:
+  test-vector:
+    type: "vector"
+    initializer: fixed_initializer
+    values: [-2.0, 2.0, -1.5, 1.5]
+    dim: 4
+    bounds: [-5.0, 5.0]
 
-mutation:
-  strategy: "adaptive_global"
-  init_probability: 0.3
-  min_probability: 0.3
-  max_probability: 0.3
+    mutation:
+      strategy: "adaptive_global"
+      init_probability: 0.3
+      min_probability: 0.3
+      max_probability: 0.3
 
-  init_strength: 0.5
-  min_strength: 0.1
-  max_strength: 1.0
+      init_strength: 0.5
+      min_strength: 0.1
+      max_strength: 1.0
 
-  min_diversity_threshold: 100000
-  max_diversity_threshold: 500000
+      min_diversity_threshold: 100000
+      max_diversity_threshold: 500000
 
-  increase_factor: 1.1
-  decrease_factor: 0.9
+      increase_factor: 1.1
+      decrease_factor: 0.9
 

@@ -8,14 +8,15 @@ num_elites: 1
 evolution:
   strategy: "mu_plus_lambda"
 
-representation:
-  type: "vector"
-  initializer: fixed_initializer
-  values: [-2.0, 2.0, -1.5, 1.5]
-  dim: 4
-  bounds: [-5.0, 5.0]
+modules:
+  test-vector:
+    type: "vector"
+    initializer: fixed_initializer
+    values: [-2.0, 2.0, -1.5, 1.5]
+    dim: 4
+    bounds: [-5.0, 5.0]
 
-mutation:
-  strategy: "constant"
-  probability: 0.3
-  strength: 0.1
+    mutation:
+      strategy: "constant"
+      probability: 0.3
+      strength: 0.1

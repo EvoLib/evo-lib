@@ -28,7 +28,7 @@ from evolib import Indiv, Pop, evolve_mu_plus_lambda, mse_loss, rosenbrock
 # User-defined fitness function
 def my_fitness(indiv: Indiv) -> None:
     expected = [1.0, 1.0, 1.0, 1.0]
-    predicted = rosenbrock(indiv.para.vector)
+    predicted = rosenbrock(indiv.para["test-vector"].vector)
     indiv.fitness = mse_loss(expected, predicted)
 
 
@@ -43,10 +43,11 @@ def run_experiment(config_path: str) -> None:
         best = pop.best()
         print(
             f"   DiversityEMA: {pop.diversity_ema:.4f}  | "
-            f"MinDiversityThreshold: {best.para.min_diversity_threshold} | "
-            f"MaxDiversityThreshold: {best.para.max_diversity_threshold}"
+            f"MinDiversityThreshold: "
+            f"{best.para['test-vector'].min_diversity_threshold} | "
+            f"MaxDiversityThreshold: {best.para['test-vector'].max_diversity_threshold}"
         )
-        print(f"   MutationStrength: {best.para.mutation_strength:.4f}")
+        print(f"   MutationStrength: {best.para['test-vector'].mutation_strength:.4f}")
 
 
 # Configuration with constant mutation strength

@@ -13,7 +13,7 @@ from evolib import Indiv, Pop, mse_loss, plot_fitness_comparison, rosenbrock
 
 def my_fitness(indiv: Indiv) -> None:
     expected = [1.0, 1.0, 1.0, 1.0]
-    predicted = rosenbrock(indiv.para.vector)
+    predicted = rosenbrock(indiv.para["test-vector"].vector)
     indiv.fitness = mse_loss(expected, predicted)
 
 

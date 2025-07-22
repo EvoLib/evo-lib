@@ -59,11 +59,38 @@ class ComponentConfig(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def infer_dim(cls, data: dict[str, Any]) -> dict[str, Any]:
-        if "dim" not in data and "structure" in data:
-            structure = data["structure"]
+    def validate_initializer_and_dim(cls, data: dict[str, Any]) -> dict[str, Any]:
+        initializer = data.get("initializer")
+        dim = data.get("dim")
+        values = data.get("values")
+        structure = data.get("structure")
+
+        # Fall 1: fixed_initializer → values müssen gesetzt sein
+        if initializer == "fixed_initializer":
+            if not values:
+                raise ValueError(
+                    "When using 'fixed_initializer', 'values' must be provided."
+                )
+            if dim is None:
+                data["dim"] = len(values)
+
+        # Fall 2: andere Initializer
+        else:
+            if dim is None and not structure:
+                raise ValueError(
+                    "Field 'dim' is required unless 'structure' is provided."
+                )
+            if values is not None:
+                raise ValueError(
+                    "Field 'values' must not be set unless initializer "
+                    "is 'fixed_initializer'."
+                )
+
+        # Fall 3: structure → dim ableiten
+        if "dim" not in data and structure:
             if isinstance(structure, list) and len(structure) >= 2:
                 data["dim"] = sum(i * j for i, j in zip(structure, structure[1:]))
+
         return data
 
 

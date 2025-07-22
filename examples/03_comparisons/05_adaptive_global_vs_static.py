@@ -23,7 +23,7 @@ from evolib import Indiv, Pop, mse_loss, plot_fitness_comparison, rosenbrock
 
 def my_fitness(indiv: Indiv) -> None:
     expected = [1.0, 1.0, 1.0, 1.0]
-    predicted = rosenbrock(indiv.para.vector)
+    predicted = rosenbrock(indiv.para["test-vector"].vector)
     indiv.fitness = mse_loss(expected, predicted)
 
 
@@ -38,7 +38,7 @@ def run_experiment(config_path: str) -> pd.DataFrame:
     history = pop.history_logger.to_dataframe()
     print(history)
 
-    print(f"Best Indiduum Parameter: {pop.indivs[0].para}")
+    print(f"Best Indiduum Parameter: {pop.indivs[0].para['test-vector'].vector}")
 
     return pop.history_logger.to_dataframe()
 

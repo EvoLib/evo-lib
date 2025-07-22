@@ -21,7 +21,7 @@ from evolib import Indiv, Pop, generate_cloned_offspring, mse_loss, simple_quadr
 def my_fitness(indiv: Indiv) -> None:
     """Simple fitness function using the quadratic benchmark and MSE loss."""
     expected = 0.0
-    predicted = simple_quadratic(indiv.para.vector)
+    predicted = simple_quadratic(indiv.para["test-vector"].vector)
     indiv.fitness = mse_loss(expected, predicted)
 
 
@@ -38,7 +38,8 @@ print("Parents:")
 for i, indiv in enumerate(pop.indivs):
     my_fitness(indiv)
     print(
-        f"  Indiv {i}: Parameter = {indiv.para.vector}, Fitness = {indiv.fitness:.6f}"
+        f"  Indiv {i}: Parameter = {indiv.para['test-vector'].vector}, "
+        f"Fitness = {indiv.fitness:.6f}"
     )
 
 
@@ -50,7 +51,8 @@ print("\nOffspring before mutation:")
 for i, indiv in enumerate(offspring):
     my_fitness(indiv)
     print(
-        f"  Indiv {i}: Parameter = {indiv.para.vector}, Fitness = {indiv.fitness:.6f}"
+        f"  Indiv {i}: Parameter = {indiv.para['test-vector'].vector}, "
+        f"Fitness = {indiv.fitness:.6f}"
     )
 
 # Apply mutation
@@ -62,7 +64,8 @@ print("\nOffspring after mutation:")
 for i, indiv in enumerate(offspring):
     my_fitness(indiv)
     print(
-        f"  Indiv {i}: Parameter = {indiv.para.vector}, Fitness = {indiv.fitness:.6f}"
+        f"  Indiv {i}: Parameter = {indiv.para['test-vector'].vector}, "
+        f"Fitness = {indiv.fitness:.6f}"
     )
 
 
@@ -70,7 +73,8 @@ pop.indivs = pop.indivs + offspring
 print("\nPopulation befor Selection")
 for i, indiv in enumerate(pop.indivs):
     print(
-        f"  Indiv {i}: Parameter = {indiv.para.vector}, Fitness = {indiv.fitness:.6f}"
+        f"  Indiv {i}: Parameter = {indiv.para['test-vector'].vector}, "
+        f"Fitness = {indiv.fitness:.6f}"
     )
 
 # Sort Population by fitness
@@ -82,5 +86,6 @@ pop.indivs = pop.indivs[: pop.parent_pool_size]
 print("\nPopulation after Selection")
 for i, indiv in enumerate(pop.indivs):
     print(
-        f"  Indiv {i}: Parameter = {indiv.para.vector}, Fitness = {indiv.fitness:.6f}"
+        f"  Indiv {i}: Parameter = {indiv.para['test-vector'].vector}, "
+        f"Fitness = {indiv.fitness:.6f}"
     )

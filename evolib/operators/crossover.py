@@ -16,8 +16,6 @@ if TYPE_CHECKING:
     from evolib.core.individual import Indiv
     from evolib.core.population import Pop
 
-from evolib.interfaces.enums import CrossoverStrategy
-
 
 def crossover_blend_alpha(
     parent1_para: np.ndarray,
@@ -314,11 +312,7 @@ def crossover_offspring(pop: "Pop", offspring: list["Indiv"]) -> None:
         - If `crossover_strategy` is NONE or probability too low, nothing happens.
         - This method does not return; offspring are modified in place.
     """
-    if (
-        not offspring
-        or pop.crossover_strategy is None
-        or pop.crossover_strategy == CrossoverStrategy.NONE
-    ):
+    if not offspring:
         return
 
     for i in range(0, len(offspring) - 1, 2):

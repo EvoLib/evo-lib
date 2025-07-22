@@ -21,7 +21,7 @@ def my_fitness(indiv: Indiv) -> None:
     Assigns fitness based on distance to 0.0 (global minimum).
     """
     expected = 0.0
-    predicted = simple_quadratic(indiv.para.vector)
+    predicted = simple_quadratic(indiv.para["test-vector"].vector)
     indiv.fitness = mse_loss(expected, predicted)
 
 
@@ -37,7 +37,8 @@ print("Before mutation:")
 for i, indiv in enumerate(pop.indivs):
     my_fitness(indiv)
     print(
-        f"  Indiv {i}: Parameter = {indiv.para.vector}, Fitness = {indiv.fitness:.6f}"
+        f"  Indiv {i}: Parameter = {indiv.para['test-vector'].vector}, "
+        f"Fitness = {indiv.fitness:.6f}"
     )
 
 # Apply mutation
@@ -49,5 +50,6 @@ print("\nAfter mutation:")
 for i, indiv in enumerate(pop.indivs):
     my_fitness(indiv)
     print(
-        f"  Indiv {i}: Parameter = {indiv.para.vector}, Fitness = {indiv.fitness:.6f}"
+        f"  Indiv {i}: Parameter = {indiv.para['test-vector'].vector}, "
+        f"Fitness = {indiv.fitness:.6f}"
     )

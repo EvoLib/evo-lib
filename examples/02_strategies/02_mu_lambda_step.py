@@ -21,7 +21,7 @@ from evolib import (
 def my_fitness(indiv: Indiv) -> None:
     """Simple fitness function using the quadratic benchmark and MSE loss."""
     expected = 0.0
-    predicted = simple_quadratic(indiv.para.vector)
+    predicted = simple_quadratic(indiv.para["test-vector"].vector)
     indiv.fitness = mse_loss(expected, predicted)
 
 
@@ -29,7 +29,7 @@ def print_population(pop: Pop, title: str) -> None:
     print(f"\n{title}")
     for i, indiv in enumerate(pop.indivs):
         print(
-            f"  Indiv {i}: Parameter = {indiv.para.vector}, "
+            f"  Indiv {i}: Parameter = {indiv.para['test-vector'].vector}, "
             f"Fitness = {indiv.fitness:.6f}"
         )
 
