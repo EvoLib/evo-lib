@@ -57,7 +57,7 @@ def plot_generation(indiv: Indiv, generation: int, x_support: np.ndarray) -> Non
 def run_experiment() -> None:
     pop = Pop(CONFIG_FILE)
 
-    dim = pop.full_config.representation.dim
+    dim = pop.full_config.modules["test-vector"].dim
     assert dim is not None
     num_support_points = dim
     x_support = np.linspace(0, 2 * np.pi, num_support_points)

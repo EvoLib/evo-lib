@@ -1,6 +1,6 @@
 import numpy as np
 
-from evolib.config.schema import FullConfig
+from evolib.config.schema import ComponentConfig
 from evolib.interfaces.enums import (
     CrossoverOperator,
     CrossoverStrategy,
@@ -539,15 +539,19 @@ class ParaVector(ParaBase):
         )
         return self.max_crossover_probability * np.exp(-k * generation)
 
-    def apply_config(self, cfg: FullConfig) -> None:
-        """Apply configuration dictionary to this ParaVector instance."""
-        self.representation = cfg.representation.type
-        self.dim = cfg.representation.dim
-        self.tau = cfg.representation.tau or 0.0
-        self.bounds = cfg.representation.bounds
-        self.init_bounds = cfg.representation.init_bounds or self.bounds
+    def apply_config(self, cfg: ComponentConfig) -> None:
+        """Apply component-level configuration to this ParaVector instance."""
+        self.representation = cfg.type
+        self.dim = cfg.dim
+        self.tau = cfg.tau or 0.0
+        self.bounds = cfg.bounds
+        self.init_bounds = cfg.init_bounds or self.bounds
+        self.randomize_mutation_strengths = cfg.randomize_mutation_strengths
 
         # Mutation
+        if cfg.mutation is None:
+            raise ValueError("Mutation config is required for ParaVector.")
+
         self.mutation_strategy = MutationStrategy(cfg.mutation.strategy)
 
         if self.mutation_strategy == MutationStrategy.CONSTANT:
@@ -591,16 +595,15 @@ class ParaVector(ParaBase):
             self.min_mutation_strength = cfg.mutation.min_strength
             self.max_mutation_strength = cfg.mutation.max_strength
             self.randomize_mutation_strengths = (
-                cfg.representation.randomize_mutation_strengths or False
+                cfg.randomize_mutation_strengths or False
             )
 
-        # Crossover
         if cfg.crossover is None:
             self.crossover_strategy = CrossoverStrategy.NONE
             self._crossover_fn = None
-            self.crossover_probability = None
         else:
             self.crossover_strategy = CrossoverStrategy(cfg.crossover.strategy)
+
             if self.crossover_strategy == CrossoverStrategy.CONSTANT:
                 self.crossover_probability = cfg.crossover.probability
 
@@ -615,27 +618,24 @@ class ParaVector(ParaBase):
                 self.crossover_inc_factor = cfg.crossover.increase_factor
                 self.crossover_dec_factor = cfg.crossover.decrease_factor
 
-        # Choose an operator
-        if cfg.crossover is None or cfg.crossover.operator is None:
-            self._crossover_fn = None
-            return
+            # Choose crossover operator
+            if cfg.crossover.operator is None:
+                self._crossover_fn = None
+            else:
+                op = cfg.crossover.operator
+                if op == CrossoverOperator.BLX:
+                    from evolib.operators.crossover import crossover_blend_alpha
 
-        crossover_op = cfg.crossover.operator
+                    self._crossover_fn = lambda a, b: crossover_blend_alpha(
+                        a, b, alpha=0.5
+                    )
+                elif op == CrossoverOperator.ARITHMETIC:
+                    from evolib.operators.crossover import crossover_arithmetic
 
-        if crossover_op == CrossoverOperator.BLX:
-            from evolib.operators.crossover import crossover_blend_alpha
+                    self._crossover_fn = crossover_arithmetic
+                elif op == CrossoverOperator.SBX:
+                    from evolib.operators.crossover import crossover_simulated_binary
 
-            self._crossover_fn = lambda a, b: crossover_blend_alpha(a, b, alpha=0.5)
-
-        elif crossover_op == CrossoverOperator.ARITHMETIC:
-            from evolib.operators.crossover import crossover_arithmetic
-
-            self._crossover_fn = crossover_arithmetic
-
-        elif crossover_op == CrossoverOperator.SBX:
-            from evolib.operators.crossover import crossover_simulated_binary
-
-            self._crossover_fn = crossover_simulated_binary
-
-        else:
-            self._crossover_fn = None
+                    self._crossover_fn = crossover_simulated_binary
+                else:
+                    self._crossover_fn = None

@@ -5,7 +5,7 @@ from evolib.operators.selection import selection_tournament
 
 def test_selection_tournament_index() -> None:
     # Dummy-Population aufbauen
-    pop = Pop(config_path="./tests/population.yaml")
+    pop = Pop(config_path="./tests/configs/population.yaml")
     pop.indivs = []
 
     for i in range(5):

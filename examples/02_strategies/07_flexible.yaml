@@ -1,0 +1,28 @@
+parent_pool_size: 10
+offspring_pool_size: 5
+max_generations: 20
+max_indiv_age: 0
+num_elites: 1
+
+representation:
+  type: vector
+  dim: 3
+  bounds: [-1.0, 1.0]
+  initializer: random_initializer
+
+evolution:
+  strategy: flexible
+
+selection:
+  strategy: tournament
+  tournament_size: 3
+
+mutation:
+  strategy: constant
+  strength: 0.5
+  probability: 1.0
+
+replacement:
+  strategy: steady_state
+  num_replace: 5
+

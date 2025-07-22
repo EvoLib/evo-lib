@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Union
+from typing import Any, Callable, Union
 
 import numpy as np
 
-from evolib.config.schema import FullConfig
+from evolib.config.schema import ComponentConfig
 
 
 class ParaBase(ABC):
@@ -17,7 +17,7 @@ class ParaBase(ABC):
         ) = None
 
     @abstractmethod
-    def apply_config(self, cfg: FullConfig) -> None: ...
+    def apply_config(self, cfg: ComponentConfig) -> None: ...
 
     @abstractmethod
     def mutate(self) -> None: ...
@@ -26,7 +26,11 @@ class ParaBase(ABC):
     def print_status(self) -> None: ...
 
     @abstractmethod
-    def get_status(self) -> str: ...
+    def get_status(self) -> str | dict[str, Any]: ...
+
+    def get_history(self) -> dict[str, float]:
+        """Returns a dictionary of scalar values for logging (optional)."""
+        return {}
 
     def update_mutation_parameters(
         self, generation: int, max_generations: int, diversity_ema: float | None = None

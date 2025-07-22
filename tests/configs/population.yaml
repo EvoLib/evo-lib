@@ -1,11 +1,12 @@
-parent_pool_size: 10
-offspring_pool_size: 0
-max_generations: 0
+parent_pool_size: 2
+offspring_pool_size: 4
+
+max_generations: 20
 max_indiv_age: 0
 num_elites: 0
 
 modules:
-  test-vector:
+  population_test:
     type: vector
     initializer: random_initializer
     dim: 1
@@ -15,3 +16,4 @@ modules:
       strategy: "constant"
       strength: 0.01
       probability: 1.0
+

@@ -30,7 +30,7 @@ def paranet_fitness(indiv: Indiv) -> None:
 
     for x in X_RANGE:
         x_input = np.array([x])
-        y_pred = paranet.forward(x_input, indiv.para.vector)
+        y_pred = paranet.forward(x_input, indiv.para["nnet"].vector)
         predictions.append(y_pred.item())
 
     y_pred_array = np.array(predictions)
@@ -48,7 +48,9 @@ for _ in range(pop.max_generations):
 
 # Visualize best solution
 best = pop.best()
-y_best = [paranet.forward(np.array([x]), best.para.vector).item() for x in X_RANGE]
+y_best = [
+    paranet.forward(np.array([x]), best.para["nnet"].vector).item() for x in X_RANGE
+]
 
 plt.plot(X_RANGE, Y_TRUE, label="Target: sin(x)")
 plt.plot(X_RANGE, y_best, label="Best Approximation", linestyle="--")

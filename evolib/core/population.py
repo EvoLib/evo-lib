@@ -13,9 +13,8 @@ import numpy as np
 
 from evolib.config.schema import FullConfig
 from evolib.core.individual import Indiv
-from evolib.initializers.registry import get_initializer
+from evolib.initializers.composite_initializers import composite_initializer
 from evolib.interfaces.enums import (
-    CrossoverStrategy,
     DiversityMethod,
     EvolutionStrategy,
     Origin,
@@ -44,12 +43,7 @@ class Pop:
         cfg: FullConfig = load_config(config_path)
 
         self.full_config = cfg
-        self.representation_cfg = cfg.representation
-
-        initializer_name = self.representation_cfg.initializer
-        initializer_factory = get_initializer(initializer_name)
-        self.para_initializer = initializer_factory(cfg)
-
+        self.para_initializer = composite_initializer(cfg)
         self.indivs: List[Any] = []
 
         # Core parameters
@@ -94,16 +88,6 @@ class Pop:
             self.replacement_strategy = None
             self._replacement_registry = {}
             self._replacement_fn = None
-
-        # Mutation
-        self.mutation_strategy = cfg.mutation.strategy
-
-        # Crossover
-        if cfg.crossover is not None:
-            self.crossover_strategy = cfg.crossover.strategy
-        else:
-            self.crossover_strategy = CrossoverStrategy.NONE
-            self.crossover_probability = None
 
         # Statistics
         self.history_logger = HistoryLogger(

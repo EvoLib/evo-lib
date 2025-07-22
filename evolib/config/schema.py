@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: MIT
-"""Defines the pydantic schema for YAML-based configuration files in EvoLib."""
-
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -43,42 +41,29 @@ class CrossoverConfig(BaseModel):
     decrease_factor: Optional[float] = None
 
 
-class RepresentationConfig(BaseModel):
-    type: RepresentationType
+class ComponentConfig(BaseModel):
+    type: RepresentationType = RepresentationType.VECTOR
     dim: Optional[int] = None
-    bounds: Tuple[float, float]
+    structure: Optional[list[int]] = None
+    bounds: Tuple[float, float] = (-1.0, 1.0)
     initializer: str
-    values: Optional[List[float]] = None  # Nur für fixed
-    randomize_mutation_strengths: Optional[bool] = False
     init_bounds: Optional[Tuple[float, float]] = None
+    randomize_mutation_strengths: Optional[bool] = False
     tau: Optional[float] = 0.0
     mean: Optional[float] = 0.0
     std: Optional[float] = 0.0
+    values: Optional[List[float]] = None
+
+    mutation: Optional[MutationConfig] = None
+    crossover: Optional[CrossoverConfig] = None
 
     @model_validator(mode="before")
     @classmethod
-    def check_fixed_initializer(cls, data: dict[str, Any]) -> dict[str, Any]:
-        initializer = data.get("initializer")
-        dim = data.get("dim")
-        values = data.get("values")
-
-        if initializer == "fixed_initializer":
-            if not values:
-                raise ValueError(
-                    "When using 'fixed' initializer, " "'values' must be provided."
-                )
-            if dim is None:
-                data["dim"] = len(values)
-        else:
-            if dim is None:
-                raise ValueError(
-                    "Field 'dim' is required for initializers other " "than 'fixed'."
-                )
-            if values is not None:
-                raise ValueError(
-                    "Field 'values' must not be set unless initializer " "is 'fixed'."
-                )
-
+    def infer_dim(cls, data: dict[str, Any]) -> dict[str, Any]:
+        if "dim" not in data and "structure" in data:
+            structure = data["structure"]
+            if isinstance(structure, list) and len(structure) >= 2:
+                data["dim"] = sum(i * j for i, j in zip(structure, structure[1:]))
         return data
 
 
@@ -113,11 +98,11 @@ class FullConfig(BaseModel):
     parent_pool_size: int
     offspring_pool_size: int
     max_generations: int
-    max_indiv_age: int
+    max_indiv_age: int = 0
     num_elites: int
-    representation: RepresentationConfig
-    mutation: MutationConfig
-    crossover: Optional[CrossoverConfig] = None
+
+    modules: Dict[str, ComponentConfig]
+
     evolution: Optional[EvolutionConfig] = None
     selection: Optional[SelectionConfig] = None
     replacement: Optional[ReplacementConfig] = None

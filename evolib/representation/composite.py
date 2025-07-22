@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, Dict
 
 from evolib.representation.base import ParaBase
 
@@ -17,44 +17,69 @@ class ParaComposite(ParaBase):
     The composite supports standard ParaBase operations like mutate() and
     crossover_with(), delegating them to its components.
 
-    Access to individual components is provided via indexing (e.g. para[0], para[1]).
-
-    Example:
-        indiv.para = ParaComposite([
-            ParaVector(...),
-            ParaNet(...),
-            MyCustomController(...)
-        ])
-
-        indiv.para[1].mutate()
-        output = indiv.para[2].forward(x)
+    Access to individual components is provided via name or index:
+        para["controller"], para[0]
     """
 
-    def __init__(self, components: List[ParaBase]):
+    def __init__(self, components: Dict[str, ParaBase]):
         self.components = components
 
-    def __getitem__(self, index: int) -> ParaBase:
-        return self.components[index]
+    def __getitem__(self, key: str | int) -> ParaBase:
+        if isinstance(key, int):
+            return list(self.components.values())[key]
+        return self.components[key]
 
     def __len__(self) -> int:
         return len(self.components)
 
     def mutate(self) -> None:
-        for comp in self.components:
+        for comp in self.components.values():
             comp.mutate()
+
+    def apply_config(self, cfg: Any) -> None:
+        pass
 
     def crossover_with(self, partner: ParaBase) -> None:
         if not isinstance(partner, ParaComposite):
             raise TypeError("Crossover partner must also be ParaComposite")
-        for self_comp, partner_comp in zip(self.components, partner.components):
-            self_comp.crossover_with(partner_comp)
+        for (k1, comp1), (k2, comp2) in zip(
+            self.components.items(), partner.components.items()
+        ):
+            if k1 != k2:
+                raise ValueError("Component keys do not match between composites.")
+            comp1.crossover_with(comp2)
 
     def print_status(self) -> None:
-        for i, comp in enumerate(self.components):
-            print(f"Component {i}:")
+        for name, comp in self.components.items():
+            print(f"Component '{name}':")
             comp.print_status()
 
-    def get_status(self) -> str:
-        return " | ".join(
-            f"[{i}] {comp.get_status()}" for i, comp in enumerate(self.components)
-        )
+    def get_status(self) -> dict:
+        return {
+            name: component.get_status() for name, component in self.components.items()
+        }
+
+    def update_mutation_parameters(
+        self, generation: int, max_generations: int, diversity_ema: float | None = None
+    ) -> None:
+        for comp in self.components.values():
+            comp.update_mutation_parameters(generation, max_generations, diversity_ema)
+
+    def update_crossover_parameters(
+        self, generation: int, max_generations: int, diversity_ema: float | None = None
+    ) -> None:
+        for comp in self.components.values():
+            comp.update_crossover_parameters(generation, max_generations, diversity_ema)
+
+    def get_history(self) -> dict[str, float]:
+        """
+        Aggregates history dicts from all components for logging purposes.
+
+        Keys are prefixed with their component name.
+        """
+        history = {}
+        for name, comp in self.components.items():
+            comp_history = comp.get_history()
+            for key, value in comp_history.items():
+                history[f"{name}_{key}"] = value
+        return history
