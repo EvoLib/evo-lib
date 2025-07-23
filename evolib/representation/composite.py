@@ -1,5 +1,6 @@
-from typing import Any, Dict
+from typing import Dict
 
+from evolib.config.schema import ComponentConfig, FullConfig
 from evolib.representation.base import ParaBase
 
 
@@ -36,8 +37,24 @@ class ParaComposite(ParaBase):
         for comp in self.components.values():
             comp.mutate()
 
-    def apply_config(self, cfg: Any) -> None:
-        pass
+    def apply_config(self, cfg: ComponentConfig | FullConfig) -> None:
+        """
+        Apply sub-configs to each component of the ParaComposite.
+
+        Each component receives the matching config from cfg.modules by name.
+        """
+        if not isinstance(cfg, FullConfig):
+            raise TypeError(
+                "ParaComposite requires a FullConfig with 'modules', "
+                f"but received {type(cfg).__name__}"
+            )
+
+        for name, component in self.components.items():
+            subcfg = cfg.modules.get(name)
+            if subcfg is not None:
+                component.apply_config(subcfg)
+            else:
+                print(f"[Warning] No config found for component '{name}' – skipping.")
 
     def crossover_with(self, partner: ParaBase) -> None:
         if not isinstance(partner, ParaComposite):

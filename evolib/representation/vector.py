@@ -1,6 +1,6 @@
 import numpy as np
 
-from evolib.config.schema import ComponentConfig
+from evolib.config.schema import ComponentConfig, FullConfig
 from evolib.interfaces.enums import (
     CrossoverOperator,
     CrossoverStrategy,
@@ -545,8 +545,14 @@ class ParaVector(ParaBase):
         )
         return self.max_crossover_probability * np.exp(-k * generation)
 
-    def apply_config(self, cfg: ComponentConfig) -> None:
+    def apply_config(self, cfg: ComponentConfig | FullConfig) -> None:
         """Apply component-level configuration to this ParaVector instance."""
+
+        if not isinstance(cfg, ComponentConfig):
+            raise TypeError(
+                "ParaiVector requires ComponetConfig, "
+                f"but received {type(cfg).__name__}"
+            )
         self.representation = cfg.type
         self.dim = cfg.dim
         self.tau = cfg.tau or 0.0

@@ -3,7 +3,7 @@ from typing import Any, Callable, Union
 
 import numpy as np
 
-from evolib.config.schema import ComponentConfig
+from evolib.config.schema import ComponentConfig, FullConfig
 
 
 class ParaBase(ABC):
@@ -17,7 +17,7 @@ class ParaBase(ABC):
         ) = None
 
     @abstractmethod
-    def apply_config(self, cfg: ComponentConfig) -> None: ...
+    def apply_config(self, cfg: ComponentConfig | FullConfig) -> None: ...
 
     @abstractmethod
     def mutate(self) -> None: ...
