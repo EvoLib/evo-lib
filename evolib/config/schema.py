@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT
-from typing import Any, Dict, List, Optional, Tuple
 
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+import numpy as np
 from pydantic import BaseModel, Field, model_validator
 
 from evolib.interfaces.enums import (
@@ -47,7 +49,7 @@ class CrossoverConfig(BaseModel):
 
 class ComponentConfig(BaseModel):
     type: RepresentationType = RepresentationType.VECTOR
-    dim: Optional[int] = None
+    dim: Union[int, list[int]]
     structure: Optional[list[int]] = None
     bounds: Tuple[float, float] = (-1.0, 1.0)
     initializer: str
@@ -57,6 +59,7 @@ class ComponentConfig(BaseModel):
     mean: Optional[float] = 0.0
     std: Optional[float] = 0.0
     values: Optional[List[float]] = None
+    shape: Optional[Tuple[int, ...]] = None
 
     mutation: Optional[MutationConfig] = None
     crossover: Optional[CrossoverConfig] = None
@@ -65,9 +68,18 @@ class ComponentConfig(BaseModel):
     @classmethod
     def validate_initializer_and_dim(cls, data: dict[str, Any]) -> dict[str, Any]:
         initializer = data.get("initializer")
-        dim = data.get("dim")
+        dim_raw = data.get("dim")
         values = data.get("values")
         structure = data.get("structure")
+
+        if isinstance(dim_raw, list):
+            try:
+                shape = tuple(dim_raw)
+                dim = int(np.prod(shape))
+                data["shape"] = shape
+                data["dim"] = dim
+            except Exception:
+                raise ValueError("Invalid dim list – must be list of integers")
 
         # Fall 1: fixed_initializer → values müssen gesetzt sein
         if initializer == "fixed_initializer":
@@ -79,11 +91,9 @@ class ComponentConfig(BaseModel):
                 data["dim"] = len(values)
 
         # Fall 2: andere Initializer
-        else:
-            if dim is None and not structure:
-                raise ValueError(
-                    "Field 'dim' is required unless 'structure' is provided."
-                )
+        elif "dim" not in data and not structure:
+            raise ValueError("Field 'dim' is required unless 'structure' is provided.")
+
             if values is not None:
                 raise ValueError(
                     "Field 'values' must not be set unless initializer "
