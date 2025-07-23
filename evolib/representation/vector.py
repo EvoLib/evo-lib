@@ -38,6 +38,7 @@ class ParaVector(ParaBase):
 
         # Parametervektor
         self.vector: np.ndarray = np.zeros(1)
+        self.shape: tuple[int, ...] = (1,)
 
         # Bounds for mutation (min/max)
         self.min_mutation_strength: float | None = None
@@ -559,6 +560,13 @@ class ParaVector(ParaBase):
         self.bounds = cfg.bounds
         self.init_bounds = cfg.init_bounds or self.bounds
         self.randomize_mutation_strengths = cfg.randomize_mutation_strengths
+
+        if isinstance(cfg.dim, list):
+            self.shape = tuple(cfg.dim)
+            self.dim = int(np.prod(cfg.dim))
+        else:
+            self.shape = (cfg.dim,)
+            self.dim = cfg.dim
 
         # Mutation
         if cfg.mutation is None:
