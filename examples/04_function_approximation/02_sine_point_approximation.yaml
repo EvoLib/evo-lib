@@ -8,7 +8,7 @@ evolution:
   strategy: "mu_plus_lambda"
 
 modules:
-  test-vector:
+  points:
     type: vector
     initializer: random_initializer
     dim: 16

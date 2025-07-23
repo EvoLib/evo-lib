@@ -29,8 +29,10 @@ def repair_to_circle(vec: np.ndarray, radius: float = MAX_RADIUS) -> np.ndarray:
 
 # Fitness Function (no penalty, assumes repaired vector)
 def fitness_function(indiv: Indiv) -> None:
-    indiv.para.vector = repair_to_circle(indiv.para.vector)  # apply repair
-    x, y = indiv.para.vector
+    indiv.para["test-vector"].vector = repair_to_circle(
+        indiv.para["test-vector"].vector
+    )
+    x, y = indiv.para["test-vector"].vector
     indiv.fitness = (x - 1) ** 2 + (y + 2) ** 2
 
 
@@ -42,7 +44,7 @@ def plot_generation(indiv: Indiv, generation: int) -> None:
     circle = plt.Circle((0, 0), MAX_RADIUS, color="black", fill=False, linestyle="--")
     ax.add_patch(circle)
 
-    x, y = indiv.para.vector
+    x, y = indiv.para["test-vector"].vector
     ax.plot(x, y, "ro", label="Best Solution")
 
     # Theoretical optimum on boundary (direction to target)

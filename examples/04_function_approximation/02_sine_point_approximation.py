@@ -25,7 +25,7 @@ CONFIG_FILE = "02_sine_point_approximation.yaml"
 # Fitness
 def make_fitness_function(x_support: np.ndarray) -> Callable:
     def fitness_function(indiv: Indiv) -> None:
-        y_support = indiv.para.vector
+        y_support = indiv.para["points"].vector
         y_pred = np.interp(X_DENSE, x_support, y_support)
         weights = 1.0 + 0.4 * np.abs(np.cos(X_DENSE))
         indiv.fitness = np.average((Y_TRUE - y_pred) ** 2, weights=weights)
@@ -35,13 +35,17 @@ def make_fitness_function(x_support: np.ndarray) -> Callable:
 
 # Visualisierung
 def plot_generation(indiv: Indiv, generation: int, x_support: np.ndarray) -> None:
-    y_pred = np.interp(X_DENSE, x_support, indiv.para.vector)
+    y_pred = np.interp(X_DENSE, x_support, indiv.para["points"].vector)
 
     plt.figure(figsize=(6, 4))
     plt.plot(X_DENSE, Y_TRUE, label="Target: sin(x)", color="black")
     plt.plot(X_DENSE, y_pred, label="Best Approx", color="red")
     plt.scatter(
-        x_support, indiv.para.vector, color="blue", s=10, label="support points"
+        x_support,
+        indiv.para["points"].vector,
+        color="blue",
+        s=10,
+        label="support points",
     )
     plt.title(f"Generation {generation}")
     plt.ylim(-1.2, 1.2)
@@ -57,7 +61,7 @@ def plot_generation(indiv: Indiv, generation: int, x_support: np.ndarray) -> Non
 def run_experiment() -> None:
     pop = Pop(CONFIG_FILE)
 
-    dim = pop.full_config.modules["test-vector"].dim
+    dim = pop.full_config.modules["points"].dim
     assert dim is not None
     num_support_points = dim
     x_support = np.linspace(0, 2 * np.pi, num_support_points)

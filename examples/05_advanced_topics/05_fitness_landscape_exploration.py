@@ -26,7 +26,7 @@ def objective(x: float | np.ndarray, y: float | np.ndarray) -> float | np.ndarra
 
 # Fitness evaluation
 def fitness_function(indiv: Indiv) -> None:
-    x, y = indiv.para.vector
+    x, y = indiv.para["position"].vector
     indiv.fitness = float(objective(x, y))
 
 
@@ -48,7 +48,7 @@ def plot_fitness_landscape_with_path(
     plt.plot(path[:, 0], path[:, 1], "w--", linewidth=1.0, label="Path")
 
     # Plot current best
-    x, y = indiv.para.vector
+    x, y = indiv.para["position"].vector
     plt.plot(x, y, "ro", label="Best Solution")
 
     plt.title(f"Fitness Landscape – Gen {generation}")
@@ -72,7 +72,7 @@ def run_experiment() -> None:
     for gen in range(pop.max_generations):
         pop.run_one_generation(sort=True)
         best = pop.best()
-        x, y = best.para.vector
+        x, y = best.para["position"].vector
         path_points.append((x, y))
 
         plot_fitness_landscape_with_path(best, gen, path_points)

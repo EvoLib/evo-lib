@@ -7,6 +7,12 @@ from evolib.interfaces.enums import (
     MutationStrategy,
 )
 from evolib.interfaces.structs import MutationParams
+from evolib.operators.crossover import (
+    crossover_arithmetic,
+    crossover_blend_alpha,
+    crossover_intermediate,
+    crossover_simulated_binary,
+)
 from evolib.operators.mutation import adapted_mutation_strength
 from evolib.representation.base import ParaBase
 
@@ -624,18 +630,19 @@ class ParaVector(ParaBase):
             else:
                 op = cfg.crossover.operator
                 if op == CrossoverOperator.BLX:
-                    from evolib.operators.crossover import crossover_blend_alpha
-
-                    self._crossover_fn = lambda a, b: crossover_blend_alpha(
-                        a, b, alpha=0.5
-                    )
+                    alpha = cfg.crossover.alpha or 0.5
+                    self._crossover_fn = lambda a, b: crossover_blend_alpha(a, b, alpha)
                 elif op == CrossoverOperator.ARITHMETIC:
-                    from evolib.operators.crossover import crossover_arithmetic
-
                     self._crossover_fn = crossover_arithmetic
                 elif op == CrossoverOperator.SBX:
-                    from evolib.operators.crossover import crossover_simulated_binary
-
-                    self._crossover_fn = crossover_simulated_binary
+                    eta = cfg.crossover.eta or 15.0
+                    self._crossover_fn = lambda a, b: crossover_simulated_binary(
+                        a, b, eta=eta
+                    )
+                elif op == CrossoverOperator.INTERMEDIATE:
+                    blend = cfg.crossover.blend_range or 0.25
+                    self._crossover_fn = lambda a, b: crossover_intermediate(
+                        a, b, blend_range=blend
+                    )
                 else:
                     self._crossover_fn = None

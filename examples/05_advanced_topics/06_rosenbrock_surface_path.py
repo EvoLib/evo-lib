@@ -24,7 +24,7 @@ trajectory: list[np.ndarray] = []  # best-of-generation history
 
 # Fitness
 def fitness_function(indiv: Indiv) -> None:
-    x, y = indiv.para.vector
+    x, y = indiv.para["position"].vector
     indiv.fitness = float(rosenbrock_2d(x, y))
 
 
@@ -47,12 +47,12 @@ def plot_surface_with_path(generation: int, best: Indiv) -> None:
     )
 
     # Current best
-    x, y = best.para.vector
+    x, y = best.para["position"].vector
     z = rosenbrock_2d(x, y)
     ax.scatter(x, y, z, color="red", s=50, label="Best")
 
     # Draw path so far
-    trajectory.append(best.para.vector.copy())
+    trajectory.append(best.para["position"].vector.copy())
     if len(trajectory) >= 2:
         path = np.array(trajectory)
         z_path = rosenbrock_2d(path[:, 0], path[:, 1])

@@ -34,7 +34,7 @@ def compute_smoothness(y: np.ndarray) -> float:
 
 # Fitness Function (scalarized, but logs both)
 def fitness_function(indiv: Indiv) -> None:
-    y_support = indiv.para.vector
+    y_support = indiv.para["test-vector"].vector
     y_pred = np.interp(X_DENSE, X_SUPPORT, y_support)
 
     mse = compute_mse(y_pred)
@@ -46,13 +46,17 @@ def fitness_function(indiv: Indiv) -> None:
 
 # Plotting
 def plot_generation(indiv: Indiv, generation: int) -> None:
-    y_pred = np.interp(X_DENSE, X_SUPPORT, indiv.para.vector)
+    y_pred = np.interp(X_DENSE, X_SUPPORT, indiv.para["test-vector"].vector)
 
     plt.figure(figsize=(6, 4))
     plt.plot(X_DENSE, Y_TRUE, label="Target", color="black")
     plt.plot(X_DENSE, y_pred, label="Best Approx", color="red")
     plt.scatter(
-        X_SUPPORT, indiv.para.vector, color="blue", s=10, label="Support Points"
+        X_SUPPORT,
+        indiv.para["test-vector"].vector,
+        color="blue",
+        s=10,
+        label="Support Points",
     )
     plt.title(f"Generation {generation}")
     plt.ylim(-1.2, 1.2)

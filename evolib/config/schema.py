@@ -39,6 +39,10 @@ class CrossoverConfig(BaseModel):
     max_probability: Optional[float] = None
     increase_factor: Optional[float] = None
     decrease_factor: Optional[float] = None
+    # Parameters for specific operators
+    alpha: Optional[float] = None  # for BLX
+    eta: Optional[float] = None  # for SBX
+    blend_range: Optional[float] = None  # for Intermediate
 
 
 class ComponentConfig(BaseModel):

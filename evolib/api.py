@@ -51,8 +51,6 @@ from evolib.interfaces.types import (
 from evolib.operators.crossover import (
     crossover_arithmetic,
     crossover_blend_alpha,
-    crossover_differential,
-    crossover_heuristic,
     crossover_intermediate,
     crossover_offspring,
     crossover_simulated_binary,
@@ -204,8 +202,6 @@ __all__ = [
     "cross_entropy_loss",
     "crossover_arithmetic",
     "crossover_blend_alpha",
-    "crossover_differential",
-    "crossover_heuristic",
     "crossover_intermediate",
     "crossover_offspring",
     "crossover_simulated_binary",

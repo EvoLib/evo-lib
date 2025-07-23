@@ -7,15 +7,16 @@ max_indiv_age: 0
 evolution:
   strategy: "mu_comma_lambda"
 
-representation: 
-  type: "vector"
-  initializer: vector_adaptive
-  dim: 7
-  bounds: [-1.0, 1.0]
-  init_bounds: [-0.001, 0.001]
-  randomize_mutation_strengths: True
-
-mutation:
-  strategy: adaptive_per_parameter
-  min_strength: 0.0001
-  max_strength: 0.1
+modules:
+  poly:
+    type: "vector"
+    initializer: vector_adaptive
+    dim: 7
+    bounds: [-1.0, 1.0]
+    init_bounds: [-0.001, 0.001]
+    randomize_mutation_strengths: True
+    
+    mutation:
+      strategy: adaptive_per_parameter
+      min_strength: 0.0001
+      max_strength: 0.1

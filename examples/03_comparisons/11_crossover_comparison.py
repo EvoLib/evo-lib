@@ -45,8 +45,6 @@ crossover_strategies = {
     "arithmetic": "./11_configs/11_arithmetic.yaml",
     "sbx": "./11_configs/11_sbx.yaml",
     "intermediate": "./11_configs/11_intermediate.yaml",
-    "heuristic": "./11_configs/11_heuristic.yaml",
-    "differential": "./11_configs/11_differential.yaml",
 }
 
 runs = {}

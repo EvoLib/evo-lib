@@ -51,8 +51,6 @@ class CrossoverOperator(Enum):
     ARITHMETIC = "arithmetic"
     SBX = "sbx"
     INTERMEDIATE = "intermediate"
-    HEURISTIC = "heuristic"
-    DIFFERENTIAL = "differential"
 
 
 class DiversityMethod(Enum):

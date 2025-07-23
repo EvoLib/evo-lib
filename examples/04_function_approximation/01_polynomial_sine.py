@@ -28,7 +28,7 @@ CONFIG_FILE = "01_polynomial_sine.yaml"
 # Fitness Function
 def fitness_function(indiv: Indiv) -> None:
     predicted = np.polyval(
-        indiv.para.vector[::-1], X_RANGE
+        indiv.para["poly"].vector[::-1], X_RANGE
     )  # numpy expects highest degree first
     true_vals = TARGET_FUNC(X_RANGE)
     weights = 1.0 + 0.4 * np.abs(np.cos(X_RANGE))
@@ -37,7 +37,7 @@ def fitness_function(indiv: Indiv) -> None:
 
 # Plotting per Generation
 def plot_approximation(indiv: Indiv, generation: int) -> None:
-    y_pred = np.polyval(indiv.para.vector[::-1], X_RANGE)
+    y_pred = np.polyval(indiv.para["poly"].vector[::-1], X_RANGE)
     y_true = TARGET_FUNC(X_RANGE)
 
     plt.figure(figsize=(6, 4))

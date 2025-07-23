@@ -52,7 +52,7 @@ def collision_penalty(path: np.ndarray) -> float:
 
 # Fitness: distance to target + collision penalty
 def fitness_function(indiv: Indiv) -> None:
-    path = simulate_trajectory(indiv.para.vector)
+    path = simulate_trajectory(indiv.para["steps"].vector)
     final_pos = path[-1]
     dist = np.linalg.norm(final_pos - TARGET)
     penalty = collision_penalty(path)
@@ -61,7 +61,7 @@ def fitness_function(indiv: Indiv) -> None:
 
 # Plot best individual's path with obstacles
 def plot_trajectory(indiv: Indiv, generation: int) -> None:
-    path = simulate_trajectory(indiv.para.vector)
+    path = simulate_trajectory(indiv.para["steps"].vector)
 
     plt.figure(figsize=(5, 5))
     plt.plot(path[:, 0], path[:, 1], "o-", color="blue", label="Agent Path")

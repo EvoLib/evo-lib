@@ -32,7 +32,7 @@ def simulate_trajectory(para: np.ndarray) -> np.ndarray:
 
 # Fitness function: distance to target
 def fitness_function(indiv: Indiv) -> None:
-    final_pos = simulate_trajectory(indiv.para.vector)
+    final_pos = simulate_trajectory(indiv.para["steps"].vector)
     indiv.fitness = float(np.linalg.norm(final_pos - TARGET))
 
 
@@ -41,8 +41,8 @@ def plot_trajectory(indiv: Indiv, generation: int) -> None:
     pos = START.copy()
     traj = [pos.copy()]
     for t in range(NUM_STEPS):
-        vx = np.clip(indiv.para.vector[t * 2 + 0], -MAX_SPEED, MAX_SPEED)
-        vy = np.clip(indiv.para.vector[t * 2 + 1], -MAX_SPEED, MAX_SPEED)
+        vx = np.clip(indiv.para["steps"].vector[t * 2 + 0], -MAX_SPEED, MAX_SPEED)
+        vy = np.clip(indiv.para["steps"].vector[t * 2 + 1], -MAX_SPEED, MAX_SPEED)
         pos += np.array([vx, vy])
         traj.append(pos.copy())
 

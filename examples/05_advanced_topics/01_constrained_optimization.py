@@ -25,7 +25,7 @@ PENALTY_FACTOR = 100.0
 
 # Fitness Function
 def fitness_function(indiv: Indiv) -> None:
-    x, y = indiv.para.vector
+    x, y = indiv.para["test-vector"].vector
     value = (x - 1) ** 2 + (y + 2) ** 2  # e.g., distance to target point (1, -2)
     constraint = x**2 + y**2
 
@@ -46,7 +46,7 @@ def plot_generation(indiv: Indiv, generation: int) -> None:
     ax.add_patch(circle)
 
     # Aktuelles bestes Individuum
-    x, y = indiv.para.vector
+    x, y = indiv.para["test-vector"].vector
     ax.plot(x, y, "ro", label="Best Solution")
 
     # Theorie: bestmöglicher Punkt auf dem Kreis in Richtung Ziel (1, -2)
