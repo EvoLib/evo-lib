@@ -68,12 +68,9 @@ Requirements: Python 3.9+ and packages in `requirements.txt`.
 ```python
 from evolib import Pop
 from my_fitness import fitness_function
-from my_mutation import mutate_custom
 
 pop = Pop(config_path="config/my_experiment.yaml")
-pop.set_functions(fitness_function=fitness_function,
-                  mutation_function=mutate_custom)
-pop.initialize_population()
+pop.set_functions(fitness_function=fitness_function)
 
 for _ in range(pop.max_generations):
     pop.run_one_generation()
@@ -86,26 +83,27 @@ For full examples, see 📁[`examples/`](https://github.com/EvoLib/evo-lib/tree/
 # ⚙️ Configuration Example (.yaml)
 
 ```yaml
-parent_pool_size: 10
-offspring_pool_size: 40
-max_generations: 100
-max_indiv_age: 3
-num_elites: 1
+parent_pool_size: 20
+offspring_pool_size: 60
+max_generations: 300
+max_indiv_age: 0
+num_elites: 2
 
 evolution:
-  strategy: mu_plus_lambda
+  strategy: "mu_plus_lambda"
 
-mutation:
-  strategy: adaptive_individual
-  init_probability: 0.8
-  min_probability: 0.2
-  max_probability: 1.0
-  init_strength: 0.5
-  min_strength: 0.01
-  max_strength: 1.0
+modules:
+  main:
+    type: vector
+    initializer: random_initializer
+    dim: 16
+    bounds: [-2.0, 2.0]
+    init_bounds: [0.0, 0.0]
 
-crossover:
-  strategy: none
+    mutation:
+      strategy: constant
+      probability: 1.0
+      strength: 0.02
 ```
 
 ---
