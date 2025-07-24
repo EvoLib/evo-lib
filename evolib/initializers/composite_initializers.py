@@ -26,10 +26,10 @@ def composite_initializer(cfg: FullConfig) -> Callable[["Pop"], ParaComposite]:
 
         for name, component_cfg in cfg.modules.items():
             # Verwende denselben Initializer-Mechanismus wie bei klassischen Vektoren
-            initializer_fn = get_initializer(component_cfg.initializer)
+            initializer_fn = get_initializer(component_cfg.initializer, component_cfg)
 
             # Übergib nur die ComponentConfig als Scheinausschnitt (für apply_config())
-            para = initializer_fn(component_cfg)(pop)
+            para = initializer_fn(pop)
 
             components[name] = para
 

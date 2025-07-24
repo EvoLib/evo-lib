@@ -9,14 +9,13 @@ if TYPE_CHECKING:
 from collections.abc import Callable
 from typing import Protocol
 
-from evolib.config.schema import ComponentConfig
 from evolib.interfaces.structs import MutationParams
 from evolib.representation.base import ParaBase
 
 EvolutionStrategyFunction = Callable[["Pop"], None]
 SelectionFunction = Callable[["Pop", int], list["Indiv"]]
 ReplaceFunction = Callable[["Pop", list["Indiv"]], None]
-ParaInitializer = Callable[[ComponentConfig], Callable[["Pop"], ParaBase]]
+ParaInitializer = Callable[["Pop"], ParaBase]
 
 
 class FitnessFunction(Protocol):

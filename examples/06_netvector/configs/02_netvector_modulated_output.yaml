@@ -10,7 +10,7 @@ evolution:
 modules:
   controller:
     type: vector
-    dim: 2  # gain, bias
+    dim: 1
     initializer: normal_initializer
     bounds: [-2.0, 2.0]
     mutation:
@@ -22,13 +22,12 @@ modules:
 
   nnet:
     type: vector
-    dim: 16
-    initializer: random_initializer
+    dim_type: net
+    dim: [1, 16, 16, 1]
+    initializer: normal_initializer
     mutation:
       strategy: constant
       strength: 0.05
       probability: 1.0
     crossover:
       strategy: none
-
-

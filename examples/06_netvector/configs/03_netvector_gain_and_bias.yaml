@@ -1,0 +1,33 @@
+parent_pool_size: 20
+offspring_pool_size: 140
+max_generations: 150
+num_elites: 1
+max_indiv_age: 0
+
+evolution:
+  strategy: mu_plus_lambda
+
+modules:
+  controller:
+    type: vector
+    dim: 2
+    initializer: normal_initializer
+    bounds: [-2.0, 2.0]
+    mutation:
+      strategy: constant
+      strength: 0.05
+      probability: 1.0
+
+  nnet:
+    type: vector
+    dim_type: net
+    dim: [1, 16, 8, 1]
+    activation: tanh
+    initializer: normal_initializer
+    bounds: [-1.0, 1.0]
+    mutation:
+      strategy: exponential_decay
+      min_strength: 0.01
+      max_strength: 0.1
+      min_probability: 1.0
+      max_probability: 1.0

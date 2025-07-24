@@ -13,11 +13,8 @@ from evolib.core.individual import Indiv
 from evolib.core.population import Pop, compute_fitness_diversity
 from evolib.globals.numeric import DEFAULT_FLOAT_DTYPE, EPSILON, MAX_FLOAT, MIN_FLOAT
 from evolib.initializers.composite_initializers import composite_initializer
-from evolib.initializers.registry import (
-    get_initializer,
-    initializer_registry,
-    register_initializer,
-)
+from evolib.initializers.net_initializers import normal_initializer_net
+from evolib.initializers.registry import get_initializer
 from evolib.initializers.vector_initializers import (
     fixed_initializer,
     normal_initializer,
@@ -217,13 +214,13 @@ __all__ = [
     "griewank_2d",
     "griewank_3d",
     "huber_loss",
-    "initializer_registry",
     "load_config",
     "load_strategy",
     "mae_loss",
     "mse_loss",
     "mutate_offspring",
     "normal_initializer",
+    "normal_initializer_net",
     "plot_diversity",
     "plot_fitness",
     "plot_fitness_comparison",
@@ -233,7 +230,6 @@ __all__ = [
     "rastrigin",
     "rastrigin_2d",
     "rastrigin_3d",
-    "register_initializer",
     "replace_generational",
     "replace_mu_lambda",
     "replace_random",

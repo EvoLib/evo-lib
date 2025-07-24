@@ -1,19 +1,21 @@
 # SPDX-License-Identifier: MIT
 """Initializers for ParaVector representations."""
 
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 import numpy as np
 
 from evolib.config.schema import ComponentConfig
-from evolib.core.population import Pop
-from evolib.initializers.registry import register_initializer
+
+if TYPE_CHECKING:
+    from evolib.core.population import Pop
+
 from evolib.representation.vector import ParaVector
 
 
-def random_initializer(cfg: ComponentConfig) -> Callable[[Pop], ParaVector]:
+def random_initializer(cfg: ComponentConfig) -> Callable[["Pop"], ParaVector]:
 
-    def init_fn(_: Pop) -> ParaVector:
+    def init_fn(_: "Pop") -> ParaVector:
         pv = ParaVector()
         pv.apply_config(cfg)
 
@@ -28,9 +30,9 @@ def random_initializer(cfg: ComponentConfig) -> Callable[[Pop], ParaVector]:
     return init_fn
 
 
-def zero_initializer(cfg: ComponentConfig) -> Callable[[Pop], ParaVector]:
+def zero_initializer(cfg: ComponentConfig) -> Callable[["Pop"], ParaVector]:
 
-    def init_fn(_: Pop) -> ParaVector:
+    def init_fn(_: "Pop") -> ParaVector:
         pv = ParaVector()
         pv.apply_config(cfg)
         pv.vector = np.zeros(pv.dim)
@@ -39,10 +41,10 @@ def zero_initializer(cfg: ComponentConfig) -> Callable[[Pop], ParaVector]:
     return init_fn
 
 
-def fixed_initializer(cfg: ComponentConfig) -> Callable[[Pop], ParaVector]:
+def fixed_initializer(cfg: ComponentConfig) -> Callable[["Pop"], ParaVector]:
     values = np.array(cfg.values)
 
-    def init_fn(_: Pop) -> ParaVector:
+    def init_fn(_: "Pop") -> ParaVector:
         pv = ParaVector()
         pv.apply_config(cfg)
         pv.vector = values.copy()
@@ -51,11 +53,11 @@ def fixed_initializer(cfg: ComponentConfig) -> Callable[[Pop], ParaVector]:
     return init_fn
 
 
-def normal_initializer(cfg: ComponentConfig) -> Callable[[Pop], ParaVector]:
+def normal_initializer(cfg: ComponentConfig) -> Callable[["Pop"], ParaVector]:
     mean = float(cfg.mean or 0.0)
     std = float(cfg.std or 1.0)
 
-    def init_fn(_: Pop) -> ParaVector:
+    def init_fn(_: "Pop") -> ParaVector:
         pv = ParaVector()
         pv.apply_config(cfg)
         pv.vector = np.random.normal(loc=mean, scale=std, size=pv.dim)
@@ -64,9 +66,9 @@ def normal_initializer(cfg: ComponentConfig) -> Callable[[Pop], ParaVector]:
     return init_fn
 
 
-def vector_adaptive_initializer(cfg: ComponentConfig) -> Callable[[Pop], ParaVector]:
+def vector_adaptive_initializer(cfg: ComponentConfig) -> Callable[["Pop"], ParaVector]:
 
-    def init_fn(_: Pop) -> ParaVector:
+    def init_fn(_: "Pop") -> ParaVector:
         pv = ParaVector()
         pv.apply_config(cfg)
 
@@ -94,11 +96,3 @@ def vector_adaptive_initializer(cfg: ComponentConfig) -> Callable[[Pop], ParaVec
         return pv
 
     return init_fn
-
-
-# Registration
-register_initializer("random_initializer", random_initializer)
-register_initializer("zero_initializer", zero_initializer)
-register_initializer("fixed_initializer", fixed_initializer)
-register_initializer("normal_initializer", normal_initializer)
-register_initializer("vector_adaptive", vector_adaptive_initializer)

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 from pydantic import BaseModel, Field, model_validator
@@ -50,7 +50,8 @@ class CrossoverConfig(BaseModel):
 class ComponentConfig(BaseModel):
     type: RepresentationType = RepresentationType.VECTOR
     dim: Union[int, list[int]]
-    structure: Optional[list[int]] = None
+    dim_type: Literal["flat", "net", "tensor", "blocks", "grouped"] = "flat"
+    activation: Optional[Literal["tanh", "relu", "identity"]] = "tanh"
     bounds: Tuple[float, float] = (-1.0, 1.0)
     initializer: str
     init_bounds: Optional[Tuple[float, float]] = None
@@ -70,40 +71,46 @@ class ComponentConfig(BaseModel):
         initializer = data.get("initializer")
         dim_raw = data.get("dim")
         values = data.get("values")
-        structure = data.get("structure")
+        dim_type = data.get("dim_type", "flat")
 
+        # 1. Interpretiere dim je nach dim_type
         if isinstance(dim_raw, list):
-            try:
-                shape = tuple(dim_raw)
-                dim = int(np.prod(shape))
-                data["shape"] = shape
-                data["dim"] = dim
-            except Exception:
-                raise ValueError("Invalid dim list – must be list of integers")
+            if dim_type == "flat":
+                try:
+                    shape = tuple(dim_raw)
+                    dim = int(np.prod(shape))
+                    data["shape"] = shape
+                    data["dim"] = dim
+                except Exception:
+                    raise ValueError("Invalid dim list – must be list of integers")
+            elif dim_type == "net":
+                if len(dim_raw) < 2:
+                    raise ValueError("dim_type 'net' requires at least 2 layers")
+                data["dim"] = dim_raw
+            elif dim_type == "tensor":
+                data["shape"] = tuple(dim_raw)
+                data["dim"] = int(np.prod(dim_raw))
+            elif dim_type == "blocks":
+                data["block_sizes"] = dim_raw
+                data["dim"] = sum(dim_raw)
+            elif dim_type == "grouped":
+                data["group_sizes"] = dim_raw
+                data["dim"] = sum(dim_raw)
+            else:
+                raise ValueError(f"Unknown dim_type '{dim_type}'")
 
-        # Fall 1: fixed_initializer → values müssen gesetzt sein
+        # 2. fixed_initializer → values müssen gesetzt sein
         if initializer == "fixed_initializer":
             if not values:
                 raise ValueError(
                     "When using 'fixed_initializer', 'values' must be provided."
                 )
-            if dim is None:
+            if "dim" not in data:
                 data["dim"] = len(values)
 
-        # Fall 2: andere Initializer
-        elif "dim" not in data and not structure:
-            raise ValueError("Field 'dim' is required unless 'structure' is provided.")
-
-            if values is not None:
-                raise ValueError(
-                    "Field 'values' must not be set unless initializer "
-                    "is 'fixed_initializer'."
-                )
-
-        # Fall 3: structure → dim ableiten
-        if "dim" not in data and structure:
-            if isinstance(structure, list) and len(structure) >= 2:
-                data["dim"] = sum(i * j for i, j in zip(structure, structure[1:]))
+        # 3. Wenn weder dim noch struktur definiert
+        if "dim" not in data:
+            raise ValueError("Missing 'dim' – must be provided directly or derived")
 
         return data
 

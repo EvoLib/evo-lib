@@ -1,23 +1,28 @@
+# SPDX-License-Identifier: MIT
 """
-Defines a minimal parameter representation for a simple feedforward neural network with
-one hidden layer. The network is controlled entirely by a flat parameter vector, which
-includes weights and biases for both layers.
+NetVector – Interpreter for flat ParaVectors as feedforward neural networks.
 
-This module does not define a full learning model or topology structure. Instead, it
-provides a lightweight way to encode and evaluate a fixed network architecture using
-evolutionary strategies or other vector-based optimization approaches.
+This module provides a lightweight helper class that interprets a flat ParaVector
+(e.g. created via dim_type='net') as a fully connected feedforward network with
+arbitrary layer structure and activation function.
 
-Classes:
-    ParaNet: Feedforward network interface using a flat parameter vector.
+NetVector does not contain any trainable parameters or evolutionary logic itself.
+Instead, it unpacks and applies a flat vector (weights + biases) to input data.
 
-Example usage:
-    net = ParaNet(input_dim=1, hidden_dim=5, output_dim=1)
-    y = net.forward(x, para_vector)
+Typical use case:
+    - Use ParaVector as evolvable parameter container (mutation, crossover etc.)
+    - Use NetVector to define the network structure and perform forward evaluations
+
+Example:
+    para = ParaVector(...)  # created via normal_initializer_net
+    net = NetVector(dim=[1, 8, 1], activation="tanh")
+    y = net.forward(x, para.vector)
 """
-
 from typing import Callable
 
 import numpy as np
+
+from evolib.config.schema import FullConfig
 
 ACTIVATIONS: dict[str, Callable[[np.ndarray], np.ndarray]] = {
     "tanh": np.tanh,
@@ -27,55 +32,68 @@ ACTIVATIONS: dict[str, Callable[[np.ndarray], np.ndarray]] = {
 
 
 class NetVector:
-    """Simple feedforward neural network with 1 hidden layer, controlled by a flat
-    parameter vector."""
+    def __init__(self, dim: list[int], activation: str = "tanh") -> None:
+        if not isinstance(dim, list) or not all(isinstance(d, int) for d in dim):
+            raise ValueError(f"dim must be list[int], but got: {dim} ({type(dim)})")
+        if len(dim) < 2:
+            raise ValueError("dim must include at least input and output layers")
 
-    def __init__(
-        self,
-        input_dim: int,
-        hidden_dim: int,
-        output_dim: int,
-        activation: str = "tanh",
-    ) -> None:
-        self.input_dim = input_dim
-        self.hidden_dim = hidden_dim
-        self.output_dim = output_dim
-
-        if activation not in ACTIVATIONS:
-            raise ValueError(f"Unknown activation: {activation}")
+        self.dim = dim
+        self.n_layers = len(dim) - 1
         self.activation_fn = ACTIVATIONS[activation]
 
-        self.weight_shapes = [
-            (hidden_dim, input_dim),  # input → hidden
-            (output_dim, hidden_dim),  # hidden → output
-        ]
-        self.bias_shapes = [
-            (hidden_dim,),  # bias for hidden layer
-            (output_dim,),  # bias for output layer
-        ]
+        self.weight_shapes = [(dim[i + 1], dim[i]) for i in range(self.n_layers)]
+        self.bias_shapes = [(dim[i + 1],) for i in range(self.n_layers)]
         self.n_parameters = sum(
             np.prod(s) for s in self.weight_shapes + self.bias_shapes
         )
 
-    def forward(self, x: np.ndarray, para_vector: np.ndarray) -> np.ndarray:
-        """Computes y = f(x) based on a flat parameter vector."""
-        w1, b1, w2, b2 = self._unpack_parameters(para_vector)
-        h = self.activation_fn(w1 @ x + b1)
-        y = self.activation_fn(w2 @ h + b2)
-        return y
+    def forward(self, x: np.ndarray, vector: np.ndarray) -> np.ndarray:
+        """
+        Evaluates the network on input x using the flat parameter vector. Activation is
+        applied after all but the last layer.
 
-    def _unpack_parameters(self, para: np.ndarray) -> tuple[np.ndarray, ...]:
+        Args:
+            x (np.ndarray): Input vector (shape: [input_dim] or [batch, input_dim])
+            vector (np.ndarray): Flat parameter vector with correct dimension
+
+        Returns:
+            np.ndarray: Output of the network
+        """
+        weights, biases = self._unpack_parameters(vector)
+        h = x
+        for i in range(self.n_layers):
+            h = weights[i] @ h + biases[i]
+            if i < self.n_layers - 1:
+                h = self.activation_fn(h)
+        return h
+
+    def _unpack_parameters(
+        self, vector: np.ndarray
+    ) -> tuple[list[np.ndarray], list[np.ndarray]]:
+        """
+        Decomposes the flat vector into per-layer weights and biases.
+
+        Args:
+            vector (np.ndarray): Flat parameter vector
+
+        Returns:
+            Tuple of two lists: weights and biases
+        """
         i = 0
+        weights, biases = [], []
+        for w_shape, b_shape in zip(self.weight_shapes, self.bias_shapes):
+            w_size = int(np.prod(w_shape))
+            b_size = int(np.prod(b_shape))
+            weights.append(vector[i : i + w_size].reshape(w_shape))
+            i += w_size
+            biases.append(vector[i : i + b_size].reshape(b_shape))
+            i += b_size
+        return weights, biases
 
-        def next_chunk(shape: tuple[int, ...]) -> np.ndarray:
-            nonlocal i
-            size = int(np.prod(shape))
-            chunk = para[i : i + size].reshape(shape)
-            i += size
-            return chunk
-
-        w1 = next_chunk(self.weight_shapes[0])
-        b1 = next_chunk(self.bias_shapes[0])
-        w2 = next_chunk(self.weight_shapes[1])
-        b2 = next_chunk(self.bias_shapes[1])
-        return w1, b1, w2, b2
+    @classmethod
+    def from_config(cls, cfg: FullConfig, module: str) -> "NetVector":
+        mod = cfg.modules[module]
+        if not isinstance(mod.dim, list):
+            raise TypeError(f"Module '{module}': expected dim as list[int]")
+        return cls(dim=mod.dim, activation=mod.activation or "tanh")
