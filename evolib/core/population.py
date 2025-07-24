@@ -124,6 +124,18 @@ class Pop:
     def lambda_(self) -> int:
         return self.offspring_pool_size
 
+    @property
+    def sample_indiv(self) -> Indiv:
+        """
+        Returns a representative individual from the current population.
+
+        Useful for inspecting parameter module dimensions, shapes, or bounds
+        """
+
+        if not self.indivs:
+            raise RuntimeError("No individuals initialized.")
+        return self.indivs[0]
+
     def initialize_population(
         self, initializer: Callable[["Pop"], Any] | None = None
     ) -> None:
@@ -393,6 +405,9 @@ class Pop:
 
         if hasattr(self.best(), "para") and hasattr(self.best().para, "get_history"):
             row.update(self.best().para.get_history())
+
+        if hasattr(self.best().para, "get_status"):
+            row["status_str"] = self.best().para.get_status()
 
         self.history_logger.log(row)
 

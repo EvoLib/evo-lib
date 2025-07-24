@@ -1,3 +1,20 @@
+"""
+Defines a minimal parameter representation for a simple feedforward neural network with
+one hidden layer. The network is controlled entirely by a flat parameter vector, which
+includes weights and biases for both layers.
+
+This module does not define a full learning model or topology structure. Instead, it
+provides a lightweight way to encode and evaluate a fixed network architecture using
+evolutionary strategies or other vector-based optimization approaches.
+
+Classes:
+    ParaNet: Feedforward network interface using a flat parameter vector.
+
+Example usage:
+    net = ParaNet(input_dim=1, hidden_dim=5, output_dim=1)
+    y = net.forward(x, para_vector)
+"""
+
 from typing import Callable
 
 import numpy as np
@@ -9,7 +26,7 @@ ACTIVATIONS: dict[str, Callable[[np.ndarray], np.ndarray]] = {
 }
 
 
-class ParaNet:
+class NetVector:
     """Simple feedforward neural network with 1 hidden layer, controlled by a flat
     parameter vector."""
 
