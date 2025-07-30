@@ -39,7 +39,10 @@ jobs:
         run: black --check evolib/ tests/
 
       - name: Run isort
-        run: isort --check-only evolib/ tests/
+        run: |
+          echo "::group::Check import order with isort"
+          isort evolib tests --check-only --diff
+          echo "::endgroup::"
 
       - name: Run flake8
         run: flake8 evolib/ tests/
