@@ -41,7 +41,7 @@ def fitness_gain_bias(indiv: Indiv) -> None:
 pop = Pop("configs/03_netvector_gain_and_bias.yaml")
 pop.set_functions(fitness_function=fitness_gain_bias)
 
-net = NetVector.from_config(pop.full_config, module="nnet")
+net = NetVector.from_config(pop.config, module="nnet")
 
 for _ in range(pop.max_generations):
     pop.run_one_generation()

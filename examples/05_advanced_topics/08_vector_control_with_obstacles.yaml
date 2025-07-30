@@ -1,3 +1,5 @@
+# Sample configuration for 08_vector_control_with_obstacles.py
+
 parent_pool_size: 20
 offspring_pool_size: 60
 max_generations: 100
@@ -10,7 +12,7 @@ evolution:
 modules:
   steps:
     type: vector
-    initializer: "random_initializer"
+    initializer: random_vector
     dim: 16  # NUM_STEPS * 2
     bounds: [-1.0, 1.0]
 

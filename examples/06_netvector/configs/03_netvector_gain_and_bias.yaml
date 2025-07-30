@@ -1,3 +1,5 @@
+#Sample configuration for 03_netvector_gain_and_bias.py
+
 parent_pool_size: 20
 offspring_pool_size: 140
 max_generations: 150
@@ -11,7 +13,7 @@ modules:
   controller:
     type: vector
     dim: 2
-    initializer: normal_initializer
+    initializer: normal_vector
     bounds: [-2.0, 2.0]
     mutation:
       strategy: constant
@@ -20,10 +22,10 @@ modules:
 
   nnet:
     type: vector
-    dim_type: net
+    structure: net
     dim: [1, 16, 8, 1]
     activation: tanh
-    initializer: normal_initializer
+    initializer: normal_net
     bounds: [-1.0, 1.0]
     mutation:
       strategy: exponential_decay

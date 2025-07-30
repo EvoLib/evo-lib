@@ -36,7 +36,13 @@ class HistoryLogger:
 
     def to_dataframe(self) -> pd.DataFrame:
         """Returns the full history as a pandas DataFrame."""
-        return self.history
+        df = self.history.copy()
+        for col in df.columns:
+            try:
+                df[col] = pd.to_numeric(df[col])
+            except (ValueError, TypeError):
+                pass  # leave non-numeric columns untouched
+        return df
 
     def save_csv(self, path: str) -> None:
         """

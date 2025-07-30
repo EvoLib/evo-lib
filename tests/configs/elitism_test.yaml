@@ -17,7 +17,7 @@ replacement:
 modules:
   vector:
     type: vector
-    initializer: random_initializer
+    initializer: random_vector
     dim: 16
     bounds: [-1.0, 1.0]
 

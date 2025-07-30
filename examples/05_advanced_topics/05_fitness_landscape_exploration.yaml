@@ -1,3 +1,4 @@
+# Sample configuration for 05_fitness_landscape_exploration.py
 parent_pool_size: 10
 offspring_pool_size: 30
 max_generations: 100
@@ -12,7 +13,7 @@ modules:
     type: vector
     dim: 2
     bounds: [-32.0, 32.0]
-    initializer: "random_initializer"
+    initializer: random_vector
 
     mutation:
       strategy: constant

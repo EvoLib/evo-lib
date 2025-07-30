@@ -1,4 +1,4 @@
-# Simple sample configuration
+# Sample configuration
 
 parent_pool_size: 2
 offspring_pool_size: 4
@@ -13,7 +13,7 @@ evolution:
 modules:
   test-vector:
     type: vector
-    initializer: random_initializer
+    initializer: random_vector
     dim: 1
     bounds: [-1.0, 1.0]
 

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from evolib.core.population import Pop  # noqa: F401
@@ -9,6 +9,9 @@ if TYPE_CHECKING:
 from collections.abc import Callable
 from typing import Protocol
 
+from pydantic import BaseModel
+
+from evolib.config.schema import FullConfig
 from evolib.interfaces.structs import MutationParams
 from evolib.representation.base import ParaBase
 
@@ -16,6 +19,8 @@ EvolutionStrategyFunction = Callable[["Pop"], None]
 SelectionFunction = Callable[["Pop", int], list["Indiv"]]
 ReplaceFunction = Callable[["Pop", list["Indiv"]], None]
 ParaInitializer = Callable[["Pop"], ParaBase]
+
+ModuleConfig = Union[BaseModel, FullConfig]
 
 
 class FitnessFunction(Protocol):

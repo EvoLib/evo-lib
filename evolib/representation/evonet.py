@@ -5,13 +5,15 @@ Implements the ParaBase interface for use within EvoLib's evolutionary pipeline.
 Supports mutation, crossover, vector conversion, and configuration.
 """
 
-from __future__ import annotations
-
+import random
 from typing import TYPE_CHECKING
 
 import numpy as np
+from evonet.connection import Connection
 from evonet.core import Nnet
 from evonet.mutation import mutate_biases, mutate_weights
+from evonet.neuron import Neuron
+from evonet.types import NeuronRole
 
 from evolib.representation.base import ParaBase
 
@@ -29,10 +31,35 @@ class ParaNnet(ParaBase):
     def __init__(self) -> None:
         self.net = Nnet()
 
-    def apply_config(self, cfg: ComponentConfig) -> None:
-        # load net structure from cfg.dim or similar
-        # NOTE: This will be extended in Phase 3
-        pass
+    def apply_config(self, cfg: "ComponentConfig") -> None:
+        dim = cfg.dim
+        act = cfg.activation or "tanh"
+        w_min, w_max = getattr(cfg, "weight_bounds", (-1.0, 1.0))
+        b_min, b_max = getattr(cfg, "bias_bounds", (-0.5, 0.5))
+
+        prev_layer: list[Neuron] = []
+        for i, num_neurons in enumerate(dim):
+            layer: list[Neuron] = []
+            role = (
+                NeuronRole.INPUT
+                if i == 0
+                else NeuronRole.OUTPUT if i == len(dim) - 1 else NeuronRole.HIDDEN
+            )
+            for _ in range(num_neurons):
+                bias = random.uniform(b_min, b_max)
+                neuron = Neuron(activation=act, bias=bias)
+                self.net.add_neuron(neuron, role=role)
+                layer.append(neuron)
+
+            # fully connect to previous layer
+            if prev_layer:
+                for src in prev_layer:
+                    for dst in layer:
+                        weight = random.uniform(w_min, w_max)
+                        conn = Connection(src, dst, weight)
+                        self.net.add_connection(conn)
+
+            prev_layer = layer
 
     def mutate(self) -> None:
         mutate_weights(self.net)

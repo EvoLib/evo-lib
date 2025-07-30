@@ -1,98 +1,144 @@
 # SPDX-License-Identifier: MIT
-"""Initializers for ParaVector representations."""
+"""
+Initializers for ParaVector representations.
 
-from typing import TYPE_CHECKING, Callable
+These functions use a full configuration (FullConfig) and a module name to initialize
+ParaVector instances directly.
+
+Each initializer is compatible with EvoLib’s mutation, crossover, and adaptation system.
+"""
 
 import numpy as np
 
-from evolib.config.schema import ComponentConfig
-
-if TYPE_CHECKING:
-    from evolib.core.population import Pop
-
+from evolib.config.schema import FullConfig
 from evolib.representation.vector import ParaVector
 
 
-def random_initializer(cfg: ComponentConfig) -> Callable[["Pop"], ParaVector]:
+def initializer_normal_vector(config: FullConfig, module: str) -> ParaVector:
+    """
+    Initializes a ParaVector using a normal distribution.
 
-    def init_fn(_: "Pop") -> ParaVector:
-        pv = ParaVector()
-        pv.apply_config(cfg)
+    Args:
+        config (FullConfig): Full config object containing all module definitions
+        module (str): Name of the module (e.g. "weights")
 
-        if pv.init_bounds is None:
-            raise ValueError("init_bounds must be defined")
-        if pv.dim is None:
-            raise ValueError("dim must be defined")
+    Returns:
+        ParaVector: Initialized vector
+    """
+    para = ParaVector()
+    cfg = config.modules[module]
+    para.apply_config(cfg)
 
-        pv.vector = np.random.uniform(pv.init_bounds[0], pv.init_bounds[1], size=pv.dim)
-        return pv
-
-    return init_fn
-
-
-def zero_initializer(cfg: ComponentConfig) -> Callable[["Pop"], ParaVector]:
-
-    def init_fn(_: "Pop") -> ParaVector:
-        pv = ParaVector()
-        pv.apply_config(cfg)
-        pv.vector = np.zeros(pv.dim)
-        return pv
-
-    return init_fn
+    para.vector = np.random.normal(
+        loc=cfg.mean or 0.0,
+        scale=cfg.std or 1.0,
+        size=para.dim,
+    )
+    return para
 
 
-def fixed_initializer(cfg: ComponentConfig) -> Callable[["Pop"], ParaVector]:
-    values = np.array(cfg.values)
+def initializer_random_vector(config: FullConfig, module: str) -> ParaVector:
+    """
+    Initializes a ParaVector with uniform random values from init_bounds.
 
-    def init_fn(_: "Pop") -> ParaVector:
-        pv = ParaVector()
-        pv.apply_config(cfg)
-        pv.vector = values.copy()
-        return pv
+    Args:
+        config (FullConfig): Full config object
+        module (str): Module name
 
-    return init_fn
+    Returns:
+        ParaVector: Initialized vector
+    """
+    para = ParaVector()
+    cfg = config.modules[module]
+    para.apply_config(cfg)
 
+    if para.init_bounds is None:
+        raise ValueError(f"init_bounds must be set for module '{module}'")
 
-def normal_initializer(cfg: ComponentConfig) -> Callable[["Pop"], ParaVector]:
-    mean = float(cfg.mean or 0.0)
-    std = float(cfg.std or 1.0)
-
-    def init_fn(_: "Pop") -> ParaVector:
-        pv = ParaVector()
-        pv.apply_config(cfg)
-        pv.vector = np.random.normal(loc=mean, scale=std, size=pv.dim)
-        return pv
-
-    return init_fn
+    size = int(para.dim)
+    para.vector = np.random.uniform(*para.init_bounds, size=size)
+    return para
 
 
-def vector_adaptive_initializer(cfg: ComponentConfig) -> Callable[["Pop"], ParaVector]:
+def initializer_zero_vector(config: FullConfig, module: str) -> ParaVector:
+    """
+    Initializes a ParaVector with all zeros.
 
-    def init_fn(_: "Pop") -> ParaVector:
-        pv = ParaVector()
-        pv.apply_config(cfg)
+    Args:
+        config (FullConfig): Full config object
+        module (str): Module name
 
-        if pv.init_bounds is None:
-            raise ValueError("init_bounds must be defined")
-        if pv.dim is None:
-            raise ValueError("dim must be defined")
-        if pv.min_mutation_strength is None or pv.max_mutation_strength is None:
+    Returns:
+        ParaVector: Initialized vector
+    """
+    para = ParaVector()
+    cfg = config.modules[module]
+    para.apply_config(cfg)
+
+    para.vector = np.zeros(para.dim)
+    return para
+
+
+def initializer_fixed_vector(config: FullConfig, module: str) -> ParaVector:
+    """
+    Initializes a ParaVector with fixed values from the config.
+
+    Args:
+        config (FullConfig): Full config object
+        module (str): Module name
+
+    Returns:
+        ParaVector: Initialized vector
+    """
+    para = ParaVector()
+    cfg = config.modules[module]
+    para.apply_config(cfg)
+
+    if cfg.values is None:
+        raise ValueError(
+            f"values must be defined for initializer_fixed_vector "
+            f"in module '{module}'"
+        )
+
+    para.vector = np.array(cfg.values)
+    return para
+
+
+def initializer_adaptive_vector(config: FullConfig, module: str) -> ParaVector:
+    """
+    Initializes a ParaVector with random values and per-parameter mutation strengths.
+
+    Args:
+        config (FullConfig): Full config object
+        module (str): Module name
+
+    Returns:
+        ParaVector: Initialized vector
+    """
+    para = ParaVector()
+    cfg = config.modules[module]
+    para.apply_config(cfg)
+
+    if para.init_bounds is None:
+        raise ValueError(f"init_bounds must be defined in module '{module}'")
+    if para.min_mutation_strength is None or para.max_mutation_strength is None:
+        raise ValueError(
+            f"min/max mutation strength must be defined in " f"module '{module}'"
+        )
+
+    size = int(para.dim)
+    para.vector = np.random.uniform(*para.init_bounds, size=size)
+
+    if para.randomize_mutation_strengths:
+        para.para_mutation_strengths = np.random.uniform(
+            para.min_mutation_strength, para.max_mutation_strength, size=para.dim
+        )
+    else:
+        if para.mutation_strength is None:
             raise ValueError(
-                "min_mutation_strength and max_mutation_strength" "must be defined."
+                f"mutation_strength must be defined for non-random initialization "
+                f"in module '{module}'"
             )
+        para.para_mutation_strengths = np.full(para.dim, para.mutation_strength)
 
-        pv.vector = np.random.uniform(pv.init_bounds[0], pv.init_bounds[1], size=pv.dim)
-        if pv.randomize_mutation_strengths:
-            pv.para_mutation_strengths = np.random.uniform(
-                pv.min_mutation_strength, pv.max_mutation_strength, size=pv.dim
-            )
-        else:
-            if pv.mutation_strength is None:
-                raise ValueError(
-                    "mutation_strength must be defined for non-random"
-                    "initialization of para_mutation_strengths."
-                )
-            pv.para_mutation_strengths = np.full(pv.dim, pv.mutation_strength)
-        return pv
-
-    return init_fn
+    return para

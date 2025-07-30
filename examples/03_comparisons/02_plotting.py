@@ -32,4 +32,3 @@ history = pop.history_logger.to_dataframe()
 
 # Plotting
 plot_fitness(history, show=True, save_path="./figures/02_plotting.png")
-print("Plot saved to ./figures/02_plotting.png.")

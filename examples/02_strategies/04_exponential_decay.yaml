@@ -1,4 +1,4 @@
-# Sample configuration
+# Sample configuration for 04_exponential_decay.py
 
 parent_pool_size: 40
 offspring_pool_size: 40
@@ -10,7 +10,7 @@ num_elites: 1
 modules:
   test-vector:
     type: "vector"
-    initializer: fixed_initializer
+    initializer: fixed_vector
     values: [-2.0, 2.0, -1.5, 1.5]
     dim: 4
     bounds: [-5.0, 5.0]

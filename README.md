@@ -125,7 +125,7 @@ EvoLib is designed to support a wide range of applications, including:
 - [x] Adaptive Mutation (global, individual, per-parameter)
 - [x] Flexible Crossover Strategies (BLX, intermediate, none)
 - [x] Strategy Comparisons via Examples
-- [ ] Neural Network Representations
+- [X] Neural Network Representations
 - [ ] Neuroevolution
 - [ ] Visualization Tools for Evolution Progress
 

@@ -140,10 +140,10 @@ def evolve_steady_state(pop: "Pop") -> None:
 
     # Select parents (configurable)
     if (
-        pop.full_config.selection is not None
-        and pop.full_config.selection.num_parents is not None
+        pop.config.selection is not None
+        and pop.config.selection.num_parents is not None
     ):
-        num_parents = pop.full_config.selection.num_parents
+        num_parents = pop.config.selection.num_parents
     else:
         num_parents = pop.offspring_pool_size
     parents = pop.select_parents(num_parents)
@@ -197,10 +197,10 @@ def evolve_flexible(pop: "Pop") -> None:
 
     # Selection
     if (
-        pop.full_config.selection is not None
-        and pop.full_config.selection.num_parents is not None
+        pop.config.selection is not None
+        and pop.config.selection.num_parents is not None
     ):
-        num_parents = pop.full_config.selection.num_parents
+        num_parents = pop.config.selection.num_parents
     else:
         num_parents = pop.offspring_pool_size
     parents = pop.select_parents(num_parents)

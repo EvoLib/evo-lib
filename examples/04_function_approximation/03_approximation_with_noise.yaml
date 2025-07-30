@@ -1,3 +1,5 @@
+# Sample configuration for 03_approximation_with_noise.py
+
 parent_pool_size: 20
 offspring_pool_size: 40
 max_generations: 300
@@ -10,7 +12,7 @@ evolution:
 modules:
   points:
     type: vector
-    initializer: random_initializer
+    initializer: random_vector
     dim: 16
     bounds: [-2.0, 2.0]
     init_bounds: [0.0, 0.0]

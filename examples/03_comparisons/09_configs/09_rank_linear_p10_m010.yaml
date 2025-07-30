@@ -1,4 +1,4 @@
-# Simple sample configuration
+# Sample configuration for selection_vs_mutation_pressure.py
 
 parent_pool_size: 50
 offspring_pool_size: 100
@@ -20,7 +20,7 @@ replacement:
 modules:
   test-vector:
     type: vector
-    initializer: random_initializer
+    initializer: random_vector
     dim: 10
     bounds: [-4.0, 4.0]
 

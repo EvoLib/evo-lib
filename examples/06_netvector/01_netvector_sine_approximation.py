@@ -31,7 +31,7 @@ def netvector_fitness(indiv: Indiv) -> None:
 pop = Pop(config_path="configs/01_netvector_sine_approximation.yaml")
 pop.set_functions(fitness_function=netvector_fitness)
 
-net = NetVector.from_config(pop.full_config, module="nnet")
+net = NetVector.from_config(pop.config, module="nnet")
 
 for _ in range(pop.max_generations):
     pop.run_one_generation()

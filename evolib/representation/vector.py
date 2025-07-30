@@ -1,6 +1,11 @@
-import numpy as np
+# SPDX-License-Identifier: MIT
+from typing import cast
 
-from evolib.config.schema import ComponentConfig, FullConfig
+import numpy as np
+from pydantic import BaseModel
+
+from evolib.config.schema import FullConfig
+from evolib.config.vector_component_config import VectorComponentConfig
 from evolib.interfaces.enums import (
     CrossoverOperator,
     CrossoverStrategy,
@@ -15,6 +20,7 @@ from evolib.operators.crossover import (
 )
 from evolib.operators.mutation import adapted_mutation_strength
 from evolib.representation.base import ParaBase
+from evolib.representation.netvector import NetVector
 
 
 class ParaVector(ParaBase):
@@ -59,6 +65,7 @@ class ParaVector(ParaBase):
         self.max_crossover_probability: float | None = None
         self.crossover_inc_factor: float | None = None
         self.crossover_dec_factor: float | None = None
+        self._crossover_fn = None
 
     def mutate(self) -> None:
         """
@@ -546,117 +553,121 @@ class ParaVector(ParaBase):
         )
         return self.max_crossover_probability * np.exp(-k * generation)
 
-    def apply_config(self, cfg: ComponentConfig | FullConfig) -> None:
-        """Apply component-level configuration to this ParaVector instance."""
-
-        if not isinstance(cfg, ComponentConfig):
+    def apply_config(self, cfg: BaseModel | FullConfig) -> None:
+        if isinstance(cfg, FullConfig):
             raise TypeError(
-                "ParaiVector requires ComponetConfig, "
-                f"but received {type(cfg).__name__}"
+                "ParaVector only accepts a single component config, " "not FullConfig"
             )
-        self.representation = cfg.type
+        cfg = cast(VectorComponentConfig, cfg)
+
+        # structure-based interpretation of di
+        structure = getattr(cfg, "structure", "flat")
+
+        if structure == "net":
+            if not isinstance(cfg.dim, list):
+                raise ValueError("structure='net' requires dim as list[int]")
+            net = NetVector(dim=cfg.dim, activation=cfg.activation or "tanh")
+            cfg.shape = (int(net.n_parameters),)
+            cfg.dim = int(net.n_parameters)
+
+        elif structure == "tensor":
+            if not isinstance(cfg.dim, list):
+                raise ValueError("structure='tensor' requires dim as list[int]")
+            cfg.shape = tuple(cfg.dim)
+            cfg.dim = int(np.prod(cfg.shape))
+
+        elif structure == "blocks":
+            if not isinstance(cfg.dim, list):
+                raise ValueError("structure='blocks' requires dim as list[int]")
+            cfg.shape = None
+            cfg.dim = sum(cfg.dim)
+
+        elif structure == "grouped":
+            if not isinstance(cfg.dim, list):
+                raise ValueError("structure='grouped' requires dim as list[int]")
+            cfg.shape = None
+            cfg.dim = sum(cfg.dim)
+
+        elif structure == "flat":
+            if isinstance(cfg.dim, list):
+                cfg.shape = tuple(cfg.dim)
+                cfg.dim = int(np.prod(cfg.shape))
+            else:
+                cfg.shape = (cfg.dim,)
+        else:
+            raise ValueError(f"Unknown structure type: '{structure}'")
+
+        # Assign dimensions
         self.dim = cfg.dim
-        self.tau = cfg.tau or 0.0
+        self.shape = cfg.shape or (cfg.dim,)
+        self.vector = np.zeros(self.dim)
+
+        # Bounds
         self.bounds = cfg.bounds
         self.init_bounds = cfg.init_bounds or self.bounds
-        self.randomize_mutation_strengths = cfg.randomize_mutation_strengths
-
-        if isinstance(cfg.dim, list):
-            self.shape = tuple(cfg.dim)
-            self.dim = int(np.prod(cfg.dim))
-        else:
-            self.shape = (cfg.dim,)
-            self.dim = cfg.dim
 
         # Mutation
         if cfg.mutation is None:
             raise ValueError("Mutation config is required for ParaVector.")
+        self.mutation_strategy = cfg.mutation.strategy
+        self.tau = cfg.tau or 0.0
+        self.randomize_mutation_strengths = cfg.randomize_mutation_strengths or False
+        self.mean = cfg.mean or 0.0
+        self.std = cfg.std or 1.0
 
-        self.mutation_strategy = MutationStrategy(cfg.mutation.strategy)
-
+        # Strategy-specific mutation params
+        m = cfg.mutation
         if self.mutation_strategy == MutationStrategy.CONSTANT:
-            self.mutation_probability = cfg.mutation.probability
-            self.mutation_strength = cfg.mutation.strength
-
+            self.mutation_probability = m.probability
+            self.mutation_strength = m.strength
         elif self.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
-            self.min_mutation_probability = cfg.mutation.min_probability
-            self.max_mutation_probability = cfg.mutation.max_probability
-            self.min_mutation_strength = cfg.mutation.min_strength
-            self.max_mutation_strength = cfg.mutation.max_strength
-
+            self.min_mutation_probability = m.min_probability
+            self.max_mutation_probability = m.max_probability
+            self.min_mutation_strength = m.min_strength
+            self.max_mutation_strength = m.max_strength
         elif self.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
-            self.mutation_probability = cfg.mutation.init_probability
-            self.min_mutation_probability = cfg.mutation.min_probability
-            self.max_mutation_probability = cfg.mutation.max_probability
-
-            self.mutation_strength = cfg.mutation.init_strength
-            self.min_mutation_strength = cfg.mutation.min_strength
-            self.max_mutation_strength = cfg.mutation.max_strength
-
-            self.min_diversity_threshold = cfg.mutation.min_diversity_threshold
-            self.max_diversity_threshold = cfg.mutation.max_diversity_threshold
-
-            self.mutation_inc_factor = cfg.mutation.increase_factor
-            self.mutation_dec_factor = cfg.mutation.decrease_factor
-
+            self.mutation_probability = m.init_probability
+            self.mutation_strength = m.init_strength
+            self.min_mutation_probability = m.min_probability
+            self.max_mutation_probability = m.max_probability
+            self.min_mutation_strength = m.min_strength
+            self.max_mutation_strength = m.max_strength
+            self.min_diversity_threshold = m.min_diversity_threshold
+            self.max_diversity_threshold = m.max_diversity_threshold
+            self.mutation_inc_factor = m.increase_factor
+            self.mutation_dec_factor = m.decrease_factor
         elif self.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
-            self.mutation_probability = None
-            self.mutation_strength = None
-
-            self.min_mutation_strength = cfg.mutation.min_strength
-            self.max_mutation_strength = cfg.mutation.max_strength
-            self.update_tau()
-
+            self.min_mutation_strength = m.min_strength
+            self.max_mutation_strength = m.max_strength
         elif self.mutation_strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
-            self.mutation_probability = None
-            self.mutation_strength = None
-            self.min_mutation_probability = None
-            self.max_mutation_probability = None
-            self.min_mutation_strength = cfg.mutation.min_strength
-            self.max_mutation_strength = cfg.mutation.max_strength
-            self.randomize_mutation_strengths = (
-                cfg.randomize_mutation_strengths or False
-            )
+            self.min_mutation_strength = m.min_strength
+            self.max_mutation_strength = m.max_strength
+        else:
+            raise ValueError(f"Unknown mutation strategy: {self.mutation_strategy}")
 
+        # Crossover
         if cfg.crossover is None:
             self.crossover_strategy = CrossoverStrategy.NONE
-            self._crossover_fn = None
         else:
-            self.crossover_strategy = CrossoverStrategy(cfg.crossover.strategy)
+            c = cfg.crossover
+            self.crossover_strategy = c.strategy
+            self.crossover_probability = c.probability or c.init_probability
+            self.min_crossover_probability = c.min_probability
+            self.max_crossover_probability = c.max_probability
+            self.crossover_inc_factor = c.increase_factor
+            self.crossover_dec_factor = c.decrease_factor
 
-            if self.crossover_strategy == CrossoverStrategy.CONSTANT:
-                self.crossover_probability = cfg.crossover.probability
-
-            elif self.crossover_strategy == CrossoverStrategy.EXPONENTIAL_DECAY:
-                self.min_crossover_probability = cfg.crossover.min_probability
-                self.max_crossover_probability = cfg.crossover.max_probability
-
-            elif self.crossover_strategy == CrossoverStrategy.ADAPTIVE_GLOBAL:
-                self.crossover_probability = cfg.crossover.init_probability
-                self.min_crossover_probability = cfg.crossover.min_probability
-                self.max_crossover_probability = cfg.crossover.max_probability
-                self.crossover_inc_factor = cfg.crossover.increase_factor
-                self.crossover_dec_factor = cfg.crossover.decrease_factor
-
-            # Choose crossover operator
-            if cfg.crossover.operator is None:
-                self._crossover_fn = None
+            op = c.operator
+            if op == CrossoverOperator.BLX:
+                alpha = c.alpha or 0.5
+                self._crossover_fn = lambda a, b: crossover_blend_alpha(a, b, alpha)
+            elif op == CrossoverOperator.ARITHMETIC:
+                self._crossover_fn = crossover_arithmetic
+            elif op == CrossoverOperator.SBX:
+                eta = c.eta or 15.0
+                self._crossover_fn = lambda a, b: crossover_simulated_binary(a, b, eta)
+            elif op == CrossoverOperator.INTERMEDIATE:
+                blend = c.blend_range or 0.25
+                self._crossover_fn = lambda a, b: crossover_intermediate(a, b, blend)
             else:
-                op = cfg.crossover.operator
-                if op == CrossoverOperator.BLX:
-                    alpha = cfg.crossover.alpha or 0.5
-                    self._crossover_fn = lambda a, b: crossover_blend_alpha(a, b, alpha)
-                elif op == CrossoverOperator.ARITHMETIC:
-                    self._crossover_fn = crossover_arithmetic
-                elif op == CrossoverOperator.SBX:
-                    eta = cfg.crossover.eta or 15.0
-                    self._crossover_fn = lambda a, b: crossover_simulated_binary(
-                        a, b, eta=eta
-                    )
-                elif op == CrossoverOperator.INTERMEDIATE:
-                    blend = cfg.crossover.blend_range or 0.25
-                    self._crossover_fn = lambda a, b: crossover_intermediate(
-                        a, b, blend_range=blend
-                    )
-                else:
-                    self._crossover_fn = None
+                self._crossover_fn = None

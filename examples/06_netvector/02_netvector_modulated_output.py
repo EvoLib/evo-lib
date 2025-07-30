@@ -38,7 +38,7 @@ def composite_fitness(indiv: Indiv) -> None:
 pop = Pop("configs/02_netvector_modulated_output.yaml")
 pop.set_functions(fitness_function=composite_fitness)
 
-net = NetVector.from_config(pop.full_config, module="nnet")
+net = NetVector.from_config(pop.config, module="nnet")
 
 for _ in range(pop.max_generations):
     pop.run_one_generation()

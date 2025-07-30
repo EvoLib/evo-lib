@@ -1,3 +1,5 @@
+# Sample configuration for 01_polynomial_sine.py
+
 parent_pool_size: 100
 offspring_pool_size: 700
 max_generations: 1000
@@ -10,7 +12,7 @@ evolution:
 modules:
   poly:
     type: "vector"
-    initializer: vector_adaptive
+    initializer: adaptive_vector
     dim: 7
     bounds: [-1.0, 1.0]
     init_bounds: [-0.001, 0.001]

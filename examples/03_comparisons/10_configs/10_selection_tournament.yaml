@@ -1,3 +1,4 @@
+# Sample configuration for 10_selection_stochastic_vs_deterministic.py
 parent_pool_size: 50
 offspring_pool_size: 100
 max_generations: 50
@@ -17,7 +18,7 @@ replacement:
 modules:
   test-vector:
     type: vector
-    initializer: random_initializer
+    initializer: random_vector
     dim: 10
     bounds: [-4.0, 4.0]
 

@@ -1,3 +1,5 @@
+# Sample configuration for 11_crossover_comparison.py
+
 parent_pool_size: 50
 offspring_pool_size: 100
 
@@ -19,7 +21,7 @@ modules:
     type: vector
     dim: 10
     bounds: [0.0, 2.0]
-    initializer: random_initializer
+    initializer: random_vector
 
     mutation:
       strategy: constant

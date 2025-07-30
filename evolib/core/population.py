@@ -13,7 +13,7 @@ import numpy as np
 
 from evolib.config.schema import FullConfig
 from evolib.core.individual import Indiv
-from evolib.initializers.composite_initializers import composite_initializer
+from evolib.initializers.registry import build_composite_initializer
 from evolib.interfaces.enums import (
     DiversityMethod,
     EvolutionStrategy,
@@ -42,8 +42,8 @@ class Pop:
 
         cfg: FullConfig = load_config(config_path)
 
-        self.full_config = cfg
-        self.para_initializer = composite_initializer(cfg)
+        self.config = cfg
+        self.para_initializer = build_composite_initializer(cfg)
         self.indivs: List[Any] = []
 
         # Core parameters

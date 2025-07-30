@@ -27,7 +27,7 @@ from evolib.config.schema import FullConfig
 ACTIVATIONS: dict[str, Callable[[np.ndarray], np.ndarray]] = {
     "tanh": np.tanh,
     "relu": lambda x: np.maximum(0, x),
-    "identity": lambda x: x,
+    "linear": lambda x: x,
 }
 
 

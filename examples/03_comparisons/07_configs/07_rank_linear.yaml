@@ -1,4 +1,4 @@
-# Simple sample configuration
+# Sample configuration for 07_selection_comparison.py
 
 parent_pool_size: 50
 offspring_pool_size: 100
@@ -8,7 +8,7 @@ max_indiv_age: 0
 num_elites: 1
 
 evolution:
-  strategy: "flexible"
+  strategy: flexible
 
 selection:
   strategy: rank_linear
@@ -20,11 +20,11 @@ replacement:
 modules:
   test-vector:
     type: vector
-    initializer: fixed_initializer
+    initializer: fixed_vector
     values: [-2.0, 2.0, -1.5, 1.5]
     bounds: [-5.0, 5.0]
 
     mutation:
-      strategy: "constant"
+      strategy: constant
       strength: 0.01
       probability: 1.0

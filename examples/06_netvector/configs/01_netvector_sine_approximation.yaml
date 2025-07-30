@@ -1,3 +1,5 @@
+# Sample configuration for 01_netvector_sine_approximation.py
+
 parent_pool_size: 20
 offspring_pool_size: 140
 max_generations: 150
@@ -10,9 +12,9 @@ evolution:
 modules:
   nnet:
     type: vector
-    dim_type: net
+    structure: net
     dim: [1, 16, 16, 1]
-    initializer: normal_initializer
+    initializer: normal_net
     activation: tanh
     bounds: [-1.0, 1.0]
     mutation:

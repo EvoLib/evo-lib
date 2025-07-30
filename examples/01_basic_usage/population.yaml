@@ -1,3 +1,5 @@
+# Sample configuration
+
 parent_pool_size: 10
 offspring_pool_size: 10
 max_generations: 0
@@ -7,7 +9,7 @@ num_elites: 0
 modules:
   test-vector:
     type: vector
-    initializer: random_initializer
+    initializer: random_vector
     dim: 4
     bounds: [-1.0, 1.0]
 

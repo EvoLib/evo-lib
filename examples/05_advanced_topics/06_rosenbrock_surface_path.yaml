@@ -1,3 +1,5 @@
+# Sample configuration for 06_rosenbrock_surface_path.py
+
 parent_pool_size: 10
 offspring_pool_size: 30
 max_generations: 100
@@ -12,7 +14,7 @@ modules:
     type: vector
     dim: 2
     bounds: [-2.0, 2.0]
-    initializer: fixed_initializer
+    initializer: fixed_vector
     values: [-2.0, -2.0]
 
     mutation:

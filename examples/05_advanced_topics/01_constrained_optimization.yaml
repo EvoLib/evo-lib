@@ -1,3 +1,8 @@
+# Sample configuration for:
+# 01_constrained_optimization.py
+# 02_constrained_optimization_repair.py
+# 03_constrained_optimization_multi.py
+
 parent_pool_size: 20
 offspring_pool_size: 40
 max_generations: 100
@@ -10,7 +15,7 @@ evolution:
 modules:
   test-vector:
     type: vector
-    initializer: random_initializer
+    initializer: random_vector
     dim: 2
     init_bounds: [-3.0, 3.0]
     bounds: [-5.0, 5.0]

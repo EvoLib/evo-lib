@@ -8,7 +8,7 @@ num_elites: 0
 modules:
   population_test:
     type: vector
-    initializer: random_initializer
+    initializer: random_vector
     dim: 1
     bounds: [-1.0, 1.0]
 

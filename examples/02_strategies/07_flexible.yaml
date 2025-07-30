@@ -1,3 +1,5 @@
+# Sample configuration for 07_flexible.yaml
+
 parent_pool_size: 10
 offspring_pool_size: 5
 max_generations: 20
@@ -20,7 +22,7 @@ modules:
     type: vector
     dim: 3
     bounds: [-1.0, 1.0]
-    initializer: random_initializer
+    initializer: random_vector
 
     mutation:
       strategy: constant

@@ -6,7 +6,8 @@ target data. It uses fixed support points to approximate sin(x) + normally distr
 noise.
 """
 
-import Callable
+from typing import Callable
+
 import matplotlib.pyplot as plt
 import numpy as np
 

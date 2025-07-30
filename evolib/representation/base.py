@@ -1,12 +1,21 @@
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Union
+from typing import TYPE_CHECKING, Any, Callable, Union
 
 import numpy as np
 
-from evolib.config.schema import ComponentConfig, FullConfig
+if TYPE_CHECKING:
+    from evolib.interfaces.types import ModuleConfig
 
 
 class ParaBase(ABC):
+    """
+    Abstract base class for all evolvable parameter representations (e.g. ParaVector,
+    ParaNnet).
+
+    This interface defines the evolutionary behavior of individuals and allows mutation,
+    crossover, adaptive updates, and access to history and diagnostic information.
+    """
+
     def __init__(self) -> None:
         self._crossover_fn: (
             Callable[
@@ -17,7 +26,7 @@ class ParaBase(ABC):
         ) = None
 
     @abstractmethod
-    def apply_config(self, cfg: ComponentConfig | FullConfig) -> None: ...
+    def apply_config(self, cfg: "ModuleConfig") -> None: ...
 
     @abstractmethod
     def mutate(self) -> None: ...
