@@ -23,7 +23,8 @@ jobs:
         run: |
           pip install -e .
 
-          pip install -e git+https://github.com/EvoLib/evo-net.git@main#egg=evonet
+          git clone https://github.com/EvoLib/evo-net.git
+          pip install -e ./evo-net
 
           pip install \
             black \
