@@ -53,6 +53,7 @@ target-version = ["py311"]
 profile = "black"
 line_length = 88
 known_first_party = ["evolib"]
+src_paths = ["evolib"]
 
 [tool.mypy]
 python_version = "3.12"
