@@ -30,7 +30,8 @@ jobs:
             pytest \
             docformatter \
             types-PyYAML \
-            matplotlib
+            matplotlib \
+            evonet
 
       - name: Run black
         run: black --check evolib/ tests/
