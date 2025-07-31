@@ -22,6 +22,6 @@ def initializer_normal_evonet(config: FullConfig, module: str) -> ParaNnet:
         ParaNnet: Initialized EvoNet representation
     """
     para = ParaNnet()
-    cfg = config.modules[module]
+    cfg = config.modules[module].model_copy(deep=True)
     para.apply_config(cfg)
     return para

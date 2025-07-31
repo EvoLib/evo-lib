@@ -5,15 +5,13 @@ Implements the ParaBase interface for use within EvoLib's evolutionary pipeline.
 Supports mutation, crossover, vector conversion, and configuration.
 """
 
-import random
 from typing import TYPE_CHECKING
 
 import numpy as np
-from evonet.connection import Connection
+from evonet.activation import random_function_name
 from evonet.core import Nnet
+from evonet.enums import NeuronRole
 from evonet.mutation import mutate_biases, mutate_weights
-from evonet.neuron import Neuron
-from evonet.types import NeuronRole
 
 from evolib.representation.base import ParaBase
 
@@ -33,33 +31,39 @@ class ParaNnet(ParaBase):
 
     def apply_config(self, cfg: "ComponentConfig") -> None:
         dim = cfg.dim
-        act = cfg.activation or "tanh"
+        activation = cfg.activation or "tanh"  # ToDo: config
         w_min, w_max = getattr(cfg, "weight_bounds", (-1.0, 1.0))
         b_min, b_max = getattr(cfg, "bias_bounds", (-0.5, 0.5))
 
-        prev_layer: list[Neuron] = []
-        for i, num_neurons in enumerate(dim):
-            layer: list[Neuron] = []
-            role = (
-                NeuronRole.INPUT
-                if i == 0
-                else NeuronRole.OUTPUT if i == len(dim) - 1 else NeuronRole.HIDDEN
-            )
-            for _ in range(num_neurons):
-                bias = random.uniform(b_min, b_max)
-                neuron = Neuron(activation=act, bias=bias)
-                self.net.add_neuron(neuron, role=role)
-                layer.append(neuron)
+        for layer_idx, num_neurons in enumerate(dim):
 
-            # fully connect to previous layer
-            if prev_layer:
-                for src in prev_layer:
-                    for dst in layer:
-                        weight = random.uniform(w_min, w_max)
-                        conn = Connection(src, dst, weight)
-                        self.net.add_connection(conn)
+            if activation == "random":
+                activation = random_function_name()
 
-            prev_layer = layer
+            if layer_idx == 0:
+                # InputLayer
+                self.net.add_layer()
+                self.net.add_neuron(
+                    count=num_neurons,
+                    activation="linear",  # ToDo: config
+                    role=NeuronRole.INPUT,
+                )
+            elif layer_idx == len(dim):
+                # OutputLayer
+                self.net.add_layer()
+                self.net.add_neuron(
+                    count=num_neurons,
+                    activation="tanh",  # ToDo: config
+                    role=NeuronRole.OUTPUT,
+                )
+            else:
+                self.net.add_layer()
+                self.net.add_neuron(
+                    count=num_neurons, activation=activation, role=NeuronRole.HIDDEN
+                )
+
+    def calc(self, input_values: list[float]) -> list[float]:
+        return self.net.calc(input_values)
 
     def mutate(self) -> None:
         mutate_weights(self.net)
@@ -83,13 +87,7 @@ class ParaNnet(ParaBase):
         self.net.set_biases(vector[n_weights:])
 
     def get_status(self) -> dict:
-        return {
-            "neurons": len(self.net.neurons),
-            "connections": len(self.net.connections),
-        }
+        return self.net
 
     def print_status(self) -> None:
-        print(
-            f"[ParaNnet] neurons: {len(self.net.neurons)} "
-            f"connections: {len(self.net.connections)}"
-        )
+        print(f"[ParaNnet] : {self.net} ")
