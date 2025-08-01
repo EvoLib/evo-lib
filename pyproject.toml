@@ -17,6 +17,7 @@ dependencies = [
     "pyyaml >=6.0",
     "pandas >=2.3.0",
     "pydantic >= 2.7,<3.0",
+    "graphviz>=0.20.1",
     "evonet @ git+https://github.com/EvoLib/evo-net.git@main"
 ]
 
