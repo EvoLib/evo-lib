@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 class ParaBase(ABC):
     """
     Abstract base class for all evolvable parameter representations (e.g. ParaVector,
-    ParaNnet).
+    ParaEvoNet).
 
     This interface defines the evolutionary behavior of individuals and allows mutation,
     crossover, adaptive updates, and access to history and diagnostic information.

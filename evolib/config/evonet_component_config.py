@@ -19,7 +19,7 @@ from evolib.config.base_component_config import CrossoverConfig, MutationConfig
 
 class EvoNetComponentConfig(BaseModel):
     """
-    Configuration for structured EvoNet-like networks (e.g. ParaNnet).
+    Configuration for structured EvoNet-like networks (e.g. ParaEvoNet).
 
     Used with: type = "evonet"
 

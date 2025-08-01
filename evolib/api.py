@@ -93,7 +93,7 @@ from evolib.registry.selection_registry import build_selection_registry
 from evolib.registry.strategy_registry import strategy_registry
 from evolib.representation.base import ParaBase
 from evolib.representation.composite import ParaComposite
-from evolib.representation.evonet import ParaNnet
+from evolib.representation.evonet import ParaEvoNet
 from evolib.representation.netvector import ACTIVATIONS, NetVector
 from evolib.representation.vector import ParaVector
 from evolib.utils.benchmarks import (
@@ -180,9 +180,9 @@ __all__ = [
     "Origin",
     "ParaBase",
     "ParaComposite",
+    "ParaEvoNet",
     "ParaInitFunction",
     "ParaInitializer",
-    "ParaNnet",
     "ParaVector",
     "Pop",
     "ReplaceFunction",

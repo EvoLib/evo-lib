@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from evolib.config.schemas import ComponentConfig
 
 
-class ParaNnet(ParaBase):
+class ParaEvoNet(ParaBase):
     """
     ParaBase wrapper for EvoNet.
 
@@ -86,8 +86,8 @@ class ParaNnet(ParaBase):
         self.net.set_weights(vector[:n_weights])
         self.net.set_biases(vector[n_weights:])
 
-    def get_status(self) -> dict:
+    def get_status(self) -> str:
         return self.net
 
     def print_status(self) -> None:
-        print(f"[ParaNnet] : {self.net} ")
+        print(f"[ParaEvoNet] : {self.net} ")
