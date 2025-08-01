@@ -48,7 +48,7 @@ class ParaNnet(ParaBase):
                     activation="linear",  # ToDo: config
                     role=NeuronRole.INPUT,
                 )
-            elif layer_idx == len(dim):
+            elif layer_idx == len(dim) - 1:
                 # OutputLayer
                 self.net.add_layer()
                 self.net.add_neuron(
