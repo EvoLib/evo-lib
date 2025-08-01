@@ -31,36 +31,36 @@ class ParaEvoNet(ParaBase):
 
     def apply_config(self, cfg: "ComponentConfig") -> None:
         dim = cfg.dim
-        activation = cfg.activation or "tanh"  # ToDo: config
         w_min, w_max = getattr(cfg, "weight_bounds", (-1.0, 1.0))
         b_min, b_max = getattr(cfg, "bias_bounds", (-0.5, 0.5))
 
+        if isinstance(cfg.activation, list):
+            activations = cfg.activation
+        else:
+            activations = [cfg.activation] * len(cfg.dim)
+
         for layer_idx, num_neurons in enumerate(dim):
 
-            if activation == "random":
-                activation = random_function_name()
+            activation_name = activations[layer_idx]
+
+            if activation_name == "random":
+                activation_name = random_function_name()
+
+            self.net.add_layer()
 
             if layer_idx == 0:
                 # InputLayer
-                self.net.add_layer()
-                self.net.add_neuron(
-                    count=num_neurons,
-                    activation="linear",  # ToDo: config
-                    role=NeuronRole.INPUT,
-                )
+                role = NeuronRole.INPUT
             elif layer_idx == len(dim) - 1:
                 # OutputLayer
-                self.net.add_layer()
-                self.net.add_neuron(
-                    count=num_neurons,
-                    activation="tanh",  # ToDo: config
-                    role=NeuronRole.OUTPUT,
-                )
+                role = NeuronRole.OUTPUT
             else:
-                self.net.add_layer()
-                self.net.add_neuron(
-                    count=num_neurons, activation=activation, role=NeuronRole.HIDDEN
-                )
+                # HiddenLayer
+                role = NeuronRole.HIDDEN
+
+            self.net.add_neuron(
+                count=num_neurons, activation=activation_name, role=role
+            )
 
     def calc(self, input_values: list[float]) -> list[float]:
         return self.net.calc(input_values)

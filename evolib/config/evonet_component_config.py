@@ -10,9 +10,10 @@ It is used with type = "evonet" and supports definition of:
     - Optional mutation/crossover strategies
 """
 
-from typing import Literal, Optional, Tuple
+from typing import Literal, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field, field_validator
+from pydantic_core import core_schema
 
 from evolib.config.base_component_config import CrossoverConfig, MutationConfig
 
@@ -29,7 +30,7 @@ class EvoNetComponentConfig(BaseModel):
             type: evonet
             dim: [4, 6, 2]
             activation: "relu"
-            initializer: "normal_initializer_evonet"
+            initializer: "normal_evonet"
             weight_bounds: [-1.0, 1.0]
             bias_bounds: [-0.5, 0.5]
     """
@@ -37,7 +38,7 @@ class EvoNetComponentConfig(BaseModel):
     type: Literal["evonet"] = "evonet"
     dim: list[int]
 
-    activation: Optional[str] = "tanh"
+    activation: Union[str, list[str]] = "tanh"
     initializer: str = Field(..., description="Name of the initializer to use")
 
     weight_bounds: Tuple[float, float] = (-1.0, 1.0)
@@ -62,3 +63,16 @@ class EvoNetComponentConfig(BaseModel):
         if low >= high:
             raise ValueError("Bounds must be specified as (min, max) with min < max")
         return bounds
+
+    @field_validator("activation")
+    @classmethod
+    def validate_activation_length(
+        cls,
+        act: Union[str, list[str]],
+        info: core_schema.FieldValidationInfo,
+    ) -> Union[str, list[str]]:
+
+        dim = info.data.get("dim")
+        if isinstance(act, list) and dim and len(act) != len(dim):
+            raise ValueError("Length of 'activation' list must match 'dim'")
+        return act

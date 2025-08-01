@@ -13,8 +13,8 @@ modules:
   nnet:
     type: evonet
     dim: [1, 16, 16, 1]
+    activation: ["linear", "tanh", "tanh", "tanh"]
     initializer: normal_evonet
-    activation: tanh
     bounds: [-1.0, 1.0]
     mutation:
       strategy: exponential_decay
