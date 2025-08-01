@@ -27,10 +27,10 @@ def evonet_fitness(indiv: Indiv) -> None:
 pop = Pop(config_path="configs/01_evonet_sine_approximation.yaml")
 pop.set_functions(fitness_function=evonet_fitness)
 
+
 for _ in range(pop.max_generations):
     pop.run_one_generation()
     pop.print_status()
-
 
 # Visualize result
 best = pop.best()

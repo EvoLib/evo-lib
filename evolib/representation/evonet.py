@@ -91,3 +91,32 @@ class ParaEvoNet(ParaBase):
 
     def print_status(self) -> None:
         print(f"[ParaEvoNet] : {self.net} ")
+
+    def print_graph(
+        self,
+        name: str,
+        engine: str = "neato",
+        labels_on: bool = True,
+        colors_on: bool = True,
+        thickness_on: bool = False,
+        fillcolors_on: bool = False,
+    ) -> None:
+        """
+        Prints the graph structure of the EvoNet.
+
+        Args:
+            name (str): Output filename (without extension).
+            engine (str): Layout engine for Graphviz.
+            labels_on (bool): Show edge weights as labels.
+            colors_on (bool): Use color coding for edge weights.
+            thickness_on (bool): Adjust edge thickness by weight.
+            fillcolors_on (bool): Fill nodes with colors by type.
+        """
+        self.net.print_graph(
+            name=name,
+            engine=engine,
+            labels_on=labels_on,
+            colors_on=colors_on,
+            thickness_on=thickness_on,
+            fillcolors_on=fillcolors_on,
+        )

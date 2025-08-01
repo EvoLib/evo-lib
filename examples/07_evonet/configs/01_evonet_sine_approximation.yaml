@@ -12,7 +12,7 @@ evolution:
 modules:
   nnet:
     type: evonet
-    dim: [1, 16, 16, 1]
+    dim: [1, 6, 6, 1]
     activation: ["linear", "tanh", "tanh", "tanh"]
     initializer: normal_evonet
     bounds: [-1.0, 1.0]
