@@ -13,6 +13,7 @@ from evonet.core import Nnet
 from evonet.enums import NeuronRole
 from evonet.mutation import mutate_biases, mutate_weights
 
+from evolib.interfaces.enums import CrossoverStrategy, MutationStrategy
 from evolib.representation.base import ParaBase
 
 if TYPE_CHECKING:
@@ -29,17 +30,71 @@ class ParaEvoNet(ParaBase):
     def __init__(self) -> None:
         self.net = Nnet()
 
+        # Mutationstrategy
+        self.mutation_strategy: MutationStrategy | None = None
+
+        # Global Mutationparameter
+        self.mutation_strength: float | None = None
+        self.mutation_probability: float | None = None
+        self.tau: float = 0.0
+
+        # Per-Parameter Mutationparameter
+        self.para_mutation_strengths: np.ndarray | None = None
+        self.randomize_mutation_strengths: bool | None = None
+
+        # Bounds of parameter (z. B. [-1, 1])
+        self.bounds: tuple[float, float] | None = None
+        self.init_bounds: tuple[float, float] | None = None
+
+        # Parametervektor
+        self.vector: np.ndarray = np.zeros(1)
+        self.shape: tuple[int, ...] = (1,)
+
+        # Bounds for mutation (min/max)
+        self.min_mutation_strength: float | None = None
+        self.max_mutation_strength: float | None = None
+        self.min_mutation_probability: float | None = None
+        self.max_mutation_probability: float | None = None
+
+        # Diversity based Adaptionfaktors
+        self.mutation_inc_factor: float | None = None
+        self.mutation_dec_factor: float | None = None
+        self.min_diversity_threshold: float | None = None
+        self.max_diversity_threshold: float | None = None
+
+        # Crossover
+        self.crossover_strategy: CrossoverStrategy | None = None
+        self.crossover_probability: float | None = None
+        self.min_crossover_probability: float | None = None
+        self.max_crossover_probability: float | None = None
+        self.crossover_inc_factor: float | None = None
+        self.crossover_dec_factor: float | None = None
+        self._crossover_fn = None
+
     def apply_config(self, cfg: "ComponentConfig") -> None:
-        dim = cfg.dim
         w_min, w_max = getattr(cfg, "weight_bounds", (-1.0, 1.0))
         b_min, b_max = getattr(cfg, "bias_bounds", (-0.5, 0.5))
+
+        # Assign dimensions
+        self.dim = cfg.dim
+
+        # Mutation
+        if cfg.mutation is None:
+            raise ValueError("Mutation config is required for ParaEvoNet.")
+        self.mutation_strategy = cfg.mutation.strategy
+
+        # Strategy-specific mutation params
+        m = cfg.mutation
+        if self.mutation_strategy == MutationStrategy.CONSTANT:
+            self.mutation_probability = m.probability
+            self.mutation_strength = m.strength
 
         if isinstance(cfg.activation, list):
             activations = cfg.activation
         else:
             activations = [cfg.activation] * len(cfg.dim)
 
-        for layer_idx, num_neurons in enumerate(dim):
+        for layer_idx, num_neurons in enumerate(self.dim):
 
             activation_name = activations[layer_idx]
 
@@ -51,7 +106,7 @@ class ParaEvoNet(ParaBase):
             if layer_idx == 0:
                 # InputLayer
                 role = NeuronRole.INPUT
-            elif layer_idx == len(dim) - 1:
+            elif layer_idx == len(self.dim) - 1:
                 # OutputLayer
                 role = NeuronRole.OUTPUT
             else:
@@ -66,7 +121,7 @@ class ParaEvoNet(ParaBase):
         return self.net.calc(input_values)
 
     def mutate(self) -> None:
-        mutate_weights(self.net)
+        mutate_weights(self.net, std=self.mutation_strength)
         mutate_biases(self.net)
 
     def crossover_with(self, partner: ParaBase) -> None:

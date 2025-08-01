@@ -2,7 +2,7 @@
 
 parent_pool_size: 20
 offspring_pool_size: 140
-max_generations: 25
+max_generations: 250
 max_indiv_age: 0
 num_elites: 2
 
@@ -17,8 +17,6 @@ modules:
     initializer: normal_evonet
     bounds: [-1.0, 1.0]
     mutation:
-      strategy: exponential_decay
-      min_strength: 0.01
-      max_strength: 0.1
-      min_probability: 1.0
-      max_probability: 1.0
+      strategy: constant
+      strength: 0.05
+      probability: 1.0

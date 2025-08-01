@@ -136,6 +136,7 @@ from evolib.utils.plotting import (
     plot_fitness_comparison,
     plot_history,
     plot_mutation_trends,
+    save_combined_net_plot,
     save_current_plot,
 )
 from evolib.utils.registry import (
@@ -256,6 +257,7 @@ __all__ = [
     "rosenbrock",
     "rosenbrock_2d",
     "rosenbrock_3d",
+    "save_combined_net_plot",
     "save_current_plot",
     "scaled_mutation_factor",
     "schwefel",

@@ -3,22 +3,22 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, Pop, mse_loss
+from evolib import Indiv, Pop, mse_loss, save_combined_net_plot
 
 # Define target function
-X_RANGE = np.linspace(0, 2 * np.pi, 100)
-Y_TRUE = np.sin(X_RANGE)
+X_RAW = np.linspace(0, 2 * np.pi, 100)
+X_NORM = (X_RAW - np.pi) / np.pi
+Y_TRUE = np.sin(X_RAW)
 
 
 # Fitness function
 def evonet_fitness(indiv: Indiv) -> None:
-    predictions: list[float] = []
+    predictions = []
+    net = indiv.para["nnet"]
 
-    for x in X_RANGE:
-        x_input = np.array([x])
-        output = indiv.para["nnet"].calc(x_input)
-        y_pred = output[0]
-        predictions.append(y_pred)
+    for x_norm in X_NORM:
+        output = net.calc([x_norm])
+        predictions.append(output[0])
 
     indiv.fitness = mse_loss(Y_TRUE, np.array(predictions))
 
@@ -28,16 +28,32 @@ pop = Pop(config_path="configs/01_evonet_sine_approximation.yaml")
 pop.set_functions(fitness_function=evonet_fitness)
 
 
+last_best_fitness = 2.0
 for _ in range(pop.max_generations):
+
     pop.run_one_generation()
     pop.print_status()
 
+    gen = pop.generation_num
+
+    indiv = pop.best()
+
+    if indiv.fitness < last_best_fitness:
+        last_best_fitness = indiv.fitness
+        net = indiv.para["nnet"].net
+        y_pred = np.array([net.calc([x])[0] for x in X_NORM])
+
+        save_combined_net_plot(
+            net, X_RAW, Y_TRUE, y_pred, f"01_frames/gen_{gen:04d}.png"
+        )
+exit(0)
 # Visualize result
 best = pop.best()
-y_best = [best.para["nnet"].calc(np.array([x])) for x in X_RANGE]
+y_best = [pop.best().para["nnet"].calc([x])[0] for x in X_NORM]
 
-plt.plot(X_RANGE, Y_TRUE, label="Target: sin(x)")
-plt.plot(X_RANGE, y_best, label="Best Approximation", linestyle="--")
+plt.plot(X_RAW, Y_TRUE, label="Target: sin(x)")
+plt.plot(X_RAW, y_best, label="Best Approximation", linestyle="--")
+
 plt.title("EvoNet Fit to sin(x)")
 plt.xlabel("x")
 plt.ylabel("y")

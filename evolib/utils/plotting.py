@@ -9,10 +9,15 @@ This module provides functions for visualizing:
 - Fitness comparison
 """
 
+import os
+import tempfile
 from typing import Optional, Union
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+from evonet.core import Nnet
+from PIL import Image
 
 
 def plot_history(
@@ -214,6 +219,60 @@ def plot_fitness_comparison(
         show=show,
         with_std=True,
     )
+
+
+def save_combined_net_plot(
+    net: Nnet,
+    X: np.ndarray,
+    Y_true: np.ndarray,
+    Y_pred: np.ndarray,
+    path: str,
+    *,
+    dpi: int = 100,
+    title: str = "EvoNet Fit to sin(x)",
+) -> None:
+    """
+    Saves a combined image of network structure and approximation plot.
+
+    Args:
+        net: EvoNet instance with .print_graph().
+        X (np.ndarray): Input values (for plotting).
+        Y_true (np.ndarray): Ground truth values (e.g. sin(x)).
+        Y_pred (np.ndarray): Network prediction values.
+        path (str): Output path for PNG image.
+        dpi (int): DPI resolution for the output.
+        title (str): Plot title.
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        graph_path = os.path.join(tmpdir, "net")
+        net.print_graph(graph_path, fillcolors_on=True, thickness_on=True)
+        img_net = Image.open(graph_path + ".png")
+
+        # Create approximation plot
+        fig, ax = plt.subplots(figsize=(5, 4))
+        ax.plot(X, Y_true, label="Target: sin(x)")
+        ax.plot(X, Y_pred, label="Network Output", linestyle="--")
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        ax.set_title(title)
+        ax.grid(True)
+        ax.legend()
+        fig.tight_layout()
+
+        plot_path = os.path.join(tmpdir, "plot.png")
+        fig.savefig(plot_path, dpi=dpi)
+        plt.close(fig)
+
+        img_plot = Image.open(plot_path)
+
+        # Combine horizontally
+        total_width = img_net.width + img_plot.width
+        height = max(img_net.height, img_plot.height)
+
+        combined = Image.new("RGB", (total_width, height), "white")
+        combined.paste(img_net, (0, 0))
+        combined.paste(img_plot, (img_net.width, 0))
+        combined.save(path)
 
 
 def save_current_plot(filename: str, dpi: int = 300) -> None:
