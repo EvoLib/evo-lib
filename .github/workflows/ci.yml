@@ -22,14 +22,8 @@ jobs:
 
       - name: Install project and tools
         run: |
-          # Install evolib in editable mode
-          pip install -e .
-
-          # Clone and install evonet in editable mode
-          git clone https://github.com/EvoLib/evo-net.git
-          echo "PYTHONPATH=$PYTHONPATH:$(pwd)/evo-net" >> $GITHUB_ENV
-          pip install -e ./evo-net
-
+          pip install -e .[dev]
+          
           # Linter, Formatter, Typechecker, Testing Tools
           pip install \
             black \
