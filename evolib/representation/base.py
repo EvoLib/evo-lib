@@ -26,10 +26,14 @@ class ParaBase(ABC):
         ) = None
 
     @abstractmethod
-    def apply_config(self, cfg: "ModuleConfig") -> None: ...
+    def apply_config(self, cfg: "ModuleConfig") -> None:
+        """Initializes parameters from a configuration object."""
+        ...
 
     @abstractmethod
-    def mutate(self) -> None: ...
+    def mutate(self) -> None:
+        """Applies mutation to the parameters."""
+        ...
 
     @abstractmethod
     def print_status(self) -> None: ...

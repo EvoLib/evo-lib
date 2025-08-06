@@ -9,9 +9,9 @@ def test_mutate_vector_changes_values() -> None:
     para = ParaVector()
     para.vector = np.zeros(3)
     para.bounds = (-1, 1)
-    para.mutation_strength = 0.1
-    para.mutation_probability = 1.0
-    para.mutation_strategy = MutationStrategy.CONSTANT
+    para.evo_params.mutation_strength = 0.1
+    para.evo_params.mutation_probability = 1.0
+    para.evo_params.mutation_strategy = MutationStrategy.CONSTANT
 
     indiv = Indiv(para=para)
 

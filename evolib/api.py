@@ -60,8 +60,19 @@ from evolib.operators.crossover import (
     crossover_simulated_binary,
 )
 from evolib.operators.mutation import (
-    adapted_mutation_probability,
-    adapted_mutation_strength,
+    adapt_crossover_probability,
+    adapt_crossover_probability_by_diversity,
+    adapt_mutation_probability,
+    adapt_mutation_probability_by_diversity,
+    adapt_mutation_strength,
+    adapt_mutation_strength_by_diversity,
+    adapt_mutation_strengths,
+    adapt_value_by_diversity,
+    adapted_tau,
+    exponential_crossover_probability,
+    exponential_decay,
+    exponential_mutation_probability,
+    exponential_mutation_strength,
     mutate_offspring,
 )
 from evolib.operators.replacement import (
@@ -93,6 +104,7 @@ from evolib.registry.selection_registry import build_selection_registry
 from evolib.registry.strategy_registry import strategy_registry
 from evolib.representation.base import ParaBase
 from evolib.representation.composite import ParaComposite
+from evolib.representation.evo_params import EvoControlParams
 from evolib.representation.evonet import ParaEvoNet
 from evolib.representation.netvector import ACTIVATIONS, NetVector
 from evolib.representation.vector import ParaVector
@@ -159,6 +171,7 @@ __all__ = [
     "ERR_INVALID_NAME",
     "ERR_NO_GET_STRATEGY",
     "ERR_UNKNOWN_CATEGORY",
+    "EvoControlParams",
     "EvoNetComponentConfig",
     "EvolutionConfig",
     "EvolutionStrategy",
@@ -199,8 +212,15 @@ __all__ = [
     "ackley",
     "ackley_2d",
     "ackley_3d",
-    "adapted_mutation_probability",
-    "adapted_mutation_strength",
+    "adapt_crossover_probability",
+    "adapt_crossover_probability_by_diversity",
+    "adapt_mutation_probability",
+    "adapt_mutation_probability_by_diversity",
+    "adapt_mutation_strength",
+    "adapt_mutation_strength_by_diversity",
+    "adapt_mutation_strengths",
+    "adapt_value_by_diversity",
+    "adapted_tau",
     "binary_cross_entropy_loss",
     "build_composite_initializer",
     "build_replacement_registry",
@@ -220,6 +240,10 @@ __all__ = [
     "evolve_mu_comma_lambda",
     "evolve_mu_plus_lambda",
     "evolve_steady_state",
+    "exponential_crossover_probability",
+    "exponential_decay",
+    "exponential_mutation_probability",
+    "exponential_mutation_strength",
     "generate_cloned_offspring",
     "get_component_config_class",
     "get_enum",

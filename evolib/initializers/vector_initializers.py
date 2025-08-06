@@ -121,7 +121,10 @@ def initializer_adaptive_vector(config: FullConfig, module: str) -> ParaVector:
 
     if para.init_bounds is None:
         raise ValueError(f"init_bounds must be defined in module '{module}'")
-    if para.min_mutation_strength is None or para.max_mutation_strength is None:
+    if (
+        para.evo_params.min_mutation_strength is None
+        or para.evo_params.max_mutation_strength is None
+    ):
         raise ValueError(
             f"min/max mutation strength must be defined in " f"module '{module}'"
         )
@@ -130,15 +133,19 @@ def initializer_adaptive_vector(config: FullConfig, module: str) -> ParaVector:
     para.vector = np.random.uniform(*para.init_bounds, size=size)
 
     if para.randomize_mutation_strengths:
-        para.para_mutation_strengths = np.random.uniform(
-            para.min_mutation_strength, para.max_mutation_strength, size=para.dim
+        para.evo_params.mutation_strengths = np.random.uniform(
+            para.evo_params.min_mutation_strength,
+            para.evo_params.max_mutation_strength,
+            size=para.dim,
         )
     else:
-        if para.mutation_strength is None:
+        if para.evo_params.mutation_strength is None:
             raise ValueError(
                 f"mutation_strength must be defined for non-random initialization "
                 f"in module '{module}'"
             )
-        para.para_mutation_strengths = np.full(para.dim, para.mutation_strength)
+        para.evo_params.mutation_strengths = np.full(
+            para.dim, para.evo_params.mutation_strength
+        )
 
     return para
