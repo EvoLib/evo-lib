@@ -5,19 +5,17 @@ Implements the ParaBase interface for use within EvoLib's evolutionary pipeline.
 Supports mutation, crossover, vector conversion, and configuration.
 """
 
-from typing import TYPE_CHECKING
-
 import numpy as np
 from evonet.activation import random_function_name
 from evonet.core import Nnet
 from evonet.enums import NeuronRole
 from evonet.mutation import mutate_biases, mutate_weights
 
-from evolib.interfaces.enums import CrossoverStrategy, MutationStrategy
+from evolib.config.evonet_component_config import EvoNetComponentConfig
+from evolib.interfaces.enums import MutationStrategy
+from evolib.interfaces.types import ModuleConfig
 from evolib.representation.base import ParaBase
-
-if TYPE_CHECKING:
-    from evolib.config.schemas import ComponentConfig
+from evolib.representation.evo_params import EvoControlParams
 
 
 class ParaEvoNet(ParaBase):
@@ -30,64 +28,69 @@ class ParaEvoNet(ParaBase):
     def __init__(self) -> None:
         self.net = Nnet()
 
-        # Mutationstrategy
-        self.mutation_strategy: MutationStrategy | None = None
-
-        # Global Mutationparameter
-        self.mutation_strength: float | None = None
-        self.mutation_probability: float | None = None
-        self.tau: float = 0.0
-
-        # Per-Parameter Mutationparameter
-        self.para_mutation_strengths: np.ndarray | None = None
-        self.randomize_mutation_strengths: bool | None = None
-
         # Bounds of parameter (z. B. [-1, 1])
-        self.bounds: tuple[float, float] | None = None
-        self.init_bounds: tuple[float, float] | None = None
+        self.weight_bounds: tuple[float, float] | None = None
+        self.bias_bounds: tuple[float, float] | None = None
 
-        # Parametervektor
-        self.vector: np.ndarray = np.zeros(1)
-        self.shape: tuple[int, ...] = (1,)
+        # EvoControlParams
+        self.evo_params = EvoControlParams()
 
-        # Bounds for mutation (min/max)
-        self.min_mutation_strength: float | None = None
-        self.max_mutation_strength: float | None = None
-        self.min_mutation_probability: float | None = None
-        self.max_mutation_probability: float | None = None
+    def apply_config(self, cfg: ModuleConfig) -> None:
 
-        # Diversity based Adaptionfaktors
-        self.mutation_inc_factor: float | None = None
-        self.mutation_dec_factor: float | None = None
-        self.min_diversity_threshold: float | None = None
-        self.max_diversity_threshold: float | None = None
+        if not isinstance(cfg, EvoNetComponentConfig):
+            raise TypeError("Expected EvoNetComponentConfig")
 
-        # Crossover
-        self.crossover_strategy: CrossoverStrategy | None = None
-        self.crossover_probability: float | None = None
-        self.min_crossover_probability: float | None = None
-        self.max_crossover_probability: float | None = None
-        self.crossover_inc_factor: float | None = None
-        self.crossover_dec_factor: float | None = None
-        self._crossover_fn = None
-
-    def apply_config(self, cfg: "ComponentConfig") -> None:
-        w_min, w_max = getattr(cfg, "weight_bounds", (-1.0, 1.0))
-        b_min, b_max = getattr(cfg, "bias_bounds", (-0.5, 0.5))
+        evo_params = self.evo_params
 
         # Assign dimensions
         self.dim = cfg.dim
 
+        # Bounds
+        self.weight_bounds = cfg.weight_bounds or (-1.0, 1.0)
+        self.bias_bounds = cfg.bias_bounds or (-0.5, 0.5)
+
         # Mutation
-        if cfg.mutation is None:
+        mutation_cfg = cfg.mutation
+        if mutation_cfg is None:
             raise ValueError("Mutation config is required for ParaEvoNet.")
-        self.mutation_strategy = cfg.mutation.strategy
+
+        evo_params.mutation_strategy = mutation_cfg.strategy
 
         # Strategy-specific mutation params
-        m = cfg.mutation
-        if self.mutation_strategy == MutationStrategy.CONSTANT:
-            self.mutation_probability = m.probability
-            self.mutation_strength = m.strength
+        if self.evo_params.mutation_strategy == MutationStrategy.CONSTANT:
+            self.evo_params.mutation_probability = mutation_cfg.probability
+            self.evo_params.mutation_strength = mutation_cfg.strength
+
+        elif evo_params.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
+            evo_params.min_mutation_probability = mutation_cfg.min_probability
+            evo_params.max_mutation_probability = mutation_cfg.max_probability
+            evo_params.min_mutation_strength = mutation_cfg.min_strength
+            evo_params.max_mutation_strength = mutation_cfg.max_strength
+
+        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
+            evo_params.mutation_probability = mutation_cfg.init_probability
+            evo_params.mutation_strength = mutation_cfg.init_strength
+            evo_params.min_mutation_probability = mutation_cfg.min_probability
+            evo_params.max_mutation_probability = mutation_cfg.max_probability
+            evo_params.min_mutation_strength = mutation_cfg.min_strength
+            evo_params.max_mutation_strength = mutation_cfg.max_strength
+            evo_params.min_diversity_threshold = mutation_cfg.min_diversity_threshold
+            evo_params.max_diversity_threshold = mutation_cfg.max_diversity_threshold
+            evo_params.mutation_inc_factor = mutation_cfg.increase_factor
+            evo_params.mutation_dec_factor = mutation_cfg.decrease_factor
+
+        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
+            evo_params.min_mutation_strength = mutation_cfg.min_strength
+            evo_params.max_mutation_strength = mutation_cfg.max_strength
+
+        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
+            evo_params.min_mutation_strength = mutation_cfg.min_strength
+            evo_params.max_mutation_strength = mutation_cfg.max_strength
+
+        else:
+            raise ValueError(
+                f"Unknown mutation strategy: {evo_params.mutation_strategy}"
+            )
 
         if isinstance(cfg.activation, list):
             activations = cfg.activation
@@ -121,11 +124,11 @@ class ParaEvoNet(ParaBase):
         return self.net.calc(input_values)
 
     def mutate(self) -> None:
-        mutate_weights(self.net, std=self.mutation_strength)
+        mutate_weights(self.net, std=self.evo_params.mutation_strength)
         mutate_biases(self.net)
 
     def crossover_with(self, partner: ParaBase) -> None:
-        # Placeholder – to be implemented in crossover.py
+        # Placeholder
         # NOTE: Will be implementet in Phase 3
         pass
 

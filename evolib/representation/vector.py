@@ -1,16 +1,14 @@
 # SPDX-License-Identifier: MIT
-from typing import cast
 
 import numpy as np
-from pydantic import BaseModel
 
-from evolib.config.schema import FullConfig
 from evolib.config.vector_component_config import VectorComponentConfig
 from evolib.interfaces.enums import (
     CrossoverOperator,
     CrossoverStrategy,
     MutationStrategy,
 )
+from evolib.interfaces.types import ModuleConfig
 from evolib.operators.crossover import (
     crossover_arithmetic,
     crossover_blend_alpha,
@@ -49,6 +47,137 @@ class ParaVector(ParaBase):
 
         # EvoControlParams
         self.evo_params = EvoControlParams()
+
+    def apply_config(self, cfg: ModuleConfig) -> None:
+
+        if not isinstance(cfg, VectorComponentConfig):
+            raise TypeError("Expected VectorComponentConfig")
+
+        evo_params = self.evo_params
+
+        # structure-based interpretation of dimenson
+        structure = getattr(cfg, "structure", "flat")
+
+        if structure == "net":
+            if not isinstance(cfg.dim, list):
+                raise ValueError("structure='net' requires dim as list[int]")
+            net = NetVector(dim=cfg.dim, activation=cfg.activation or "tanh")
+            cfg.shape = (int(net.n_parameters),)
+            cfg.dim = int(net.n_parameters)
+
+        elif structure == "tensor":
+            if not isinstance(cfg.dim, list):
+                raise ValueError("structure='tensor' requires dim as list[int]")
+            cfg.shape = tuple(cfg.dim)
+            cfg.dim = int(np.prod(cfg.shape))
+
+        elif structure == "blocks":
+            if not isinstance(cfg.dim, list):
+                raise ValueError("structure='blocks' requires dim as list[int]")
+            cfg.shape = None
+            cfg.dim = sum(cfg.dim)
+
+        elif structure == "grouped":
+            if not isinstance(cfg.dim, list):
+                raise ValueError("structure='grouped' requires dim as list[int]")
+            cfg.shape = None
+            cfg.dim = sum(cfg.dim)
+
+        elif structure == "flat":
+            if isinstance(cfg.dim, list):
+                cfg.shape = tuple(cfg.dim)
+                cfg.dim = int(np.prod(cfg.shape))
+            else:
+                cfg.shape = (cfg.dim,)
+        else:
+            raise ValueError(f"Unknown structure type: '{structure}'")
+
+        # Assign dimensions
+        self.dim = cfg.dim
+        self.shape = cfg.shape or (cfg.dim,)
+        self.vector = np.zeros(self.dim)
+
+        # Bounds
+        self.bounds = cfg.bounds
+        self.init_bounds = cfg.init_bounds or self.bounds
+
+        self.mean = cfg.mean or 0.0
+        self.std = cfg.std or 1.0
+
+        # Mutation
+        mutation_cfg = cfg.mutation
+        if mutation_cfg is None:
+            raise ValueError("Mutation config is required for ParaVector.")
+        evo_params.tau = cfg.tau or 0.0
+        self.randomize_mutation_strengths = cfg.randomize_mutation_strengths or False
+
+        evo_params.mutation_strategy = mutation_cfg.strategy
+
+        # Strategy-specific mutation params
+        if evo_params.mutation_strategy == MutationStrategy.CONSTANT:
+            evo_params.mutation_probability = mutation_cfg.probability
+            evo_params.mutation_strength = mutation_cfg.strength
+
+        elif evo_params.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
+            evo_params.min_mutation_probability = mutation_cfg.min_probability
+            evo_params.max_mutation_probability = mutation_cfg.max_probability
+            evo_params.min_mutation_strength = mutation_cfg.min_strength
+            evo_params.max_mutation_strength = mutation_cfg.max_strength
+
+        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
+            evo_params.mutation_probability = mutation_cfg.init_probability
+            evo_params.mutation_strength = mutation_cfg.init_strength
+            evo_params.min_mutation_probability = mutation_cfg.min_probability
+            evo_params.max_mutation_probability = mutation_cfg.max_probability
+            evo_params.min_mutation_strength = mutation_cfg.min_strength
+            evo_params.max_mutation_strength = mutation_cfg.max_strength
+            evo_params.min_diversity_threshold = mutation_cfg.min_diversity_threshold
+            evo_params.max_diversity_threshold = mutation_cfg.max_diversity_threshold
+            evo_params.mutation_inc_factor = mutation_cfg.increase_factor
+            evo_params.mutation_dec_factor = mutation_cfg.decrease_factor
+
+        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
+            evo_params.min_mutation_strength = mutation_cfg.min_strength
+            evo_params.max_mutation_strength = mutation_cfg.max_strength
+
+        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
+            evo_params.min_mutation_strength = mutation_cfg.min_strength
+            evo_params.max_mutation_strength = mutation_cfg.max_strength
+
+        else:
+            raise ValueError(
+                f"Unknown mutation strategy: {evo_params.mutation_strategy}"
+            )
+
+        # Crossover
+        crossover_cfg = cfg.crossover
+        if crossover_cfg is None:
+            evo_params.crossover_strategy = CrossoverStrategy.NONE
+        else:
+            evo_params.crossover_strategy = crossover_cfg.strategy
+            evo_params.crossover_probability = (
+                crossover_cfg.probability or crossover_cfg.init_probability
+            )
+
+            evo_params.min_crossover_probability = crossover_cfg.min_probability
+            evo_params.max_crossover_probability = crossover_cfg.max_probability
+            evo_params.crossover_inc_factor = crossover_cfg.increase_factor
+            evo_params.crossover_dec_factor = crossover_cfg.decrease_factor
+
+            op = crossover_cfg.operator
+            if op == CrossoverOperator.BLX:
+                alpha = crossover_cfg.alpha or 0.5
+                self._crossover_fn = lambda a, b: crossover_blend_alpha(a, b, alpha)
+            elif op == CrossoverOperator.ARITHMETIC:
+                self._crossover_fn = crossover_arithmetic
+            elif op == CrossoverOperator.SBX:
+                eta = crossover_cfg.eta or 15.0
+                self._crossover_fn = lambda a, b: crossover_simulated_binary(a, b, eta)
+            elif op == CrossoverOperator.INTERMEDIATE:
+                blend = crossover_cfg.blend_range or 0.25
+                self._crossover_fn = lambda a, b: crossover_intermediate(a, b, blend)
+            else:
+                self._crossover_fn = None
 
     def mutate(self) -> None:
         """
@@ -251,130 +380,3 @@ class ParaVector(ParaBase):
 
         min_val_p, max_val_p = partner.bounds
         partner.vector = np.clip(child2, min_val_p, max_val_p)
-
-    def apply_config(self, cfg: BaseModel | FullConfig) -> None:
-
-        if isinstance(cfg, FullConfig):
-            raise TypeError(
-                "ParaVector only accepts a single component config, " "not FullConfig"
-            )
-
-        cfg = cast(VectorComponentConfig, cfg)
-        evo_params = self.evo_params
-
-        # structure-based interpretation of di
-        structure = getattr(cfg, "structure", "flat")
-
-        if structure == "net":
-            if not isinstance(cfg.dim, list):
-                raise ValueError("structure='net' requires dim as list[int]")
-            net = NetVector(dim=cfg.dim, activation=cfg.activation or "tanh")
-            cfg.shape = (int(net.n_parameters),)
-            cfg.dim = int(net.n_parameters)
-
-        elif structure == "tensor":
-            if not isinstance(cfg.dim, list):
-                raise ValueError("structure='tensor' requires dim as list[int]")
-            cfg.shape = tuple(cfg.dim)
-            cfg.dim = int(np.prod(cfg.shape))
-
-        elif structure == "blocks":
-            if not isinstance(cfg.dim, list):
-                raise ValueError("structure='blocks' requires dim as list[int]")
-            cfg.shape = None
-            cfg.dim = sum(cfg.dim)
-
-        elif structure == "grouped":
-            if not isinstance(cfg.dim, list):
-                raise ValueError("structure='grouped' requires dim as list[int]")
-            cfg.shape = None
-            cfg.dim = sum(cfg.dim)
-
-        elif structure == "flat":
-            if isinstance(cfg.dim, list):
-                cfg.shape = tuple(cfg.dim)
-                cfg.dim = int(np.prod(cfg.shape))
-            else:
-                cfg.shape = (cfg.dim,)
-        else:
-            raise ValueError(f"Unknown structure type: '{structure}'")
-
-        # Assign dimensions
-        self.dim = cfg.dim
-        self.shape = cfg.shape or (cfg.dim,)
-        self.vector = np.zeros(self.dim)
-
-        # Bounds
-        self.bounds = cfg.bounds
-        self.init_bounds = cfg.init_bounds or self.bounds
-
-        self.mean = cfg.mean or 0.0
-        self.std = cfg.std or 1.0
-
-        # Mutation
-        mutation_cfg = cfg.mutation
-        if mutation_cfg is None:
-            raise ValueError("Mutation config is required for ParaVector.")
-        evo_params.tau = cfg.tau or 0.0
-        self.randomize_mutation_strengths = cfg.randomize_mutation_strengths or False
-
-        evo_params.mutation_strategy = mutation_cfg.strategy
-
-        # Strategy-specific mutation params
-        if evo_params.mutation_strategy == MutationStrategy.CONSTANT:
-            evo_params.mutation_probability = mutation_cfg.probability
-            evo_params.mutation_strength = mutation_cfg.strength
-
-        elif evo_params.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
-            evo_params.min_mutation_probability = mutation_cfg.min_probability
-            evo_params.max_mutation_probability = mutation_cfg.max_probability
-            evo_params.min_mutation_strength = mutation_cfg.min_strength
-            evo_params.max_mutation_strength = mutation_cfg.max_strength
-        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
-            evo_params.mutation_probability = mutation_cfg.init_probability
-            evo_params.mutation_strength = mutation_cfg.init_strength
-            evo_params.min_mutation_probability = mutation_cfg.min_probability
-            evo_params.max_mutation_probability = mutation_cfg.max_probability
-            evo_params.min_mutation_strength = mutation_cfg.min_strength
-            evo_params.max_mutation_strength = mutation_cfg.max_strength
-            evo_params.min_diversity_threshold = mutation_cfg.min_diversity_threshold
-            evo_params.max_diversity_threshold = mutation_cfg.max_diversity_threshold
-            evo_params.mutation_inc_factor = mutation_cfg.increase_factor
-            evo_params.mutation_dec_factor = mutation_cfg.decrease_factor
-        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
-            evo_params.min_mutation_strength = mutation_cfg.min_strength
-            evo_params.max_mutation_strength = mutation_cfg.max_strength
-        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
-            evo_params.min_mutation_strength = mutation_cfg.min_strength
-            evo_params.max_mutation_strength = mutation_cfg.max_strength
-        else:
-            raise ValueError(
-                f"Unknown mutation strategy: {evo_params.mutation_strategy}"
-            )
-
-        # Crossover
-        if cfg.crossover is None:
-            evo_params.crossover_strategy = CrossoverStrategy.NONE
-        else:
-            c = cfg.crossover
-            evo_params.crossover_strategy = c.strategy
-            evo_params.crossover_probability = c.probability or c.init_probability
-            evo_params.min_crossover_probability = c.min_probability
-            evo_params.max_crossover_probability = c.max_probability
-            evo_params.crossover_inc_factor = c.increase_factor
-            evo_params.crossover_dec_factor = c.decrease_factor
-
-            op = c.operator
-            if op == CrossoverOperator.BLX:
-                alpha = c.alpha or 0.5
-                self._crossover_fn = lambda a, b: crossover_blend_alpha(a, b, alpha)
-            elif op == CrossoverOperator.ARITHMETIC:
-                self._crossover_fn = crossover_arithmetic
-            elif op == CrossoverOperator.SBX:
-                eta = c.eta or 15.0
-                self._crossover_fn = lambda a, b: crossover_simulated_binary(a, b, eta)
-            elif op == CrossoverOperator.INTERMEDIATE:
-                blend = c.blend_range or 0.25
-                self._crossover_fn = lambda a, b: crossover_intermediate(a, b, blend)
-            else:
-                self._crossover_fn = None

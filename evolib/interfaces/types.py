@@ -9,9 +9,8 @@ if TYPE_CHECKING:
 from collections.abc import Callable
 from typing import Protocol
 
-from pydantic import BaseModel
-
-from evolib.config.schema import FullConfig
+from evolib.config.evonet_component_config import EvoNetComponentConfig
+from evolib.config.vector_component_config import VectorComponentConfig
 from evolib.interfaces.structs import MutationParams
 from evolib.representation.base import ParaBase
 
@@ -20,7 +19,7 @@ SelectionFunction = Callable[["Pop", int], list["Indiv"]]
 ReplaceFunction = Callable[["Pop", list["Indiv"]], None]
 ParaInitializer = Callable[["Pop"], ParaBase]
 
-ModuleConfig = Union[BaseModel, FullConfig]
+ModuleConfig = Union[VectorComponentConfig, EvoNetComponentConfig]
 
 
 class FitnessFunction(Protocol):
