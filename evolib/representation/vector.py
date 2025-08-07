@@ -101,9 +101,6 @@ class ParaVector(ParaBase):
         self.bounds = cfg.bounds
         self.init_bounds = cfg.init_bounds or self.bounds
 
-        self.mean = cfg.mean or 0.0
-        self.std = cfg.std or 1.0
-
         # Mutation
         mutation_cfg = cfg.mutation
         if mutation_cfg is None:

@@ -160,10 +160,6 @@ class Pop:
 
         Args:
             fitness_function (Callable): Function to assign fitness to an individual.
-            mutation_function (Callable): Function to mutate parameters
-            of an individual.
-            tau_update_function (Callable): Optional function to update
-            `tau` based on `para`.
         """
         self.fitness_function = fitness_function
 
