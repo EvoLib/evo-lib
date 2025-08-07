@@ -22,8 +22,6 @@ Classes:
 from copy import deepcopy
 from typing import Any, Dict, Optional
 
-import numpy as np
-
 from evolib.interfaces.enums import Origin
 
 
@@ -72,20 +70,6 @@ class Indiv:
 
     def __lt__(self, other: "Indiv") -> bool:
         return self.fitness < other.fitness
-
-    @property
-    def vector(self) -> np.ndarray:
-        """Return vector of first component (default convention)."""
-        if hasattr(self.para, "__iter__"):
-            return self.para[0].vector
-        return self.para.vector
-
-    @property
-    def dim(self) -> int:
-        """Return dimension of first component (default convention)."""
-        if hasattr(self.para, "__iter__"):
-            return self.para[0].dim
-        return self.para.dim
 
     def mutate(self) -> None:
         """
