@@ -33,7 +33,6 @@ classifiers = [
 dev = [
     "mypy",
     "types-PyYAML",
-    "evonet @ git+https://github.com/EvoLib/evo-net.git@main"
 ]
 docs = [
   "sphinx",
