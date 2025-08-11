@@ -124,8 +124,23 @@ class ParaEvoNet(ParaBase):
         return self.net.calc(input_values)
 
     def mutate(self) -> None:
-        mutate_weights(self.net, std=self.evo_params.mutation_strength)
-        mutate_biases(self.net)
+
+        if self.evo_params.mutation_strength is None:
+            raise ValueError("mutation_strength must be set.")
+        if self.evo_params.mutation_probability is None:
+            raise ValueError("mutation_probability must be set.")
+
+        mutate_weights(
+            self.net,
+            std=self.evo_params.mutation_strength,
+            probability=self.evo_params.mutation_probability,
+        )
+
+        mutate_biases(
+            self.net,
+            std=self.evo_params.mutation_strength,
+            probability=self.evo_params.mutation_probability,
+        )
 
     def crossover_with(self, partner: ParaBase) -> None:
         # Placeholder
@@ -139,10 +154,34 @@ class ParaEvoNet(ParaBase):
         return np.concatenate([weights, biases])
 
     def set_vector(self, vector: np.ndarray) -> None:
-        """Restores weights and biases from a flat vector."""
-        n_weights = len(self.net.connections)
+        """Split a flat vector into weights and biases and apply them to the network."""
+        vector = np.asarray(vector, dtype=float).ravel()
+        n_weights = self.net.num_weights
+        n_biases = self.net.num_biases
+        if vector.size != (n_weights + n_biases):
+            raise ValueError(
+                f"Vector length mismatch: expected {n_weights + n_biases}, "
+                f"got {vector.size}."
+            )
         self.net.set_weights(vector[:n_weights])
         self.net.set_biases(vector[n_weights:])
+
+    # Wrappers
+    def get_weights(self) -> np.ndarray:
+        """Return network weights in the canonical order defined by Nnet."""
+        return self.net.get_weights()
+
+    def set_weights(self, weights: np.ndarray) -> None:
+        """Set network weights; length must match num_weights."""
+        self.net.set_weights(weights)
+
+    def get_biases(self) -> np.ndarray:
+        """Return network biases (non-input neurons)."""
+        return self.net.get_biases()
+
+    def set_biases(self, biases: np.ndarray) -> None:
+        """Set network biases; length must match num_biases."""
+        self.net.set_biases(biases)
 
     def get_status(self) -> str:
         return self.net

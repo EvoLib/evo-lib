@@ -6,11 +6,11 @@ Provides NumPy-compatible implementations such as mean squared error (MSE) for u
 regression and optimization tasks.
 """
 
-from typing import List, Sequence, Union
+from typing import Sequence, Union
 
 import numpy as np
 
-from evolib.globals.numeric import DEFAULT_FLOAT_DTYPE, MIN_FLOAT
+from evolib.globals.numeric import MIN_FLOAT
 
 
 def mse_loss(
@@ -91,37 +91,7 @@ def huber_loss(
     return np.mean(np.where(is_small, squared_loss, linear_loss))
 
 
-def cross_entropy_loss(expected: List[int], predicted: List[float]) -> float:
-    """
-    Calculates the cross-entropy loss between expected and predicted probability
-    distributions.
-
-    This function is used for classification problems, where the expected output
-    is a one-hot encoded vector (i.e. only one correct class), and the predicted output
-    is a list of probabilities from the model.
-
-    A lower cross-entropy loss means the predicted probability for the correct class is
-    high.
-
-    Parameters:
-        expected (list of int): One-hot encoded list representing the correct class.
-        predicted (list of float): List of predicted probabilities for each class.
-
-    Returns:
-        float: Cross-entropy loss value.
-    """
-    pred = np.asarray(predicted, dtype=DEFAULT_FLOAT_DTYPE)
-    exp = np.asarray(expected, dtype=DEFAULT_FLOAT_DTYPE)
-
-    # Avoid log(0) by ensuring all values are > 0
-    pred = np.clip(pred, MIN_FLOAT, 1.0)
-
-    return -np.sum(exp * np.log(pred))
-
-
-def binary_cross_entropy_loss(
-    expected: Sequence[float], predicted: Sequence[float]
-) -> float:
+def bce_loss(expected: Sequence[float], predicted: Sequence[float]) -> float:
     """
     Calculates binary cross-entropy loss between expected and predicted probabilities.
 
@@ -140,9 +110,7 @@ def binary_cross_entropy_loss(
     return -np.mean(exp * np.log(pred) + (1 - exp) * np.log(1 - pred))
 
 
-def categorical_cross_entropy_loss(
-    expected: Sequence[int], predicted: Sequence[float]
-) -> float:
+def cce_loss(expected: Sequence[int], predicted: Sequence[float]) -> float:
     """
     Calculates categorical cross-entropy loss for multi-class classification.
 
