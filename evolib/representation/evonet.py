@@ -14,6 +14,17 @@ from evonet.mutation import mutate_biases, mutate_weights
 from evolib.config.evonet_component_config import EvoNetComponentConfig
 from evolib.interfaces.enums import MutationStrategy
 from evolib.interfaces.types import ModuleConfig
+from evolib.operators.mutation import (
+    adapt_mutation_probability_by_diversity,
+    adapt_mutation_strength,
+    adapt_mutation_strength_by_diversity,
+    adapted_tau,
+    exponential_mutation_probability,
+    exponential_mutation_strength,
+)
+from evolib.representation._apply_config_mapping import (
+    apply_mutation_config,
+)
 from evolib.representation.base import ParaBase
 from evolib.representation.evo_params import EvoControlParams
 
@@ -50,47 +61,16 @@ class ParaEvoNet(ParaBase):
         self.bias_bounds = cfg.bias_bounds or (-0.5, 0.5)
 
         # Mutation
-        mutation_cfg = cfg.mutation
-        if mutation_cfg is None:
+        if cfg.mutation is None:
             raise ValueError("Mutation config is required for ParaEvoNet.")
 
-        evo_params.mutation_strategy = mutation_cfg.strategy
+        evo_params.mutation_strategy = cfg.mutation.strategy
 
-        # Strategy-specific mutation params
-        if self.evo_params.mutation_strategy == MutationStrategy.CONSTANT:
-            self.evo_params.mutation_probability = mutation_cfg.probability
-            self.evo_params.mutation_strength = mutation_cfg.strength
+        # Apply mutation config
+        apply_mutation_config(evo_params, cfg.mutation)
 
-        elif evo_params.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
-            evo_params.min_mutation_probability = mutation_cfg.min_probability
-            evo_params.max_mutation_probability = mutation_cfg.max_probability
-            evo_params.min_mutation_strength = mutation_cfg.min_strength
-            evo_params.max_mutation_strength = mutation_cfg.max_strength
-
-        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
-            evo_params.mutation_probability = mutation_cfg.init_probability
-            evo_params.mutation_strength = mutation_cfg.init_strength
-            evo_params.min_mutation_probability = mutation_cfg.min_probability
-            evo_params.max_mutation_probability = mutation_cfg.max_probability
-            evo_params.min_mutation_strength = mutation_cfg.min_strength
-            evo_params.max_mutation_strength = mutation_cfg.max_strength
-            evo_params.min_diversity_threshold = mutation_cfg.min_diversity_threshold
-            evo_params.max_diversity_threshold = mutation_cfg.max_diversity_threshold
-            evo_params.mutation_inc_factor = mutation_cfg.increase_factor
-            evo_params.mutation_dec_factor = mutation_cfg.decrease_factor
-
-        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
-            evo_params.min_mutation_strength = mutation_cfg.min_strength
-            evo_params.max_mutation_strength = mutation_cfg.max_strength
-
-        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
-            evo_params.min_mutation_strength = mutation_cfg.min_strength
-            evo_params.max_mutation_strength = mutation_cfg.max_strength
-
-        else:
-            raise ValueError(
-                f"Unknown mutation strategy: {evo_params.mutation_strategy}"
-            )
+        # apply crossover config
+        # apply_crossover_config(evo_params, cfg.crossover)
 
         if isinstance(cfg.activation, list):
             activations = cfg.activation
@@ -127,25 +107,84 @@ class ParaEvoNet(ParaBase):
 
         if self.evo_params.mutation_strength is None:
             raise ValueError("mutation_strength must be set.")
-        if self.evo_params.mutation_probability is None:
-            raise ValueError("mutation_probability must be set.")
+
+        probability = self.evo_params.mutation_probability or 1.0
 
         mutate_weights(
             self.net,
             std=self.evo_params.mutation_strength,
-            probability=self.evo_params.mutation_probability,
+            probability=probability,
         )
 
         mutate_biases(
             self.net,
             std=self.evo_params.mutation_strength,
-            probability=self.evo_params.mutation_probability,
+            probability=probability,
         )
 
     def crossover_with(self, partner: ParaBase) -> None:
         # Placeholder
         # NOTE: Will be implementet in Phase 3
         pass
+
+    def update_mutation_parameters(
+        self, generation: int, max_generations: int, diversity_ema: float | None = None
+    ) -> None:
+
+        ep = self.evo_params
+        """Update mutation parameters based on strategy and generation."""
+        if ep.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
+            ep.mutation_strength = exponential_mutation_strength(
+                ep, generation, max_generations
+            )
+
+            ep.mutation_probability = exponential_mutation_probability(
+                ep, generation, max_generations
+            )
+
+        elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
+            if diversity_ema is None:
+                raise ValueError(
+                    "diversity_ema must be provided" "for ADAPTIVE_GLOBAL strategy"
+                )
+            if ep.mutation_strength is None:
+                raise ValueError(
+                    "mutation_strength must be provided" "for ADAPTIVE_GLOBAL strategy"
+                )
+            if ep.mutation_probability is None:
+                raise ValueError(
+                    "mutation_probability must be provided"
+                    "for ADAPTIVE_GLOBAL strategy"
+                )
+
+            ep.mutation_probability = adapt_mutation_probability_by_diversity(
+                ep.mutation_probability, diversity_ema, ep
+            )
+
+            ep.mutation_strength = adapt_mutation_strength_by_diversity(
+                ep.mutation_strength, diversity_ema, ep
+            )
+
+        elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
+            # Ensure tau is initialized
+            ep.tau = adapted_tau(len(self.get_vector()))
+
+            if ep.min_mutation_strength is None or ep.max_mutation_strength is None:
+                raise ValueError(
+                    "min_mutation_strength and max_mutation_strength must be defined."
+                )
+
+            if self.weight_bounds is None:
+                raise ValueError("bounds must be set")
+
+            # Ensure mutation_strength is initialized
+            if ep.mutation_strength is None:
+                ep.mutation_strength = np.random.uniform(
+                    ep.min_mutation_strength, ep.max_mutation_strength
+                )
+
+            # Perform adaptive update
+            ep.mutation_strength = adapt_mutation_strength(ep, self.weight_bounds)
 
     def get_vector(self) -> np.ndarray:
         """Returns a flat vector of all weights and biases."""
@@ -184,7 +223,19 @@ class ParaEvoNet(ParaBase):
         self.net.set_biases(biases)
 
     def get_status(self) -> str:
-        return self.net
+        ep = self.evo_params
+        parts = [
+            f"layers={len(self.dim)}",
+            f"weights={self.net.num_weights}",
+            f"biases={self.net.num_biases}",
+        ]
+        if ep.mutation_strength is not None:
+            parts.append(f"sigma={ep.mutation_strength:.4f}")
+        if ep.mutation_probability is not None:
+            parts.append(f"p={ep.mutation_probability:.4f}")
+        if ep.tau:
+            parts.append(f"tau={ep.tau:.4f}")
+        return " | ".join(parts)
 
     def print_status(self) -> None:
         print(f"[ParaEvoNet] : {self.net} ")

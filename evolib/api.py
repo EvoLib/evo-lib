@@ -102,6 +102,10 @@ from evolib.operators.strategy import (
 from evolib.registry.replacement_registry import build_replacement_registry
 from evolib.registry.selection_registry import build_selection_registry
 from evolib.registry.strategy_registry import strategy_registry
+from evolib.representation._apply_config_mapping import (
+    apply_crossover_config,
+    apply_mutation_config,
+)
 from evolib.representation.base import ParaBase
 from evolib.representation.composite import ParaComposite
 from evolib.representation.evo_params import EvoControlParams
@@ -220,6 +224,8 @@ __all__ = [
     "adapt_mutation_strengths",
     "adapt_value_by_diversity",
     "adapted_tau",
+    "apply_crossover_config",
+    "apply_mutation_config",
     "bce_loss",
     "build_composite_initializer",
     "build_replacement_registry",
