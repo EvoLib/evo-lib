@@ -1,0 +1,24 @@
+# Sample configuration for 01_evonet_sine_approximation.py
+
+parent_pool_size: 70
+offspring_pool_size: 420
+max_generations: 1500
+max_indiv_age: 0
+num_elites: 7
+
+evolution:
+  strategy: mu_comma_lambda
+
+modules:
+  nnet:
+    type: evonet
+    dim: [2, 16, 8, 1]
+    activation: ["tanh", "tanh", "tanh", "sigmoid"]
+    initializer: normal_evonet
+    bounds: [-1.0, 1.0]
+    mutation:
+      strategy: adaptive_individual
+      min_strength: 0.01
+      max_strength: 0.1
+      probability: 0.8
+      

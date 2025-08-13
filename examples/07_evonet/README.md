@@ -20,7 +20,25 @@ This section introduces EvoNet — an evolvable neural network representation wi
 ---
 
 <p align="center">
-  <img src="./01_frames/01_evonet_sine_approximation.gif" alt="Sample EvoNet Frame" width="512"/>
+  <img src="./01_frames/01_sine_approximation.gif" alt="Sample EvoNet Frame" width="512"/>
 </p>
 
 ---
+
+### 📗 02 – Tiny Image Approximation with EvoNet
+
+* **File:** `02_image_approximation.py`
+* **Goal:** Learn a tiny grayscale image by mapping 2D coordinates `(x, y)` -> intensity `[0, 1]`. Fitness is the **MSE** between predicted and target image.
+* **Input Normalization:** Coordinates are normalized to `[-1, 1]`.
+* **Target:** Synthetic pattern (ring + horizontal bar) to keep the task interpretable.
+* **Architecture:** EvoNet (`2 -> … -> 1`), defined in the YAML config `configs/02_evonet_image_approximation.yaml`.
+* **Mutation:** Gaussian mutation on weights & biases; strategy and parameters come from the config.
+* **Fitness:** Mean Squared Error (MSE) between predicted and target image.
+* **Visualization:** Saves side-by-side target vs. prediction frames whenever the best fitness improves.
+* **Output:** `02_frames/gen_XXXX.png` (progress frames).
+
+---
+
+<p align="center">
+  <img src="./01_frames/02_image_approximation.gif" alt="Sample EvoNet Frame" width="512"/>
+</p>
