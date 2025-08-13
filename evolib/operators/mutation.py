@@ -362,8 +362,8 @@ def exponential_crossover_probability(
         raise ValueError("max_crossover_probability must not be None")
 
     return exponential_decay(
-        start=ctrl.min_crossover_probability,
-        end=ctrl.max_crossover_probability,
+        start=ctrl.max_crossover_probability,
+        end=ctrl.min_crossover_probability,
         step=gen,
         total_steps=max_gen,
     )
