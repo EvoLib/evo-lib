@@ -3,18 +3,8 @@
 import numpy as np
 
 from evolib.config.vector_component_config import VectorComponentConfig
-from evolib.interfaces.enums import (
-    CrossoverOperator,
-    CrossoverStrategy,
-    MutationStrategy,
-)
+from evolib.interfaces.enums import MutationStrategy
 from evolib.interfaces.types import ModuleConfig
-from evolib.operators.crossover import (
-    crossover_arithmetic,
-    crossover_blend_alpha,
-    crossover_intermediate,
-    crossover_simulated_binary,
-)
 from evolib.operators.mutation import (
     adapt_mutation_probability_by_diversity,
     adapt_mutation_strength,
@@ -23,6 +13,10 @@ from evolib.operators.mutation import (
     adapted_tau,
     exponential_mutation_probability,
     exponential_mutation_strength,
+)
+from evolib.representation._apply_config_mapping import (
+    apply_crossover_config,
+    apply_mutation_config,
 )
 from evolib.representation.base import ParaBase
 from evolib.representation.evo_params import EvoControlParams
@@ -102,79 +96,18 @@ class ParaVector(ParaBase):
         self.init_bounds = cfg.init_bounds or self.bounds
 
         # Mutation
-        mutation_cfg = cfg.mutation
-        if mutation_cfg is None:
+        if cfg.mutation is None:
             raise ValueError("Mutation config is required for ParaVector.")
         evo_params.tau = cfg.tau or 0.0
         self.randomize_mutation_strengths = cfg.randomize_mutation_strengths or False
 
-        evo_params.mutation_strategy = mutation_cfg.strategy
+        evo_params.mutation_strategy = cfg.mutation.strategy
 
-        # Strategy-specific mutation params
-        if evo_params.mutation_strategy == MutationStrategy.CONSTANT:
-            evo_params.mutation_probability = mutation_cfg.probability
-            evo_params.mutation_strength = mutation_cfg.strength
+        # Apply Mutation Config
+        apply_mutation_config(evo_params, cfg.mutation)
 
-        elif evo_params.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
-            evo_params.min_mutation_probability = mutation_cfg.min_probability
-            evo_params.max_mutation_probability = mutation_cfg.max_probability
-            evo_params.min_mutation_strength = mutation_cfg.min_strength
-            evo_params.max_mutation_strength = mutation_cfg.max_strength
-
-        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
-            evo_params.mutation_probability = mutation_cfg.init_probability
-            evo_params.mutation_strength = mutation_cfg.init_strength
-            evo_params.min_mutation_probability = mutation_cfg.min_probability
-            evo_params.max_mutation_probability = mutation_cfg.max_probability
-            evo_params.min_mutation_strength = mutation_cfg.min_strength
-            evo_params.max_mutation_strength = mutation_cfg.max_strength
-            evo_params.min_diversity_threshold = mutation_cfg.min_diversity_threshold
-            evo_params.max_diversity_threshold = mutation_cfg.max_diversity_threshold
-            evo_params.mutation_inc_factor = mutation_cfg.increase_factor
-            evo_params.mutation_dec_factor = mutation_cfg.decrease_factor
-
-        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
-            evo_params.min_mutation_strength = mutation_cfg.min_strength
-            evo_params.max_mutation_strength = mutation_cfg.max_strength
-
-        elif evo_params.mutation_strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
-            evo_params.min_mutation_strength = mutation_cfg.min_strength
-            evo_params.max_mutation_strength = mutation_cfg.max_strength
-
-        else:
-            raise ValueError(
-                f"Unknown mutation strategy: {evo_params.mutation_strategy}"
-            )
-
-        # Crossover
-        crossover_cfg = cfg.crossover
-        if crossover_cfg is None:
-            evo_params.crossover_strategy = CrossoverStrategy.NONE
-        else:
-            evo_params.crossover_strategy = crossover_cfg.strategy
-            evo_params.crossover_probability = (
-                crossover_cfg.probability or crossover_cfg.init_probability
-            )
-
-            evo_params.min_crossover_probability = crossover_cfg.min_probability
-            evo_params.max_crossover_probability = crossover_cfg.max_probability
-            evo_params.crossover_inc_factor = crossover_cfg.increase_factor
-            evo_params.crossover_dec_factor = crossover_cfg.decrease_factor
-
-            op = crossover_cfg.operator
-            if op == CrossoverOperator.BLX:
-                alpha = crossover_cfg.alpha or 0.5
-                self._crossover_fn = lambda a, b: crossover_blend_alpha(a, b, alpha)
-            elif op == CrossoverOperator.ARITHMETIC:
-                self._crossover_fn = crossover_arithmetic
-            elif op == CrossoverOperator.SBX:
-                eta = crossover_cfg.eta or 15.0
-                self._crossover_fn = lambda a, b: crossover_simulated_binary(a, b, eta)
-            elif op == CrossoverOperator.INTERMEDIATE:
-                blend = crossover_cfg.blend_range or 0.25
-                self._crossover_fn = lambda a, b: crossover_intermediate(a, b, blend)
-            else:
-                self._crossover_fn = None
+        # Apply Crossover Config
+        apply_crossover_config(evo_params, cfg.crossover)
 
     def mutate(self) -> None:
         """
