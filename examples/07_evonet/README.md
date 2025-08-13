@@ -40,5 +40,5 @@ This section introduces EvoNet — an evolvable neural network representation wi
 ---
 
 <p align="center">
-  <img src="./01_frames/02_image_approximation.gif" alt="Sample EvoNet Frame" width="512"/>
+  <img src="./02_frames/02_image_approximation.gif" alt="Sample EvoNet Frame" width="512"/>
 </p>
