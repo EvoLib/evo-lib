@@ -34,9 +34,9 @@ def run_experiment(config_path: str) -> None:
         evolve_mu_plus_lambda(pop)
 
         pop.print_status(verbosity=1)
-        best = pop.best()
-        print(f"   tau: {best.para['test-vector'].tau:.4f}")
-        print(f"   MutationStrength: {best.para['test-vector'].mutation_strength:.4f}")
+        best_params = pop.best().para["test-vector"].evo_params
+        print(f"   tau: {best_params.tau:.4f}")
+        print(f"   MutationStrength: {best_params.mutation_strength:.4f}")
 
 
 print("Running adaptive_individual experiment with tau...\n")

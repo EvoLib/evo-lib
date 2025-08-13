@@ -40,14 +40,14 @@ def run_experiment(config_path: str) -> None:
         evolve_mu_plus_lambda(pop)
 
         pop.print_status(verbosity=1)
-        best = pop.best()
+        best_params = pop.best().para["test-vector"].evo_params
         print(
             f"   DiversityEMA: {pop.diversity_ema:.4f}  | "
             f"MinDiversityThreshold: "
-            f"{best.para['test-vector'].min_diversity_threshold} | "
-            f"MaxDiversityThreshold: {best.para['test-vector'].max_diversity_threshold}"
+            f"{best_params.min_diversity_threshold} | "
+            f"MaxDiversityThreshold: {best_params.max_diversity_threshold}"
         )
-        print(f"   MutationStrength: {best.para['test-vector'].mutation_strength:.4f}")
+        print(f"   MutationStrength: " f"{best_params.mutation_strength:.4f}")
 
 
 # Configuration with constant mutation strength

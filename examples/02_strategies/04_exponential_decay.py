@@ -29,7 +29,7 @@ def run_experiment(config_path: str) -> None:
         pop.print_status(verbosity=1)
         print(
             f"   MutationStrength: "
-            f"{pop.indivs[0].para['test-vector'].mutation_strength:.4f}"
+            f"{pop.indivs[0].para['test-vector'].evo_params.mutation_strength:.4f}"
         )
 
 
