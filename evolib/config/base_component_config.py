@@ -44,6 +44,17 @@ class MutationConfig(BaseModel):
     max_diversity_threshold: Optional[float] = None
 
 
+class EvoNetMutationConfig(MutationConfig):
+    """
+    EvoNet-specific mutation configuration with optional per-scope overrides.
+
+    This allows overrides without affecting other modules. If absent, the global
+    settings apply to both weights and biases.
+    """
+
+    biases: Optional[MutationConfig] = None
+
+
 class CrossoverConfig(BaseModel):
     """
     Configuration block for crossover strategies.
