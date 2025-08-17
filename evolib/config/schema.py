@@ -54,13 +54,38 @@ class FullConfig(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def resolve_component_configs(cls, data: dict[str, Any]) -> dict[str, Any]:
-        """Replace each module entry with the appropriate ComponentConfig class, based
-        on the declared dim_type."""
+        """
+        Resolves raw module dictionaries into typed ComponentConfig objects.
+
+        Each entry in `modules` is a plain dictionary (parsed from YAML).
+        This validator inspects the `type` field of each entry (e.g. "vector", "evonet")
+        and replaces the dictionary with the corresponding Pydantic ComponentConfig
+        subclass (e.g. VectorComponentConfig, EvoNetComponentConfig).
+
+        This ensures that after validation, `FullConfig.modules` always contains
+        typed config objects instead of untyped dicts.
+
+        Args:
+            data (dict[str, Any]): Raw configuration dictionary provided to FullConfig.
+
+        Returns:
+            dict[str, Any]: The updated configuration dictionary, where `modules`
+            contains ComponentConfig instances instead of dicts.
+        """
+        # Extract raw module configs (untyped dicts, e.g. from YAML)
         raw_modules = data.get("modules", {})
+
         resolved = {}
         for name, cfg in raw_modules.items():
+            # Fallback: if no 'type' provided, assume "vector"
             type_name = cfg.get("type", "vector")
+
+            # Select the correct Pydantic config class for this type
             cfg_cls = get_component_config_class(type_name)
+
+            # Instantiate the config class with the provided dictionary
             resolved[name] = cfg_cls(**cfg)
+
+        # Replace raw dicts with validated ComponentConfig objects
         data["modules"] = resolved
         return data
