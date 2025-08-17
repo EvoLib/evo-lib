@@ -51,10 +51,10 @@ class EvoNetComponentConfig(BaseModel):
     # Either a single activation function or one per layer
     activation: Union[str, list[str]] = "tanh"
 
-    # Initializer for weights and biases
+    # Name of the initializer function (resolved via initializer registry)
     initializer: str = Field(..., description="Name of the initializer to use")
 
-    # Value ranges for weights and biases
+    # Numeric bounds for values; used by initialization and mutation
     weight_bounds: Tuple[float, float] = (-1.0, 1.0)
     bias_bounds: Tuple[float, float] = (-0.5, 0.5)
 
