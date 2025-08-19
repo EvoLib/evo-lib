@@ -16,7 +16,8 @@ from evolib.representation.vector import ParaVector
 
 def initializer_normal_vector(config: FullConfig, module: str) -> ParaVector:
     """
-    Initializes a ParaVector using a normal distribution.
+    Initializes a ParaVector using a normal distribution. init_bounds act as a hard
+    clamp for initializer outputs; if omitted, bounds are used as fallback.
 
     Args:
         config (FullConfig): Full config object containing all module definitions
@@ -29,11 +30,19 @@ def initializer_normal_vector(config: FullConfig, module: str) -> ParaVector:
     cfg = config.modules[module]
     para.apply_config(cfg)
 
-    para.vector = np.random.normal(
+    vec = np.random.normal(
         loc=cfg.mean or 0.0,
         scale=cfg.std or 1.0,
         size=para.dim,
     )
+
+    # clamp to init_bounds (fallback to bounds)
+    bounds = para.init_bounds or para.bounds
+    if bounds is not None:
+        lo, hi = bounds
+        vec = np.clip(vec, lo, hi)
+
+    para.vector = vec
     return para
 
 
