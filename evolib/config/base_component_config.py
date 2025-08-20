@@ -1,6 +1,12 @@
 # SPDX-License-Identifier: MIT
-"""Shared mutation and crossover configuration schemas used by multiple ComponentConfig
-classes (e.g., VectorComponentConfig, EvoNetComponentConfig)."""
+"""
+Shared configuration blocks for mutation and crossover used across multiple
+ComponentConfig classes (e.g. VectorComponentConfig, EvoNetComponentConfig).
+
+The classes here are intentionally small and reusable: they describe *what*
+should be configured, not *how* it is executed. Any runtime behavior belongs
+into the respective Para* representations and operator modules.
+"""
 
 from typing import Optional
 
@@ -17,10 +23,43 @@ class MutationConfig(BaseModel):
     """
     Configuration block for mutation strategies.
 
-    Supports constant, exponential, adaptive global/individual/per-parameter mutation.
-    Only required fields need to be set based on strategy.
+    Supported strategies (see MutationStrategy enum):
+        - CONSTANT
+        - EXPONENTIAL_DECAY
+        - ADAPTIVE_GLOBAL
+        - ADAPTIVE_INDIVIDUAL
+        - ADAPTIVE_PER_PARAMETER
+
+    Which fields are relevant depends on the selected strategy:
+
+    CONSTANT
+        - strength (required)
+        - probability (optional; default behavior handled downstream)
+
+    EXPONENTIAL_DECAY
+        - init_strength (required)
+        - init_probability (optional)
+
+    ADAPTIVE_GLOBAL
+        - strength (required as starting point; mapped to runtime state)
+        - probability (required as starting point)
+        - increase_factor / decrease_factor (optional)
+        - min_diversity_threshold / max_diversity_threshold (optional)
+        - min_strength / max_strength (optional clamp)
+        - min_probability / max_probability (optional clamp)
+
+    ADAPTIVE_INDIVIDUAL / ADAPTIVE_PER_PARAMETER
+        - min_strength, max_strength (required range for sigma updates)
+        - probability (optional)
+        - increase_factor / decrease_factor, diversity thresholds (optional)
+        - min_probability / max_probability (optional clamp)
+
+    This class is purely declarative. Strategy-specific calculations and
+    state updates occur in the corresponding Para* implementations or update
+    helpers.
     """
 
+    # Mutation strategy to use
     strategy: MutationStrategy
 
     # For constant mutation
@@ -48,8 +87,7 @@ class EvoNetMutationConfig(MutationConfig):
     """
     EvoNet-specific mutation configuration with optional per-scope overrides.
 
-    This allows overrides without affecting other modules. If absent, the global
-    settings apply to both weights and biases.
+    If an override is omitted, the base fields of this config apply.
     """
 
     biases: Optional[MutationConfig] = None
@@ -57,9 +95,16 @@ class EvoNetMutationConfig(MutationConfig):
 
 class CrossoverConfig(BaseModel):
     """
-    Configuration block for crossover strategies.
+    Configuration block for crossover strategies and operators.
 
-    Supports constant, exponential, adaptive crossover, and several operators.
+    Strategy (high-level policy) and Operator (low-level mechanism) are modeled
+    separately. Depending on the operator, additional parameters may apply.
+
+    Operators (see CrossoverOperator):
+        - BLX (uses alpha)
+        - SBX (uses eta)
+        - INTERMEDIATE (uses blend_range)
+        - ...
     """
 
     strategy: CrossoverStrategy
