@@ -12,80 +12,131 @@ from evolib.interfaces.enums import (
 
 
 class EvolutionConfig(BaseModel):
-    strategy: EvolutionStrategy
+    """
+    Top-level evolution policy.
+
+    Holds only the high-level strategy choice; operator-specific behavior lives in the
+    Para* representations and operator modules.
+    """
+
+    strategy: EvolutionStrategy = Field(
+        ..., description="High-level evolution strategy (e.g. (mu_plus_lambda)."
+    )
 
 
 class SelectionConfig(BaseModel):
-    strategy: SelectionStrategy
-    num_parents: Optional[int] = None
-    tournament_size: Optional[int] = None
-    exp_base: Optional[float] = None
-    fitness_maximization: Optional[bool] = False
+    """
+    Parent selection settings.
+
+    Depending on the selected strategy, only some fields are relevant; the actual
+    semantics are implemented in the selection registry.
+    """
+
+    strategy: SelectionStrategy = Field(
+        ..., description="Parent selection strategy (e.g. tournament, ranking)."
+    )
+    num_parents: Optional[int] = Field(
+        None, description="Optional override for the number of parents to pick."
+    )
+    tournament_size: Optional[int] = Field(
+        None, description="Tournament size for tournament selection."
+    )
+    exp_base: Optional[float] = Field(
+        None, description="Base for exponential ranking selection."
+    )
+    fitness_maximization: Optional[bool] = Field(
+        False, description="If True, higher fitness is considered better."
+    )
 
 
 class ReplacementConfig(BaseModel):
+    """
+    Survivor replacement (environmental selection) settings.
+
+    Concrete behavior is implemented in the replacement registry.
+    """
+
     strategy: ReplacementStrategy = Field(
-        ..., description="Replacement strategy to use for survivor selection."
+        ..., description="Survivor selection strategy (e.g. replace_worst, anneal)."
     )
-    num_replace: Optional[int] = None
-    temperature: Optional[float] = None
+    num_replace: Optional[int] = Field(
+        None, description="How many individuals to replace (strategy-dependent)."
+    )
+    temperature: Optional[float] = Field(
+        None, description="Temperature parameter for annealing-like strategies."
+    )
 
 
 class FullConfig(BaseModel):
     """
-    Main configuration object for an evolutionary run.
+    Main configuration model for an evolutionary run.
 
-    Includes all meta-settings (evolution, selection, replacement) and the modules
-    dictionary, which is resolved into typed ComponentConfigs based on their dim_type.
+    Aggregates global run parameters, high-level policies (evolution/selection/
+    replacement), and a 'modules' mapping that is resolved into typed ComponentConfigs.
+
+    1) YAML → dict 2) dict → FullConfig(**data) 3) model_validator(mode="before")
+    resolves each raw 'modules[name]' dict into a    typed ComponentConfig (e.g.
+    VectorComponentConfig, EvoNetComponentConfig).
     """
 
-    parent_pool_size: int
-    offspring_pool_size: int
-    max_generations: int
-    max_indiv_age: int = 0
-    num_elites: int
+    # Global run parameters
+    parent_pool_size: int = Field(
+        ..., description="Number of parents retained in each generation."
+    )
+    offspring_pool_size: int = Field(
+        ..., description="Number of offspring produced per generation."
+    )
+    max_generations: int = Field(
+        ..., description="Maximum number of generations to run."
+    )
+    max_indiv_age: int = Field(
+        0,
+        description="Maximum allowed individual age in generations; 0 disables aging.",
+    )
+    num_elites: int = Field(
+        ..., description="Number of elite individuals preserved each generation."
+    )
 
+    # Module configs (resolved to typed ComponentConfig instances by the validator)
     modules: Dict[str, Any]
 
-    evolution: Optional[EvolutionConfig] = None
-    selection: Optional[SelectionConfig] = None
-    replacement: Optional[ReplacementConfig] = None
+    # High-level policies (optional)
+    evolution: Optional[EvolutionConfig] = Field(
+        None, description="Global evolution strategy configuration."
+    )
+    selection: Optional[SelectionConfig] = Field(
+        None, description="Parent selection configuration."
+    )
+    replacement: Optional[ReplacementConfig] = Field(
+        None, description="Survivor selection (replacement) configuration."
+    )
 
     @model_validator(mode="before")
     @classmethod
     def resolve_component_configs(cls, data: dict[str, Any]) -> dict[str, Any]:
         """
-        Resolves raw module dictionaries into typed ComponentConfig objects.
+        Replace raw 'modules[name]' dicts with typed ComponentConfig objects.
 
-        Each entry in `modules` is a plain dictionary (parsed from YAML).
-        This validator inspects the `type` field of each entry (e.g. "vector", "evonet")
-        and replaces the dictionary with the corresponding Pydantic ComponentConfig
-        subclass (e.g. VectorComponentConfig, EvoNetComponentConfig).
+        Steps:
+          1) Read raw dict from 'modules[name]'
+          2) Determine 'type' (default: "vector")
+          3) Lookup ComponentConfig class in the registry
+          4) Instantiate the typed model with the raw dict
 
-        This ensures that after validation, `FullConfig.modules` always contains
-        typed config objects instead of untyped dicts.
+        After this hook, 'modules' contains fully validated Pydantic models.
 
-        Args:
-            data (dict[str, Any]): Raw configuration dictionary provided to FullConfig.
-
-        Returns:
-            dict[str, Any]: The updated configuration dictionary, where `modules`
-            contains ComponentConfig instances instead of dicts.
+        Raises
+        ------
+        ValueError
+            If a module 'type' is unknown to the component registry.
         """
-        # Extract raw module configs (untyped dicts, e.g. from YAML)
         raw_modules = data.get("modules", {})
+        resolved: dict[str, Any] = {}
 
-        resolved = {}
         for name, cfg in raw_modules.items():
-            # Fallback: if no 'type' provided, assume "vector"
             type_name = cfg.get("type", "vector")
-
-            # Select the correct Pydantic config class for this type
             cfg_cls = get_component_config_class(type_name)
-
-            # Instantiate the config class with the provided dictionary
             resolved[name] = cfg_cls(**cfg)
 
-        # Replace raw dicts with validated ComponentConfig objects
         data["modules"] = resolved
         return data
