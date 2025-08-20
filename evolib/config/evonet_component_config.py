@@ -16,7 +16,22 @@ from typing import Literal, Optional, Tuple, Union
 from pydantic import BaseModel, Field, field_validator
 from pydantic_core import core_schema
 
-from evolib.config.base_component_config import CrossoverConfig, MutationConfig
+from evolib.config.base_component_config import (
+    CrossoverConfig,
+    EvoNetMutationConfig,
+)
+
+
+class StructuralMutationConfig(BaseModel):
+    """Configuration block for EvoNet structural mutations."""
+
+    add_connection: Optional[float] = 0.0
+    remove_connection: Optional[float] = 0.0
+    add_neuron: Optional[float] = 0.0
+    split_connection: Optional[float] = 0.0
+    keep_connected: bool = True
+    max_nodes: Optional[int] = None
+    max_edges: Optional[int] = None
 
 
 class EvoNetComponentConfig(BaseModel):
@@ -59,8 +74,9 @@ class EvoNetComponentConfig(BaseModel):
     bias_bounds: Tuple[float, float] = (-0.5, 0.5)
 
     # Evolutionary operators
-    mutation: Optional[MutationConfig] = None
+    mutation: Optional[EvoNetMutationConfig] = None
     crossover: Optional[CrossoverConfig] = None
+    structural: Optional[StructuralMutationConfig] = None
 
     # Validators
 
