@@ -159,15 +159,20 @@ class EvoNetMutationConfig(MutationConfig):
     """
     EvoNet-specific variant with optional per-scope overrides.
 
-    Currently supported override scopes:
-        - biases: MutationConfig for neuron biases only.
-
-    If an override is omitted, the base fields of this config apply.
-    This is intentionally minimal for now to keep the API lean and didactic.
+    Supported override scopes:
+        - weights: MutationConfig for weights (optional)
+        - biases:  MutationConfig for biases  (optional)
+        - activations: MutationConfig for activation choices (optional)
     """
 
+    weights: Optional[MutationConfig] = Field(
+        default=None, description="Optional override for weight mutation."
+    )
     biases: Optional[MutationConfig] = Field(
         default=None, description="Optional override for bias mutation."
+    )
+    activations: Optional[MutationConfig] = Field(
+        default=None, description="Optional override for activation changes."
     )
 
 
