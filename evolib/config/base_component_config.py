@@ -10,7 +10,7 @@ into the respective Para* representations and operator modules.
 
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, model_validator
 
 from evolib.interfaces.enums import (
     CrossoverOperator,
@@ -59,38 +59,116 @@ class MutationConfig(BaseModel):
     helpers.
     """
 
-    # Mutation strategy to use
-    strategy: MutationStrategy
+    strategy: MutationStrategy = Field(..., description="Mutation strategy to use.")
 
-    # For constant mutation
-    strength: Optional[float] = None
-    probability: Optional[float] = None
+    # Generic / commonly used parameters
+    strength: Optional[float] = Field(
+        default=None, description="Global mutation strength (sigma)."
+    )
+    probability: Optional[float] = Field(
+        default=None, description="Per-parameter mutation application probability."
+    )
 
-    # For exponential and adaptive strategies
-    init_strength: Optional[float] = None
-    init_probability: Optional[float] = None
+    # Exponential / schedule-based starts
+    init_strength: Optional[float] = Field(
+        default=None, description="Initial strength for schedule-based strategies."
+    )
+    init_probability: Optional[float] = Field(
+        default=None, description="Initial probability for schedule-based strategies."
+    )
 
+    # Strength / probability ranges (used for clamping or adaptive updates)
     min_strength: Optional[float] = None
     max_strength: Optional[float] = None
 
     min_probability: Optional[float] = None
     max_probability: Optional[float] = None
 
-    # Diversity adaptation
-    increase_factor: Optional[float] = None
-    decrease_factor: Optional[float] = None
+    # Diversity adaptation (optional)
+    increase_factor: Optional[float] = Field(
+        default=None,
+        description="Factor to increase values when diversity is low/high.",
+    )
+    decrease_factor: Optional[float] = Field(
+        default=None,
+        description="Factor to decrease values when diversity is low/high.",
+    )
     min_diversity_threshold: Optional[float] = None
     max_diversity_threshold: Optional[float] = None
+
+    # Validators
+
+    @model_validator(mode="after")
+    def _validate_ranges_and_strategy(self) -> "MutationConfig":
+        """Sanity checks for common ranges and strategy-dependent requirements."""
+        # Probability bounds (if present)
+        for p in (
+            self.probability,
+            self.init_probability,
+            self.min_probability,
+            self.max_probability,
+        ):
+            if p is not None and not (0.0 <= p <= 1.0):
+                raise ValueError("All probabilities must be in [0, 1].")
+
+        # Strength non-negativity (if present)
+        for s in (
+            self.strength,
+            self.init_strength,
+            self.min_strength,
+            self.max_strength,
+        ):
+            if s is not None and s < 0.0:
+                raise ValueError("Mutation strengths must be >= 0.")
+
+        # Min/Max consistency
+        if self.min_strength is not None and self.max_strength is not None:
+            if self.min_strength > self.max_strength:
+                raise ValueError("min_strength must be <= max_strength.")
+
+        if self.min_probability is not None and self.max_probability is not None:
+            if self.min_probability > self.max_probability:
+                raise ValueError("min_probability must be <= max_probability.")
+
+        # Strategy-specific light requirements
+        if self.strategy.name == "CONSTANT":
+            if self.strength is None:
+                raise ValueError("CONSTANT strategy requires 'strength'.")
+
+        if self.strategy.name == "EXPONENTIAL_DECAY":
+            if self.init_strength is None:
+                raise ValueError("EXPONENTIAL_DECAY requires 'init_strength'.")
+
+        if self.strategy.name == "ADAPTIVE_GLOBAL":
+            if self.strength is None or self.probability is None:
+                raise ValueError(
+                    "ADAPTIVE_GLOBAL requires both 'strength' and 'probability' "
+                    "as initial values."
+                )
+
+        if self.strategy.name in {"ADAPTIVE_INDIVIDUAL", "ADAPTIVE_PER_PARAMETER"}:
+            if self.min_strength is None or self.max_strength is None:
+                raise ValueError(
+                    f"{self.strategy.name} requires 'min_strength' and 'max_strength'."
+                )
+
+        return self
 
 
 class EvoNetMutationConfig(MutationConfig):
     """
-    EvoNet-specific mutation configuration with optional per-scope overrides.
+    EvoNet-specific variant with optional per-scope overrides.
+
+    Currently supported override scopes:
+        - biases: MutationConfig for neuron biases only.
 
     If an override is omitted, the base fields of this config apply.
+    This is intentionally minimal for now to keep the API lean and didactic.
     """
 
-    biases: Optional[MutationConfig] = None
+    biases: Optional[MutationConfig] = Field(
+        default=None, description="Optional override for bias mutation."
+    )
 
 
 class CrossoverConfig(BaseModel):
@@ -104,23 +182,51 @@ class CrossoverConfig(BaseModel):
         - BLX (uses alpha)
         - SBX (uses eta)
         - INTERMEDIATE (uses blend_range)
-        - ...
+        - ...others can be added as needed
     """
 
-    strategy: CrossoverStrategy
-    operator: Optional[CrossoverOperator] = None
+    strategy: CrossoverStrategy = Field(..., description="Crossover strategy to use.")
+    operator: Optional[CrossoverOperator] = Field(
+        default=None, description="Concrete crossover operator (if applicable)."
+    )
 
-    # Probability settings
-    probability: Optional[float] = None
+    # Probability control
+    probability: Optional[float] = Field(
+        default=None, description="Per-gene/application probability for crossover."
+    )
     init_probability: Optional[float] = None
     min_probability: Optional[float] = None
     max_probability: Optional[float] = None
 
-    # Diversity adaptation
+    # Diversity adaptation (optional)
     increase_factor: Optional[float] = None
     decrease_factor: Optional[float] = None
 
     # Operator-specific parameters
-    alpha: Optional[float] = None  # for BLX
-    eta: Optional[float] = None  # for SBX
-    blend_range: Optional[float] = None  # for intermediate crossover
+    alpha: Optional[float] = Field(
+        default=None, description="BLX-alpha parameter (typ. in [0, 1] or small >1)."
+    )
+    eta: Optional[float] = Field(
+        default=None, description="SBX-eta (non-negative; larger → more local)."
+    )
+    blend_range: Optional[float] = Field(
+        default=None, description="Range for intermediate/blend crossover."
+    )
+
+    @model_validator(mode="after")
+    def _validate_probability_and_operator(self) -> "CrossoverConfig":
+        # Probability bounds (if present)
+        for p in (
+            self.probability,
+            self.init_probability,
+            self.min_probability,
+            self.max_probability,
+        ):
+            if p is not None and not (0.0 <= p <= 1.0):
+                raise ValueError("All crossover probabilities must be in [0, 1].")
+
+        if self.min_probability is not None and self.max_probability is not None:
+            if self.min_probability > self.max_probability:
+                raise ValueError("min_probability must be <= max_probability.")
+
+        return self
