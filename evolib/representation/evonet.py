@@ -84,23 +84,22 @@ class ParaEvoNet(ParaBase):
             self.bias_evo_params = EvoControlParams()
             apply_mutation_config(self.bias_evo_params, cfg.mutation.biases)
 
-        # Accepted but not yet applied (Phase 1)
         if cfg.mutation.weights is not None:
-            warn(
-                "[ParaEvoNet] mutation.weights is parsed but not yet applied at "
-                "runtime."
+            raise ValueError(
+                "[EvoNet] 'mutation.weights' is not supported. "
+                "Use the global mutation block for weights, "
+                "and the 'biases' override for biases."
             )
 
+        # Accepted but not yet applied
         if cfg.mutation.activations is not None:
             warn(
-                "[ParaEvoNet] mutation.activations is parsed but not yet applied at "
+                "[EvoNet] mutation.activations is parsed but not yet applied at "
                 "runtime."
             )
 
         if cfg.structural is not None:
-            warn(
-                "[ParaEvoNet] structural mutation config is parsed but not yet applied"
-            )
+            warn("[EvoNet] structural mutation config is parsed but not yet applied")
 
         # Apply crossover config
         apply_crossover_config(evo_params, cfg.crossover)
