@@ -36,9 +36,6 @@ class ParaVector(ParaBase):
         self.bounds: tuple[float, float] | None = None
         self.init_bounds: tuple[float, float] | None = None
 
-        # Crossover
-        self._crossover_fn = None
-
         # EvoControlParams
         self.evo_params = EvoControlParams()
 
@@ -292,10 +289,10 @@ class ParaVector(ParaBase):
         if not isinstance(partner, ParaVector):
             return
 
-        if self._crossover_fn is None:
+        if self.evo_params._crossover_fn is None:
             return
 
-        result = self._crossover_fn(self.vector, partner.vector)
+        result = self.evo_params._crossover_fn(self.vector, partner.vector)
 
         if isinstance(result, tuple):
             child1, child2 = result

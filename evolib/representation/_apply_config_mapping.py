@@ -8,8 +8,18 @@ to EvoControlParams, which store runtime control parameters used during evolutio
 runs.
 """
 
-from evolib.config.base_component_config import CrossoverConfig, MutationConfig
+from evolib.config.base_component_config import (
+    CrossoverConfig,
+    CrossoverOperator,
+    MutationConfig,
+)
 from evolib.interfaces.enums import CrossoverStrategy, MutationStrategy
+from evolib.operators.crossover import (
+    crossover_arithmetic,
+    crossover_blend_alpha,
+    crossover_intermediate,
+    crossover_simulated_binary,
+)
 from evolib.representation.evo_params import EvoControlParams
 
 
@@ -90,3 +100,18 @@ def apply_crossover_config(ep: EvoControlParams, c: CrossoverConfig | None) -> N
     ep.max_crossover_probability = c.max_probability
     ep.crossover_inc_factor = c.increase_factor
     ep.crossover_dec_factor = c.decrease_factor
+
+    op = c.operator
+    if op == CrossoverOperator.BLX:
+        alpha = c.alpha or 0.5
+        ep._crossover_fn = lambda a, b: crossover_blend_alpha(a, b, alpha)
+    elif op == CrossoverOperator.ARITHMETIC:
+        ep._crossover_fn = crossover_arithmetic
+    elif op == CrossoverOperator.SBX:
+        eta = c.eta or 15.0
+        ep._crossover_fn = lambda a, b: crossover_simulated_binary(a, b, eta)
+    elif op == CrossoverOperator.INTERMEDIATE:
+        blend = c.blend_range or 0.25
+        ep._crossover_fn = lambda a, b: crossover_intermediate(a, b, blend)
+    else:
+        ep._crossover_fn = None

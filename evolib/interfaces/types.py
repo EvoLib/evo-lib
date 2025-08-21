@@ -2,12 +2,13 @@
 
 from typing import TYPE_CHECKING, Union
 
+import numpy as np
+
 if TYPE_CHECKING:
     from evolib.core.population import Pop  # noqa: F401
     from evolib.core.individual import Indiv  # noqa: F401
 
-from collections.abc import Callable
-from typing import Protocol
+from typing import Callable, Protocol
 
 from evolib.config.evonet_component_config import EvoNetComponentConfig
 from evolib.config.vector_component_config import VectorComponentConfig
@@ -17,6 +18,9 @@ from evolib.representation.base import ParaBase
 EvolutionStrategyFunction = Callable[["Pop"], None]
 SelectionFunction = Callable[["Pop", int], list["Indiv"]]
 ReplaceFunction = Callable[["Pop", list["Indiv"]], None]
+CrossoverFunction = Callable[
+    [np.ndarray, np.ndarray], np.ndarray | tuple[np.ndarray, np.ndarray]
+]
 ParaInitializer = Callable[["Pop"], ParaBase]
 
 ModuleConfig = Union[VectorComponentConfig, EvoNetComponentConfig]
@@ -35,7 +39,3 @@ class TauUpdateFunction(Protocol):
 
 
 ParaInitFunction = Callable[["Pop"], ParaBase]
-
-
-class CrossoverFunction(Protocol):
-    def __call__(self, parent1: "Indiv", parent2: "Indiv") -> list["Indiv"]: ...

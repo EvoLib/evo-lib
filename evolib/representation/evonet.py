@@ -26,6 +26,7 @@ from evolib.operators.mutation import (
     exponential_mutation_strength,
 )
 from evolib.representation._apply_config_mapping import (
+    apply_crossover_config,
     apply_mutation_config,
 )
 from evolib.representation.base import ParaBase
@@ -101,8 +102,8 @@ class ParaEvoNet(ParaBase):
                 "[ParaEvoNet] structural mutation config is parsed but not yet applied"
             )
 
-        # apply crossover config
-        # apply_crossover_config(evo_params, cfg.crossover)
+        # Apply crossover config
+        apply_crossover_config(evo_params, cfg.crossover)
 
         if isinstance(cfg.activation, list):
             activations = cfg.activation
@@ -162,9 +163,63 @@ class ParaEvoNet(ParaBase):
         mutate_biases(self.net, std=bias_std, probability=bias_prob)
 
     def crossover_with(self, partner: ParaBase) -> None:
-        # Placeholder
-        # NOTE: Will be implementet in Phase 3
-        pass
+        """
+        Weight-level crossover if vectors are compatible.
+
+        No structural crossover.
+        """
+
+        if not isinstance(partner, ParaEvoNet):
+            return
+
+        if self.evo_params._crossover_fn is None:
+            return
+
+        # Weights Crossover
+        weights1 = self.get_weights()
+        weights2 = partner.get_weights()
+        if weights1.shape != weights2.shape:
+            # Different topology or parameter count -> skip crossover
+            return
+
+        result = self.evo_params._crossover_fn(weights1, weights2)
+
+        if isinstance(result, tuple):
+            child1, child2 = result
+        else:
+            child1 = child2 = result
+
+        if self.weight_bounds is None or partner.weight_bounds is None:
+            raise ValueError("Both participants must define bounds before crossover.")
+
+        min_val, max_val = self.weight_bounds
+        self.set_weights(np.clip(child1, min_val, max_val))
+
+        min_val_p, max_val_p = partner.weight_bounds
+        partner.set_weights(np.clip(child2, min_val_p, max_val_p))
+
+        # Biases Crossover
+        biases1 = self.get_biases()
+        biases2 = partner.get_biases()
+        if biases1.shape != biases2.shape:
+            # Different topology or parameter count -> skip crossover
+            return
+
+        result = self.evo_params._crossover_fn(biases1, biases2)
+
+        if isinstance(result, tuple):
+            child1, child2 = result
+        else:
+            child1 = child2 = result
+
+        if self.bias_bounds is None or partner.bias_bounds is None:
+            raise ValueError("Both participants must define bounds before crossover.")
+
+        min_val, max_val = self.bias_bounds
+        self.set_biases(np.clip(child1, min_val, max_val))
+
+        min_val_p, max_val_p = partner.bias_bounds
+        partner.set_biases(np.clip(child2, min_val_p, max_val_p))
 
     def update_mutation_parameters(
         self, generation: int, max_generations: int, diversity_ema: float | None = None

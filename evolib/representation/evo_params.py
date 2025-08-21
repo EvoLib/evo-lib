@@ -10,6 +10,7 @@ All update logic is handled externally by `evo_param_update.py`.
 import numpy as np
 
 from evolib.interfaces.enums import CrossoverStrategy, MutationStrategy
+from evolib.interfaces.types import CrossoverFunction
 
 
 class EvoControlParams:
@@ -52,6 +53,7 @@ class EvoControlParams:
         self.max_crossover_probability: float | None = None
         self.crossover_inc_factor: float | None = None
         self.crossover_dec_factor: float | None = None
+        self._crossover_fn: CrossoverFunction | None = None
 
     def get_log_dict(self) -> dict[str, float]:
         """
