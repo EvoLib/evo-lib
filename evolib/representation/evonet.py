@@ -5,6 +5,9 @@ Implements the ParaBase interface for use within EvoLib's evolutionary pipeline.
 Supports mutation, crossover, vector conversion, and configuration.
 """
 
+from typing import Any, Optional
+from warnings import warn
+
 import numpy as np
 from evonet.activation import random_function_name
 from evonet.core import Nnet
@@ -29,6 +32,11 @@ from evolib.representation.base import ParaBase
 from evolib.representation.evo_params import EvoControlParams
 
 
+def _append_if_not_none(parts: list[str], prefix: str, value: Any) -> None:
+    if value is not None:
+        parts.append(f"{prefix}={value:.4f}")
+
+
 class ParaEvoNet(ParaBase):
     """
     ParaBase wrapper for EvoNet.
@@ -44,7 +52,9 @@ class ParaEvoNet(ParaBase):
         self.bias_bounds: tuple[float, float] | None = None
 
         # EvoControlParams
-        self.evo_params = EvoControlParams()
+        self.evo_params: EvoControlParams = EvoControlParams()
+        # Optional override for biases; if None, fall back to self.evo_params
+        self.bias_evo_params: Optional[EvoControlParams] = None
 
     def apply_config(self, cfg: ModuleConfig) -> None:
 
@@ -64,10 +74,32 @@ class ParaEvoNet(ParaBase):
         if cfg.mutation is None:
             raise ValueError("Mutation config is required for ParaEvoNet.")
 
+        # Global settings
         evo_params.mutation_strategy = cfg.mutation.strategy
+        apply_mutation_config(self.evo_params, cfg.mutation)
 
-        # Apply mutation config
-        apply_mutation_config(evo_params, cfg.mutation)
+        # Optional per-scope override for biases
+        if cfg.mutation.biases is not None:
+            self.bias_evo_params = EvoControlParams()
+            apply_mutation_config(self.bias_evo_params, cfg.mutation.biases)
+
+        # Accepted but not yet applied (Phase 1)
+        if cfg.mutation.weights is not None:
+            warn(
+                "[ParaEvoNet] mutation.weights is parsed but not yet applied at "
+                "runtime."
+            )
+
+        if cfg.mutation.activations is not None:
+            warn(
+                "[ParaEvoNet] mutation.activations is parsed but not yet applied at "
+                "runtime."
+            )
+
+        if cfg.structural is not None:
+            warn(
+                "[ParaEvoNet] structural mutation config is parsed but not yet applied"
+            )
 
         # apply crossover config
         # apply_crossover_config(evo_params, cfg.crossover)
@@ -75,7 +107,9 @@ class ParaEvoNet(ParaBase):
         if isinstance(cfg.activation, list):
             activations = cfg.activation
         else:
-            activations = [cfg.activation] * len(cfg.dim)
+            # Apply the same activation to all hidden/output layers,
+            # but force input layer to be linear
+            activations = ["linear"] + [cfg.activation] * (len(cfg.dim) - 1)
 
         for layer_idx, num_neurons in enumerate(self.dim):
 
@@ -105,22 +139,27 @@ class ParaEvoNet(ParaBase):
 
     def mutate(self) -> None:
 
+        # Weights
         if self.evo_params.mutation_strength is None:
             raise ValueError("mutation_strength must be set.")
 
-        probability = self.evo_params.mutation_probability or 1.0
+        mutation_strength = self.evo_params.mutation_strength
+        mutation_probability = self.evo_params.mutation_probability or 1.0
 
         mutate_weights(
-            self.net,
-            std=self.evo_params.mutation_strength,
-            probability=probability,
+            self.net, std=mutation_strength, probability=mutation_probability
         )
 
-        mutate_biases(
-            self.net,
-            std=self.evo_params.mutation_strength,
-            probability=probability,
-        )
+        # Biases (optional override)
+        if self.bias_evo_params is not None:
+            bias_std = self.bias_evo_params.mutation_strength or mutation_strength
+            bias_prob = (
+                self.bias_evo_params.mutation_probability or mutation_probability
+            )
+        else:
+            bias_std, bias_prob = mutation_strength, mutation_probability
+
+        mutate_biases(self.net, std=bias_std, probability=bias_prob)
 
     def crossover_with(self, partner: ParaBase) -> None:
         # Placeholder
@@ -186,6 +225,54 @@ class ParaEvoNet(ParaBase):
             # Perform adaptive update
             ep.mutation_strength = adapt_mutation_strength(ep, self.weight_bounds)
 
+        # If Bias-Override exists
+        if self.bias_evo_params is not None:
+            bep = self.bias_evo_params
+            if ep.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
+                bep.mutation_strength = exponential_mutation_strength(
+                    bep, generation, max_generations
+                )
+                bep.mutation_probability = exponential_mutation_probability(
+                    bep, generation, max_generations
+                )
+
+            elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
+                if diversity_ema is None:
+                    raise ValueError(
+                        "diversity_ema must be provided for ADAPTIVE_GLOBAL (biases)"
+                    )
+                if bep.mutation_strength is None or bep.mutation_probability is None:
+                    raise ValueError(
+                        "biases override for ADAPTIVE_GLOBAL requires both "
+                        "'init_strength' and 'init_probability'."
+                    )
+                bep.mutation_probability = adapt_mutation_probability_by_diversity(
+                    bep.mutation_probability, diversity_ema, bep
+                )
+                bep.mutation_strength = adapt_mutation_strength_by_diversity(
+                    bep.mutation_strength, diversity_ema, bep
+                )
+
+            elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
+                # Ensure tau is initialized
+                bep.tau = adapted_tau(len(self.get_vector()))
+
+                if (
+                    bep.min_mutation_strength is None
+                    or bep.max_mutation_strength is None
+                ):
+                    raise ValueError(
+                        "biases override requires min/max mutation_strength for "
+                        "ADAPTIVE_INDIVIDUAL."
+                    )
+                if self.bias_bounds is None:
+                    raise ValueError("bias_bounds must be set for bias adaptation.")
+                if bep.mutation_strength is None:
+                    bep.mutation_strength = np.random.uniform(
+                        bep.min_mutation_strength, bep.max_mutation_strength
+                    )
+                bep.mutation_strength = adapt_mutation_strength(bep, self.bias_bounds)
+
     def get_vector(self) -> np.ndarray:
         """Returns a flat vector of all weights and biases."""
         weights = self.net.get_weights()
@@ -229,12 +316,19 @@ class ParaEvoNet(ParaBase):
             f"weights={self.net.num_weights}",
             f"biases={self.net.num_biases}",
         ]
-        if ep.mutation_strength is not None:
-            parts.append(f"sigma={ep.mutation_strength:.4f}")
-        if ep.mutation_probability is not None:
-            parts.append(f"p={ep.mutation_probability:.4f}")
-        if ep.tau:
-            parts.append(f"tau={ep.tau:.4f}")
+
+        _append_if_not_none(parts, "sigma", ep.mutation_strength)
+        _append_if_not_none(parts, "p", ep.mutation_probability)
+        _append_if_not_none(parts, "tau", ep.tau)
+
+        if self.bias_evo_params is not None:
+            _append_if_not_none(
+                parts, "sigma_bias", self.bias_evo_params.mutation_strength
+            )
+            _append_if_not_none(
+                parts, "p_bias", self.bias_evo_params.mutation_probability
+            )
+
         return " | ".join(parts)
 
     def print_status(self) -> None:
