@@ -12,7 +12,7 @@ import numpy as np
 from evonet.activation import random_function_name
 from evonet.core import Nnet
 from evonet.enums import NeuronRole
-from evonet.mutation import mutate_biases, mutate_weights
+from evonet.mutation import mutate_activations, mutate_biases, mutate_weights
 
 from evolib.config.evonet_component_config import EvoNetComponentConfig
 from evolib.interfaces.enums import MutationStrategy
@@ -57,6 +57,10 @@ class ParaEvoNet(ParaBase):
         # Optional override for biases; if None, fall back to self.evo_params
         self.bias_evo_params: Optional[EvoControlParams] = None
 
+        # Optional override for activation mutation
+        self.activation_probability: float | None = None
+        self.allowed_activations: list[str] | None = None
+
     def apply_config(self, cfg: ModuleConfig) -> None:
 
         if not isinstance(cfg, EvoNetComponentConfig):
@@ -84,9 +88,12 @@ class ParaEvoNet(ParaBase):
             self.bias_evo_params = EvoControlParams()
             apply_mutation_config(self.bias_evo_params, cfg.mutation.biases)
 
-        # Accepted but not yet applied
+        # Optional activation mutatation
         if cfg.mutation.activations is not None:
-            warn("[EvoNet] mutation.activations is parsed but not yet applied")
+            self.activation_probability = cfg.mutation.activations.probability
+            self.allowed_activations = cfg.mutation.activations.allowed
+
+        # Accepted but not yet applied
         if cfg.structural is not None:
             warn("[EvoNet] structural mutation config is parsed but not yet applied")
 
@@ -149,6 +156,14 @@ class ParaEvoNet(ParaBase):
             bias_std, bias_prob = mutation_strength, mutation_probability
 
         mutate_biases(self.net, std=bias_std, probability=bias_prob)
+
+        # Activations
+        if self.activation_probability and self.activation_probability > 0.0:
+            mutate_activations(
+                self.net,
+                probability=self.activation_probability,
+                activations=self.allowed_activations,
+            )
 
     def crossover_with(self, partner: ParaBase) -> None:
         """
@@ -371,6 +386,9 @@ class ParaEvoNet(ParaBase):
             _append_if_not_none(
                 parts, "p_bias", self.bias_evo_params.mutation_probability
             )
+
+        if self.activation_probability is not None:
+            _append_if_not_none(parts, "p_act", self.activation_probability)
 
         return " | ".join(parts)
 

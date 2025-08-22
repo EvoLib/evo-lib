@@ -155,6 +155,23 @@ class MutationConfig(BaseModel):
         return self
 
 
+class ActivationMutationConfig(BaseModel):
+    probability: float = Field(
+        ..., description="Per-neuron mutation probability in [0,1]."
+    )
+    allowed: Optional[list[str]] = Field(
+        default=None,
+        description="Whitelist of activation names; if None, "
+        "all registered activations.",
+    )
+
+    @model_validator(mode="after")
+    def _check_probability(self) -> "ActivationMutationConfig":
+        if not (0.0 <= self.probability <= 1.0):
+            raise ValueError("activations.probability must be in [0, 1].")
+        return self
+
+
 class EvoNetMutationConfig(MutationConfig):
     """
     EvoNet-specific variant with optional per-scope overrides.
@@ -168,7 +185,7 @@ class EvoNetMutationConfig(MutationConfig):
     biases: Optional[MutationConfig] = Field(
         default=None, description="Optional override for bias mutation."
     )
-    activations: Optional[MutationConfig] = Field(
+    activations: Optional[ActivationMutationConfig] = Field(
         default=None, description="Optional override for activation changes."
     )
     structural: Optional[MutationConfig] = Field(
