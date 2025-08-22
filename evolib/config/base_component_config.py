@@ -155,6 +155,38 @@ class MutationConfig(BaseModel):
         return self
 
 
+class StructuralMutationConfig(BaseModel):
+    """Structural mutation configuration (shared across evolvable networks)."""
+
+    add_connection: Optional[float] = 0.0
+    remove_connection: Optional[float] = 0.0
+    add_neuron: Optional[float] = 0.0
+    split_connection: Optional[float] = 0.0
+    keep_connected: bool = True
+    max_nodes: Optional[int] = None
+    max_edges: Optional[int] = None
+
+    @model_validator(mode="after")
+    def _check_ranges(self) -> "StructuralMutationConfig":
+        for name in [
+            "add_connection",
+            "remove_connection",
+            "add_neuron",
+            "split_connection",
+        ]:
+            val = getattr(self, name)
+            if val is not None and not (0.0 <= val <= 1.0):
+                raise ValueError(f"{name} must be in [0, 1], got {val}")
+
+        if self.max_nodes is not None and self.max_nodes <= 0:
+            raise ValueError("max_nodes must be > 0 or None")
+
+        if self.max_edges is not None and self.max_edges <= 0:
+            raise ValueError("max_edges must be > 0 or None")
+
+        return self
+
+
 class ActivationMutationConfig(BaseModel):
     probability: float = Field(
         ..., description="Per-neuron mutation probability in [0,1]."
