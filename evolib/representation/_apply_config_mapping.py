@@ -92,10 +92,16 @@ def apply_crossover_config(ep: EvoControlParams, c: CrossoverConfig | None) -> N
     """
     if c is None:
         ep.crossover_strategy = CrossoverStrategy.NONE
+        ep._crossover_fn = None
         return
 
     ep.crossover_strategy = c.strategy
-    ep.crossover_probability = c.probability or c.init_probability
+
+    if c.probability is not None:
+        ep.crossover_probability = c.probability
+    elif c.init_probability is not None:
+        ep.crossover_probability = c.init_probability
+
     ep.min_crossover_probability = c.min_probability
     ep.max_crossover_probability = c.max_probability
     ep.crossover_inc_factor = c.increase_factor

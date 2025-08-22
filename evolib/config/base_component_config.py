@@ -160,20 +160,30 @@ class EvoNetMutationConfig(MutationConfig):
     EvoNet-specific variant with optional per-scope overrides.
 
     Supported override scopes:
-        - weights: MutationConfig for weights (optional)
         - biases:  MutationConfig for biases  (optional)
         - activations: MutationConfig for activation choices (optional)
+        - structural: MutationConfig for structural choices (optional)
     """
 
-    weights: Optional[MutationConfig] = Field(
-        default=None, description="Optional override for weight mutation."
-    )
     biases: Optional[MutationConfig] = Field(
         default=None, description="Optional override for bias mutation."
     )
     activations: Optional[MutationConfig] = Field(
         default=None, description="Optional override for activation changes."
     )
+    structural: Optional[MutationConfig] = Field(
+        default=None, description="Optional override for structural mutation."
+    )
+
+    @model_validator(mode="after")
+    def _no_weights_override(self) -> "EvoNetMutationConfig":
+        if getattr(self, "weights", None) is not None:
+            raise ValueError(
+                "mutation.weights is not supported. "
+                "Use the global mutation block for weights; "
+                "per-scope overrides exist only for biases/activations/structural."
+            )
+        return self
 
 
 class CrossoverConfig(BaseModel):
