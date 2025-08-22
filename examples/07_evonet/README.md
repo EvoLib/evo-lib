@@ -42,3 +42,33 @@ This section introduces EvoNet — an evolvable neural network representation wi
 <p align="center">
   <img src="./02_frames/02_image_approximation.gif" alt="Sample EvoNet Frame" width="512"/>
 </p>
+
+
+---
+
+### 📘 03 – Structural Mutation on XOR
+
+* **File:** `03_structural_xor.py`
+* **Goal:** Solve the XOR function `f(x1, x2) = x1 ⊕ x2` using a minimal EvoNet that grows via structural mutation
+* **Input:** 4 binary combinations `[0,0], [0,1], [1,0], [1,1]`
+* **Architecture:** Starts with only `[2, 1]` (input → output), then expands via:
+
+  * `add_neuron`, `add_connection`, `split_connection`
+* **Mutation:**
+
+  * Weights: Gaussian mutation (constant)
+  * Structure: Evolves topology (connections and neurons)
+* **Fitness:** Mean Squared Error (MSE) on all 4 XOR samples
+* **Visualization:**
+
+  * Combined output: network structure + predicted XOR outputs
+  * Saves frame on improvement, plus final best frame
+* **Output:** `03_frames/gen_XXXX.png` (per-gen frame), `final_best.png` (best net)
+
+---
+
+<p align="center">
+  <img src="./03_frames/final_best.png" alt="Structural XOR Final" width="512"/>
+</p>
+
+---

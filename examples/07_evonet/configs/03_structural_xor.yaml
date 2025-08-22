@@ -1,0 +1,36 @@
+parent_pool_size: 20
+offspring_pool_size: 40
+max_generations: 300
+max_indiv_age: 0
+num_elites: 1
+
+evolution:
+  strategy: mu_plus_lambda
+
+modules:
+  brain:
+    type: evonet
+    dim: [2, 1]
+    activation: [linear, sigmoid]
+    initializer: normal_evonet
+    weight_bounds: [-1.0, 1.0]
+    bias_bounds: [-0.5, 0.5]
+
+    mutation:
+      strategy: constant
+      strength: 0.1
+      probability: 0.9
+
+      biases:
+        strategy: constant
+        strength: 0.05
+        probability: 0.8
+
+      structural:
+        add_neuron: 0.03
+        add_connection: 0.05
+        split_connection: 0.02
+        remove_connection: 0.01
+
+        max_nodes: 20
+        max_edges: 50

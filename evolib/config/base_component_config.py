@@ -162,7 +162,7 @@ class StructuralMutationConfig(BaseModel):
     remove_connection: Optional[float] = 0.0
     add_neuron: Optional[float] = 0.0
     split_connection: Optional[float] = 0.0
-    keep_connected: bool = True
+    keep_connected: Optional[bool] = True
     max_nodes: Optional[int] = None
     max_edges: Optional[int] = None
 
@@ -220,7 +220,7 @@ class EvoNetMutationConfig(MutationConfig):
     activations: Optional[ActivationMutationConfig] = Field(
         default=None, description="Optional override for activation changes."
     )
-    structural: Optional[MutationConfig] = Field(
+    structural: Optional[StructuralMutationConfig] = Field(
         default=None, description="Optional override for structural mutation."
     )
 

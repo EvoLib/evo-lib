@@ -97,8 +97,8 @@ class ParaEvoNet(ParaBase):
             self.activation_probability = cfg.mutation.activations.probability
             self.allowed_activations = cfg.mutation.activations.allowed
 
-        if cfg.structural is not None:
-            self.structural_cfg = cfg.structural
+        if cfg.mutation.structural is not None:
+            self.structural_cfg = cfg.mutation.structural
 
         # Apply crossover config
         apply_crossover_config(evo_params, cfg.crossover)
