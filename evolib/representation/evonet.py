@@ -6,7 +6,6 @@ Supports mutation, crossover, vector conversion, and configuration.
 """
 
 from typing import Any, Optional
-from warnings import warn
 
 import numpy as np
 from evonet.activation import random_function_name
@@ -14,9 +13,11 @@ from evonet.core import Nnet
 from evonet.enums import NeuronRole
 from evonet.mutation import mutate_activations, mutate_biases, mutate_weights
 
+from evolib.config.base_component_config import StructuralMutationConfig
 from evolib.config.evonet_component_config import EvoNetComponentConfig
 from evolib.interfaces.enums import MutationStrategy
 from evolib.interfaces.types import ModuleConfig
+from evolib.operators.evonet_structual_mutation import mutate_structure
 from evolib.operators.mutation import (
     adapt_mutation_probability_by_diversity,
     adapt_mutation_strength,
@@ -61,6 +62,9 @@ class ParaEvoNet(ParaBase):
         self.activation_probability: float | None = None
         self.allowed_activations: list[str] | None = None
 
+        # Optional for structur mutation
+        self.structural_cfg: StructuralMutationConfig | None = None
+
     def apply_config(self, cfg: ModuleConfig) -> None:
 
         if not isinstance(cfg, EvoNetComponentConfig):
@@ -93,9 +97,8 @@ class ParaEvoNet(ParaBase):
             self.activation_probability = cfg.mutation.activations.probability
             self.allowed_activations = cfg.mutation.activations.allowed
 
-        # Accepted but not yet applied
         if cfg.structural is not None:
-            warn("[EvoNet] structural mutation config is parsed but not yet applied")
+            self.structural_cfg = cfg.structural
 
         # Apply crossover config
         apply_crossover_config(evo_params, cfg.crossover)
@@ -164,6 +167,10 @@ class ParaEvoNet(ParaBase):
                 probability=self.activation_probability,
                 activations=self.allowed_activations,
             )
+
+        # Structure
+        if self.structural_cfg is not None:
+            mutate_structure(self.net, self.structural_cfg)
 
     def crossover_with(self, partner: ParaBase) -> None:
         """
