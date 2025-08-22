@@ -68,7 +68,7 @@ This section introduces EvoNet — an evolvable neural network representation wi
 ---
 
 <p align="center">
-  <img src="./03_frames/final_best.png" alt="Structural XOR Final" width="512"/>
+  <img src="./03_frames/03_structural_xor.gif" alt="Structural XOR Final" width="512"/>
 </p>
 
 ---
