@@ -1,17 +1,17 @@
 parent_pool_size: 20
 offspring_pool_size: 40
-max_generations: 300
+max_generations: 200
 max_indiv_age: 0
-num_elites: 1
+num_elites: 0
 
 evolution:
-  strategy: mu_plus_lambda
+  strategy: mu_comma_lambda
 
 modules:
   brain:
     type: evonet
-    dim: [2, 1]
-    activation: [linear, sigmoid]
+    dim: [2, 0, 0, 1]
+    activation: [linear, tanh, tanh, sigmoid]
     initializer: normal_evonet
     weight_bounds: [-1.0, 1.0]
     bias_bounds: [-0.5, 0.5]
@@ -28,9 +28,10 @@ modules:
 
       structural:
         add_neuron: 0.03
+        remove_neuron: 0.01
         add_connection: 0.05
-        split_connection: 0.02
         remove_connection: 0.01
+        split_connection: 0.02
 
-        max_nodes: 20
-        max_edges: 50
+        max_nodes: 3
+        max_edges: 20
