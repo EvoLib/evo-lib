@@ -160,7 +160,7 @@ It supports a wide range of applications, including:
 - [X] Structured Neural Representations (EvoNet)
 - [X] Composite Parameters (multi-module individuals)
 - [X] Neuroevolution
-- [ ] Topological Evolution (add/remove neurons, edges)
+- [X] Topological Evolution (add/remove neurons, edges)
 - [ ] Co-Evolution & Speciation Support
 - [ ] Advanced Visualization Tools
 
