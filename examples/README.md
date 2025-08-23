@@ -155,7 +155,7 @@ Examples for EvoNet, a modular, evolvable neural network architecture capable of
 ## Sample output
 
 <p align="center">
-  <img src="./03_frames/03_structural_xor.gif" alt="Structural XOR Final" width="512"/>
+  <img src="./07_evonet/03_frames/03_structural_xor.gif" alt="Structural XOR Final" width="512"/>
 </p>
 
 ---
