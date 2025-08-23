@@ -75,8 +75,8 @@ class EvoNetComponentConfig(BaseModel):
         """Ensure that `dim` has at least input/output layer and all values > 0."""
         if len(dim) < 2:
             raise ValueError("dim must contain at least input and output layer")
-        if not all(isinstance(x, int) and x > 0 for x in dim):
-            raise ValueError("All layer sizes in dim must be positive integers")
+        if not all(isinstance(x, int) and x >= 0 for x in dim):
+            raise ValueError("All layer sizes in dim must be non-negative integers")
         return dim
 
     @field_validator("weight_bounds", "bias_bounds")
