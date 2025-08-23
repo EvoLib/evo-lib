@@ -161,6 +161,7 @@ class StructuralMutationConfig(BaseModel):
     add_connection: Optional[float] = 0.0
     remove_connection: Optional[float] = 0.0
     add_neuron: Optional[float] = 0.0
+    remove_neuron: Optional[float] = 0.0
     split_connection: Optional[float] = 0.0
     keep_connected: Optional[bool] = True
     max_nodes: Optional[int] = None
@@ -172,6 +173,7 @@ class StructuralMutationConfig(BaseModel):
             "add_connection",
             "remove_connection",
             "add_neuron",
+            "remove_neuron",
             "split_connection",
         ]:
             val = getattr(self, name)

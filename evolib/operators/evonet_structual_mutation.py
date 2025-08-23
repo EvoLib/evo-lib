@@ -7,6 +7,7 @@ from evonet.mutation import (
     add_random_connection,
     add_random_neuron,
     remove_random_connection,
+    remove_random_neuron,
     split_connection,
 )
 
@@ -26,6 +27,9 @@ def mutate_structure(net: Nnet, cfg: StructuralMutationConfig) -> None:
     if cfg.add_neuron and np.random.rand() < cfg.add_neuron:
         if cfg.max_nodes is None or count_non_input_neurons(net) < cfg.max_nodes:
             add_random_neuron(net)
+
+    if cfg.remove_neuron and np.random.rand() < cfg.remove_neuron:
+        remove_random_neuron(net)
 
     if cfg.split_connection and np.random.rand() < cfg.split_connection:
         if cfg.max_nodes is None or count_non_input_neurons(net) < cfg.max_nodes:
