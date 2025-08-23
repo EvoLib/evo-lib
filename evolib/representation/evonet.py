@@ -129,9 +129,10 @@ class ParaEvoNet(ParaBase):
                 # HiddenLayer
                 role = NeuronRole.HIDDEN
 
-            self.net.add_neuron(
-                count=num_neurons, activation=activation_name, role=role
-            )
+            if num_neurons > 0:
+                self.net.add_neuron(
+                    count=num_neurons, activation=activation_name, role=role
+                )
 
     def calc(self, input_values: list[float]) -> list[float]:
         return self.net.calc(input_values)
