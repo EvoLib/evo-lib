@@ -8,7 +8,7 @@ should be configured, not *how* it is executed. Any runtime behavior belongs
 into the respective Para* representations and operator modules.
 """
 
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -166,6 +166,7 @@ class StructuralMutationConfig(BaseModel):
     keep_connected: Optional[bool] = True
     max_nodes: Optional[int] = None
     max_edges: Optional[int] = None
+    recurrent: Optional[Literal["none", "direct", "local", "all"]] = "none"
 
     @model_validator(mode="after")
     def _check_ranges(self) -> "StructuralMutationConfig":
@@ -185,6 +186,9 @@ class StructuralMutationConfig(BaseModel):
 
         if self.max_edges is not None and self.max_edges <= 0:
             raise ValueError("max_edges must be > 0 or None")
+
+        if self.recurrent not in {None, "none", "direct", "local", "all"}:
+            raise ValueError(f"Invalid value for recurrent: {self.recurrent}")
 
         return self
 

@@ -5,7 +5,7 @@ max_indiv_age: 0
 num_elites: 0
 
 evolution:
-  strategy: mu_comma_lambda
+  strategy: mu_plus_lambda
 
 modules:
   brain:
@@ -28,6 +28,7 @@ modules:
 
       structural:
         add_neuron: 0.03
+        recurrent: "none"  # Optionen: none | direct | local | all
         remove_neuron: 0.01
         add_connection: 0.05
         remove_connection: 0.01
