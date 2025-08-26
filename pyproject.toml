@@ -18,6 +18,8 @@ dependencies = [
     "pandas >=2.3.0",
     "pydantic >= 2.7,<3.0",
     "graphviz>=0.20.1",
+    "evonet>=0.1.0.dev5,<0.2",
+    "matplotlib >=3.10",
 ]
 
 classifiers = [
