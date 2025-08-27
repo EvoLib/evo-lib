@@ -14,7 +14,8 @@ Requirements:
     'population.yaml' must be present in the current working directory
 """
 
-from evolib import Indiv, Pop, generate_cloned_offspring, mse_loss, simple_quadratic
+from evolib import Indiv, Pop, mse_loss, simple_quadratic
+from evolib.operators.reproduction import generate_cloned_offspring
 
 
 # User-defined fitness function

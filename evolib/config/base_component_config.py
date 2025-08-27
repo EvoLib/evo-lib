@@ -140,10 +140,10 @@ class MutationConfig(BaseModel):
                 raise ValueError("EXPONENTIAL_DECAY requires 'init_strength'.")
 
         if self.strategy.name == "ADAPTIVE_GLOBAL":
-            if self.strength is None or self.probability is None:
+            if self.init_strength is None or self.init_probability is None:
                 raise ValueError(
-                    "ADAPTIVE_GLOBAL requires both 'strength' and 'probability' "
-                    "as initial values."
+                    "ADAPTIVE_GLOBAL requires both 'init_strength' and "
+                    "'init_probability' as initial values."
                 )
 
         if self.strategy.name in {"ADAPTIVE_INDIVIDUAL", "ADAPTIVE_PER_PARAMETER"}:

@@ -32,7 +32,14 @@ from evolib.utils.loss_functions import (
     mae_loss,
     mse_loss,
 )
-from evolib.utils.plotting import plot_fitness
+from evolib.utils.plotting import (
+    plot_diversity,
+    plot_fitness,
+    plot_fitness_comparison,
+    plot_history,
+    plot_mutation_trends,
+    save_combined_net_plot,
+)
 
 __all__ = [
     "Population",
@@ -42,6 +49,11 @@ __all__ = [
     "NetVector",
     "HistoryLogger",
     "plot_fitness",
+    "save_combined_net_plot",
+    "plot_history",
+    "plot_diversity",
+    "plot_mutation_trends",
+    "plot_fitness_comparison",
     "mse_loss",
     "mae_loss",
     "huber_loss",

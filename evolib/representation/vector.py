@@ -220,7 +220,7 @@ class Vector(ParaBase):
                 )
             if ep.mutation_strength is None:
                 raise ValueError(
-                    "mutation_strength must be provided" "for ADAPTIVE_GLOBAL strategy"
+                    "mutation_strength must be provided for ADAPTIVE_GLOBAL strategy"
                 )
             if ep.mutation_probability is None:
                 raise ValueError(
