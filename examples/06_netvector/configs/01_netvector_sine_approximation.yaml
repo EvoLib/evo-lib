@@ -19,6 +19,7 @@ modules:
     bounds: [-1.0, 1.0]
     mutation:
       strategy: exponential_decay
+      init_strength: 0.05
       min_strength: 0.01
       max_strength: 0.1
       min_probability: 1.0
