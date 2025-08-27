@@ -1,13 +1,13 @@
 ## NetVector Experiments
 
-NetVector encodes a **feedforward neural network** as a flat parameter vector using `ParaVector` with `structure: net`.  At evaluation time, the vector is **interpreted** by `NetVector` (weights + biases) to perform forward passes.  This gives you a clean, didactic baseline before moving on to EvoNet’s explicit topology evolution.
+NetVector encodes a **feedforward neural network** as a flat parameter vector using `Vector` with `structure: net`.  At evaluation time, the vector is **interpreted** by `NetVector` (weights + biases) to perform forward passes.  This gives you a clean, didactic baseline before moving on to EvoNet’s explicit topology evolution.
 
 ---
 
 ### What you’ll learn here
 
 * How to configure a fixed architecture in YAML and initialize it as a vector
-* How to evaluate a `ParaVector` via `NetVector.forward(...)`
+* How to evaluate a `Vector` via `NetVector.forward(...)`
 * How to combine modules with `ParaComposite` (e.g., a small controller vector + network)
 
 > All examples use **MSE** as fitness. Plots are shown with Matplotlib.
@@ -20,7 +20,7 @@ NetVector encodes a **feedforward neural network** as a flat parameter vector us
 * **Config:** `configs/01_netvector_sine_approximation.yaml`
 * **Goal:** Approximate `y = sin(x)` on `[0, 2π]`.
 * **Architecture:** Defined in YAML via `dim: [input, hidden..., output]` and an activation (e.g., `tanh`).
-* **Representation:** Parameters live in `ParaVector` (module name: `nnet`), interpreted by `NetVector` in the fitness function.
+* **Representation:** Parameters live in `Vector` (module name: `nnet`), interpreted by `NetVector` in the fitness function.
 * **Fitness:** MSE between predicted values and the analytic sine curve.
 * **Visualization:** Line plot of target vs. best individual (no files saved).
 
@@ -36,8 +36,8 @@ NetVector encodes a **feedforward neural network** as a flat parameter vector us
   `ŷ = gain · net(x)`
 * **Representation:** `ParaComposite` with two modules:
 
-  * `controller`: a 1D `ParaVector` holding **gain**
-  * `nnet`: a `ParaVector` interpreted by `NetVector`
+  * `controller`: a 1D `Vector` holding **gain**
+  * `nnet`: a `Vector` interpreted by `NetVector`
 * **Fitness:** MSE vs. `sin(x)`.
 * **Visualization:** Plot comparing target `sin(x)` and the modulated prediction.
 

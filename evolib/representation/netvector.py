@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
 """
-NetVector – Interpreter for flat ParaVectors as feedforward neural networks.
+NetVector – Interpreter for flat Vectors as feedforward neural networks.
 
-This module provides a lightweight helper class that interprets a flat ParaVector
+This module provides a lightweight helper class that interprets a flat Vector
 (e.g. created via dim_type='net') as a fully connected feedforward network with
 arbitrary layer structure and activation function.
 
@@ -10,11 +10,11 @@ NetVector does not contain any trainable parameters or evolutionary logic itself
 Instead, it unpacks and applies a flat vector (weights + biases) to input data.
 
 Typical use case:
-    - Use ParaVector as evolvable parameter container (mutation, crossover etc.)
+    - Use Vector as evolvable parameter container (mutation, crossover etc.)
     - Use NetVector to define the network structure and perform forward evaluations
 
 Example:
-    para = ParaVector(...)  # created via normal_initializer_net
+    para = Vector(...)  # created via normal_initializer_net
     net = NetVector(dim=[1, 8, 1], activation="tanh")
     y = net.forward(x, para.vector)
 """

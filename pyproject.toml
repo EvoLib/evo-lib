@@ -65,6 +65,7 @@ python_version = "3.12"
 ignore_missing_imports = true
 disallow_untyped_defs = true
 check_untyped_defs = true
+plugins = ["pydantic.mypy"]
 warn_unused_ignores = true
 
 [tool.flake8]
@@ -105,3 +106,9 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "raise NotImplementedError",
 ]
+
+
+[pydantic-mypy]
+init_typed = true
+warn_untyped_fields = true
+warn_required_dynamic_aliases = true

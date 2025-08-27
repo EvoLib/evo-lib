@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 """
-Initializers for ParaVector interpreted as feedforward neural networks.
+Initializers for Vector interpreted as feedforward neural networks.
 
 These initializers use a 'structure: net' config and convert the network architecture
 into a flat parameter vector (weights + biases).
@@ -12,12 +12,12 @@ import numpy as np
 
 from evolib.config.schema import FullConfig
 from evolib.representation.netvector import NetVector
-from evolib.representation.vector import ParaVector
+from evolib.representation.vector import Vector
 
 
-def initializer_normal_net(config: FullConfig, module: str) -> ParaVector:
+def initializer_normal_net(config: FullConfig, module: str) -> Vector:
     """
-    Initializes a ParaVector representing a feedforward neural network.
+    Initializes a Vector representing a feedforward neural network.
 
     The network structure is defined via dim = [input, hidden, ..., output],
     and encoded using the NetVector interpreter. All parameters are initialized
@@ -28,7 +28,7 @@ def initializer_normal_net(config: FullConfig, module: str) -> ParaVector:
         module (str): Module name (e.g., "brain")
 
     Returns:
-        ParaVector: Initialized flat vector representing network weights + biases
+        Vector: Initialized flat vector representing network weights + biases
     """
     cfg = config.modules[module].model_copy(deep=True)
     # cfg = config.modules[module]
@@ -39,7 +39,7 @@ def initializer_normal_net(config: FullConfig, module: str) -> ParaVector:
     net = NetVector(dim=cfg.dim, activation=cfg.activation or "tanh")
     n_params = net.n_parameters
 
-    para = ParaVector()
+    para = Vector()
     para.apply_config(cfg)
 
     para.vector = np.random.normal(

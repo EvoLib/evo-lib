@@ -1,6 +1,6 @@
 from evolib.config.schema import FullConfig
 from evolib.initializers.registry import get_initializer
-from evolib.representation.evonet import ParaEvoNet
+from evolib.representation.evonet import EvoNet
 
 
 def test_normal_initializer_evonet_builds_expected_structure() -> None:
@@ -27,7 +27,7 @@ def test_normal_initializer_evonet_builds_expected_structure() -> None:
 
     init_fn = get_initializer("normal_evonet")
     para = init_fn(config, "brain")
-    assert isinstance(para, ParaEvoNet)
+    assert isinstance(para, EvoNet)
     net = para.net
 
     # Check structure: number of layers

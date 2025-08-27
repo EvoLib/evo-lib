@@ -101,14 +101,14 @@ class FullConfig(BaseModel):
     modules: Dict[str, Any]
 
     # High-level policies (optional)
-    evolution: Optional[EvolutionConfig] = Field(
-        None, description="Global evolution strategy configuration."
+    evolution: EvolutionConfig | None = Field(
+        default=None, description="Global evolution strategy configuration."
     )
-    selection: Optional[SelectionConfig] = Field(
-        None, description="Parent selection configuration."
+    selection: SelectionConfig | None = Field(
+        default=None, description="Parent selection configuration."
     )
-    replacement: Optional[ReplacementConfig] = Field(
-        None, description="Survivor selection (replacement) configuration."
+    replacement: ReplacementConfig | None = Field(
+        default=None, description="Survivor selection (replacement) configuration."
     )
 
     @model_validator(mode="before")

@@ -3,7 +3,7 @@ Example 02 – ParaComposite with controller + NetVector.
 
 This example evolves a composite individual with:
 - a 'controller' vector (1D), used to modulate network output (gain)
-- a 'nnet' ParaVector interpreted as feedforward NetVector
+- a 'nnet' Vector interpreted as feedforward NetVector
 
 The fitness is the MSE between gain * net(x) and sin(x).
 """

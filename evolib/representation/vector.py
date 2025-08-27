@@ -23,7 +23,7 @@ from evolib.representation.evo_params import EvoControlParams
 from evolib.representation.netvector import NetVector
 
 
-class ParaVector(ParaBase):
+class Vector(ParaBase):
     def __init__(self) -> None:
 
         # Parametervektor
@@ -94,7 +94,7 @@ class ParaVector(ParaBase):
 
         # Mutation
         if cfg.mutation is None:
-            raise ValueError("Mutation config is required for ParaVector.")
+            raise ValueError("Mutation config is required for Vector.")
         evo_params.tau = cfg.tau or 0.0
         self.randomize_mutation_strengths = cfg.randomize_mutation_strengths or False
 
@@ -142,8 +142,7 @@ class ParaVector(ParaBase):
         print(status)
 
     def get_status(self) -> str:
-        """Returns a formatted string summarizing the internal state of the
-        ParaVector."""
+        """Returns a formatted string summarizing the internal state of the Vector."""
         parts = []
 
         vector_preview = np.round(self.vector[:4], 3).tolist()
@@ -282,11 +281,11 @@ class ParaVector(ParaBase):
         """
         Applies crossover with another ParaBase-compatible instance.
 
-        This method is specific to ParaVector and expects the partner to also be a
-        ParaVector. The internal _crossover_fn may return either a single offspring
-        vector or a tuple of two.
+        This method is specific to Vector and expects the partner to also be a Vector.
+        The internal _crossover_fn may return either a single offspring vector or a
+        tuple of two.
         """
-        if not isinstance(partner, ParaVector):
+        if not isinstance(partner, Vector):
             return
 
         if self.evo_params._crossover_fn is None:

@@ -5,7 +5,7 @@ import numpy as np
 from evolib.config.schema import FullConfig
 from evolib.initializers.registry import get_initializer
 from evolib.representation.netvector import NetVector
-from evolib.representation.vector import ParaVector
+from evolib.representation.vector import Vector
 
 
 def test_normal_initializer_netvector_builds_expected_structure() -> None:
@@ -42,7 +42,7 @@ def test_normal_initializer_netvector_builds_expected_structure() -> None:
     )
 
     init_fn = get_initializer("normal_net")
-    para = cast(ParaVector, init_fn(config, "brain"))
+    para = cast(Vector, init_fn(config, "brain"))
 
     # Check shape and size
     assert isinstance(para.vector, np.ndarray)

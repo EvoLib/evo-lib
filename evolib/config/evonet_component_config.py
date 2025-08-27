@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 """
 EvoNetComponentConfig defines the configuration schema for structured evolutionary
-neural networks (ParaEvoNet).
+neural networks (EvoNet).
 
 This config class is selected when a module has `type: "evonet"`. It validates layer
 dimensions, activation functions, weight/bias bounds, and optional mutation/crossover
@@ -25,7 +25,7 @@ from evolib.config.base_component_config import (
 
 class EvoNetComponentConfig(BaseModel):
     """
-    Configuration schema for EvoNet modules (used by ParaEvoNet).
+    Configuration schema for EvoNet modules (used by EvoNet).
 
     This config is selected when a module has ``type: "evonet"`` and defines
     the structure, initialization, and evolutionary operators for EvoNet-based

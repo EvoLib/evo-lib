@@ -39,7 +39,7 @@ def _append_if_not_none(parts: list[str], prefix: str, value: Any) -> None:
         parts.append(f"{prefix}={value:.4f}")
 
 
-class ParaEvoNet(ParaBase):
+class EvoNet(ParaBase):
     """
     ParaBase wrapper for EvoNet.
 
@@ -81,7 +81,7 @@ class ParaEvoNet(ParaBase):
 
         # Mutation
         if cfg.mutation is None:
-            raise ValueError("Mutation config is required for ParaEvoNet.")
+            raise ValueError("Mutation config is required for EvoNet.")
 
         # Global settings
         evo_params.mutation_strategy = cfg.mutation.strategy
@@ -180,7 +180,7 @@ class ParaEvoNet(ParaBase):
         No structural crossover.
         """
 
-        if not isinstance(partner, ParaEvoNet):
+        if not isinstance(partner, EvoNet):
             return
 
         if self.evo_params._crossover_fn is None:
@@ -401,7 +401,7 @@ class ParaEvoNet(ParaBase):
         return " | ".join(parts)
 
     def print_status(self) -> None:
-        print(f"[ParaEvoNet] : {self.net} ")
+        print(f"[EvoNet] : {self.net} ")
 
     def print_graph(
         self,

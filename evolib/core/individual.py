@@ -77,7 +77,7 @@ class Indiv:
 
         Delegates the mutation process to the underlying parameter object `para`.
         This ensures that mutation behavior is defined polymorphically in the
-        specific `ParaBase` subclass (e.g. `ParaVector`, `ParaNet`, ...).
+        specific `ParaBase` subclass (e.g. `Vector`, `ParaNet`, ...).
         """
 
         if hasattr(self.para, "__iter__"):
@@ -92,7 +92,7 @@ class Indiv:
 
         Delegates the crossover process to the underlying parameter object `para`.
         This ensures that crossover behavior is defined polymorphically in the
-        specific `ParaBase` subclass (e.g. `ParaVector`, `ParaNet`, ...).
+        specific `ParaBase` subclass (e.g. `Vector`, `ParaNet`, ...).
         """
         if hasattr(self.para, "__iter__"):
             for p in self.para:
