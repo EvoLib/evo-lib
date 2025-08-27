@@ -87,3 +87,21 @@ disable = [
     "too-many-locals"
 ]
 
+[tool.pytest.ini_options]
+addopts = "-q --cov=evolib --cov-report=term-missing:skip-covered --cov-branch"
+testpaths = ["tests"]
+python_files = "test_*.py"
+
+[tool.coverage.run]
+branch = true
+source = ["evolib"]
+
+[tool.coverage.report]
+#fail_under = 80
+skip_covered = true
+show_missing = true
+exclude_lines = [
+  "pragma: no cover",
+  "if __name__ == .__main__.:",
+  "raise NotImplementedError",
+]
