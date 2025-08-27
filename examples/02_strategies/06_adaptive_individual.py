@@ -16,7 +16,8 @@ Configuration:
     Each individual carries and evolves its own mutation strength
 """
 
-from evolib import Indiv, Pop, evolve_mu_plus_lambda, mse_loss, rosenbrock
+from evolib import Indiv, Pop, mse_loss, rosenbrock
+from evolib.operators.strategy import evolve_mu_plus_lambda
 
 
 # User-defined fitness function
