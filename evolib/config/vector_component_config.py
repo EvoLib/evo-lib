@@ -9,7 +9,7 @@ from evolib.interfaces.enums import RepresentationType
 
 class VectorComponentConfig(BaseModel):
     """
-    Configuration schema for vector-based modules (used by ParaVector/NetVector).
+    Configuration schema for vector-based modules (used by Vector/NetVector).
 
     Selected when a module has ``type: "vector"``. Defines dimensionality and (optional)
     structural interpretation, initialization, numeric bounds, and evolutionary
@@ -36,7 +36,7 @@ class VectorComponentConfig(BaseModel):
     )
 
     # Optional structural interpretation; affects how 'dim' (and sometimes `activation`)
-    # are interpreted downstream in ParaVector.apply_config().
+    # are interpreted downstream in Vector.apply_config().
     structure: Optional[Literal["flat", "net", "tensor", "blocks", "grouped"]] = Field(
         default="flat",
         description=(
@@ -77,7 +77,7 @@ class VectorComponentConfig(BaseModel):
     shape: Optional[Tuple[int, ...]] = Field(
         default=None,
         description=(
-            "Optional explicit shape. If provided with flat dims, ParaVector flattens "
+            "Optional explicit shape. If provided with flat dims, Vector flattens "
             "to dim = prod(shape) and retains shape for display/reshaping."
         ),
     )
@@ -93,7 +93,7 @@ class VectorComponentConfig(BaseModel):
     activation: Optional[str] = Field(
         default=None,
         description=(
-            "Activation for structure='net'. The ParaVector net mapping may use this "
+            "Activation for structure='net'. The Vector net mapping may use this "
             "to parameterize an internal NetVector layout."
         ),
     )

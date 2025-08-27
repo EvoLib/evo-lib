@@ -2,8 +2,8 @@
 Example 03 – NetVector + Gain and Bias Modulation.
 
 This example evolves a composite individual with:
-- a 'controller' ParaVector of 2 scalars: gain and bias
-- a 'nnet' ParaVector interpreted as feedforward network
+- a 'controller' Vector of 2 scalars: gain and bias
+- a 'nnet' Vector interpreted as feedforward network
 
 The output is scaled and shifted:
     ŷ = gain * net(x) + bias

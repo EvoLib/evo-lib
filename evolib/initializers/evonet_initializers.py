@@ -1,27 +1,27 @@
 # SPDX-License-Identifier: MIT
 """
-Initializers for structured EvoNet networks using ParaEvoNet.
+Initializers for structured EvoNet networks using EvoNet.
 
 These initializers convert a module configuration with `type: evonet` into a fully
-initialized ParaEvoNet instance.
+initialized EvoNet instance.
 """
 
 from evolib.config.schema import FullConfig
-from evolib.representation.evonet import ParaEvoNet
+from evolib.representation.evonet import EvoNet
 
 
-def initializer_normal_evonet(config: FullConfig, module: str) -> ParaEvoNet:
+def initializer_normal_evonet(config: FullConfig, module: str) -> EvoNet:
     """
-    Initializes a ParaEvoNet (EvoNet-based neural network) from config.
+    Initializes a EvoNet (EvoNet-based neural network) from config.
 
     Args:
         config (FullConfig): Full experiment configuration
         module (str): Name of the module (e.g. "brain")
 
     Returns:
-        ParaEvoNet: Initialized EvoNet representation
+        EvoNet: Initialized EvoNet representation
     """
-    para = ParaEvoNet()
+    para = EvoNet()
     cfg = config.modules[module].model_copy(deep=True)
     para.apply_config(cfg)
     return para

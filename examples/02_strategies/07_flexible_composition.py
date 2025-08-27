@@ -5,7 +5,8 @@ This example demonstrates the modular composition of selection, mutation,
 crossover, and replacement strategies using `evolve_flexible`.
 """
 
-from evolib import Indiv, Pop, evolve_flexible, mse_loss, simple_quadratic
+from evolib import Indiv, Pop, mse_loss, simple_quadratic
+from evolib.operators.strategy import evolve_flexible
 
 
 # User-defined fitness function

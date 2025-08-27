@@ -13,8 +13,8 @@ class ParaComposite(ParaBase):
     This class allows a single individual (Indiv) to consist of multiple, logically
     distinct ParaBase components, such as:
 
-        - A global ParaVector (e.g. hyperparameters)
-        - One or more neural network components (e.g. ParaEvoNet, NetVector)
+        - A global Vector (e.g. hyperparameters)
+        - One or more neural network components (e.g. EvoNet, NetVector)
         - Specialized modules (e.g. rule systems, PID controllers)
 
     The composite supports standard ParaBase operations like mutate() and

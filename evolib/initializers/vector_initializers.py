@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MIT
 """
-Initializers for ParaVector representations.
+Initializers for Vector representations.
 
 These functions use a full configuration (FullConfig) and a module name to initialize
-ParaVector instances directly.
+Vector instances directly.
 
 Each initializer is compatible with EvoLib’s mutation, crossover, and adaptation system.
 """
@@ -11,22 +11,22 @@ Each initializer is compatible with EvoLib’s mutation, crossover, and adaptati
 import numpy as np
 
 from evolib.config.schema import FullConfig
-from evolib.representation.vector import ParaVector
+from evolib.representation.vector import Vector
 
 
-def initializer_normal_vector(config: FullConfig, module: str) -> ParaVector:
+def initializer_normal_vector(config: FullConfig, module: str) -> Vector:
     """
-    Initializes a ParaVector using a normal distribution. init_bounds act as a hard
-    clamp for initializer outputs; if omitted, bounds are used as fallback.
+    Initializes a Vector using a normal distribution. init_bounds act as a hard clamp
+    for initializer outputs; if omitted, bounds are used as fallback.
 
     Args:
         config (FullConfig): Full config object containing all module definitions
         module (str): Name of the module (e.g. "weights")
 
     Returns:
-        ParaVector: Initialized vector
+        Vector: Initialized vector
     """
-    para = ParaVector()
+    para = Vector()
     cfg = config.modules[module]
     para.apply_config(cfg)
 
@@ -46,18 +46,18 @@ def initializer_normal_vector(config: FullConfig, module: str) -> ParaVector:
     return para
 
 
-def initializer_random_vector(config: FullConfig, module: str) -> ParaVector:
+def initializer_random_vector(config: FullConfig, module: str) -> Vector:
     """
-    Initializes a ParaVector with uniform random values from init_bounds.
+    Initializes a Vector with uniform random values from init_bounds.
 
     Args:
         config (FullConfig): Full config object
         module (str): Module name
 
     Returns:
-        ParaVector: Initialized vector
+        Vector: Initialized vector
     """
-    para = ParaVector()
+    para = Vector()
     cfg = config.modules[module]
     para.apply_config(cfg)
 
@@ -69,18 +69,18 @@ def initializer_random_vector(config: FullConfig, module: str) -> ParaVector:
     return para
 
 
-def initializer_zero_vector(config: FullConfig, module: str) -> ParaVector:
+def initializer_zero_vector(config: FullConfig, module: str) -> Vector:
     """
-    Initializes a ParaVector with all zeros.
+    Initializes a Vector with all zeros.
 
     Args:
         config (FullConfig): Full config object
         module (str): Module name
 
     Returns:
-        ParaVector: Initialized vector
+        Vector: Initialized vector
     """
-    para = ParaVector()
+    para = Vector()
     cfg = config.modules[module]
     para.apply_config(cfg)
 
@@ -88,18 +88,18 @@ def initializer_zero_vector(config: FullConfig, module: str) -> ParaVector:
     return para
 
 
-def initializer_fixed_vector(config: FullConfig, module: str) -> ParaVector:
+def initializer_fixed_vector(config: FullConfig, module: str) -> Vector:
     """
-    Initializes a ParaVector with fixed values from the config.
+    Initializes a Vector with fixed values from the config.
 
     Args:
         config (FullConfig): Full config object
         module (str): Module name
 
     Returns:
-        ParaVector: Initialized vector
+        Vector: Initialized vector
     """
-    para = ParaVector()
+    para = Vector()
     cfg = config.modules[module]
     para.apply_config(cfg)
 
@@ -113,18 +113,18 @@ def initializer_fixed_vector(config: FullConfig, module: str) -> ParaVector:
     return para
 
 
-def initializer_adaptive_vector(config: FullConfig, module: str) -> ParaVector:
+def initializer_adaptive_vector(config: FullConfig, module: str) -> Vector:
     """
-    Initializes a ParaVector with random values and per-parameter mutation strengths.
+    Initializes a Vector with random values and per-parameter mutation strengths.
 
     Args:
         config (FullConfig): Full config object
         module (str): Module name
 
     Returns:
-        ParaVector: Initialized vector
+        Vector: Initialized vector
     """
-    para = ParaVector()
+    para = Vector()
     cfg = config.modules[module]
     para.apply_config(cfg)
 

@@ -4,10 +4,10 @@ import numpy as np
 import pytest
 from evonet.enums import NeuronRole
 
-from evolib.representation.evonet import ParaEvoNet
+from evolib.representation.evonet import EvoNet
 
 
-def _build_net_2_3_1(para: ParaEvoNet) -> None:
+def _build_net_2_3_1(para: EvoNet) -> None:
     """Build a small 2->3->1 feed-forward net with linear activations."""
     para.net.add_layer()  # L0
     para.net.add_layer()  # L1
@@ -35,7 +35,7 @@ def _build_net_2_3_1(para: ParaEvoNet) -> None:
     )
 
 
-def _build_net_1_1(para: ParaEvoNet) -> None:
+def _build_net_1_1(para: EvoNet) -> None:
     """Build a minimal 1->1 linear net."""
     para.net.add_layer()  # L0
     para.net.add_layer()  # L1
@@ -57,12 +57,12 @@ def _build_net_1_1(para: ParaEvoNet) -> None:
 
 def test_paraevo_vector_roundtrip() -> None:
     """
-    Ensure ParaEvoNet vector I/O is a bijection:
+    Ensure EvoNet vector I/O is a bijection:
 
     set_vector(get_vector()) keeps parameters unchanged, and manual vectors round-trip
     verbatim.
     """
-    para = ParaEvoNet()
+    para = EvoNet()
     _build_net_2_3_1(para)
 
     n_w = para.net.num_weights
@@ -88,7 +88,7 @@ def test_paraevo_forward_1x1_linear() -> None:
 
     This verifies that set_vector() actually affects the forward pass.
     """
-    para = ParaEvoNet()
+    para = EvoNet()
     _build_net_1_1(para)
 
     assert para.net.num_weights == 1
@@ -105,7 +105,7 @@ def test_paraevo_forward_1x1_linear() -> None:
 
 def test_paraevo_vector_length_matches_params() -> None:
     """get_vector() length must equal num_params (weights + biases)."""
-    para = ParaEvoNet()
+    para = EvoNet()
     _build_net_2_3_1(para)
 
     vec = para.get_vector()
@@ -115,7 +115,7 @@ def test_paraevo_vector_length_matches_params() -> None:
 
 def test_paraevo_set_vector_length_mismatch_raises() -> None:
     """set_vector() must raise ValueError if length does not match num_params."""
-    para = ParaEvoNet()
+    para = EvoNet()
     _build_net_1_1(para)
 
     good_len = para.net.num_params

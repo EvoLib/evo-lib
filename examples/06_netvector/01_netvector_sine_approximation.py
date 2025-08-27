@@ -1,6 +1,6 @@
 """
 NetVector usage: Approximating sin(x) using a feedforward network defined via
-ParaVector.  The network structure is configured in YAML using dim_type = 'net'
+Vector.  The network structure is configured in YAML using dim_type = 'net'
 and interpreted with NetVector at evaluation time.
 """
 
@@ -15,7 +15,7 @@ X_RANGE = np.linspace(0, 2 * np.pi, 100)
 Y_TRUE = np.sin(X_RANGE)
 
 
-# Fitness function using NetVector to interpret ParaVector
+# Fitness function using NetVector to interpret Vector
 def netvector_fitness(indiv: Indiv) -> None:
     predictions: list[float] = []
 
