@@ -41,6 +41,10 @@ docs = [
   "sphinx-rtd-theme",
   "myst-parser",
 ]
+test = [
+  "pytest>=8",
+  "pytest-cov>=5",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -102,6 +106,6 @@ skip_covered = true
 show_missing = true
 exclude_lines = [
   "pragma: no cover",
-  "if __name__ == .__main__.:",
+  "if __name__ == \"__main__\":",
   "raise NotImplementedError",
 ]
