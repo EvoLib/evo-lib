@@ -24,7 +24,7 @@ def evonet_fitness(indiv: Indiv) -> None:
 
 
 # Run evolution
-pop = Pop(config_path="configs/01_evonet_sine_approximation.yaml")
+pop = Pop(config_path="configs/01_sine_approximation.yaml")
 pop.set_functions(fitness_function=evonet_fitness)
 
 
