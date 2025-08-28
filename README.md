@@ -67,13 +67,16 @@ Requirements: Python 3.9+ and packages in `requirements.txt`.
 
 ```python
 from evolib import Pop
-from my_fitness import fitness_function
+
+def my_fitness(indiv):
+    # Custom fitness function (example: sum of vector)
+    indiv.fitness = sum(indiv.para["main"].vector)
 
 pop = Pop(config_path="config/my_experiment.yaml")
-pop.set_functions(fitness_function=fitness_function)
+pop.set_functions(fitness_function=my_fitness)
 
-for _ in range(pop.max_generations):
-    pop.run_one_generation()
+# Run the evolutionary process
+pop.run()
 ```
 
 For full examples, see 📁[`examples/`](https://github.com/EvoLib/evo-lib/tree/main/examples) – including adaptive mutation, controller evolution, and network approximation.
@@ -86,43 +89,50 @@ For full examples, see 📁[`examples/`](https://github.com/EvoLib/evo-lib/tree/
 parent_pool_size: 20
 offspring_pool_size: 60
 max_generations: 100
-max_indiv_age: 0
 num_elites: 2
+max_indiv_age: 0
+
+stopping:
+  target_fitness: 0.01
+  patience: 20
+  min_delta: 0.0001
+  minimize: true
 
 evolution:
-  strategy: "mu_plus_lambda"
+  strategy: mu_comma_lambda
 
 modules:
-  main:
+  controller:
     type: vector
-    dim: 16
-    initializer: random_vector
-    bounds: [-2.0, 2.0]
-    init_bounds: [-1.0, 1.0]
+    dim: 8
+    initializer: normal_vector
+    bounds: [-1.0, 1.0]
+    mutation:
+      strategy: adaptive_individual
+      probability: 1.0
+      strength: 0.1
 
+  brain:
+    type: evonet
+    dim: [4, 6, 2]
+    activation: [linear, tanh, tanh]
+    initializer: normal_evonet
     mutation:
       strategy: constant
       probability: 1.0
       strength: 0.05
 
+      # Optional fine-grained control
+      activations:
+        probability: 0.01
+        allowed: [tanh, relu, sigmoid]
 
-# Example: Multiple Modules
-# modules:
-#   controller:
-#     type: vector
-#     dim: 8
-#     initializer: normal_vector
-#     mutation:
-#       strategy: constant
-#       strength: 0.1
-#
-#   brain:
-#     type: evonet
-#     dim: [4, 8, 2]
-#     initializer: normal_evonet
-#     mutation:
-#       strategy: constant
-#       strength: 0.05
+      structural:
+        add_neuron: 0.01
+        add_connection: 0.05
+        remove_connection: 0.02
+        recurrent: local  # none | direct | local | all
+        keep_connected: true
 
 ```
 
