@@ -173,6 +173,8 @@ It supports a wide range of applications, including:
 - [X] Topological Evolution (add/remove neurons, edges)
 - [ ] Co-Evolution & Speciation Support
 - [ ] Advanced Visualization Tools
+- [ ] Ray Support for Parallel Evaluation
+- [ ] Game Environment Integration (pygame, PettingZoo)
 
 ---
 
