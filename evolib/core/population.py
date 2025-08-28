@@ -537,6 +537,22 @@ class Pop:
         if sort:
             self.sort_by_fitness()
 
+    def run(self, verbosity: int = 1) -> None:
+        """
+        Executes the full evolutionary run, including all generations.
+
+        Args:
+            verbosity (int): Verbosity level for print_status(). Default is 1.
+        """
+        print(
+            f"Starting evolution: mu={self.mu}, lambda={self.lambda_}, "
+            f"max_gen={self.max_generations}, strategy={self.evolution_strategy}"
+        )
+
+        for _ in range(self.max_generations):
+            self.run_one_generation()
+            self.print_status(verbosity=verbosity)
+
     def select_parents(self, num_parents: int) -> list[Indiv]:
         """
         Selects parents using the configured selection strategy.
