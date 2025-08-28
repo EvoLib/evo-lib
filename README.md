@@ -72,8 +72,8 @@ def my_fitness(indiv):
     # Custom fitness function (example: sum of vector)
     indiv.fitness = sum(indiv.para["main"].vector)
 
-pop = Pop(config_path="config/my_experiment.yaml")
-pop.set_functions(fitness_function=my_fitness)
+pop = Pop(config_path="config/my_experiment.yaml",
+          fitness_function=my_fitness)
 
 # Run the evolutionary process
 pop.run()
