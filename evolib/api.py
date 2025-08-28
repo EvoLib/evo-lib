@@ -33,6 +33,7 @@ from evolib.utils.loss_functions import (
     mse_loss,
 )
 from evolib.utils.plotting import (
+    plot_approximation,
     plot_diversity,
     plot_fitness,
     plot_fitness_comparison,
@@ -49,6 +50,7 @@ __all__ = [
     "NetVector",
     "HistoryLogger",
     "plot_fitness",
+    "plot_approximation",
     "save_combined_net_plot",
     "plot_history",
     "plot_diversity",

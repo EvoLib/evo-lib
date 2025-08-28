@@ -221,6 +221,60 @@ def plot_fitness_comparison(
     )
 
 
+def plot_approximation(
+    y_pred: list[float] | np.ndarray,
+    y_true: list[float] | np.ndarray,
+    *,
+    title: str = "Approximation",
+    show: bool = True,
+    save_path: Optional[str] = None,
+    pred_label: str = "Prediction",
+    true_label: str = "Target",
+    pred_marker: str = "x",
+    true_marker: str = "o",
+) -> None:
+    """
+    Plot predicted values against targets.
+
+    Args:
+        y_pred: Predicted values (1D).
+        y_true: Target values (1D).
+        title: Plot title.
+        x: Optional x-axis values; defaults to range(len(y_true)).
+        show: If True, show the plot interactively.
+        save_path: If provided, save the figure to this path (PNG recommended).
+        pred_label: Legend label for predictions.
+        true_label: Legend label for targets.
+        pred_marker: Marker style for predictions.
+        true_marker: Marker style for targets.
+    """
+    y_pred_arr = np.asarray(y_pred, dtype=float)
+    y_true_arr = np.asarray(y_true, dtype=float)
+
+    if y_pred_arr.shape != y_true_arr.shape:
+        raise ValueError(
+            f"Shape mismatch: y_pred {y_pred_arr.shape} vs y_true {y_true_arr.shape}"
+        )
+
+    x_vals = np.arange(len(y_true_arr))
+
+    plt.figure()
+    plt.title(title)
+    plt.plot(x_vals, y_true_arr, label=true_label, marker=true_marker)
+    plt.plot(x_vals, y_pred_arr, label=pred_label, marker=pred_marker)
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+
+    if save_path:
+        plt.savefig(save_path, dpi=300)
+
+    if show:
+        plt.show()
+    else:
+        plt.close()
+
+
 def save_combined_net_plot(
     net: Nnet,
     X: np.ndarray,
