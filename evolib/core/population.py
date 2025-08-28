@@ -1,10 +1,19 @@
 # SPDX-License-Identifier: MIT
 """
-Coordinates application of evolutionary operations over generations.
+Population class coordinating evolutionary operations over generations.
 
-While the core logic for operations like fitness, mutation, and crossover is externally
-defined and dynamically loaded, this class coordinates their application over
-generations.
+This class acts as the central coordinator for a population-based evolutionary
+algorithm. It manages individuals, loads the configuration from YAML, and integrates
+mutation, selection, crossover, replacement, and stopping logic.
+
+Supports:
+- Initialization from config (parameter modules, mutation strategies, etc.)
+- Configurable evolutionary strategies (mu+lambda, steady state, flexible, etc.)
+- Early stopping (target fitness, patience, time limit)
+- Callbacks: on_start, on_improvement, on_end
+- Fitness logging and history tracking
+
+Use Pop.run() for full evolution, or run_one_generation() for manual stepping.
 """
 
 import math
@@ -34,13 +43,28 @@ class Pop:
     """Represents a population for evolutionary optimization, including configuration,
     statistics, and operator integration."""
 
-    def __init__(self, config_path: str, initialize: bool = True):
+    def __init__(
+        self,
+        config_path: str,
+        fitness_function: Optional[FitnessFunction] = None,
+        initialize: bool = True,
+    ):
         """
-        Initialize a population from a YAML config file.
+        Initialize the population from a YAML configuration file.
+
+        Loads all parameter module configurations, strategy settings,
+        and operator registries. Optionally initializes individuals immediately.
 
         Args:
-        config_path (str): Path to the population configuration file.
+            config_path (str): Path to the YAML configuration file.
+            fitness_function (Callable[[Indiv], None], optional): Fitness function.
+                If provided, it is stored and used during evolution. Can also be set
+                later via set_fitness_function(...).
+            initialize (bool): Whether to immediately initialize the population.
+                Set to False if you want to control initialization manually
+                (e.g., for testing).
         """
+        self.fitness_function: Optional[FitnessFunction] = fitness_function
 
         cfg: FullConfig = load_config(config_path)
 
@@ -64,9 +88,6 @@ class Pop:
         self.evolution_strategy = None
         self.replacement_strategy: Optional[ReplacementStrategy] = None
         self._replacement_fn: Optional[ReplaceFunction] = None
-
-        # User-defined functions
-        self.fitness_function: FitnessFunction | None = None
 
         # Evolution
         if cfg.evolution is not None:
@@ -156,9 +177,26 @@ class Pop:
             para = init_fn(self)
             self.add_indiv(Indiv(para=para))
 
+    def set_fitness_function(self, func: FitnessFunction) -> None:
+        """
+        Sets the fitness function to be used for evaluating individuals.
+
+        Args:
+            func (Callable[[Indiv], None]): A function that modifies an individual
+            in-place by assigning `indiv.fitness = ...`.
+
+        Raises:
+            TypeError: If the argument is not callable.
+        """
+        if not callable(func):
+            raise TypeError("Fitness function must be callable.")
+        self.fitness_function = func
+
     def set_functions(self, fitness_function: FitnessFunction) -> None:
         """
-        Registers core evolutionary functions used during evolution.
+        [DEPRECATED] Use set_fitness_function() or constructor argument instead.
+
+        Registers the fitness function used during evolution.
 
         Args:
             fitness_function (Callable): Function to assign fitness to an individual.

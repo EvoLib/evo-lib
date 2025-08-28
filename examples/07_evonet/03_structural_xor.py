@@ -69,10 +69,7 @@ def on_end(pop: Pop) -> None:
 
 
 # Evolution setup
-pop = Pop(config_path="configs/03_structural_xor.yaml")
-
-# Register the fitness function
-pop.set_functions(fitness_function=xor_fitness)
+pop = Pop(config_path="configs/03_structural_xor.yaml", fitness_function=xor_fitness)
 
 # Evolution loop
 pop.run(on_improvement=on_improvement, on_end=on_end)
