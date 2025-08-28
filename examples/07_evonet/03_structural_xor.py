@@ -46,6 +46,28 @@ def xor_fitness(indiv: Indiv) -> None:
     indiv.fitness = mse_loss(Y_TRUE, np.array(predictions))
 
 
+def on_improvement(pop: Pop, gen: int) -> None:
+    indiv = pop.best()
+    net = indiv.para["brain"].net
+    y_pred = [net.calc(x.tolist())[0] for x in X]
+    save_combined_net_plot(
+        net,
+        np.arange(len(X)),
+        Y_TRUE,
+        np.array(y_pred),
+        f"03_frames/gen_{gen:04d}.png",
+        title="Structural Mutation on XOR",
+    )
+
+
+def on_end(pop: Pop) -> None:
+    # Final visualization
+    best = pop.best()
+    net = best.para["brain"].net
+    y_pred = [net.calc(x.tolist())[0] for x in X_NORM]
+    plot_approximation(y_pred, Y_TRUE, title="Best XOR Approximation")
+
+
 # Evolution setup
 pop = Pop(config_path="configs/03_structural_xor.yaml")
 
@@ -53,33 +75,4 @@ pop = Pop(config_path="configs/03_structural_xor.yaml")
 pop.set_functions(fitness_function=xor_fitness)
 
 # Evolution loop
-last_best_fit = 2.0  # start with a high error (MSE > 1 is clearly non-optimal)
-
-for _ in range(pop.max_generations):
-    pop.run_one_generation()
-    pop.print_status()
-
-    indiv = pop.best()
-    gen = pop.generation_num
-
-    # If a new best individual is found, save a visualization
-    if indiv.fitness < last_best_fit:
-        last_best_fit = indiv.fitness
-
-        net = indiv.para["brain"].net
-        y_pred = [net.calc(x.tolist())[0] for x in X_NORM]
-
-        # Save combined visualization: network structure + fitness curve
-        save_combined_net_plot(
-            net,
-            np.arange(len(X_NORM)),
-            Y_TRUE,
-            np.array(y_pred),
-            f"03_frames/gen_{gen:04d}.png",
-            title="Structural Mutation on XOR",
-        )
-
-# Final visualization
-best = pop.best()
-net = best.para["brain"].net
-plot_approximation(y_pred, Y_TRUE, title="Best XOR Approximation")
+pop.run(on_improvement=on_improvement, on_end=on_end)

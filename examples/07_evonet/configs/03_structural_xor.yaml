@@ -4,6 +4,9 @@ max_generations: 200
 max_indiv_age: 0
 num_elites: 0
 
+stopping:
+  target_fitness: 0.01
+
 evolution:
   strategy: mu_plus_lambda
 

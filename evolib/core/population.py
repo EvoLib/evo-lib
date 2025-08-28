@@ -7,6 +7,8 @@ defined and dynamically loaded, this class coordinates their application over
 generations.
 """
 
+import math
+import time
 from typing import Any, Callable, List, Optional
 
 import numpy as np
@@ -537,21 +539,146 @@ class Pop:
         if sort:
             self.sort_by_fitness()
 
-    def run(self, verbosity: int = 1) -> None:
+    def run(
+        self,
+        *,
+        strategy: EvolutionStrategy | None = None,
+        max_generations: Optional[int] = None,
+        target_fitness: Optional[float] = None,
+        minimize: Optional[bool] = None,
+        patience: Optional[int] = None,
+        min_delta: float = 0.0,
+        time_limit_s: Optional[float] = None,
+        verbosity: int = 1,
+        on_start: Optional[Callable[["Pop"], None]] = None,
+        on_improvement: Optional[Callable[["Pop", int], None]] = None,
+        on_end: Optional[Callable[["Pop"], None]] = None,
+    ) -> int:
         """
-        Executes the full evolutionary run, including all generations.
+        Run the evolutionary process until a stopping criterion is met.
 
         Args:
-            verbosity (int): Verbosity level for print_status(). Default is 1.
-        """
-        print(
-            f"Starting evolution: mu={self.mu}, lambda={self.lambda_}, "
-            f"max_gen={self.max_generations}, strategy={self.evolution_strategy}"
-        )
+            strategy: Optional override of the evolution strategy.
+            max_generations: Maximum number of generations to run
+                             (fallback: self.max_generations).
+            target_fitness: Desired fitness threshold to stop evolution early.
+            minimize: If True, lower fitness is better; else maximize. Defaults to True.
+            patience: Stop if no improvement after this many generations.
+            min_delta: Minimum improvement to reset patience counter.
+            time_limit_s: Stop evolution after this many seconds (wall clock).
+            verbosity: 0 = silent, 1 = status messages (default).
+            on_improvement: Optional callback(pop, gen) when a new best is found.
 
-        for _ in range(self.max_generations):
-            self.run_one_generation()
-            self.print_status(verbosity=verbosity)
+        Returns:
+            int: Number of generations completed.
+        """
+        # Strategy
+        strategy = strategy or self.evolution_strategy
+        if strategy is None:
+            raise ValueError("Evolution Strategy must be defined")
+
+        # Load stopping criteria from config if not provided
+        if self.config.stopping:
+            cfg = self.config.stopping
+            if target_fitness is None:
+                target_fitness = cfg.target_fitness
+            if minimize is None:
+                minimize = cfg.minimize
+            if patience is None:
+                patience = cfg.patience
+            if min_delta == 0.0 and cfg.min_delta != 0.0:
+                min_delta = cfg.min_delta
+            if time_limit_s is None:
+                time_limit_s = cfg.time_limit_s
+
+        # Fallback to default: minimize = True
+        if minimize is None:
+            minimize = True
+
+        # Determine maximum number of generations
+        gen_cap = max_generations or self.max_generations
+        if gen_cap <= 0:
+            return 0
+
+        if verbosity >= 1:
+            print(
+                f"start: strategy={strategy}, mu={self.mu}, "
+                f"lambda={self.lambda_}, max_gen={gen_cap}"
+            )
+
+        start_time = time.time()
+        best_fitness = math.inf if minimize else -math.inf
+        no_improve = 0
+
+        # ON_START
+        if on_start:
+            on_start(self)
+
+        for _ in range(gen_cap):
+            self.run_one_generation(strategy=strategy)
+            self.print_status(verbosity=1 if verbosity >= 1 else 0)
+
+            current_fitness = self.best().fitness
+
+            has_improved = False
+            if minimize:
+                if best_fitness - current_fitness > min_delta:
+                    has_improved = True
+            else:
+                if current_fitness - best_fitness > min_delta:
+                    has_improved = True
+
+            # ON_IMPROVEMENT
+            if has_improved:
+                best_fitness = current_fitness
+                no_improve = 0
+                if on_improvement:
+                    on_improvement(self, self.generation_num)
+            else:
+                no_improve += 1
+
+            # Target fitness reached
+            if target_fitness is not None:
+
+                fitness_reached = False
+                if minimize:
+                    if current_fitness <= target_fitness:
+                        fitness_reached = True
+                else:
+                    if current_fitness >= target_fitness:
+                        fitness_reached = True
+
+                if fitness_reached:
+                    if verbosity >= 1:
+                        print(
+                            f"stop: target_fitness={target_fitness} reached "
+                            f"at gen {self.generation_num} (best={best_fitness:.6g})"
+                        )
+                    break
+
+            # Patience exhausted
+            if patience is not None and no_improve >= patience:
+                if verbosity >= 1:
+                    print(
+                        f"stop: no improvement for {patience} generations "
+                        f"(best={best_fitness:.6g})"
+                    )
+                break
+
+            # Time limit exceeded
+            if time_limit_s is not None and (time.time() - start_time) > time_limit_s:
+                if verbosity >= 1:
+                    print(
+                        f"stop: time limit of {time_limit_s}s exceeded "
+                        f"at gen {self.generation_num} (best={best_fitness:.6g})"
+                    )
+                break
+
+        # ON_END
+        if on_end:
+            on_end(self)
+
+        return self.generation_num
 
     def select_parents(self, num_parents: int) -> list[Indiv]:
         """

@@ -67,6 +67,27 @@ class ReplacementConfig(BaseModel):
     )
 
 
+class StoppingCriteria(BaseModel):
+    """Optional stopping criteria for early stopping."""
+
+    target_fitness: Optional[float] = Field(
+        None,
+        description="Stop once fitness is below (or above if maximize) this value.",
+    )
+    minimize: bool = Field(
+        True, description="Whether the problem is a minimization task (default: True)."
+    )
+    patience: Optional[int] = Field(
+        None, description="Stop if no improvement for this many generations."
+    )
+    min_delta: float = Field(
+        0.0, description="Minimum fitness change to qualify as improvement."
+    )
+    time_limit_s: Optional[float] = Field(
+        None, description="Wall-clock time limit in seconds."
+    )
+
+
 class FullConfig(BaseModel):
     """
     Main configuration model for an evolutionary run.
@@ -95,6 +116,9 @@ class FullConfig(BaseModel):
     )
     num_elites: int = Field(
         ..., description="Number of elite individuals preserved each generation."
+    )
+    stopping: Optional[StoppingCriteria] = Field(
+        None, description="Optional early stopping configuration."
     )
 
     # Module configs (resolved to typed ComponentConfig instances by the validator)
