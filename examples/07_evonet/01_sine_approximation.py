@@ -23,41 +23,34 @@ def evonet_fitness(indiv: Indiv) -> None:
     indiv.fitness = mse_loss(Y_TRUE, np.array(predictions))
 
 
-# Run evolution
-pop = Pop(config_path="configs/01_sine_approximation.yaml")
-pop.set_functions(fitness_function=evonet_fitness)
-
-
-last_best_fitness = 2.0
-for _ in range(pop.max_generations):
-
-    pop.run_one_generation()
-    pop.print_status()
-
-    gen = pop.generation_num
-
+def on_improvement(pop: Pop, gen: int) -> None:
     indiv = pop.best()
+    net = indiv.para["nnet"].net
+    y_pred = np.array([net.calc([x])[0] for x in X_NORM])
 
-    if indiv.fitness < last_best_fitness:
-        last_best_fitness = indiv.fitness
-        net = indiv.para["nnet"].net
-        y_pred = np.array([net.calc([x])[0] for x in X_NORM])
+    save_combined_net_plot(net, X_RAW, Y_TRUE, y_pred, f"01_frames/gen_{gen:04d}.png")
 
-        save_combined_net_plot(
-            net, X_RAW, Y_TRUE, y_pred, f"01_frames/gen_{gen:04d}.png"
-        )
-exit(0)
-# Visualize result
-best = pop.best()
-y_best = [pop.best().para["nnet"].calc([x])[0] for x in X_NORM]
 
-plt.plot(X_RAW, Y_TRUE, label="Target: sin(x)")
-plt.plot(X_RAW, y_best, label="Best Approximation", linestyle="--")
+def on_end(pop: Pop) -> None:
+    # Visualize result
+    y_best = [pop.best().para["nnet"].calc([x])[0] for x in X_NORM]
 
-plt.title("EvoNet Fit to sin(x)")
-plt.xlabel("x")
-plt.ylabel("y")
-plt.legend()
-plt.grid(True)
-plt.tight_layout()
-plt.show()
+    plt.plot(X_RAW, Y_TRUE, label="Target: sin(x)")
+    plt.plot(X_RAW, y_best, label="Best Approximation", linestyle="--")
+
+    plt.title("EvoNet Fit to sin(x)")
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+
+# Evolution setup
+pop = Pop(
+    config_path="configs/01_sine_approximation.yaml", fitness_function=evonet_fitness
+)
+
+# Evolution loop
+pop.run(on_improvement=on_improvement, on_end=on_end)
