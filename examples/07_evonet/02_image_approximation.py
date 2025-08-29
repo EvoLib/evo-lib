@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from evolib import Indiv, Pop, mse_loss
-from evolib.interfaces.types import FitnessFunction
 
 
 # Target & grid construction
@@ -67,45 +66,31 @@ def save_frame(
 
 
 # Fitness
-def make_fitness(target: np.ndarray, coords: np.ndarray, size: int) -> FitnessFunction:
+def my_fitness(indiv: Indiv) -> None:
 
-    def evonet_fitness(indiv: Indiv) -> None:
-        pred_img = predict_image(indiv, coords, size)
-        indiv.fitness = mse_loss(target, pred_img)
+    pred_img = predict_image(indiv, coords, img_size)
+    indiv.fitness = mse_loss(target, pred_img)
 
-    return evonet_fitness
+
+def on_improvement(pop: Pop, gen: int) -> None:
+    best = pop.best()
+    pred_img = predict_image(best, coords, img_size)
+    save_frame(
+        path=(f"./02_frames/gen_{pop.generation_num:04d}.png"),
+        target=target,
+        pred=pred_img,
+        gen=pop.generation_num,
+        fitness=float(best.fitness),
+    )
 
 
 # Main
-def main() -> None:
-    img_size: int = 6
-    target = make_target(size=img_size)
-    coords = make_coords(img_size)
+img_size: int = 6
+target = make_target(size=img_size)
+coords = make_coords(img_size)
 
-    pop = Pop(config_path="configs/02_image_approximation.yaml")  # uses your YAML
-    pop.set_functions(fitness_function=make_fitness(target, coords, img_size))
+pop = Pop(
+    config_path="configs/02_image_approximation.yaml", fitness_function=my_fitness
+)
 
-    best_so_far = float("inf")
-    save_frames = True
-    frame_dir = "02_frames"
-
-    for _ in range(pop.max_generations):
-        pop.run_one_generation()  # executes the configured strategy
-        pop.print_status(verbosity=1)  # short, consistent progress line
-
-        best = pop.best()
-        if best.fitness < best_so_far:
-            best_so_far = best.fitness
-            if save_frames:
-                pred_img = predict_image(best, coords, img_size)
-                save_frame(
-                    path=os.path.join(frame_dir, f"gen_{pop.generation_num:04d}.png"),
-                    target=target,
-                    pred=pred_img,
-                    gen=pop.generation_num,
-                    fitness=float(best.fitness),
-                )
-
-
-if __name__ == "__main__":
-    main()
+pop.run(on_improvement=on_improvement)
