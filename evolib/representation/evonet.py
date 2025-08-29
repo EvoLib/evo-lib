@@ -5,13 +5,14 @@ Implements the ParaBase interface for use within EvoLib's evolutionary pipeline.
 Supports mutation, crossover, vector conversion, and configuration.
 """
 
+import random as rng
 from typing import Any, Optional
 
 import numpy as np
 from evonet.activation import random_function_name
 from evonet.core import Nnet
 from evonet.enums import NeuronRole
-from evonet.mutation import mutate_activations, mutate_biases, mutate_weights
+from evonet.mutation import mutate_activation, mutate_bias, mutate_weight
 
 from evolib.config.base_component_config import StructuralMutationConfig
 from evolib.config.evonet_component_config import EvoNetComponentConfig
@@ -145,29 +146,36 @@ class EvoNet(ParaBase):
 
         mutation_strength = self.evo_params.mutation_strength
         mutation_probability = self.evo_params.mutation_probability or 1.0
+        low, high = self.weight_bounds or (-np.inf, np.inf)
 
-        mutate_weights(
-            self.net, std=mutation_strength, probability=mutation_probability
-        )
+        for connection in self.net.get_all_connections():
+            if rng.random() < mutation_probability:
+                mutate_weight(connection, std=mutation_strength)
+                connection.weight = np.clip(connection.weight, low, high)
 
         # Biases (optional override)
         if self.bias_evo_params is not None:
-            bias_std = self.bias_evo_params.mutation_strength or mutation_strength
-            bias_prob = (
+            bias_strength = self.bias_evo_params.mutation_strength or mutation_strength
+            bias_probability = (
                 self.bias_evo_params.mutation_probability or mutation_probability
             )
         else:
-            bias_std, bias_prob = mutation_strength, mutation_probability
+            bias_strength, bias_probability = mutation_strength, mutation_probability
 
-        mutate_biases(self.net, std=bias_std, probability=bias_prob)
+        low, high = self.bias_bounds or (-np.inf, np.inf)
+        for neuron in self.net.get_all_neurons():
+            if rng.random() < bias_probability and neuron.role != NeuronRole.INPUT:
+                mutate_bias(neuron, std=bias_strength)
+                neuron.bias = np.clip(neuron.bias, low, high)
 
         # Activations
         if self.activation_probability and self.activation_probability > 0.0:
-            mutate_activations(
-                self.net,
-                probability=self.activation_probability,
-                activations=self.allowed_activations,
-            )
+            for neuron in self.net.get_all_neurons():
+                if (
+                    rng.random() < self.activation_probability
+                    and neuron.role != NeuronRole.INPUT
+                ):
+                    mutate_activation(neuron, activations=self.allowed_activations)
 
         # Structure
         if self.structural_cfg is not None:

@@ -5,7 +5,7 @@ max_indiv_age: 0
 num_elites: 0
 
 stopping:
-  target_fitness: 0.01
+  target_fitness: 0.001
 
 evolution:
   strategy: mu_plus_lambda
@@ -16,8 +16,8 @@ modules:
     dim: [2, 0, 0, 1]
     activation: [linear, tanh, tanh, sigmoid]
     initializer: normal_evonet
-    weight_bounds: [-1.0, 1.0]
-    bias_bounds: [-0.5, 0.5]
+    weight_bounds: [-5.0, 5.0]
+    bias_bounds: [-1.0, 1.0]
 
     mutation:
       strategy: constant
