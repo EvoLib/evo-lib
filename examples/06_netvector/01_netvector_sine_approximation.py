@@ -4,10 +4,9 @@ Vector.  The network structure is configured in YAML using dim_type = 'net'
 and interpreted with NetVector at evaluation time.
 """
 
-import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, Pop, mse_loss
+from evolib import Indiv, Pop, mse_loss, plot_approximation
 from evolib.representation.netvector import NetVector
 
 # Define target function
@@ -27,27 +26,24 @@ def netvector_fitness(indiv: Indiv) -> None:
     indiv.fitness = mse_loss(Y_TRUE, np.array(predictions))
 
 
+def on_end(pop: Pop) -> None:
+    # Final visualization
+
+    best = pop.best()
+    y_best = [
+        net.forward(np.array([x]), best.para["nnet"].vector).item() for x in X_RANGE
+    ]
+    plot_approximation(
+        y_best, Y_TRUE, title="Best Approximation", pred_marker=None, true_marker=None
+    )
+
+
 # Run evolution
-pop = Pop(config_path="configs/01_netvector_sine_approximation.yaml")
-pop.set_functions(fitness_function=netvector_fitness)
+pop = Pop(
+    config_path="configs/01_netvector_sine_approximation.yaml",
+    fitness_function=netvector_fitness,
+)
 
 net = NetVector.from_config(pop.config, module="nnet")
 
-for _ in range(pop.max_generations):
-    pop.run_one_generation()
-    pop.print_status()
-
-
-# Visualize result
-best = pop.best()
-y_best = [net.forward(np.array([x]), best.para["nnet"].vector).item() for x in X_RANGE]
-
-plt.plot(X_RANGE, Y_TRUE, label="Target: sin(x)")
-plt.plot(X_RANGE, y_best, label="Best Approximation", linestyle="--")
-plt.title("NetVector Fit to sin(x)")
-plt.xlabel("x")
-plt.ylabel("y")
-plt.legend()
-plt.grid(True)
-plt.tight_layout()
-plt.show()
+pop.run(on_end=on_end)
