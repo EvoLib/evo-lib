@@ -230,8 +230,8 @@ def plot_approximation(
     save_path: Optional[str] = None,
     pred_label: str = "Prediction",
     true_label: str = "Target",
-    pred_marker: str = "x",
-    true_marker: str = "o",
+    pred_marker: str | None = "x",
+    true_marker: str | None = "o",
 ) -> None:
     """
     Plot predicted values against targets.

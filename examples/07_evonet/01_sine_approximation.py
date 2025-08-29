@@ -1,9 +1,8 @@
 """Approximating sin(x) using a feedforward network defined via EvoNet."""
 
-import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, Pop, mse_loss, save_combined_net_plot
+from evolib import Indiv, Pop, mse_loss, plot_approximation, save_combined_net_plot
 
 # Define target function
 X_RAW = np.linspace(0, 2 * np.pi, 100)
@@ -34,17 +33,9 @@ def on_improvement(pop: Pop, gen: int) -> None:
 def on_end(pop: Pop) -> None:
     # Visualize result
     y_best = [pop.best().para["nnet"].calc([x])[0] for x in X_NORM]
-
-    plt.plot(X_RAW, Y_TRUE, label="Target: sin(x)")
-    plt.plot(X_RAW, y_best, label="Best Approximation", linestyle="--")
-
-    plt.title("EvoNet Fit to sin(x)")
-    plt.xlabel("x")
-    plt.ylabel("y")
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
-    plt.show()
+    plot_approximation(
+        y_best, Y_TRUE, title="Best Approximation", pred_marker=None, true_marker=None
+    )
 
 
 # Evolution setup
