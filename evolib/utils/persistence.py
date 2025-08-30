@@ -1,4 +1,15 @@
 # SPDX-License-Identifier: MIT
+"""
+Persistence utilities for saving and resuming evolutionary runs.
+
+This module provides standardized support for:
+- Checkpointing full populations (Pop)
+- Saving and restoring best individuals (Indiv)
+- Loading checkpoints for resuming interrupted runs
+
+All files are stored in the 'checkpoints/' directory by default.
+"""
+
 
 import pickle
 from pathlib import Path
@@ -25,13 +36,14 @@ def _best_indiv_path(run_name: str) -> Path:
 
 def save_checkpoint(pop: Pop, *, run_name: str = "default") -> None:
     """
-    Save the current population to a standardized checkpoint path.
+    Save the full population to a checkpoint file.
+
+    The file will be stored under 'checkpoints/{run_name}.pkl'.
 
     Args:
-    pop (Pop): Population to save.
-    run_name (str): Identifier for the checkpoint file.
+        pop (Pop): Population instance to be saved.
+        run_name (str): Optional name to distinguish checkpoint runs.
     """
-
     path = _checkpoint_path(run_name)
     save_population_pickle(pop, path)
 
@@ -41,15 +53,21 @@ def resume_from_checkpoint(
     fitness_fn: Optional[FitnessFunction] = None,
 ) -> Pop:
     """
-    Resume a previously saved evolutionary run.
+    Load a previously saved population from a checkpoint file and optionally re-assign
+    the fitness function.
 
     Args:
-    run_name (str): Identifier of the checkpoint file.
-    fitness_fn (callable, optional): Fitness function to assign.
+        run_name (str): Checkpoint name (stored as 'checkpoints/{run_name}.pkl').
+        fitness_fn (Optional[FitnessFunction]): Fitness function to be reattached
+            (required if it was not serializable).
 
     Returns:
-    Pop: The resumed population.
+        Pop: Restored population ready to be resumed.
+
+    Raises:
+        FileNotFoundError: If the checkpoint file does not exist.
     """
+
     path = _checkpoint_path(run_name)
     if not path.exists():
         raise FileNotFoundError(f"Checkpoint '{path}' not found.")
@@ -64,12 +82,15 @@ def resume_from_checkpoint(
 
 def save_best_indiv(pop: Pop, *, run_name: str = "default") -> None:
     """
-    Save the best individual of the population.
+    Save the best individual from a population to a separate file.
+
+    The file will be stored as 'checkpoints/{run_name}_best.pkl'.
 
     Args:
-    pop (Pop): Population from which to extract the best.
-    run_name (str): Identifier for the output file.
+        pop (Pop): Population from which to extract and save the best individual.
+        run_name (str): Optional name to identify the saved individual.
     """
+
     best = pop.best()
     path = _best_indiv_path(run_name)
     save_indiv(best, path)
@@ -77,15 +98,18 @@ def save_best_indiv(pop: Pop, *, run_name: str = "default") -> None:
 
 def load_best_indiv(run_name: str = "default") -> Indiv:
     """
-    Load the best individual saved separately from a checkpoint run.
+    Load the best individual saved via `save_best_indiv()`.
 
     Args:
-    run_name (str): Identifier used during saving.
-
+        run_name (str): Name used during saving (without '_best.pkl' suffix).
 
     Returns:
-    Indiv: The deserialized best individual.
+        Indiv: Deserialized best individual.
+
+    Raises:
+        FileNotFoundError: If the corresponding file does not exist.
     """
+
     path = _best_indiv_path(run_name)
     if not path.exists():
         raise FileNotFoundError(f"Best-indiv file '{path}' not found.")
@@ -96,18 +120,22 @@ def load_best_indiv(run_name: str = "default") -> Indiv:
 
 
 def save_population_pickle(pop: Pop, path: str | Path) -> None:
+    """Save a Pop instance to the specified file using pickle."""
     write_pickle(pop, path)
 
 
 def load_population_pickle(path: str | Path) -> Pop:
+    """Load a Pop instance from a pickle file."""
     return read_pickle(path)
 
 
 def save_indiv(indiv: Indiv, path: str | Path) -> None:
+    """Save an Indiv instance to the specified file using pickle."""
     write_pickle(indiv, Path(path))
 
 
 def load_indiv(path: str | Path) -> Indiv:
+    """Load an Indiv instance from a pickle file."""
     return read_pickle(path)
 
 
