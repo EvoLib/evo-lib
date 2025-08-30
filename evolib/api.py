@@ -32,6 +32,12 @@ from evolib.utils.loss_functions import (
     mae_loss,
     mse_loss,
 )
+from evolib.utils.persistence import (
+    load_best_indiv,
+    resume_from_checkpoint,
+    save_best_indiv,
+    save_checkpoint,
+)
 from evolib.utils.plotting import (
     plot_approximation,
     plot_diversity,
@@ -80,6 +86,10 @@ __all__ = [
     "sphere_3d",
     "rosenbrock_3d",
     "schwefel_3d",
+    "save_checkpoint",
+    "resume_from_checkpoint",
+    "save_best_indiv",
+    "load_best_indiv",
 ]
 
 Pop = Population
