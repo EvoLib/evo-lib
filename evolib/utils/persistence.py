@@ -13,7 +13,7 @@ All files are stored in the 'checkpoints/' directory by default.
 
 import pickle
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 from evolib.core.individual import Indiv
 from evolib.core.population import Pop
@@ -45,7 +45,14 @@ def save_checkpoint(pop: Pop, *, run_name: str = "default") -> None:
         run_name (str): Optional name to distinguish checkpoint runs.
     """
     path = _checkpoint_path(run_name)
-    save_population_pickle(pop, path)
+
+    initializer_backup = pop.para_initializer
+    pop.para_initializer = cast(Any, None)
+
+    try:
+        save_population_pickle(pop, path)
+    finally:
+        pop.para_initializer = initializer_backup
 
 
 def resume_from_checkpoint(

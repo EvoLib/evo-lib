@@ -20,7 +20,14 @@ Expected outcome:
 
 import numpy as np
 
-from evolib import Indiv, Pop, mse_loss, plot_approximation, save_combined_net_plot
+from evolib import (
+    Indiv,
+    Pop,
+    mse_loss,
+    plot_approximation,
+    save_checkpoint,
+    save_combined_net_plot,
+)
 
 # XOR dataset
 X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
@@ -58,6 +65,8 @@ def on_improvement(pop: Pop, gen: int) -> None:
         f"03_frames/gen_{gen:04d}.png",
         title="Structural Mutation on XOR",
     )
+
+    save_checkpoint(pop, run_name="xor")
 
 
 def on_end(pop: Pop) -> None:
