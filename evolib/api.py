@@ -35,6 +35,7 @@ from evolib.utils.loss_functions import (
 from evolib.utils.persistence import (
     load_best_indiv,
     resume_from_checkpoint,
+    resume_or_init,
     save_best_indiv,
     save_checkpoint,
 )
@@ -90,6 +91,7 @@ __all__ = [
     "resume_from_checkpoint",
     "save_best_indiv",
     "load_best_indiv",
+    "resume_or_init",
 ]
 
 Pop = Population

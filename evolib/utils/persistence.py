@@ -17,6 +17,7 @@ from typing import Any, Optional, cast
 
 from evolib.core.individual import Indiv
 from evolib.core.population import Pop
+from evolib.initializers.registry import build_composite_initializer
 from evolib.interfaces.types import FitnessFunction
 
 # Internal checkpoint directory
@@ -58,25 +59,24 @@ def save_checkpoint(pop: Pop, *, run_name: str = "default") -> None:
 def resume_from_checkpoint(
     run_name: str = "default",
     fitness_fn: Optional[FitnessFunction] = None,
-) -> Pop:
+    silent_fail: bool = True,
+) -> Optional[Pop]:
     """
-    Load a previously saved population from a checkpoint file and optionally re-assign
-    the fitness function.
+    Resume a previously saved evolutionary run.
 
     Args:
-        run_name (str): Checkpoint name (stored as 'checkpoints/{run_name}.pkl').
-        fitness_fn (Optional[FitnessFunction]): Fitness function to be reattached
-            (required if it was not serializable).
+    run_name (str): Identifier of the checkpoint file.
+    fitness_fn (callable, optional): Fitness function to assign.
+    silent_fail (bool): If True, return None instead of raising FileNotFoundError.
+
 
     Returns:
-        Pop: Restored population ready to be resumed.
-
-    Raises:
-        FileNotFoundError: If the checkpoint file does not exist.
+    Optional[Pop]: The resumed population or None if not found and silent_fail is True.
     """
-
     path = _checkpoint_path(run_name)
     if not path.exists():
+        if silent_fail:
+            return None
         raise FileNotFoundError(f"Checkpoint '{path}' not found.")
 
     pop = load_population_pickle(path)
@@ -84,7 +84,36 @@ def resume_from_checkpoint(
     if fitness_fn:
         pop.set_fitness_function(fitness_fn)
 
+    # Restore initializer
+    pop.para_initializer = build_composite_initializer(pop.config)
+
     return pop
+
+
+def resume_or_init(
+    config_path: str, fitness_fn: FitnessFunction, run_name: str = "default"
+) -> Pop:
+    """
+    Try to resume a saved run, otherwise initialize a new population.
+
+    Args:
+    config_path (str): Path to the YAML configuration.
+    fitness_fn (callable): Fitness function for individuals.
+    run_name (str): Optional name for checkpoint file.
+
+
+    Returns:
+    Pop: A ready-to-run population.
+    """
+
+    pop = resume_from_checkpoint(
+        run_name=run_name, fitness_fn=fitness_fn, silent_fail=True
+    )
+
+    if pop is not None:
+        return pop
+
+    return Pop(config_path=config_path, fitness_function=fitness_fn)
 
 
 def save_best_indiv(pop: Pop, *, run_name: str = "default") -> None:
