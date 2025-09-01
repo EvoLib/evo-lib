@@ -41,6 +41,7 @@ class Indiv:
     __slots__ = (
         "para",
         "fitness",
+        "is_evaluated",
         "age",
         "max_age",
         "origin",
@@ -59,7 +60,8 @@ class Indiv:
             para (Any, optional): Parameter values of the individual. Default: None.
         """
         self.para = para
-        self.fitness: float = float("inf")  # Optional[float] = None
+        self.fitness: float | None
+        self.is_evaluated: bool = False
         self.age = 0
         self.max_age = 0
         self.origin: Origin = Origin.PARENT
@@ -69,6 +71,8 @@ class Indiv:
         self.extra_metrics = {}
 
     def __lt__(self, other: "Indiv") -> bool:
+        if self.fitness is None or other.fitness is None:
+            raise ValueError("Comparison attempted with unevaluated individuals")
         return self.fitness < other.fitness
 
     def mutate(self) -> None:

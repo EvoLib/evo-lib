@@ -208,14 +208,20 @@ class Pop:
         if self.fitness_function is None:
             raise ValueError("No fitness function has been set.")
         for indiv in self.indivs:
-            self.fitness_function(indiv)
+            result = self.fitness_function(indiv)
+            if result is not None:
+                indiv.fitness = float(result)
+            indiv.is_evaluated = True
 
     def evaluate_indivs(self, indivs: list[Indiv]) -> None:
         """Evaluate fitness for a custom list of individuals."""
         if self.fitness_function is None:
             raise ValueError("No fitness function has been set.")
         for indiv in indivs:
-            self.fitness_function(indiv)
+            result = self.fitness_function(indiv)
+            if result is not None:
+                indiv.fitness = float(result)
+            indiv.is_evaluated = True
 
     def get_elites(self) -> list[Indiv]:
         """Return a list of elite individuals and set their is_elite flag."""
@@ -334,6 +340,7 @@ class Pop:
         Args:
             reverse (bool): If True, sort in descending order.
         """
+
         self.indivs.sort(key=lambda indivs: indivs.fitness, reverse=reverse)
 
     def best(self, sort: bool = False) -> Indiv:
@@ -610,6 +617,13 @@ class Pop:
         Returns:
             int: Number of generations completed.
         """
+
+        if self.fitness_function is None:
+            raise ValueError(
+                "Population.run() requires a fitness_function. "
+                "Set it via constructor or pop.set_fitness_function(...)."
+            )
+
         # Strategy
         strategy = strategy or self.evolution_strategy
         if strategy is None:
@@ -658,13 +672,14 @@ class Pop:
 
             current_fitness = self.best().fitness
 
-            has_improved = False
+            assert current_fitness is not None, (
+                "Strategy must evaluate " "fitness each generation"
+            )
+
             if minimize:
-                if best_fitness - current_fitness > min_delta:
-                    has_improved = True
+                has_improved = (best_fitness - current_fitness) > min_delta
             else:
-                if current_fitness - best_fitness > min_delta:
-                    has_improved = True
+                has_improved = (current_fitness - best_fitness) > min_delta
 
             # ON_IMPROVEMENT
             if has_improved:
@@ -734,8 +749,24 @@ class Pop:
 
         return self.selection_fn(self, num_parents)
 
+    def ensure_evaluated(self) -> None:
+        """Evaluate individuals that have no valid fitness yet."""
+        no_fitness = [ind for ind in self.indivs if not _is_valid_fitness(ind.fitness)]
+        if no_fitness:
+            if self.fitness_function is None:
+                raise ValueError(
+                    "No fitness_function set, but evaluation is required. "
+                    "Provide it via Population(..., fitness_function=...) "
+                    "or pop.set_fitness_function(...)."
+                )
+            self.evaluate_indivs(no_fitness)
+
 
 ##############################################################################
+
+
+def _is_valid_fitness(x: float | None) -> bool:
+    return x is not None and math.isfinite(x)
 
 
 def compute_fitness_diversity(

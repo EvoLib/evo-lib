@@ -4,7 +4,6 @@ from typing import Any, List
 
 import numpy as np
 
-from evolib.globals.numeric import MAX_FLOAT
 from evolib.interfaces.enums import Origin
 from evolib.utils.copy_indiv import copy_indiv
 
@@ -13,11 +12,10 @@ def generate_cloned_offspring(parents: List[Any], lambda_: int) -> List[Any]:
     """
     Creates lambda_ cloned offspring by randomly selecting parents with replacement.
 
-    Each offspring is a deep copy of a randomly chosen parent, with age reset and
-    fitness set to MAX_FLOAT. This method performs no crossover or mutation and
-    is typically used in evolutionary strategies such as (mu, lambda), (mu + lambda),
-    or steady-state evolution to initialize raw offspring before variation operators
-    are applied.
+    Each offspring is a deep copy of a randomly chosen parent.
+    This method performs no crossover or mutation and is typically used in evolutionary
+    strategies such as (mu, lambda), (mu + lambda), or steady-state evolution to
+    initialize raw offspring before variation operators are applied.
 
     Args:
         parents (List[Any]): List of parent individuals to clone from.
@@ -41,7 +39,8 @@ def generate_cloned_offspring(parents: List[Any], lambda_: int) -> List[Any]:
         parent = parents[idx]
         child = copy_indiv(parent)
         child.age = 0
-        child.fitness = MAX_FLOAT
+        child.fitness = None
+        child.is_evaluated = False
         child.origin = Origin.OFFSPRING
         child.parent_idx = idx
         offspring.append(child)
