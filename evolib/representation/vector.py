@@ -238,7 +238,8 @@ class Vector(ParaBase):
 
         elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
             # Ensure tau is initialized
-            ep.tau = adapted_tau(len(self.vector))
+            if ep.tau is None or ep.tau == 0.0:
+                ep.tau = adapted_tau(len(self.vector))
 
             if ep.min_mutation_strength is None or ep.max_mutation_strength is None:
                 raise ValueError(
@@ -256,9 +257,11 @@ class Vector(ParaBase):
             ep.mutation_strength = adapt_mutation_strength(ep, self.bounds)
 
         elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
+            # Ensure tau is initialized
             if ep.tau == 0.0 or ep.tau is None:
                 ep.tau = adapted_tau(len(self.vector))
 
+            # Ensure mutation_strength is initialized
             if ep.min_mutation_strength is None or ep.max_mutation_strength is None:
                 raise ValueError(
                     "min_mutation_strength and max_mutation_strength" "must be defined."

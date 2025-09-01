@@ -79,6 +79,10 @@ def adapt_mutation_strength(
     if params.mutation_strength is None:
         raise ValueError("mutation_strength must not be None")
 
+    print(f"tau: {params.tau}")
+    if params.tau is None:
+        raise ValueError("tau must not be None for adaptive mutation strength")
+
     return float(
         _adapted_mutation_strength_core(
             current=params.mutation_strength, tau=params.tau, bounds=bounds
@@ -93,6 +97,9 @@ def adapt_mutation_strengths(
 
     if params.mutation_strengths is None:
         raise ValueError("mutation_strength must not be None")
+
+    if params.tau is None:
+        raise ValueError("tau must not be None for adaptive mutation strength")
 
     return cast(
         np.ndarray,

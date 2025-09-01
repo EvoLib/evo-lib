@@ -280,7 +280,8 @@ class EvoNet(ParaBase):
 
         elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
             # Ensure tau is initialized
-            ep.tau = adapted_tau(len(self.get_vector()))
+            if ep.tau is None or ep.tau == 0.0:
+                ep.tau = adapted_tau(len(self.get_vector()))
 
             if ep.min_mutation_strength is None or ep.max_mutation_strength is None:
                 raise ValueError(
@@ -329,7 +330,8 @@ class EvoNet(ParaBase):
 
             elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
                 # Ensure tau is initialized
-                bep.tau = adapted_tau(len(self.get_vector()))
+                if bep.tau is None or bep.tau == 0.0:
+                    bep.tau = adapted_tau(len(self.get_vector()))
 
                 if (
                     bep.min_mutation_strength is None
