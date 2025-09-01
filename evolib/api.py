@@ -1,5 +1,12 @@
 from evolib.core.individual import Indiv as Individual
 from evolib.core.population import Pop as Population
+from evolib.io.checkpoint import (
+    load_best_indiv,
+    resume_from_checkpoint,
+    resume_or_init,
+    save_best_indiv,
+    save_checkpoint,
+)
 from evolib.representation.evonet import EvoNet
 from evolib.representation.netvector import NetVector
 from evolib.representation.vector import Vector
@@ -31,13 +38,6 @@ from evolib.utils.loss_functions import (
     huber_loss,
     mae_loss,
     mse_loss,
-)
-from evolib.utils.persistence import (
-    load_best_indiv,
-    resume_from_checkpoint,
-    resume_or_init,
-    save_best_indiv,
-    save_checkpoint,
 )
 from evolib.utils.plotting import (
     plot_approximation,
