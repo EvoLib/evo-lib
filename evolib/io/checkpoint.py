@@ -11,7 +11,6 @@ All files are stored in the 'checkpoints/' directory by default.
 """
 
 
-import pickle
 from pathlib import Path
 from typing import Any, Optional, cast
 
@@ -19,6 +18,12 @@ from evolib.core.individual import Indiv
 from evolib.core.population import Pop
 from evolib.initializers.registry import build_composite_initializer
 from evolib.interfaces.types import FitnessFunction
+from evolib.io.serialization import (
+    load_indiv,
+    load_population_pickle,
+    save_indiv,
+    save_population_pickle,
+)
 
 # Internal checkpoint directory
 _CHECKDIR = Path("checkpoints")
@@ -90,7 +95,7 @@ def resume_from_checkpoint(
     return pop
 
 
-def resume_or_init(
+def resume_or_create(
     config_path: str, fitness_fn: FitnessFunction, run_name: str = "default"
 ) -> Pop:
     """
@@ -153,35 +158,3 @@ def load_best_indiv(run_name: str = "default") -> Indiv:
     indiv = load_indiv(path)
 
     return indiv
-
-
-def save_population_pickle(pop: Pop, path: str | Path) -> None:
-    """Save a Pop instance to the specified file using pickle."""
-    write_pickle(pop, path)
-
-
-def load_population_pickle(path: str | Path) -> Pop:
-    """Load a Pop instance from a pickle file."""
-    return read_pickle(path)
-
-
-def save_indiv(indiv: Indiv, path: str | Path) -> None:
-    """Save an Indiv instance to the specified file using pickle."""
-    write_pickle(indiv, Path(path))
-
-
-def load_indiv(path: str | Path) -> Indiv:
-    """Load an Indiv instance from a pickle file."""
-    return read_pickle(path)
-
-
-def write_pickle(obj: Any, path: str | Path) -> None:
-    path = Path(path)
-    with open(path, "wb") as f:
-        pickle.dump(obj, f)
-
-
-def read_pickle(path: str | Path) -> Any:
-    path = Path(path)
-    with open(path, "rb") as f:
-        return pickle.load(f)

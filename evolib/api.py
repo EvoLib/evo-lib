@@ -3,7 +3,7 @@ from evolib.core.population import Pop as Population
 from evolib.io.checkpoint import (
     load_best_indiv,
     resume_from_checkpoint,
-    resume_or_init,
+    resume_or_create,
     save_best_indiv,
     save_checkpoint,
 )
@@ -91,7 +91,7 @@ __all__ = [
     "resume_from_checkpoint",
     "save_best_indiv",
     "load_best_indiv",
-    "resume_or_init",
+    "resume_or_create",
 ]
 
 Pop = Population
