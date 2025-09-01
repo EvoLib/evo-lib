@@ -25,7 +25,7 @@ from evolib import (
     Pop,
     mse_loss,
     plot_approximation,
-    resume_or_init,
+    resume_or_create,
     save_checkpoint,
     save_combined_net_plot,
 )
@@ -79,7 +79,7 @@ def on_end(pop: Pop) -> None:
 
 
 # Evolution setup
-pop = resume_or_init("configs/03_structural_xor.yaml", xor_fitness, "xor")
+pop = resume_or_create("configs/03_structural_xor.yaml", xor_fitness, "xor")
 
 # Evolution loop
 pop.run(on_improvement=on_improvement, on_end=on_end)
