@@ -1,32 +1,34 @@
 """
-Example 01-03 - Population Mutation
+Example 01-03 — Population Mutation.
 
-This example demonstrates how to:
-- Initialize a population with multiple individuals
-- Apply mutation to all individuals
-- Observe how mutation affects each parameter
+This example demonstrates:
+- How to access the individuals already initialized by Pop
+- How to apply mutation to all individuals
+- How to compare their state before and after mutation
+
+Note:
+    Here mutation is applied manually for demonstration purposes.
+    In normal use cases, mutation (along with crossover, replacement, etc.)
+    is handled automatically when calling `pop.run()` or `pop.run_one_generation()`.
 """
 
-from evolib import Pop
+from evolib import Population  # alias Pop is also available
 
-# Load configuration for the population (mutation rate, size, etc.)
-pop = Pop(config_path="population.yaml")
 
-# Create and initialize individuals
-for _ in range(pop.parent_pool_size):
-    my_indiv = pop.create_indiv()
-    pop.add_indiv(my_indiv)
+def main() -> None:
+    pop = Population(config_path="population.yaml")
 
-# Print parameters before mutation
-print("Before mutation:")
-for i, indiv in enumerate(pop.indivs):
-    print(f"  Indiv {i}: {indiv.para.get_status()}")
+    print("Before mutation:")
+    for i, indiv in enumerate(pop.indivs):
+        print(f"  Indiv {i}: {indiv.para.get_status()}")
 
-# Apply mutation to all individuals
-for indiv in pop.indivs:
-    indiv.mutate()
+    for indiv in pop.indivs:
+        indiv.mutate()
 
-# Print parameters after mutation
-print("\nAfter mutation:")
-for i, indiv in enumerate(pop.indivs):
-    print(f"  Indiv {i}: {indiv.para.get_status()}")
+    print("\nAfter mutation:")
+    for i, indiv in enumerate(pop.indivs):
+        print(f"  Indiv {i}: {indiv.para.get_status()}")
+
+
+if __name__ == "__main__":
+    main()

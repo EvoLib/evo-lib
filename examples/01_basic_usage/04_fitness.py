@@ -1,55 +1,30 @@
 """
-Example 01-04 - Fitness
+Example 01-04 — Defining a Fitness Function.
 
-This example demonstrates how to:
-- Initialize a population with multiple individuals
-- Apply mutation to all individuals
-- Observe how mutation affects parameters and fitness
-- Evaluate fitness before and after mutation
+This example demonstrates:
+- How to provide a custom fitness function
+- How EvoLib uses it automatically during evolution
 """
 
-from evolib import Indiv, Pop, mse_loss, simple_quadratic
+import numpy as np
+
+from evolib import Indiv, resume_or_init
 
 
-# User-defined fitness function that is passed to the evolution loop.
-# This function should assign a fitness value to the given individual.
-# Here, we use a simple benchmark (quadratic function) and the MSE loss.
-def my_fitness(indiv: Indiv) -> None:
-    """
-    Simple fitness function using the quadratic benchmark and MSE loss.
-
-    Assigns fitness based on distance to 0.0 (global minimum).
-    """
-    expected = 0.0
-    predicted = simple_quadratic(indiv.para["test-vector"].vector)
-    indiv.fitness = mse_loss(expected, predicted)
+# Sphere fitness: minimize sum of squares
+def sphere_fitness(indiv: Indiv) -> None:
+    vec = np.array(indiv.para["test-vector"].vector, dtype=float)
+    indiv.fitness = float(np.sum(vec * vec))
 
 
-# Load configuration and initialize population
-pop = Pop(config_path="04_fitness.yaml")
+def main() -> None:
+    # Either direct:
+    # pop = Population(config_path="population.yaml", fitness_function=sphere_fitness)
 
-for _ in range(pop.parent_pool_size):
-    indiv = pop.create_indiv()
-    pop.add_indiv(indiv)
+    # Or resumable (preferred for real runs):
+    pop = resume_or_init("04_fitness.yaml", sphere_fitness, run_name="sphere_demo")
+    pop.run()
 
-# Evaluate fitness before mutation
-print("Before mutation:")
-for i, indiv in enumerate(pop.indivs):
-    my_fitness(indiv)
-    print(
-        f"  Indiv {i}: Parameter = {indiv.para['test-vector'].vector}, "
-        f"Fitness = {indiv.fitness:.6f}"
-    )
 
-# Apply mutation
-for indiv in pop.indivs:
-    indiv.mutate()
-
-# Evaluate fitness after mutation
-print("\nAfter mutation:")
-for i, indiv in enumerate(pop.indivs):
-    my_fitness(indiv)
-    print(
-        f"  Indiv {i}: Parameter = {indiv.para['test-vector'].vector}, "
-        f"Fitness = {indiv.fitness:.6f}"
-    )
+if __name__ == "__main__":
+    main()

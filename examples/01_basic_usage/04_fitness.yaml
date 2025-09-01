@@ -1,10 +1,13 @@
 # Sample configuration for 04_fitness.py
 
-parent_pool_size: 10
-offspring_pool_size: 0
-max_generations: 0
+parent_pool_size: 2
+offspring_pool_size: 4
+max_generations: 10
 max_indiv_age: 0
 num_elites: 0
+
+evolution:
+  strategy: mu_plus_lambda
 
 modules:
   test-vector:
