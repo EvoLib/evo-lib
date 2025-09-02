@@ -33,7 +33,7 @@ pop_high = run_experiment(mutation_strength=0.005)
 
 # Compare fitness progress
 plot_fitness_comparison(
-    histories=[pop_low.history_df, pop_high.history_df],
+    histories=[pop_low, pop_high],
     labels=["Mutation σ = 0.001", "Mutation σ = 0.005"],
     metric="best_fitness",
     title="Best Fitness Comparison (Low vs High Mutation)",

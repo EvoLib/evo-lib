@@ -8,16 +8,26 @@ This module provides functions for visualizing:
 - Mutation probability and strength trends
 - Fitness comparison
 """
+from __future__ import annotations
 
 import os
 import tempfile
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Sequence, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from evonet.core import Nnet
 from PIL import Image
+
+if TYPE_CHECKING:
+    from evolib import Pop
+
+PopOrDf = Union["Pop", pd.DataFrame]
+
+
+def _as_history_df(obj: PopOrDf) -> pd.DataFrame:
+    return obj.history_df if hasattr(obj, "history_df") else obj
 
 
 def plot_history(
@@ -185,7 +195,7 @@ def plot_mutation_trends(
 
 
 def plot_fitness_comparison(
-    histories: list[pd.DataFrame],
+    histories: Sequence[PopOrDf],
     *,
     labels: Optional[list[str]] = None,
     metric: str = "best_fitness",
@@ -195,10 +205,13 @@ def plot_fitness_comparison(
     save_path: Optional[str] = None,
 ) -> None:
     """Wrapper to compare a fitness metric across multiple runs."""
+
+    dfs = [_as_history_df(h) for h in histories]
+
     # Skip histories that lack the requested metric
     filtered = []
     filtered_labels = []
-    for i, hist in enumerate(histories):
+    for i, hist in enumerate(dfs):
         if metric in hist.columns:
             filtered.append(hist)
             filtered_labels.append(labels[i] if labels else f"Run {i+1}")
