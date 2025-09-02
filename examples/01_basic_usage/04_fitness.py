@@ -8,7 +8,7 @@ This example demonstrates:
 
 import numpy as np
 
-from evolib import Indiv, resume_or_init
+from evolib import Indiv, resume_or_create
 
 
 # Sphere fitness: minimize sum of squares
@@ -22,7 +22,7 @@ def main() -> None:
     # pop = Population(config_path="population.yaml", fitness_function=sphere_fitness)
 
     # Or resumable (preferred for real runs):
-    pop = resume_or_init("04_fitness.yaml", sphere_fitness, run_name="sphere_demo")
+    pop = resume_or_create("04_fitness.yaml", sphere_fitness, run_name="sphere_demo")
     pop.run()
 
 

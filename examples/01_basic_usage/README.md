@@ -17,7 +17,7 @@ They cover the essential building blocks: creating populations, mutating individ
 
 - `04_fitness.py`:  
   Demonstrates how to define and register a **custom fitness function**.  
-  Uses `resume_or_init(...)` to create or resume a run and executes the evolution loop with `pop.run()`.  
+  Uses `resume_or_create(...)` to create or resume a run and executes the evolution loop with `pop.run()`.  
   This example shows the canonical workflow for actual experiments.
 
 ### Notes
