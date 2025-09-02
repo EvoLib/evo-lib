@@ -16,11 +16,14 @@ Supports:
 Use Pop.run() for full evolution, or run_one_generation() for manual stepping.
 """
 
+from __future__ import annotations
+
 import math
 import time
 from typing import Any, Callable, List, Optional
 
 import numpy as np
+import pandas as pd
 
 from evolib.config.schema import FullConfig
 from evolib.core.individual import Indiv
@@ -158,6 +161,16 @@ class Pop:
         if not self.indivs:
             raise RuntimeError("No individuals initialized.")
         return self.indivs[0]
+
+    @property
+    def history_df(self) -> pd.DataFrame:
+        """
+        Return the evolution history as a pandas DataFrame.
+
+        This is a convenience wrapper around `history_logger.to_dataframe()` so users
+        don't need to access internal logger details.
+        """
+        return self.history_logger.to_dataframe()
 
     def initialize_population(
         self, initializer: Callable[["Pop"], Any] | None = None
