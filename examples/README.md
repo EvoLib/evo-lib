@@ -140,11 +140,15 @@ These examples demonstrate how evolutionary strategies can handle structured env
   <img src="./05_advanced_topics/06_frames_rosenbrock/06_rosenbrock.gif" alt="Sample" width="512"/>
 </p>
 
+📄 See: [`05_advanced_topics/README.md`](05_advanced_topics/README.md)
+
 ---
 
 ## 📁 06_netvector/
 
 Demonstrates NetVector modules — a simplified vector-based representation of neural computation
+
+📄 See: [`06_netvector/README.md`](06_netvector/README.md)
 
 ---
 
@@ -157,6 +161,8 @@ Examples for EvoNet, a modular, evolvable neural network architecture capable of
 <p align="center">
   <img src="./07_evonet/03_frames/03_structural_xor.gif" alt="Structural XOR Final" width="512"/>
 </p>
+
+📄 See: [`07_evonet/README.md`](07_evonet/README.md)
 
 ---
 
