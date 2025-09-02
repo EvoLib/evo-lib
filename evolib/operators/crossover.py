@@ -213,8 +213,11 @@ def crossover_offspring(pop: "Pop", offspring: list["Indiv"]) -> None:
         b = offspring[i + 1]
 
         # Get crossover probability from para (individual)
-        prob = getattr(a.para, "crossover_probability", 1.0)
-        if prob is None or prob <= 0.0:
+        prob_a = getattr(a.para, "crossover_probability", None)
+        prob_b = getattr(b.para, "crossover_probability", None)
+        probs = [p for p in (prob_a, prob_b) if isinstance(p, (int, float))]
+        prob = min(probs) if probs else 0.0
+        if prob <= 0.0:
             continue
 
         # Perform crossover with given probability
