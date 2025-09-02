@@ -5,9 +5,7 @@ This example demonstrates how to run the same optimization with different settin
 (e.g. mutation strength) and compare their results using the fitness history.
 """
 
-import pandas as pd
-
-from evolib import Indiv, Pop, mse_loss, simple_quadratic
+from evolib import Indiv, Population, mse_loss, simple_quadratic
 from evolib.utils.plotting import plot_fitness_comparison
 
 
@@ -17,26 +15,28 @@ def my_fitness(indiv: Indiv) -> None:
     indiv.fitness = mse_loss(expected, predicted)
 
 
-def run_experiment(mutation_strength: float) -> pd.DataFrame:
-    pop = Pop(config_path="population.yaml")
-    pop.set_functions(fitness_function=my_fitness)
+def run_experiment(mutation_strength: float) -> Population:
+    pop = Population(config_path="03_compare_runs.yaml", fitness_function=my_fitness)
 
-    for _ in range(pop.max_generations):
-        pop.run_one_generation()
+    for indiv in pop.indivs:
+        params = indiv.para["test-vector"].evo_params
+        params.mutation_strength = mutation_strength
 
-    return pop.history_logger.to_dataframe()
+    pop.run(verbosity=0)
+
+    return pop
 
 
 # Run multiple experiments
-history_low = run_experiment(mutation_strength=0.1)
-history_high = run_experiment(mutation_strength=0.5)
+pop_low = run_experiment(mutation_strength=0.001)
+pop_high = run_experiment(mutation_strength=0.005)
 
 # Compare fitness progress
 plot_fitness_comparison(
-    histories=[history_low, history_high],
-    labels=["Mutation σ = 0.1", "Mutation σ = 0.5"],
+    histories=[pop_low.history_df, pop_high.history_df],
+    labels=["Mutation σ = 0.001", "Mutation σ = 0.005"],
     metric="best_fitness",
     title="Best Fitness Comparison (Low vs High Mutation)",
     show=True,
-    save_path="./figures/02_Compare_Runs.png",
+    save_path="./figures/03_Compare_Runs.png",
 )
