@@ -1,5 +1,5 @@
 """
-Example 2.2 - Mu Lambd
+Example 2.2 - Mu Lambda
 
 This example demonstrates the basic Mu Plus Lambda and Mu Comma Lambda evolution:
 """

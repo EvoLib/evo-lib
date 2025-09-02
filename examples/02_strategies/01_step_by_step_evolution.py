@@ -71,7 +71,7 @@ for i, indiv in enumerate(offspring):
 
 
 pop.indivs = pop.indivs + offspring
-print("\nPopulation befor Selection")
+print("\nPopulation before Selection")
 for i, indiv in enumerate(pop.indivs):
     print(
         f"  Indiv {i}: Parameter = {indiv.para['test-vector'].vector}, "
