@@ -667,8 +667,8 @@ class Pop:
 
         if verbosity >= 1:
             print(
-                f"start: strategy={strategy}, mu={self.mu}, "
-                f"lambda={self.lambda_}, max_gen={gen_cap}"
+                f"start: strategy={strategy}, parents(mu)={self.mu}, "
+                f"offspring(lambda)={self.lambda_}, max_gen={gen_cap}"
             )
 
         start_time = time.time()

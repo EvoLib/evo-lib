@@ -1,4 +1,4 @@
-## 01_basic_usage/ — Getting Started
+## 01_basic_usage - Getting Started
 
 This folder provides introductory examples to demonstrate the basic usage of EvoLib.
 They illustrate how populations are created, mutated, and evaluated
@@ -47,17 +47,17 @@ Running these scripts will print the population status to the console:
     Before mutation:
       Indiv 0: {'test-vector': 'Vector=[-0.495, 0.138, 0.069, -0.931] | Global mutation_strength=0.0100'}
       Indiv 1: {'test-vector': 'Vector=[0.962, -0.135, -0.303, -0.281] | Global mutation_strength=0.0100'}
-    [...]
+      [...]
     After mutation:
       Indiv 0: {'test-vector': 'Vector=[-0.482, 0.147, 0.08, -0.938] | Global mutation_strength=0.0100'}
       Indiv 1: {'test-vector': 'Vector=[0.977, -0.121, -0.315, -0.286] | Global mutation_strength=0.0100'}
-    [...]
+      [...]
     ```
 
 - `04_fitness.py`: prints generation-by-generation status updates, including best and average fitness, as the population evolves through the optimization loop (`resume_or_create` + `pop.run()`). Over time, fitness values should improve as evolution progresses.
     ```
     $ python 04_fitness.py 
-    start: strategy=EvolutionStrategy.MU_PLUS_LAMBDA, mu=2, lambda=4, max_gen=10
+    start: strategy=EvolutionStrategy.MU_PLUS_LAMBDA, parents(mu)=2, offspring(lambda)=4, max_gen=10
     Population: Gen:   1 Fit: 0.01941376
     Population: Gen:   2 Fit: 0.01743742
     [...]
@@ -65,8 +65,8 @@ Running these scripts will print the population status to the console:
     ```
 
 ## See Also
-- [`../02_strategies/01_step_by_step_evolution.py`](../02_strategies/01_step_by_step_evolution.py) — reveals the internal mechanics of one generation.
-- [`../03_comparisons/01_history.py`](../03_comparisons/01_history.py) — demonstrates logging and exporting history as a DataFrame.
+- [`../02_strategies/01_step_by_step_evolution.py`](../02_strategies/01_step_by_step_evolution.py) - reveals the internal mechanics of one generation.
+- [`../03_comparisons/01_history.py`](../03_comparisons/01_history.py) - demonstrates logging and exporting history as a DataFrame.
 
 ## Files
 - `01_getting_started.py`:  
