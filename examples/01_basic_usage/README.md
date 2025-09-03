@@ -3,6 +3,27 @@
 This folder provides introductory examples to help you understand the basic usage of EvoLib.  
 They cover the essential building blocks: creating populations, mutating individuals, and defining fitness functions.
 
+## Learning Goals
+- Load a population from a YAML config.
+- Inspect individuals and population status.
+- Attach a custom fitness function.
+- Understand manual mutation vs. automated runs.
+
+## Prerequisites
+None. This is the ideal entry point for new users.
+
+## Expected Output
+
+Console output showing population status.
+In 04_fitness.py you will see a full run driven by resume_or_create.
+
+## See Also
+
+- [`01_step_by_step_evolution.py - inner mechanics.`](../02_strategies/01_step_by_step_evolution.py)
+
+- [`03_comparisons/01_history.py - logging and data frames.`](../03_comparisons/01_history.py)
+
+
 ### Files
 - `01_getting_started.py`:  
   Minimal example - load a population from a YAML config and print its status.  
