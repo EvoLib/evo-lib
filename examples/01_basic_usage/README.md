@@ -22,7 +22,6 @@ Running these scripts will print the population status to the console:
 > and fitness values should gradually improve as evolution progresses.
 
 - `01_getting_started.py`: shows the basic structure of a population loaded from a YAML config.
-
 ```
 $ python 01_getting_started.py
 Population: Gen:   0 Fit: 0.00000000
@@ -35,7 +34,6 @@ Worst Indiv: 0.000
 ```
 
 - `02_mutation.py`: shows parameter values of a single individual before and after manual mutation.
-
 ```
 $ python 02_mutation.py 
 Before mutation: {'test-vector': 'Vector=[-0.419, 0.37, 0.944, 0.284] | Global mutation_strength=0.0100'}
@@ -43,7 +41,6 @@ After mutation:  {'test-vector': 'Vector=[-0.405, 0.368, 0.932, 0.284] | Global 
 ```
 
 - `03_population_mutation.py`: shows how the parameters of all individuals in the population change after mutation.
-
 ```
 $ python 03_population_mutation.py
 Before mutation:
@@ -57,7 +54,6 @@ After mutation:
 ```
 
 - `04_fitness.py`: prints generation-by-generation status updates, including best and average fitness, as the population evolves through the optimization loop (`resume_or_create` + `pop.run()`). Over time, fitness values should improve as evolution progresses.
-
 ```
 $ python 04_fitness.py 
 start: strategy=EvolutionStrategy.MU_PLUS_LAMBDA, mu=2, lambda=4, max_gen=10
@@ -76,11 +72,11 @@ Population: Gen:  10 Fit: 0.00638989
   Minimal example - load a population from a YAML config and print its status.  
 
 - `02_mutation.py`:
-  Shows how to create a single individual, apply mutation manually, and inspect parameter changes.
+  Shows how to create a single individual, apply mutation manually, and inspect parameter changes.<br>
   ⚠️ **Didactic only**: in real experiments, mutation is applied automatically inside the evolution loop.
 
 - `03_population_mutation.py`:
-  Applies mutation across all individuals of the initialized population.
+  Applies mutation across all individuals of the initialized population.<br>
   ⚠️ **Illustration only**: in practice, this is handled automatically by `pop.run()` or `run_one_generation()`.
 
 - `04_fitness.py`:  
