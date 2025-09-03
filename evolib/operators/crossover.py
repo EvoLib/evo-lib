@@ -196,30 +196,37 @@ def crossover_intermediate(
 
 def crossover_offspring(pop: "Pop", offspring: list["Indiv"]) -> None:
     """
-    Applies pairwise crossover to cloned offspring individuals.
+    Perform crossover for each pair of offspring individuals. Supports ParaComposite by
+    applying module-specific crossover operators and probabilities defined in the
+    configuration.
 
     Notes:
         - Offspring are assumed to be copied before this call.
         - Individuals are paired (0,1), (2,3), ...
-        - Crossover is delegated to `indiv.para.crossover_with(partner.para)`
-        - If `crossover_strategy` is NONE or probability too low, nothing happens.
         - This method does not return; offspring are modified in place.
     """
+
     if not offspring:
         return
 
     for i in range(0, len(offspring) - 1, 2):
-        a = offspring[i]
-        b = offspring[i + 1]
+        child1 = offspring[i]
+        child2 = offspring[i + 1]
 
-        # Get crossover probability from para (individual)
-        prob_a = getattr(a.para, "crossover_probability", None)
-        prob_b = getattr(b.para, "crossover_probability", None)
-        probs = [p for p in (prob_a, prob_b) if isinstance(p, (int, float))]
-        prob = min(probs) if probs else 0.0
-        if prob <= 0.0:
-            continue
+        for module_name in child1.para.components:
+            module1 = child1.para.components[module_name]
+            module2 = child2.para.components[module_name]
 
-        # Perform crossover with given probability
-        if np.random.rand() < prob:
-            a.para.crossover_with(b.para)
+            prob1 = module1.evo_params.crossover_probability
+            prob2 = module2.evo_params.crossover_probability
+
+            if prob1 is None or prob2 is None:
+                continue
+
+            effective_prob = min(prob1, prob2)
+
+            if effective_prob <= 0.0 or np.random.rand() >= effective_prob:
+                continue
+
+            # Perform crossover
+            module1.crossover_with(module2)
