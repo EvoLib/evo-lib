@@ -1,7 +1,8 @@
 ## 01_basic_usage/ — Getting Started
 
-This folder provides introductory examples to help you understand the basic usage of EvoLib.  
-They cover the essential building blocks: creating populations, mutating individuals, and defining fitness functions.
+This folder provides introductory examples to demonstrate the basic usage of EvoLib.
+They illustrate how populations are created, mutated, and evaluated
+
 
 ## Learning Goals
 - Load a population from a YAML config.
