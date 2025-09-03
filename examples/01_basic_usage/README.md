@@ -24,7 +24,7 @@ In 04_fitness.py you will see a full run driven by resume_or_create.
 - [`03_comparisons/01_history.py - logging and data frames.`](../03_comparisons/01_history.py)
 
 
-### Files
+## Files
 - `01_getting_started.py`:  
   Minimal example - load a population from a YAML config and print its status.  
 
