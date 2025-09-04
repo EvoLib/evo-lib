@@ -1,4 +1,4 @@
-# Sample configuration for 07_flexible.yaml
+# Sample configuration for 04_flexible.py
 
 parent_pool_size: 10
 offspring_pool_size: 5
@@ -26,6 +26,6 @@ modules:
 
     mutation:
       strategy: constant
-      strength: 0.5
+      strength: 0.01
       probability: 1.0
 

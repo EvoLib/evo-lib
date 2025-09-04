@@ -41,8 +41,7 @@ modules:
       probability: 1.0
 ```
 
-## Expected Output
-
+## Files & Expected Output
 Running these scripts will print the population status to the console:
 
 > **Note:** Due to random initialization and stochastic operators (mutation, crossover, selection),
@@ -50,7 +49,9 @@ Running these scripts will print the population status to the console:
 > What matters is the overall pattern: population statistics are printed generation by generation,
 > and fitness values should gradually improve as evolution progresses.
 
-- `01_getting_started.py`: shows the basic structure of a population loaded from a YAML config.
+
+- `01_getting_started.py`:  
+  Minimal example - load a population from a YAML config and print its status.  
     ```
     $ python 01_getting_started.py
     Population: Gen:   0 Fit: 0.00000000
@@ -62,14 +63,18 @@ Running these scripts will print the population status to the console:
     Worst Indiv: 0.000
     ```
 
-- `02_mutation.py`: shows parameter values of a single individual before and after manual mutation.
+- `02_mutation.py`:
+  Shows how to create a single individual, apply mutation manually, and inspect parameter changes.<br>
+  ⚠️ **Illustration only**: in real experiments, mutation is applied automatically inside the evolution loop.
     ```
     $ python 02_mutation.py 
     Before mutation: {'test-vector': 'Vector=[-0.419, 0.37, 0.944, 0.284] | Global mutation_strength=0.0100'}
     After mutation:  {'test-vector': 'Vector=[-0.405, 0.368, 0.932, 0.284] | Global mutation_strength=0.0100'}
     ```
 
-- `03_population_mutation.py`: shows how the parameters of all individuals in the population change after mutation.
+- `03_population_mutation.py`:
+  Applies mutation across all individuals of the initialized population.<br>
+  ⚠️ **Illustration only**: in practice, this is handled automatically by `pop.run()` or `run_one_generation()`.
     ```
     $ python 03_population_mutation.py
     Before mutation:
@@ -82,7 +87,10 @@ Running these scripts will print the population status to the console:
       [...]
     ```
 
-- `04_fitness.py`: prints generation-by-generation status updates, including best and average fitness, as the population evolves through the optimization loop (`resume_or_create` + `pop.run()`). Over time, fitness values should improve as evolution progresses.
+- `04_fitness.py`:  
+  Demonstrates how to define and register a **custom fitness function**.  
+  Uses `resume_or_create(...)` to create or resume a run and executes the evolution loop with `pop.run()`.  
+  This example shows the canonical workflow for actual experiments.
     ```
     $ python 04_fitness.py 
     start: strategy=EvolutionStrategy.MU_PLUS_LAMBDA, parents(mu)=2, offspring(lambda)=4, max_gen=10
@@ -92,30 +100,13 @@ Running these scripts will print the population status to the console:
     Population: Gen:  10 Fit: 0.00638989
     ```
 
-## See Also
+### See Also
 - [`../02_strategies/01_step_by_step_evolution.py`](../02_strategies/01_step_by_step_evolution.py) - reveals the internal mechanics of one generation.
 - [`../03_comparisons/01_history.py`](../03_comparisons/01_history.py) - demonstrates logging and exporting history as a DataFrame.
 
-## Files
-- `01_getting_started.py`:  
-  Minimal example - load a population from a YAML config and print its status.  
-
-- `02_mutation.py`:
-  Shows how to create a single individual, apply mutation manually, and inspect parameter changes.<br>
-  ⚠️ **Didactic only**: in real experiments, mutation is applied automatically inside the evolution loop.
-
-- `03_population_mutation.py`:
-  Applies mutation across all individuals of the initialized population.<br>
-  ⚠️ **Illustration only**: in practice, this is handled automatically by `pop.run()` or `run_one_generation()`.
-
-- `04_fitness.py`:  
-  Demonstrates how to define and register a **custom fitness function**.  
-  Uses `resume_or_create(...)` to create or resume a run and executes the evolution loop with `pop.run()`.  
-  This example shows the canonical workflow for actual experiments.
-
 
 ### Notes
-These examples are **minimal and didactic**.
+These examples are **minimal and for illustration purposes.**
 They are meant to illustrate concepts step by step:
 - How EvoLib represents populations and individuals
 - How mutation affects parameters

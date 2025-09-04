@@ -37,7 +37,7 @@ def print_population(pop: Pop, title: str) -> None:
         print(f"  Indiv {i}: Parameter = {vector}, Fitness = {indiv.fitness:.6f}")
 
 
-# Automatically creates and initializes the population.
+# Create and initialize the population.
 pop = Pop(config_path="population.yaml", fitness_function=my_fitness)
 
 # Step 1: Evaluate initial fitness
@@ -48,6 +48,6 @@ print_population(pop, "Initial Parents")
 evolve_mu_plus_lambda(pop)
 print_population(pop, "After Mu Plus Lambda")
 
-# Step 2: Apply Mu Comma Lambda strategy
+# Step 3: Apply Mu Comma Lambda strategy
 evolve_mu_comma_lambda(pop)
 print_population(pop, "After Mu Comma Lambda")
