@@ -32,6 +32,10 @@ class Indiv:
     Attributes:
         para (Any): Parameters of the individual (e.g., list, array).
         fitness (float): Fitness value of the individual.
+            None means the individual has not yet been evaluated.
+        is_evaluated (bool): Flag indicating whether the individual's fitness
+            has been evaluated. False after initialization, True after the first
+            call to a fitness evaluation.
         age (int): Current age of the individual.
         max_age (Optional[int]): Maximum allowed age of the individual.
         origin (str): Origin of the individual ('parent' or 'child').
@@ -60,7 +64,7 @@ class Indiv:
             para (Any, optional): Parameter values of the individual. Default: None.
         """
         self.para = para
-        self.fitness: float | None
+        self.fitness: float | None = None
         self.is_evaluated: bool = False
         self.age = 0
         self.max_age = 0
