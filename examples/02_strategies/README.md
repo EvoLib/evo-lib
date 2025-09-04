@@ -33,108 +33,111 @@ according to your chosen components.
 
 #### `01_step_by_step_evolution.py`:
 
-    Manually constructs a single generation loop.  
-    ⚠️ For illustration only; in practice, use `pop.run()`.
-    ```
-    $ python 01_step_by_step_evolution.py
-    0) Evaluate parents :
-      Indiv 0: [...]
-      Indiv 1: [...]
+Manually constructs a single generation loop.  
+⚠️ For illustration only; in practice, use `pop.run()`.
 
-    1) Update parameters:
-      Indiv 0: [...]
-      Indiv 1: [...]
+```
+$ python 01_step_by_step_evolution.py
+0) Evaluate parents :
+  Indiv 0: [...]
+  Indiv 1: [...]
 
-    2) Reproduction (clone parents -> offspring):
-      Indiv 0: [...]
-      Indiv 1: [...]
+1) Update parameters:
+  Indiv 0: [...]
+  Indiv 1: [...]
 
-    3) Crossover:
-      Indiv 0: [...]
-      Indiv 1: [...]
+2) Reproduction (clone parents -> offspring):
+  Indiv 0: [...]
+  Indiv 1: [...]
 
-    4) Mutation:
-      Indiv 0: [...]
-      Indiv 1: [...]
+3) Crossover:
+  Indiv 0: [...]
+  Indiv 1: [...]
 
-    5) Evaluate offspring:
-      Indiv 0: [...]
-      Indiv 1: [...]
+4) Mutation:
+  Indiv 0: [...]
+  Indiv 1: [...]
 
-    6) Replacement:
-      Indiv 0: [...]
-      Indiv 1: [...]
+5) Evaluate offspring:
+  Indiv 0: [...]
+  Indiv 1: [...]
 
-    Population: Gen:   1 Fit: 0.00026955
-    Best Indiv age: 0
-    Max Generation: 10
-    Number of Indivs: 2
-    Number of Elites: 0
-    Population fitness: 0.002
-    Worst Indiv: 0.004
-    ```
-      
+6) Replacement:
+  Indiv 0: [...]
+  Indiv 1: [...]
+
+Population: Gen:   1 Fit: 0.00026955
+Best Indiv age: 0
+Max Generation: 10
+Number of Indivs: 2
+Number of Elites: 0
+Population fitness: 0.002
+Worst Indiv: 0.004
+```
+  
 #### `02_mu_lambda_step.py`:  
 
-    Demonstrates `(μ + λ)` and `(μ , λ)` strategies once, printing parents and offspring.  
-    ⚠️ Operators are called directly for clarity.
-    ```
-    $ python 02_mu_lambda_step.py
-    Initial Parents
-      Indiv 0: Parameter = [-0.09826022], Fitness = 0.000093
-      Indiv 1: Parameter = [0.91075599], Fitness = 0.688031
+Demonstrates `(μ + λ)` and `(μ , λ)` strategies once, printing parents and offspring.  
+⚠️ Operators are called directly for clarity.
 
-    After Mu Plus Lambda
-      Indiv 0: Parameter = [-0.06251137], Fitness = 0.000015
-      Indiv 1: Parameter = [-0.0858429], Fitness = 0.000054
+```
+$ python 02_mu_lambda_step.py
+Initial Parents
+  Indiv 0: Parameter = [-0.09826022], Fitness = 0.000093
+  Indiv 1: Parameter = [0.91075599], Fitness = 0.688031
 
-    After Mu Comma Lambda
-      Indiv 0: Parameter = [-0.05951417], Fitness = 0.000013
-      Indiv 1: Parameter = [-0.06225795], Fitness = 0.000015
-    ```
+After Mu Plus Lambda
+  Indiv 0: Parameter = [-0.06251137], Fitness = 0.000015
+  Indiv 1: Parameter = [-0.0858429], Fitness = 0.000054
+
+After Mu Comma Lambda
+  Indiv 0: Parameter = [-0.05951417], Fitness = 0.000013
+  Indiv 1: Parameter = [-0.06225795], Fitness = 0.000015
+```
 
 #### `03_mu_lambda.py`:
 
-    Applies `(μ + λ)` repeatedly over several steps. Shows how the population
-    evolves across generations.
-    ```
-    $ python 03_mu_lambda.py
-    Initial Parents
-      Indiv 0: [...]
-      Indiv 1: [...]
+Applies `(μ + λ)` repeatedly over several steps. Shows how the population
+evolves across generations.
 
-    After Mu Plus Lambda - Step 1
-      Indiv 0: [...]
-      Indiv 1: [...]
+```
+$ python 03_mu_lambda.py
+Initial Parents
+  Indiv 0: [...]
+  Indiv 1: [...]
 
-    After Mu Plus Lambda - Step 2
-      [...]
+After Mu Plus Lambda - Step 1
+  Indiv 0: [...]
+  Indiv 1: [...]
 
-    After Mu Plus Lambda - Step 3
-      [...]
-    ```
+After Mu Plus Lambda - Step 2
+  [...]
+
+After Mu Plus Lambda - Step 3
+  [...]
+```
 
 #### `04_flexible.py`:  
-    Shows how to configure `evolution.strategy: flexible` and explicitly combine
-    selection, mutation, crossover, and replacement.  
-    Highlights EvoLib’s modular design.  
-    ⚠️ Loop with `evolve_flexible` is for teaching; in normal runs use `pop.run()`.
-    ```
-    $ python 04_flexible.py
-    Initial Parents
-      Indiv 0: [...]
-      Indiv 1: [...]
-      Indiv 2: [...]
+Shows how to configure `evolution.strategy: flexible` and explicitly combine
+selection, mutation, crossover, and replacement.  
+Highlights EvoLib’s modular design.  
+⚠️ Loop with `evolve_flexible` is for teaching; in normal runs use `pop.run()`.
+```
+$ python 04_flexible.py
+Initial Parents
+  Indiv 0: [...]
+  Indiv 1: [...]
+  Indiv 2: [...]
 
-    Population: Gen:   1 Fit: 0.123456
-    Population: Gen:   2 Fit: 0.101234
-    [...]
+Population: Gen:   1 Fit: 0.123456
+Population: Gen:   2 Fit: 0.101234
+[...]
 
-    Final Population
-      Indiv 0: [...]
-      Indiv 1: [...]
-      Indiv 2: [...]
-    ```
+Final Population
+  Indiv 0: [...]
+  Indiv 1: [...]
+  Indiv 2: [...]
+```
 
 ### See Also
 - [`../03_comparisons/`](../03_comparisons) — side-by-side comparisons of strategies
