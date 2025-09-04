@@ -1,7 +1,13 @@
 """
 Example 02-02 - Mu Lambda Step
 
-This example demonstrates a basic Mu Plus Lambda and Mu Comma Lambda evolution step:
+This example demonstrates a basic Mu Plus Lambda and Mu Comma Lambda evolution step.
+
+Didactic only:
+    - Operators (`evolve_mu_plus_lambda`, `evolve_mu_comma_lambda`) are called directly
+      to reveal their mechanics.
+    - In real experiments, strategies are selected via the YAML config and executed
+      automatically inside `pop.run()`. Direct calls are not required in practice.
 
 Requirements:
     'population.yaml' must be present in the current working directory
@@ -27,34 +33,21 @@ def my_fitness(indiv: Indiv) -> None:
 def print_population(pop: Pop, title: str) -> None:
     print(f"\n{title}")
     for i, indiv in enumerate(pop.indivs):
-        print(
-            f"  Indiv {i}: Parameter = {indiv.para['test-vector'].vector}, "
-            f"Fitness = {indiv.fitness:.6f}"
-        )
+        vector = indiv.para["test-vector"].vector
+        print(f"  Indiv {i}: Parameter = {vector}, Fitness = {indiv.fitness:.6f}")
 
 
 # Automatically creates and initializes the population.
-# Note: Use initialize=False to delay or customize population setup.
-pop = Pop(config_path="population.yaml")
+pop = Pop(config_path="population.yaml", fitness_function=my_fitness)
 
-
-# Initialize population
-# pop.initialize_population()
-
-# Set fitnessfuction
-pop.set_functions(fitness_function=my_fitness)
-
-# Evaluate fitness
+# Step 1: Evaluate initial fitness
 pop.evaluate_fitness()
-
 print_population(pop, "Initial Parents")
 
-# Mu Plus Lambda
+# Step 2: Apply Mu Plus Lambda strategy
 evolve_mu_plus_lambda(pop)
-
 print_population(pop, "After Mu Plus Lambda")
 
-# Mu Komma Lambda
+# Step 2: Apply Mu Comma Lambda strategy
 evolve_mu_comma_lambda(pop)
-
 print_population(pop, "After Mu Comma Lambda")

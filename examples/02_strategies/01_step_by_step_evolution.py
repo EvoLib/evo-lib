@@ -70,35 +70,35 @@ def print_indivs(msg: str, indivs: list[Indiv]) -> None:
 # Create and initialize the population
 pop = Pop(config_path="01_step_by_step_evolution.yaml", fitness_function=my_fitness)
 
-# 0) Evaluate parents (if needed)
+# Step 0) Evaluate parents (if needed)
 pop.evaluate_fitness()
 print_indivs("0) Evaluate parents :", pop.indivs)
 
-# 1) Update per-generation parameters (mutation/crossover controls)
+# Step 1) Update per-generation parameters (mutation/crossover controls)
 pop.update_parameters()
 print_indivs("1) Update parameters: ", pop.indivs)
 
-# 2) Produce offspring by cloning
+# Step 2) Produce offspring by cloning
 offspring = generate_cloned_offspring(pop.indivs, pop.offspring_pool_size)
 print_indivs("2) Reproduction (clone parents -> offspring): ", offspring)
 
-# 3) Crossover pairs (in-place)
+# Step 3) Crossover pairs (in-place)
 crossover_offspring(pop, offspring)
 print_indivs("3) Crossover: ", offspring)
 
-# 4) Mutation (in-place)
+# Step 4) Mutation (in-place)
 mutate_offspring(pop, offspring)
 print_indivs("4) Mutation: ", offspring)
 
-# 5) Evaluate offspring
+# Step 5) Evaluate offspring
 pop.evaluate_indivs(offspring)
 print_indivs("5) Evaluate offspring: ", offspring)
 
-# 6) Replacement (μ from parents + offspring)
+# Step 6) Replacement (μ from parents + offspring)
 replace_mu_lambda(pop, pop.indivs + offspring)
 print_indivs("6) Replacement: ", pop.indivs)
 
-# 7) Stats / logging (increments generation)
+# Step 7) Stats / logging (increments generation)
 pop.update_statistics()
 
 print()
