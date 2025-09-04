@@ -31,9 +31,10 @@ What matters is the **pattern**:
 - With `flexible`, you can see how the operator pipeline evolves the population
 according to your chosen components.
 
-- `01_step_by_step_evolution.py`:  
-  Manually constructs a single generation loop.  
-  ⚠️ For illustration only; in practice, use `pop.run()`.
+#### `01_step_by_step_evolution.py`:
+
+    Manually constructs a single generation loop.  
+    ⚠️ For illustration only; in practice, use `pop.run()`.
     ```
     $ python 01_step_by_step_evolution.py
     0) Evaluate parents :
@@ -73,9 +74,10 @@ according to your chosen components.
     Worst Indiv: 0.004
     ```
       
-- `02_mu_lambda_step.py`:  
-  Demonstrates `(μ + λ)` and `(μ , λ)` strategies once, printing parents and offspring.  
-  ⚠️ Operators are called directly for clarity.
+#### `02_mu_lambda_step.py`:  
+
+    Demonstrates `(μ + λ)` and `(μ , λ)` strategies once, printing parents and offspring.  
+    ⚠️ Operators are called directly for clarity.
     ```
     $ python 02_mu_lambda_step.py
     Initial Parents
@@ -91,9 +93,10 @@ according to your chosen components.
       Indiv 1: Parameter = [-0.06225795], Fitness = 0.000015
     ```
 
-- `03_mu_lambda.py`:  
-  Applies `(μ + λ)` repeatedly over several steps. Shows how the population
-  evolves across generations.
+#### `03_mu_lambda.py`:
+
+    Applies `(μ + λ)` repeatedly over several steps. Shows how the population
+    evolves across generations.
     ```
     $ python 03_mu_lambda.py
     Initial Parents
@@ -111,11 +114,11 @@ according to your chosen components.
       [...]
     ```
 
-- `04_flexible.py`:  
-  Shows how to configure `evolution.strategy: flexible` and explicitly combine
-  selection, mutation, crossover, and replacement.  
-  Highlights EvoLib’s modular design.  
-  ⚠️ Loop with `evolve_flexible` is for teaching; in normal runs use `pop.run()`.
+#### `04_flexible.py`:  
+    Shows how to configure `evolution.strategy: flexible` and explicitly combine
+    selection, mutation, crossover, and replacement.  
+    Highlights EvoLib’s modular design.  
+    ⚠️ Loop with `evolve_flexible` is for teaching; in normal runs use `pop.run()`.
     ```
     $ python 04_flexible.py
     Initial Parents
@@ -132,7 +135,6 @@ according to your chosen components.
       Indiv 1: [...]
       Indiv 2: [...]
     ```
-
 
 ### See Also
 - [`../03_comparisons/`](../03_comparisons) — side-by-side comparisons of strategies
