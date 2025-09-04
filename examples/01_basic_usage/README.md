@@ -13,6 +13,34 @@ They illustrate how populations are created, mutated, and evaluated
 ## Prerequisites
 None. This is the ideal entry point for new users.
 
+## Configuration
+
+All examples load their initial population from a YAML config file.  
+A minimal example (`population.yaml`) is provided here for illustration:
+
+```yaml
+parent_pool_size: 2
+offspring_pool_size: 4
+max_generations: 10
+max_indiv_age: 0
+num_elites: 0
+
+evolution:
+  strategy: mu_plus_lambda
+
+modules:
+  test-vector:
+    type: vector
+    initializer: random_vector
+    dim: 1
+    bounds: [-1.0, 1.0]
+
+    mutation:
+      strategy: "constant"
+      strength: 0.01
+      probability: 1.0
+```
+
 ## Expected Output
 
 Running these scripts will print the population status to the console:
