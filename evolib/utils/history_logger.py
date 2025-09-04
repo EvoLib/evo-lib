@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: MIT
+from typing import Any, Dict, List
+
 import pandas as pd
 
 
@@ -43,6 +45,10 @@ class HistoryLogger:
             except (ValueError, TypeError):
                 pass  # leave non-numeric columns untouched
         return df
+
+    def to_dicts(self) -> List[Dict[str, Any]]:
+        """Returns the full history as a list of dictionaries."""
+        return self.to_dataframe().to_dict(orient="records")
 
     def save_csv(self, path: str) -> None:
         """

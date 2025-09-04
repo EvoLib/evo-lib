@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import math
 import time
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -172,6 +172,11 @@ class Pop:
         """
         return self.history_logger.to_dataframe()
 
+    @property
+    def history_dicts(self) -> List[Dict[str, Any]]:
+        """Return history as list of dicts (pandas-free)."""
+        return self.history_logger.to_dicts()
+
     def initialize_population(
         self, initializer: Callable[["Pop"], Any] | None = None
     ) -> None:
@@ -294,6 +299,36 @@ class Pop:
 
         if verbosity == 10:
             self.print_indivs()
+
+    def print_history(
+        self, last_n: int | None = None, columns: list[str] | None = None
+    ) -> None:
+        """
+        Prints the evolution history in a simple tabular format using pandas.
+
+        Args:
+            last_n: If set, only print the last N generations.
+            columns: If set, restrict output to specific columns.
+        """
+        df = self.history_df
+
+        if columns is None:
+            columns = [
+                "generation",
+                "best_fitness",
+                "worst_fitness",
+                "mean_fitness",
+                "std_fitness",
+                "iqr_fitness",
+            ]
+
+        df = df[columns]
+
+        if last_n is not None:
+            df = df.tail(last_n)
+
+        print("\nEvolution History:")
+        print(df.to_string(index=False))
 
     def print_indivs(self) -> None:
         """Print the status of all individuals in the population."""
