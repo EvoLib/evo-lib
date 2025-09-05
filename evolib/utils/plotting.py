@@ -12,7 +12,8 @@ from __future__ import annotations
 
 import os
 import tempfile
-from typing import TYPE_CHECKING, Optional, Sequence, Union
+import warnings
+from typing import Optional, Sequence, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,8 +21,7 @@ import pandas as pd
 from evonet.core import Nnet
 from PIL import Image
 
-if TYPE_CHECKING:
-    from evolib import Pop
+from evolib.core.population import Pop
 
 PopOrDf = Union["Pop", pd.DataFrame]
 
@@ -31,7 +31,7 @@ def _as_history_df(obj: PopOrDf) -> pd.DataFrame:
 
 
 def plot_history(
-    histories: Union[pd.DataFrame, list[pd.DataFrame]],
+    histories: Sequence[PopOrDf],
     *,
     metrics: list[str] = ["best_fitness"],
     labels: Optional[list[str]] = None,
@@ -64,29 +64,34 @@ def plot_history(
         with_std (bool): If True, plot standard deviation shading when available.
         figsize (tuple): Size of the figure (width, height).
     """
+
     # Normalize input to list
-    if isinstance(histories, pd.DataFrame):
+    if isinstance(histories, Pop):
+        histories = [histories]
+    elif isinstance(histories, pd.DataFrame):
         histories = [histories]
 
+    dfs = [_as_history_df(h) for h in histories]
+
     if labels is None:
-        labels = [f"Run {i+1}" for i in range(len(histories))]
+        labels = [f"Run {i+1}" for i in range(len(dfs))]
 
     plt.figure(figsize=figsize)
 
     if log_y:
         plt.yscale("log")
 
-    for hist, label in zip(histories, labels):
+    for hist, label in zip(dfs, labels):
         generations = hist["generation"]
 
         for metric in metrics:
             if metric not in hist.columns:
-                print(
+                warnings.warn(
                     f"Metric '{metric}' not found in history for '{label}' — skipping."
                 )
                 continue
 
-            line_label = f"{label} - {metric}" if len(histories) > 1 else metric
+            line_label = f"{label} - {metric}" if len(dfs) > 1 else metric
             plt.plot(generations, hist[metric], label=line_label)
 
             # Optional standard deviation band if available
@@ -111,6 +116,7 @@ def plot_history(
     plt.tight_layout()
 
     if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
         plt.savefig(save_path, dpi=300)
         print(f"Plot saved to '{save_path}'")
 
@@ -121,7 +127,7 @@ def plot_history(
 
 
 def plot_fitness(
-    history: pd.DataFrame,
+    history: PopOrDf,
     *,
     title: str = "Fitness over Generations",
     show: bool = True,
@@ -129,11 +135,15 @@ def plot_fitness(
     save_path: Optional[str] = None,
 ) -> None:
     """Wrapper to plot best, mean, and median fitness with optional std band."""
+
+    df = _as_history_df(history)
+
     plot_history(
-        history,
+        df,
         metrics=["best_fitness", "mean_fitness", "median_fitness"],
         title=title,
         log_y=log,
+        ylabel="Fitness",
         save_path=save_path,
         show=show,
         with_std=True,
@@ -141,7 +151,7 @@ def plot_fitness(
 
 
 def plot_diversity(
-    history: pd.DataFrame,
+    history: PopOrDf,
     *,
     title: str = "Population Diversity",
     show: bool = True,
@@ -149,15 +159,19 @@ def plot_diversity(
     save_path: Optional[str] = None,
 ) -> None:
     """Wrapper to plot diversity over generations."""
-    if "diversity" not in history.columns:
-        print("Column 'diversity' not found in history.")
+
+    df = _as_history_df(history)
+
+    if "diversity" not in df.columns:
+        warnings.warn("Column 'diversity' not found in history.")
         return
 
     plot_history(
-        history,
+        df,
         metrics=["diversity"],
         title=title,
         log_y=log,
+        ylabel="Diversity",
         save_path=save_path,
         show=show,
         with_std=False,
@@ -165,7 +179,7 @@ def plot_diversity(
 
 
 def plot_mutation_trends(
-    history: pd.DataFrame,
+    history: PopOrDf,
     *,
     title: str = "Mutation Parameter Trends",
     show: bool = True,
@@ -173,21 +187,25 @@ def plot_mutation_trends(
     save_path: Optional[str] = None,
 ) -> None:
     """Wrapper to plot mutation and/or strength trends over time."""
+
+    df = _as_history_df(history)
+
     metrics = []
-    if "mutation_probability_mean" in history.columns:
+    if "mutation_probability_mean" in df.columns:
         metrics.append("mutation_probability_mean")
-    if "mutation_strength_mean" in history.columns:
+    if "mutation_strength_mean" in df.columns:
         metrics.append("mutation_strength_mean")
 
     if not metrics:
-        print("No mutation-related columns found in history.")
+        warnings.warn("No mutation-related columns found in history.")
         return
 
     plot_history(
-        history,
+        df,
         metrics=metrics,
         title=title,
         log_y=log,
+        ylabel="Mutation Parameters",
         save_path=save_path,
         show=show,
         with_std=False,
@@ -204,7 +222,9 @@ def plot_fitness_comparison(
     log: bool = False,
     save_path: Optional[str] = None,
 ) -> None:
-    """Wrapper to compare a fitness metric across multiple runs."""
+
+    if not isinstance(histories, (list, tuple)):
+        raise TypeError("histories must be a List or a Tuple")
 
     dfs = [_as_history_df(h) for h in histories]
 
@@ -216,10 +236,10 @@ def plot_fitness_comparison(
             filtered.append(hist)
             filtered_labels.append(labels[i] if labels else f"Run {i+1}")
         else:
-            print(f"Metric '{metric}' not found in run {i+1}. Skipping.")
+            warnings.warn(f"Metric '{metric}' not found in run {i+1}. Skipping.")
 
     if not filtered:
-        print("No valid runs to plot.")
+        warnings.warn("No valid runs to plot.")
         return
 
     plot_history(
@@ -280,7 +300,9 @@ def plot_approximation(
     plt.tight_layout()
 
     if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
         plt.savefig(save_path, dpi=300)
+        print(f"Plot saved to '{save_path}'")
 
     if show:
         plt.show()
