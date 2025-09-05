@@ -23,8 +23,9 @@ After the runs, best fitness trajectories are plotted to visualize and compare
 selection performance.
 """
 
+import random
+
 import numpy as np
-import pandas as pd
 
 from evolib import (
     Indiv,
@@ -33,6 +34,10 @@ from evolib import (
     plot_fitness_comparison,
     rastrigin,
 )
+
+# Use a fixed random seed for reproducibility of plots
+random.seed(42)
+np.random.seed(42)
 
 
 # Fitness function
@@ -43,14 +48,10 @@ def my_fitness(indiv: Indiv) -> None:
 
 
 # Evolution run
-def run(config_path: str) -> pd.DataFrame:
-    pop = Pop(config_path)
-    pop.set_functions(fitness_function=my_fitness)
-
-    for _ in range(pop.max_generations):
-        pop.run_one_generation()
-
-    return pop.history_logger.to_dataframe()
+def run(config_path: str) -> Pop:
+    pop = Pop(config_path, fitness_function=my_fitness)
+    pop.run(verbosity=1)
+    return pop
 
 
 # Labels & runs
@@ -68,8 +69,7 @@ selection_strategies = {
 runs = {}
 for label, config in selection_strategies.items():
     print(f"running: {label}")
-    df = run(config)
-    runs[label] = df
+    runs[label] = run(config)
 
 # Final plot
 plot_fitness_comparison(

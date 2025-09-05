@@ -79,7 +79,6 @@ def adapt_mutation_strength(
     if params.mutation_strength is None:
         raise ValueError("mutation_strength must not be None")
 
-    print(f"tau: {params.tau}")
     if params.tau is None:
         raise ValueError("tau must not be None for adaptive mutation strength")
 

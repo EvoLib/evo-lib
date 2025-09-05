@@ -1,4 +1,4 @@
-## 02_strategies - Evolution Strategies
+# 02_strategies - Evolution Strategies
 
 This folder demonstrates how different **evolution strategies** are applied in EvoLib.  
 The focus here is on showing the mechanics of `(μ + λ)`, `(μ , λ)`, and flexible
@@ -31,7 +31,7 @@ What matters is the **pattern**:
 - With `flexible`, you can see how the operator pipeline evolves the population
 according to your chosen components.
 
-#### `01_step_by_step_evolution.py`:
+### `01_step_by_step_evolution.py`:
 
 Manually constructs a single generation loop.  
 ⚠️ For illustration only; in practice, use `pop.run()`.
@@ -75,7 +75,7 @@ Population fitness: 0.002
 Worst Indiv: 0.004
 ```
   
-#### `02_mu_lambda_step.py`:  
+### `02_mu_lambda_step.py`:  
 
 Demonstrates `(μ + λ)` and `(μ , λ)` strategies once, printing parents and offspring.  
 ⚠️ Operators are called directly for clarity.
@@ -95,7 +95,7 @@ After Mu Comma Lambda
   Indiv 1: Parameter = [-0.06225795], Fitness = 0.000015
 ```
 
-#### `03_mu_lambda.py`:
+### `03_mu_lambda.py`:
 
 Applies `(μ + λ)` repeatedly over several steps. Shows how the population
 evolves across generations.
@@ -117,7 +117,7 @@ After Mu Plus Lambda - Step 3
   [...]
 ```
 
-#### `04_flexible.py`:  
+### `04_flexible.py`:  
 Shows how to configure `evolution.strategy: flexible` and explicitly combine
 selection, mutation, crossover, and replacement.  
 Highlights EvoLib’s modular design.  

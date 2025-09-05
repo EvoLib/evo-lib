@@ -18,6 +18,7 @@ from evolib import (
     rastrigin,
 )
 
+# Use a fixed random seed for reproducibility of plots
 random.seed(42)
 np.random.seed(42)
 
@@ -30,13 +31,9 @@ def my_fitness(indiv: Indiv) -> None:
 
 
 def run(config_path: str) -> pd.DataFrame:
-    pop = Pop(config_path)
-    pop.set_functions(fitness_function=my_fitness)
-
-    for _ in range(pop.max_generations):
-        pop.run_one_generation()
-
-    return pop.history_logger.to_dataframe()
+    pop = Pop(config_path, fitness_function=my_fitness)
+    pop.run()
+    return pop
 
 
 # Variation over num_parents

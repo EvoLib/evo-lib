@@ -1,4 +1,4 @@
-## 01_basic_usage - Getting Started
+# 01_basic_usage - Getting Started
 
 This folder provides introductory examples to demonstrate the basic usage of EvoLib.
 They illustrate how populations are created, mutated, and evaluated
@@ -50,7 +50,7 @@ Running these scripts will print the population status to the console:
 > and fitness values should gradually improve as evolution progresses.
 
 
-#### `01_getting_started.py`:  
+### `01_getting_started.py`:  
 
 Minimal example - load a population from a YAML config and print its status.  
 
@@ -65,7 +65,7 @@ Population fitness: 0.000
 Worst Indiv: 0.000
 ```
 
-#### `02_mutation.py`:
+### `02_mutation.py`:
 
 Shows how to create a single individual, apply mutation manually, and inspect parameter changes.<br>
 ⚠️ **Illustration only**: in real experiments, mutation is applied automatically inside the evolution loop.
@@ -76,7 +76,7 @@ Before mutation: {'test-vector': 'Vector=[-0.419, 0.37, 0.944, 0.284] | Global m
 After mutation:  {'test-vector': 'Vector=[-0.405, 0.368, 0.932, 0.284] | Global mutation_strength=0.0100'}
 ```
 
-#### `03_population_mutation.py`:
+### `03_population_mutation.py`:
 
 Applies mutation across all individuals of the initialized population.<br>
 ⚠️ **Illustration only**: in practice, this is handled automatically by `pop.run()` or `run_one_generation()`.
@@ -93,7 +93,7 @@ After mutation:
   [...]
 ```
 
-#### `04_fitness.py`:  
+### `04_fitness.py`:  
 
 Demonstrates how to define and register a **custom fitness function**.  
 Uses `resume_or_create(...)` to create or resume a run and executes the evolution loop with `pop.run()`.  

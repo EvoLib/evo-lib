@@ -31,7 +31,7 @@ def _as_history_df(obj: PopOrDf) -> pd.DataFrame:
 
 
 def plot_history(
-    histories: Sequence[PopOrDf],
+    histories: Sequence[PopOrDf] | Pop,
     *,
     metrics: list[str] = ["best_fitness"],
     labels: Optional[list[str]] = None,

@@ -16,9 +16,15 @@ Key Elements:
 - Results are saved to './figures/05_adaptive_global.png'
 """
 
-import pandas as pd
+import random
+
+import numpy as np
 
 from evolib import Indiv, Pop, mse_loss, plot_fitness_comparison, rosenbrock
+
+# Use a fixed random seed for reproducibility of plots
+random.seed(42)
+np.random.seed(42)
 
 
 def my_fitness(indiv: Indiv) -> None:
@@ -27,30 +33,20 @@ def my_fitness(indiv: Indiv) -> None:
     indiv.fitness = mse_loss(expected, predicted)
 
 
-def run_experiment(config_path: str) -> pd.DataFrame:
-    pop = Pop(config_path)
-    pop.set_functions(fitness_function=my_fitness)
-
-    for _ in range(pop.max_generations):
-        pop.run_one_generation()
-
-    pd.set_option("display.max_rows", None)
-    history = pop.history_logger.to_dataframe()
-    print(history)
-
-    print(f"Best Indiduum Parameter: {pop.indivs[0].para['test-vector'].vector}")
-
-    return pop.history_logger.to_dataframe()
+def run_experiment(config_path: str) -> Pop:
+    pop = Pop(config_path, fitness_function=my_fitness)
+    pop.run(verbosity=1)
+    return pop
 
 
 # Run multiple experiments
-history_mutation_constant = run_experiment(config_path="mutation_constant.yaml")
-history_mutation_adaptive = run_experiment(config_path="05_adaptive_global.yaml")
+pop_mutation_constant = run_experiment(config_path="mutation_constant.yaml")
+pop_mutation_adaptive = run_experiment(config_path="05_adaptive_global.yaml")
 
 
 # Compare fitness progress
 plot_fitness_comparison(
-    histories=[history_mutation_constant, history_mutation_adaptive],
+    histories=[pop_mutation_constant, pop_mutation_adaptive],
     labels=["Mutation rate static", "Mutation rate adaptive"],
     metric="best_fitness",
     title="Best Fitness Comparison (constant vs adaptive)",

@@ -28,6 +28,7 @@ from evolib import (
     rastrigin,
 )
 
+# Use a fixed random seed for reproducibility of plots
 random.seed(42)
 np.random.seed(42)
 
@@ -39,13 +40,9 @@ def my_fitness(indiv: Indiv) -> None:
 
 
 def run(config_path: str) -> pd.DataFrame:
-    pop = Pop(config_path)
-    pop.set_functions(fitness_function=my_fitness)
-
-    for _ in range(pop.max_generations):
-        pop.run_one_generation()
-
-    return pop.history_logger.to_dataframe()
+    pop = Pop(config_path, fitness_function=my_fitness)
+    pop.run()
+    return pop
 
 
 # Mapping label to config path
@@ -60,8 +57,7 @@ parameter_variants = {
 runs = {}
 for label, path in parameter_variants.items():
     print(f"Running {label}")
-    df = run(path)
-    runs[label] = df
+    runs[label] = run(path)
 
 # Plot results
 plot_fitness_comparison(

@@ -5,8 +5,16 @@ This example demonstrates how to run the same optimization with different settin
 (e.g. mutation strength) and compare their results using the fitness history.
 """
 
+import random
+
+import numpy as np
+
 from evolib import Indiv, Population, mse_loss, simple_quadratic
 from evolib.utils.plotting import plot_fitness_comparison
+
+# Use a fixed random seed for reproducibility of plots
+random.seed(42)
+np.random.seed(42)
 
 
 def my_fitness(indiv: Indiv) -> None:
@@ -38,5 +46,5 @@ plot_fitness_comparison(
     metric="best_fitness",
     title="Best Fitness Comparison (Low vs High Mutation)",
     show=True,
-    save_path="./figures/03_Compare_Runs.png",
+    save_path="./figures/03_compare_runs.png",
 )

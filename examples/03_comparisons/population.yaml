@@ -13,8 +13,8 @@ evolution:
 modules:
   test-vector:
     type: vector
-    initializer: random_vector
-    dim: 1
+    initializer: fixed_vector
+    values: [1.0]
     bounds: [-1.0, 1.0]
 
     mutation:

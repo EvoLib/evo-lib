@@ -1,9 +1,9 @@
 # Sample configuration for 11_crossover_comparison.py
 
-parent_pool_size: 50
-offspring_pool_size: 100
+parent_pool_size: 20
+offspring_pool_size: 40
 
-max_generations: 100
+max_generations: 20
 max_indiv_age: 0
 num_elites: 1
 

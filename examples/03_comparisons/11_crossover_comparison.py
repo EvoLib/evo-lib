@@ -10,8 +10,9 @@ Mutation is disabled to isolate the effects of crossover.
 After the runs, the best fitness values over time are plotted for comparison.
 """
 
+import random
+
 import numpy as np
-import pandas as pd
 
 from evolib import (
     Indiv,
@@ -19,6 +20,10 @@ from evolib import (
     mse_loss,
     plot_fitness_comparison,
 )
+
+# Use a fixed random seed for reproducibility of plots
+random.seed(42)
+np.random.seed(42)
 
 
 # Fitness: distance to target vector
@@ -29,14 +34,11 @@ def my_fitness(indiv: Indiv) -> None:
 
 
 # Evolution run
-def run(config_path: str) -> pd.DataFrame:
-    pop = Pop(config_path)
-    pop.set_functions(fitness_function=my_fitness)
+def run(config_path: str) -> Pop:
+    pop = Pop(config_path, fitness_function=my_fitness)
+    pop.run()
 
-    for _ in range(pop.max_generations):
-        pop.run_one_generation()
-
-    return pop.history_logger.to_dataframe()
+    return pop
 
 
 # Crossover operators to compare
@@ -50,8 +52,7 @@ crossover_strategies = {
 runs = {}
 for label, config in crossover_strategies.items():
     print(f"running: {label}")
-    df = run(config)
-    runs[label] = df
+    runs[label] = run(config)
 
 # Plot results
 plot_fitness_comparison(

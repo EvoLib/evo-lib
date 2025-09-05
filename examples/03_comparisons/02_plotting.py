@@ -6,11 +6,10 @@ It demonstrates how to:
 
 - Access history data from the population
 - Plot fitness statistics over generations
-- Interpret trends using matplotlib
 """
 
 from evolib import Indiv, Pop, mse_loss, simple_quadratic
-from evolib.utils.plotting import plot_fitness
+from evolib.utils.plotting import plot_fitness, plot_history
 
 
 def my_fitness(indiv: Indiv) -> None:
@@ -20,15 +19,20 @@ def my_fitness(indiv: Indiv) -> None:
 
 
 # Setup
-pop = Pop(config_path="population.yaml")
-pop.set_functions(fitness_function=my_fitness)
+pop = Pop(config_path="population.yaml", fitness_function=my_fitness)
 
-# Evolution
-for _ in range(pop.max_generations):
-    pop.run_one_generation()
+# Run evolution
+pop.run(verbosity=0)
 
-# History to DataFrame
-history = pop.history_logger.to_dataframe()
+# 1. Basic plotting (default metrics: best, mean, and median fitness)
+plot_fitness(pop, show=True, save_path="./figures/02_plotting.png")
 
-# Plotting
-plot_fitness(history, show=True, save_path="./figures/02_plotting.png")
+# 2. Custom plotting using plot_history
+# Shows how to specify metrics explicitly (e.g. diversity)
+plot_history(
+    pop,
+    metrics=["best_fitness", "mean_fitness", "diversity"],
+    title="Fitness and Diversity Over Time",
+    save_path="figures/02_plotting_custom.png",
+    show=True,
+)

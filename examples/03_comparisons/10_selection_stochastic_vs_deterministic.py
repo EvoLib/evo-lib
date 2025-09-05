@@ -34,7 +34,7 @@ from evolib import (
     rastrigin,
 )
 
-# Ensure reproducibility
+# Use a fixed random seed for reproducibility of plots
 np.random.seed(42)
 random.seed(42)
 
@@ -46,13 +46,9 @@ def fitness_function(indiv: Indiv) -> None:
 
 
 def run(config_path: str) -> pd.DataFrame:
-    pop = Pop(config_path)
-    pop.set_functions(fitness_function=fitness_function)
-
-    for _ in range(pop.max_generations):
-        pop.run_one_generation()
-
-    return pop.history_logger.to_dataframe()
+    pop = Pop(config_path, fitness_function=fitness_function)
+    pop.run()
+    return pop
 
 
 # Selection variants to compare
@@ -66,8 +62,7 @@ config_paths = {
 histories = {}
 for label, path in config_paths.items():
     print(f"Running {label} selection...")
-    df = run(path)
-    histories[label] = df
+    histories[label] = run(path)
 
 # Plot fitness comparison
 plot_fitness_comparison(

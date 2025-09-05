@@ -6,9 +6,15 @@ with a static mutation strength. Each individual has its own mutation strength a
 value that adapts over time.
 """
 
-import pandas as pd
+import random
+
+import numpy as np
 
 from evolib import Indiv, Pop, mse_loss, plot_fitness_comparison, rosenbrock
+
+# Use a fixed random seed for reproducibility of plots
+random.seed(42)
+np.random.seed(42)
 
 
 def my_fitness(indiv: Indiv) -> None:
@@ -17,23 +23,19 @@ def my_fitness(indiv: Indiv) -> None:
     indiv.fitness = mse_loss(expected, predicted)
 
 
-def run_experiment(config_path: str) -> pd.DataFrame:
-    pop = Pop(config_path)
-    pop.set_functions(fitness_function=my_fitness)
-
-    for _ in range(pop.max_generations):
-        pop.run_one_generation()
-
-    return pop.history_logger.to_dataframe()
+def run_experiment(config_path: str) -> Pop:
+    pop = Pop(config_path, fitness_function=my_fitness)
+    pop.run(verbosity=1)
+    return pop
 
 
 # Run experiments
-history_static = run_experiment("mutation_constant.yaml")
-history_adaptive = run_experiment("06_adaptive_individual.yaml")
+pop_static = run_experiment("mutation_constant.yaml")
+pop_adaptive = run_experiment("06_adaptive_individual.yaml")
 
 # Compare fitness progress
 plot_fitness_comparison(
-    histories=[history_static, history_adaptive],
+    histories=[pop_static, pop_adaptive],
     labels=["Mutation rate static", "Mutation rate adaptive"],
     metric="best_fitness",
     title="adaptive individual vs. constant",

@@ -1,127 +1,138 @@
-# Comparison Studies – Evolutionary Strategy Components
+# 03\_comparisons – Comparative Experiments
 
-This folder contains a set of controlled experiments that illustrate how different components of an evolutionary algorithm influence optimization behavior. Each script focuses on a single variation, making it ideal for teaching and method evaluation.
+This folder contains examples that **compare different algorithmic choices**.
+The focus is on illustrating how mutation, crossover, and selection strategies influence convergence, diversity, and overall optimization behavior.
 
----
 
-## 📘 01 – Logging & History Inspection
+## Learning Goals
 
-- **File:** `01_history.py`
-- **Goal:** Demonstrates how to log and inspect fitness statistics across generations.
-- **Features:** Prints best, mean, and std per generation using `history_logger`.
+* Learn how to **inspect history** (`pop.print_history`, `plot_fitness`, `plot_history`).
+* Compare runs with different **mutation settings** (strength, decay, global vs. individual adaptation).
+* Understand the effect of **crossover operators** on convergence.
+* Explore how **selection methods and parameters** influence exploration vs. exploitation.
+* Combine factors (selection vs. mutation pressure) and observe trade-offs.
 
----
+## Prerequisites
 
-## 📘 02 – Plotting
+* Knowledge from `01_basic_usage` (population setup, fitness).
+* Basic understanding of YAML configs (`population.yaml`, mutation/selection variants).
+* Optional: familiarity with plotting (`matplotlib`).
 
-- **File:** `02_plotting.py`
-- **Goal:** Introduces how to visualize evolutionary progress using built-in plotting utilities.
-- **Plot Output:** `./figures/02_plotting.png`
+## Files & Expected Output
 
----
+Running these scripts will generate fitness curves and save plots into the `figures/` folder.
 
-## 📘 03 – Compare Mutation Strengths
 
-- **File:** `03_compare_runs.py`
-- **Goal:** Runs two configurations with different mutation strengths to compare their effects.
-- **Focus:** Demonstrates convergence speed and stability.
-- **Plot Output:** `./figures/02_Compare_Runs.png`
+### `01_history.py`
 
----
+Prints per-generation statistics with `pop.print_history()`.
+Shows best, worst, mean, std, and IQR fitness values.
 
-## 📘 04 – Mutation Rate Decay vs. Static
-
-- **File:** `04_exponential_decay_vs_static.py`
-- **Goal:** Compares constant vs. exponentially decaying mutation rates.
-- **Benchmark:** 4D Rosenbrock.
-- **Plot Output:** `./figures/04_exponential_decay.png`
-
----
-
-## 📘 05 – Adaptive Global Mutation vs. Static
-
-- **File:** `05_adaptive_global_vs_static.py`
-- **Goal:** Global mutation strength that adapts over time vs. fixed value.
-- **Mechanism:** Based on population-wide feedback.
-- **Plot Output:** `./figures/05_adaptive_global.png`
-
----
-
-## 📘 06 – Adaptive Individual Mutation vs. Static
-
-- **File:** `06_adaptive_individual_vs_static.py`
-- **Goal:** Per-individual mutation rates (`σ_i`) vs. static global σ.
-- **Mechanism:** Self-adaptive, using τ.
-- **Plot Output:** `./figures/06_adaptive_individual_vs_static.png`
-
----
-
-## 📘 07 – Comparison of Selection Strategies
-
-- **File:** `07_selection_comparison.py`
-- **Goal:** Compare multiple parent selection methods.
-- **Strategies:** Tournament, rank-linear, rank-exp, roulette, SUS, truncation, Boltzmann, random.
-- **Benchmark:** Rastrigin.
-- **Plot Output:** `./figures/07_selection_comparison.png`
-
----
-
-## 📘 08 – Selection Pressure via num_parents
-
-- **File:** `08_selection_pressure.py`
-- **Goal:** Varies `num_parents` to show impact on convergence.
-- **Selection Method:** Fixed (e.g. rank-linear).
-- **Plot Output:** `./figures/08_selection_pressure.png`
-
----
-
-## 📘 09 – Selection vs. Mutation Pressure
-
-- **File:** `09_selection_vs_mutation_pressure.py`
-- **Goal:** Explores how selection pressure and mutation strength interact.
-- **Variants:** 4 combinations of parent count and mutation rate.
-- **Plot Output:** `./figures/09_selection_vs_mutation.png`
-
----
-
-## 📘 10 – Stochastic vs. Deterministic Selection
-
-- **File:** `10_selection_stochastic_vs_deterministic.py`
-- **Goal:** Compares roulette (stochastic), tournament (semi), and truncation (deterministic).
-- **Focus:** Trade-off between exploration and exploitation.
-- **Plot Output:** `./figures/10_selection_stochastic_vs_deterministic.png`
-
----
-
-## 📘 11 – Comparison of Crossover Operators
-
-- **File:** `11_crossover_comparison.py`
-- **Goal:** Shows the effect of different crossover methods under mutation-free conditions.
-- **Operators:** BLX, arithmetic, SBX, intermediate, heuristic, differential.
-- **Plot Output:** `./figures/11_crossover_comparison.png`
-
----
-
-## 🧪 Usage
-
-Each script can be run directly. YAML configuration files must exist in the appropriate subfolder (e.g., `./11_configs/`).
-
-```bash
-python 07_selection_comparison.py
-python 11_crossover_comparison.py
+```
+Evolution History:
+ generation  best_fitness  worst_fitness  mean_fitness  std_fitness  iqr_fitness
+          1      0.972999       0.976750      0.974875     0.001876     0.001876
+          2      0.915368       0.919736      0.917552     0.002184     0.002184
+          3      0.901505       0.906685      0.904095     0.002590     0.002590
+          4      0.879684       0.901505      0.890594     0.010910     0.010910
+[...]
 ```
 
-The output will include printed logs and saved plots for direct comparison.
+### `02_plotting.py`
+
+Introduces plotting:
+
+* `plot_fitness(pop)` → default metrics (best, mean, median + std band).
+* `plot_history(pop, metrics=[...])` → custom metrics (e.g. diversity).
+
+<p align="center">
+  <img src="./figures/02_plotting.png" alt="Sample" width="512"/>
+</p>
+
+### `03_compare_runs.py`
+
+Compares two runs with **different mutation strengths**.
+Plots best fitness side by side to illustrate the impact of mutation scale.
+
+<p align="center">
+  <img src="./figures/03_compare_runs.png" alt="Sample" width="512"/>
+</p>
+
+### `04_exponential_decay_vs_static.py`
+
+Contrasts **static vs. exponentially decaying mutation strength** on Rosenbrock.
+Illustrates how decay influences convergence.
+
+<p align="center">
+  <img src="./figures/04_exponential_decay.png" alt="Sample" width="512"/>
+</p>
+
+### `05_adaptive_global_vs_static.py`
+
+Compares **global adaptive mutation** vs. static mutation strength.
+Mutation parameters adapt across the whole population.
+
+<p align="center">
+  <img src="./figures/05_adaptive_global.png" alt="Sample" width="512"/>
+</p>
+
+### `06_adaptive_individual_vs_static.py`
+
+Compares **individual-level adaptive mutation** (each individual adapts its own σ and τ) vs. static.
+Highlights fine-grained adaptation.
+
+<p align="center">
+  <img src="./figures/06_adaptive_individual_vs_static.png" alt="Sample" width="512"/>
+</p>
+
+### `07_selection_comparison.py`
+
+Runs multiple **selection strategies** (tournament, rank, roulette, SUS, Boltzmann, random, truncation).
+Plots best fitness to reveal strengths and weaknesses.
+
+<p align="center">
+  <img src="./figures/07_selection_comparison.png" alt="Sample" width="512"/>
+</p>
+
+### `08_selection_pressure.py`
+
+Varies **number of parents** under a fixed strategy (rank\_linear).
+Shows how selection pressure changes with `num_parents`.
+
+<p align="center">
+  <img src="./figures/08_selection_pressure.png" alt="Sample" width="512"/>
+</p>
+
+### `09_selection_vs_mutation_pressure.py`
+
+Explores the interaction between **selection pressure** and **mutation strength**.
+Illustrates trade-offs: exploration vs. convergence speed.
+
+<p align="center">
+  <img src="./figures/09_selection_vs_mutation.png" alt="Sample" width="512"/>
+</p>
+
+### `10_selection_stochastic_vs_deterministic.py`
+
+Contrasts **roulette (stochastic)**, **tournament (semi-stochastic)**, and **truncation (deterministic)**.
+Helps understand when randomness helps preserve diversity.
+
+<p align="center">
+  <img src="./figures/10_selection_stochastic_vs_deterministic.png" alt="Sample" width="512"/>
+</p>
+
+### `11_crossover_comparison.py`
+
+Compares different **crossover operators** (BLX, arithmetic, SBX, intermediate).
+Mutation is disabled to isolate crossover effects.
+
+<p align="center">
+  <img src="./figures/11_crossover_comparison.png" alt="Sample" width="512"/>
+</p>
 
 ---
 
-## 🧭 Didactic Purpose
+## See Also
 
-| Category     | Focus                          |
-|--------------|--------------------------------|
-| Mutation     | Strength, adaptation, decay    |
-| Selection    | Strategy type, pressure        |
-| Crossover    | Operator comparison            |
-| Infrastructure | Logging, plotting, history   |
-
-Each example isolates one core mechanism of evolutionary search, enabling focused learning and analysis.
+* [`../02_strategies/`](../02_strategies) — step-by-step operator application and strategies.
+* [`../01_basic_usage/`](../01_basic_usage) — fundamentals of Pop, Indiv, and config.
