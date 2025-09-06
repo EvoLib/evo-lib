@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from evolib.core.population import Pop  # noqa: F401
     from evolib.core.individual import Indiv  # noqa: F401
 
-from typing import Callable, Protocol
+from typing import Callable, Optional, Protocol
 
 from evolib.config.evonet_component_config import EvoNetComponentConfig
 from evolib.config.vector_component_config import VectorComponentConfig
@@ -24,6 +24,15 @@ CrossoverFunction = Callable[
 ParaInitializer = Callable[["Pop"], ParaBase]
 
 ModuleConfig = Union[VectorComponentConfig, EvoNetComponentConfig]
+
+# Base type for all population-related hooks
+PopulationHook = Callable[["Pop"], None]
+
+# Specific hook aliases for clarity in Pop.run
+OnStartHook = Optional[PopulationHook]
+OnGenerationHook = Optional[PopulationHook]
+OnImprovementHook = Optional[PopulationHook]
+OnEndHook = Optional[PopulationHook]
 
 
 class FitnessFunction(Protocol):

@@ -72,8 +72,9 @@ def my_fitness(indiv: Indiv) -> None:
     indiv.fitness = mse_loss(target, pred_img)
 
 
-def on_improvement(pop: Pop, gen: int) -> None:
+def on_improvement(pop: Pop) -> None:
     best = pop.best()
+    assert best.fitness is not None
     pred_img = predict_image(best, coords, img_size)
     save_frame(
         path=(f"./02_frames/gen_{pop.generation_num:04d}.png"),

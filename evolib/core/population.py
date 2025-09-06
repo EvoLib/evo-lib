@@ -34,7 +34,15 @@ from evolib.interfaces.enums import (
     Origin,
     ReplacementStrategy,
 )
-from evolib.interfaces.types import FitnessFunction, ReplaceFunction, SelectionFunction
+from evolib.interfaces.types import (
+    FitnessFunction,
+    OnEndHook,
+    OnGenerationHook,
+    OnImprovementHook,
+    OnStartHook,
+    ReplaceFunction,
+    SelectionFunction,
+)
 from evolib.registry.replacement_registry import build_replacement_registry
 from evolib.registry.selection_registry import build_selection_registry
 from evolib.registry.strategy_registry import strategy_registry
@@ -647,10 +655,10 @@ class Pop:
         min_delta: float = 0.0,
         time_limit_s: Optional[float] = None,
         verbosity: int = 1,
-        on_start: Optional[Callable[["Pop"], None]] = None,
-        on_generation: Optional[Callable[["Pop"], None]] = None,
-        on_improvement: Optional[Callable[["Pop", int], None]] = None,
-        on_end: Optional[Callable[["Pop"], None]] = None,
+        on_start: OnStartHook = None,
+        on_generation: OnGenerationHook = None,
+        on_improvement: OnImprovementHook = None,
+        on_end: OnEndHook = None,
     ) -> int:
         """
         Run the evolutionary process until a stopping criterion is met.
@@ -665,7 +673,10 @@ class Pop:
             min_delta: Minimum improvement to reset patience counter.
             time_limit_s: Stop evolution after this many seconds (wall clock).
             verbosity: 0 = silent, 1 = status messages (default).
-            on_improvement: Optional callback(pop, gen) when a new best is found.
+            on_start: Optional callback(pop)
+            on_generation: Optional callback(pop)
+            on_improvement: Optional callback(pop)
+            on_end: Optional callback(pop)
 
         Returns:
             int: Number of generations completed.
@@ -743,7 +754,7 @@ class Pop:
                 best_fitness = current_fitness
                 no_improve = 0
                 if on_improvement:
-                    on_improvement(self, self.generation_num)
+                    on_improvement(self)
             else:
                 no_improve += 1
 

@@ -54,7 +54,7 @@ def xor_fitness(indiv: Indiv) -> None:
     indiv.fitness = mse_loss(Y_TRUE, np.array(predictions))
 
 
-def on_improvement(pop: Pop, gen: int) -> None:
+def on_improvement(pop: Pop) -> None:
     indiv = pop.best()
     net = indiv.para["brain"].net
     y_pred = [net.calc(x.tolist())[0] for x in X]
@@ -63,7 +63,7 @@ def on_improvement(pop: Pop, gen: int) -> None:
         np.arange(len(X)),
         Y_TRUE,
         np.array(y_pred),
-        f"03_frames/gen_{gen:04d}.png",
+        f"03_frames/gen_{pop.generation_num:04d}.png",
         title="Structural Mutation on XOR",
     )
 
