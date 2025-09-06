@@ -255,59 +255,90 @@ def plot_fitness_comparison(
 
 
 def plot_approximation(
-    y_pred: list[float] | np.ndarray,
-    y_true: list[float] | np.ndarray,
+    y_pred: Sequence[float] | np.ndarray,
+    y_true: Sequence[float] | np.ndarray,
     *,
     title: str = "Approximation",
     show: bool = True,
+    show_grid: bool = True,
+    legend_location: str = "upper right",
     save_path: Optional[str] = None,
     pred_label: str = "Prediction",
     true_label: str = "Target",
-    pred_marker: str | None = "x",
-    true_marker: str | None = "o",
+    pred_marker: str | None = None,
+    true_marker: str | None = None,
+    x_vals: Sequence[float] | np.ndarray | None = None,
+    y_limits: tuple[float, float] | None = None,
+    dpi: int = 150,
+    size: tuple[float, float] = (6, 4),
+    fitness: float | None = None,
 ) -> None:
     """
     Plot predicted values against targets.
 
     Args:
         y_pred: Predicted values (1D).
-        y_true: Target values (1D).
+        y_true: Target values (1D), same length as ``y_pred``.
         title: Plot title.
-        x: Optional x-axis values; defaults to range(len(y_true)).
         show: If True, show the plot interactively.
-        save_path: If provided, save the figure to this path (PNG recommended).
+        show_grid: Toggle background grid.
+        legend_location: Matplotlib legend location string.
+        save_path: If provided, save the figure to this path.
         pred_label: Legend label for predictions.
         true_label: Legend label for targets.
-        pred_marker: Marker style for predictions.
-        true_marker: Marker style for targets.
+        pred_marker: Optional marker for predictions.
+        true_marker: Optional marker for targets.
+        x_vals: Optional x-axis values; defaults to ``range(len(y_true))``.
+        y_limits: Optional (ymin, ymax); if None, computed from data with padding.
+        dpi: Figure DPI.
+        size: Figure size (width, height) in inches.
+        fitness: Optional fitness to append to the title (e.g. MSE).
     """
-    y_pred_arr = np.asarray(y_pred, dtype=float)
-    y_true_arr = np.asarray(y_true, dtype=float)
+    y_true = np.asarray(y_true, dtype=float).ravel()
+    y_pred = np.asarray(y_pred, dtype=float).ravel()
 
-    if y_pred_arr.shape != y_true_arr.shape:
+    if y_true.shape != y_pred.shape:
         raise ValueError(
-            f"Shape mismatch: y_pred {y_pred_arr.shape} vs y_true {y_true_arr.shape}"
+            f"Shape mismatch: y_true {y_true.shape} " f"vs y_pred {y_pred.shape}"
         )
 
-    x_vals = np.arange(len(y_true_arr))
+    if x_vals is None:
+        x_vals = np.arange(len(y_true))
+    else:
+        x_vals = np.asarray(x_vals, dtype=float).ravel()
+        if x_vals.shape[0] != y_true.shape[0]:
+            raise ValueError(
+                f"Length mismatch: x_vals {x_vals.shape[0]} " f"vs y {y_true.shape[0]}"
+            )
 
-    plt.figure()
-    plt.title(title)
-    plt.plot(x_vals, y_true_arr, label=true_label, marker=true_marker)
-    plt.plot(x_vals, y_pred_arr, label=pred_label, marker=pred_marker)
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
+    if fitness is not None:
+        title = f"{title} (fitness={fitness:.4f})"
+
+    fig, ax = plt.subplots(figsize=size, dpi=dpi)
+    ax.set_title(title)
+    ax.plot(x_vals, y_true, label=true_label, marker=true_marker, lw=2)
+    ax.plot(x_vals, y_pred, label=pred_label, marker=pred_marker, lw=2, ls="--")
+    ax.legend(loc=legend_location)
+    ax.grid(show_grid)
+
+    if y_limits is not None:
+        ax.set_ylim(*y_limits)
+    else:
+        # auto padding
+        y_all = np.concatenate([y_true, y_pred])
+        pad = 0.05 * (y_all.max() - y_all.min() + 1e-12)
+        ax.set_ylim(y_all.min() - pad, y_all.max() + pad)
+
+    fig.tight_layout()
 
     if save_path:
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        plt.savefig(save_path, dpi=300)
-        print(f"Plot saved to '{save_path}'")
+        fig.savefig(save_path, dpi=dpi)
 
     if show:
         plt.show()
     else:
-        plt.close()
+        plt.close(fig)
 
 
 def save_combined_net_plot(
