@@ -648,6 +648,7 @@ class Pop:
         time_limit_s: Optional[float] = None,
         verbosity: int = 1,
         on_start: Optional[Callable[["Pop"], None]] = None,
+        on_generation: Optional[Callable[["Pop"], None]] = None,
         on_improvement: Optional[Callable[["Pop", int], None]] = None,
         on_end: Optional[Callable[["Pop"], None]] = None,
     ) -> int:
@@ -721,6 +722,10 @@ class Pop:
         for _ in range(gen_cap):
             self.run_one_generation(strategy=strategy)
             self.print_status(verbosity=1 if verbosity >= 1 else 0)
+
+            # ON GENERATION
+            if on_generation:
+                on_generation(self)
 
             current_fitness = self.best().fitness
 
