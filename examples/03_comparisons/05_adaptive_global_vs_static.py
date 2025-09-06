@@ -14,17 +14,13 @@ Key Elements:
 - Results are visualized using a fitness comparison plot across generations.
 
 - Results are saved to './figures/05_adaptive_global.png'
+
+Note:
+    Reproducibility is controlled via the `random_seed` field in the YAML config.
+    Set it to an integer for deterministic runs or to null/omit it for stochastic runs.
 """
 
-import random
-
-import numpy as np
-
 from evolib import Indiv, Pop, mse_loss, plot_fitness_comparison, rosenbrock
-
-# Use a fixed random seed for reproducibility of plots
-random.seed(42)
-np.random.seed(42)
 
 
 def my_fitness(indiv: Indiv) -> None:

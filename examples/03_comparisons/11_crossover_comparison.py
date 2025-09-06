@@ -8,9 +8,11 @@ how offspring are created (BLX, arithmetic, SBX).
 Mutation is disabled to isolate the effects of crossover.
 
 After the runs, the best fitness values over time are plotted for comparison.
-"""
 
-import random
+Note:
+    Reproducibility is controlled via the `random_seed` field in the YAML config.
+    Set it to an integer for deterministic runs or to null/omit it for stochastic runs.
+"""
 
 import numpy as np
 
@@ -20,10 +22,6 @@ from evolib import (
     mse_loss,
     plot_fitness_comparison,
 )
-
-# Use a fixed random seed for reproducibility of plots
-random.seed(42)
-np.random.seed(42)
 
 
 # Fitness: distance to target vector

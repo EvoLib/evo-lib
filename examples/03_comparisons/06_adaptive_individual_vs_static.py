@@ -4,17 +4,13 @@ Example 04-06 – Adaptive Individual Mutation vs. Static Mutation.
 This example compares the effectiveness of adaptive mutation at the individual level
 with a static mutation strength. Each individual has its own mutation strength and tau
 value that adapts over time.
+
+Note:
+    Reproducibility is controlled via the `random_seed` field in the YAML config.
+    Set it to an integer for deterministic runs or to null/omit it for stochastic runs.
 """
 
-import random
-
-import numpy as np
-
 from evolib import Indiv, Pop, mse_loss, plot_fitness_comparison, rosenbrock
-
-# Use a fixed random seed for reproducibility of plots
-random.seed(42)
-np.random.seed(42)
 
 
 def my_fitness(indiv: Indiv) -> None:

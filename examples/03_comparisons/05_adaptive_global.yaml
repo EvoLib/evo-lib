@@ -1,5 +1,7 @@
 # Sample configuration
 
+random_seed: 42  # Global random seed for reproducibility.
+
 parent_pool_size: 40
 offspring_pool_size: 40
 
@@ -15,7 +17,6 @@ modules:
     type: "vector"
     initializer: fixed_vector
     values: [-2.0, 2.0, -1.5, 1.5]
-    dim: 4
     bounds: [-5.0, 5.0]
 
     mutation:

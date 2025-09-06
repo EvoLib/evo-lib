@@ -3,18 +3,14 @@ Example 02-03 - Compare Runs
 
 This example demonstrates how to run the same optimization with different settings
 (e.g. mutation strength) and compare their results using the fitness history.
+
+Note:
+    Reproducibility is controlled via the `random_seed` field in the YAML config.
+    Set it to an integer for deterministic runs or to null/omit it for stochastic runs.
 """
-
-import random
-
-import numpy as np
 
 from evolib import Indiv, Population, mse_loss, simple_quadratic
 from evolib.utils.plotting import plot_fitness_comparison
-
-# Use a fixed random seed for reproducibility of plots
-random.seed(42)
-np.random.seed(42)
 
 
 def my_fitness(indiv: Indiv) -> None:

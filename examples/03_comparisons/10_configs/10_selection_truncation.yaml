@@ -1,5 +1,7 @@
 # Sample configuration for 10_selection_stochastic_vs_deterministic.py
 
+random_seed: 42  # Global random seed for reproducibility.
+
 parent_pool_size: 50
 offspring_pool_size: 100
 max_generations: 50

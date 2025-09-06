@@ -21,11 +21,11 @@ selection strategies in terms of convergence behavior and robustness.
 
 After the runs, best fitness trajectories are plotted to visualize and compare
 selection performance.
+
+Note:
+    Reproducibility is controlled via the `random_seed` field in the YAML config.
+    Set it to an integer for deterministic runs or to null/omit it for stochastic runs.
 """
-
-import random
-
-import numpy as np
 
 from evolib import (
     Indiv,
@@ -35,14 +35,10 @@ from evolib import (
     rastrigin,
 )
 
-# Use a fixed random seed for reproducibility of plots
-random.seed(42)
-np.random.seed(42)
-
 
 # Fitness function
 def my_fitness(indiv: Indiv) -> None:
-    target = np.zeros(indiv.para["test-vector"].dim)
+    target = [0.0, 0.0, 0.0, 0.0]
     predicted = rastrigin(indiv.para["test-vector"].vector)
     indiv.fitness = mse_loss(target, predicted)
 

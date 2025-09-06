@@ -55,8 +55,7 @@ def plot_approximation(indiv: Indiv, generation: int) -> None:
 
 # Main
 def run_experiment() -> None:
-    pop = Pop(CONFIG_FILE)
-    pop.set_functions(fitness_function=fitness_function)
+    pop = Pop(CONFIG_FILE, fitness_function=fitness_function)
 
     for gen in range(pop.max_generations):
         pop.run_one_generation(sort=True)

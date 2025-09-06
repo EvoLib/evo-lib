@@ -40,6 +40,7 @@ from evolib.registry.selection_registry import build_selection_registry
 from evolib.registry.strategy_registry import strategy_registry
 from evolib.utils.config_loader import load_config
 from evolib.utils.history_logger import HistoryLogger
+from evolib.utils.random import set_random_seed
 
 
 class Pop:
@@ -81,6 +82,9 @@ class Pop:
         self.max_generations = cfg.max_generations
         self.max_indiv_age = cfg.max_indiv_age
         self.num_elites = cfg.num_elites
+
+        random_seed = cfg.random_seed
+        set_random_seed(random_seed)
 
         # Strategies (initially None – set externally later)
         self.mutation_strategy = None

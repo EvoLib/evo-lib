@@ -117,6 +117,12 @@ class FullConfig(BaseModel):
     num_elites: int = Field(
         ..., description="Number of elite individuals preserved each generation."
     )
+    random_seed: Optional[int] = Field(
+        None,
+        description="Global seed for random number generators. "
+        "Use an integer for reproducible runs or None "
+        "for stochastic runs.",
+    )
     stopping: Optional[StoppingCriteria] = Field(
         None, description="Optional early stopping configuration."
     )

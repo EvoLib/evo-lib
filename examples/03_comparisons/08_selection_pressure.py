@@ -3,12 +3,11 @@ Example 08 – Selection Pressure via num_parents (fixed strategy)
 
 This script illustrates how selection pressure changes with the number of parents. A
 fixed selection strategy (e.g. rank_linear) is used, and only num_parents is varied.
+
+Note:
+    Reproducibility is controlled via the `random_seed` field in the YAML config.
+    Set it to an integer for deterministic runs or to null/omit it for stochastic runs.
 """
-
-import random
-
-import numpy as np
-import pandas as pd
 
 from evolib import (
     Indiv,
@@ -18,19 +17,15 @@ from evolib import (
     rastrigin,
 )
 
-# Use a fixed random seed for reproducibility of plots
-random.seed(42)
-np.random.seed(42)
-
 
 # Fitness function
 def my_fitness(indiv: Indiv) -> None:
-    target = np.zeros(indiv.para["test-vector"].dim)
+    target = [0.0, 0.0, 0.0, 0.0]
     predicted = rastrigin(indiv.para["test-vector"].vector)
     indiv.fitness = mse_loss(target, predicted)
 
 
-def run(config_path: str) -> pd.DataFrame:
+def run(config_path: str) -> Pop:
     pop = Pop(config_path, fitness_function=my_fitness)
     pop.run()
     return pop

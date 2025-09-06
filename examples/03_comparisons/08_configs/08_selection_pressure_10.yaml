@@ -1,5 +1,7 @@
 # Sample config for 08_selection_pressure.py
 
+random_seed: 42  # Global random seed for reproducibility.
+
 parent_pool_size: 50
 offspring_pool_size: 100
 

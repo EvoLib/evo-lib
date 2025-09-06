@@ -1,5 +1,7 @@
 # Sample configuration for 11_crossover_comparison.py
 
+random_seed: 42  # Global random seed for reproducibility.
+
 parent_pool_size: 20
 offspring_pool_size: 40
 

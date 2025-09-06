@@ -12,17 +12,13 @@ the resulting fitness progression over generations.
 Visualization:
 - A comparison plot of best fitness per generation is saved under:
 './figures/04_exponential_decay.png'
+
+Note:
+    Reproducibility is controlled via the `random_seed` field in the YAML config.
+    Set it to an integer for deterministic runs or to null/omit it for stochastic runs.
 """
 
-import random
-
-import numpy as np
-
 from evolib import Indiv, Pop, mse_loss, plot_fitness_comparison, rosenbrock
-
-# Use a fixed random seed for reproducibility of plots
-random.seed(42)
-np.random.seed(42)
 
 
 # User-defined fitness function

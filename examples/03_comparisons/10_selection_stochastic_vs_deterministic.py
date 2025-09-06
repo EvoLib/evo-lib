@@ -19,12 +19,13 @@ Use this example to understand:
 This complements:
     - 07_selection_comparison.py  → all strategies side-by-side
     - 08_selection_pressure.py    → fine-grained pressure via num_parents
+
+Note:
+    Reproducibility is controlled via the `random_seed` field in the YAML config.
+    Set it to an integer for deterministic runs or to null/omit it for stochastic runs
 """
 
-import random
-
 import numpy as np
-import pandas as pd
 
 from evolib import (
     Indiv,
@@ -34,10 +35,6 @@ from evolib import (
     rastrigin,
 )
 
-# Use a fixed random seed for reproducibility of plots
-np.random.seed(42)
-random.seed(42)
-
 
 def fitness_function(indiv: Indiv) -> None:
     target = np.zeros(indiv.para["test-vector"].dim)
@@ -45,7 +42,7 @@ def fitness_function(indiv: Indiv) -> None:
     indiv.fitness = mse_loss(target, predicted)
 
 
-def run(config_path: str) -> pd.DataFrame:
+def run(config_path: str) -> Pop:
     pop = Pop(config_path, fitness_function=fitness_function)
     pop.run()
     return pop

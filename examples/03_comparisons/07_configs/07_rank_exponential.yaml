@@ -1,5 +1,7 @@
 # Sample configuration for 07_selection_comparison.py
 
+random_seed: 42  # Global random seed for reproducibility.
+
 parent_pool_size: 50
 offspring_pool_size: 100
 

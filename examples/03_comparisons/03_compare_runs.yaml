@@ -1,5 +1,7 @@
 # Sample configuration
 
+random_seed: 42  # Global random seed for reproducibility.
+
 parent_pool_size: 2
 offspring_pool_size: 4
 
