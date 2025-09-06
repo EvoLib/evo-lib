@@ -1,5 +1,7 @@
 # Sample configuration for 01_polynomial_sine.py
 
+random_seed: 42  # Global random seed for reproducibility.
+
 parent_pool_size: 100
 offspring_pool_size: 700
 max_generations: 1000
@@ -13,12 +15,13 @@ modules:
   poly:
     type: "vector"
     initializer: adaptive_vector
-    dim: 7
+    dim: 8
     bounds: [-1.0, 1.0]
-    init_bounds: [-0.001, 0.001]
+    init_bounds: [-1e-4, 1e-4]
     randomize_mutation_strengths: True
     
     mutation:
       strategy: adaptive_per_parameter
-      min_strength: 0.0001
-      max_strength: 0.1
+      min_strength: 1e-5
+      max_strength: 1e-2
+      probability: 0.125

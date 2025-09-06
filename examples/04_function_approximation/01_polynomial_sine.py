@@ -9,18 +9,20 @@ between the target and the approximated function.
 Fitness is computed based on the deviation from sin(x) over a fixed range. The best
 approximation is plotted at each generation to produce a visual evolution trace (e.g.,
 animation).
+
+Note:
+    Reproducibility is controlled via the `random_seed` field in the YAML config.
+    Set it to an integer for deterministic runs or to null/omit it for stochastic runs.
 """
 
-import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, Pop
+from evolib import Indiv, Pop, plot_approximation
 
 # Configuration
 TARGET_FUNC = np.sin
-x_cheb = np.cos(np.linspace(np.pi, 0, 400))  # [-1, 1]
-X_RANGE = (x_cheb + 1) * np.pi  # transformiert nach [0, 2π]
-SAVE_FRAMES = True
+x_cheb = np.cos(np.linspace(np.pi, 0, 200))
+X_RANGE = (x_cheb + 1) * np.pi  # transform to [0, 2π]
 FRAME_FOLDER = "01_frames_poly"
 CONFIG_FILE = "01_polynomial_sine.yaml"
 
@@ -35,32 +37,29 @@ def fitness_function(indiv: Indiv) -> None:
     indiv.fitness = np.average((true_vals - predicted) ** 2, weights=weights)
 
 
-# Plotting per Generation
-def plot_approximation(indiv: Indiv, generation: int) -> None:
-    y_pred = np.polyval(indiv.para["poly"].vector[::-1], X_RANGE)
+def save_plot(pop: Pop) -> None:
+    y_pred = np.polyval(pop.best().para["poly"].vector[::-1], X_RANGE)
     y_true = TARGET_FUNC(X_RANGE)
-
-    plt.figure(figsize=(6, 4))
-    plt.plot(X_RANGE, y_true, label="Target: sin(x)", color="black")
-    plt.plot(X_RANGE, y_pred, label="Best Approx", color="red")
-    plt.title(f"Generation {generation}")
-    plt.ylim(-1.2, 1.2)
-    plt.legend()
-    plt.tight_layout()
-
-    if SAVE_FRAMES:
-        plt.savefig(f"{FRAME_FOLDER}/gen_{generation:03d}.png")
-    plt.close()
+    plot_approximation(
+        y_pred,
+        y_true,
+        title=f"Function approximation (gen={pop.generation_num}, "
+        f"MSE={pop.best().fitness:.4f})",
+        pred_marker=None,
+        true_marker=None,
+        pred_label="Approximation",
+        show=False,
+        show_grid=False,
+        save_path=f"{FRAME_FOLDER}/gen_{pop.generation_num:03d}.png",
+        x_vals=X_RANGE,
+        y_limits=(-1.2, 1.2),
+    )
 
 
 # Main
 def run_experiment() -> None:
     pop = Pop(CONFIG_FILE, fitness_function=fitness_function)
-
-    for gen in range(pop.max_generations):
-        pop.run_one_generation(sort=True)
-        pop.print_status(verbosity=1)
-        plot_approximation(pop.best(), gen)
+    pop.run(verbosity=1, on_generation=save_plot)
 
 
 if __name__ == "__main__":
