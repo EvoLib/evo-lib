@@ -6,9 +6,13 @@ mathematical target function using polynomial regression. Each individual repres
 coefficients of a polynomial. The objective is to minimize the mean squared error
 between the target and the approximated function.
 
-Fitness is computed based on the deviation from sin(x) over a fixed range. The best
-approximation is plotted at each generation to produce a visual evolution trace (e.g.,
-animation).
+This example uses a plain monomial polynomial representation on [0, 2π].
+Such polynomials are known to be numerically unstable, especially at higher
+degrees. The instability is intentional: it illustrates how representation
+choices affect the success of evolutionary optimization.
+
+Experiment with different polynomial degrees or scaling the input domain to
+[-1, 1] to observe the differences.
 
 Note:
     Reproducibility is controlled via the `random_seed` field in the YAML config.
