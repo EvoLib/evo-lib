@@ -6,71 +6,59 @@ strategies. This approach avoids polynomial instability and works with any inter
 method.
 """
 
-from typing import Callable
-
-import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, Pop
+from evolib import Indiv, Pop, plot_approximation
 
 # Parameters
 X_DENSE = np.linspace(0, 2 * np.pi, 400)
 Y_TRUE = np.sin(X_DENSE)
 
-SAVE_FRAMES = True
 FRAME_FOLDER = "02_frames_point"
 CONFIG_FILE = "02_sine_point_approximation.yaml"
 
 
 # Fitness
-def make_fitness_function(x_support: np.ndarray) -> Callable:
-    def fitness_function(indiv: Indiv) -> None:
-        y_support = indiv.para["points"].vector
-        y_pred = np.interp(X_DENSE, x_support, y_support)
-        weights = 1.0 + 0.4 * np.abs(np.cos(X_DENSE))
-        indiv.fitness = np.average((Y_TRUE - y_pred) ** 2, weights=weights)
+def fitness_function(indiv: Indiv) -> None:
+    # derive support grid from this individual's dimension
+    dim = indiv.para["points"].dim
+    x_support = np.linspace(0, 2 * np.pi, dim)
 
-    return fitness_function
+    y_support = indiv.para["points"].vector
+    y_pred = np.interp(X_DENSE, x_support, y_support)
+
+    # weighted MSE (didactic: emphasize near maxima/minima)
+    weights = 1.0 + 0.4 * np.abs(np.cos(X_DENSE))
+    indiv.fitness = np.average((Y_TRUE - y_pred) ** 2, weights=weights)
 
 
-# Visualisierung
-def plot_generation(indiv: Indiv, generation: int, x_support: np.ndarray) -> None:
-    y_pred = np.interp(X_DENSE, x_support, indiv.para["points"].vector)
+def save_plot(pop: Pop) -> None:
+    best = pop.best()
+    dim = best.para["points"].dim
+    x_support = np.linspace(0, 2 * np.pi, dim)
 
-    plt.figure(figsize=(6, 4))
-    plt.plot(X_DENSE, Y_TRUE, label="Target: sin(x)", color="black")
-    plt.plot(X_DENSE, y_pred, label="Best Approx", color="red")
-    plt.scatter(
-        x_support,
-        indiv.para["points"].vector,
-        color="blue",
-        s=10,
-        label="support points",
+    y_support = best.para["points"].vector
+    y_pred = np.interp(X_DENSE, x_support, y_support)
+
+    plot_approximation(
+        y_pred,
+        Y_TRUE,
+        title=f"Function approximation (gen={pop.generation_num}, "
+        f"MSE={best.fitness:.4f})",
+        pred_label="Approximation",
+        show=False,
+        show_grid=False,
+        save_path=f"{FRAME_FOLDER}/gen_{pop.generation_num:03d}.png",
+        x_vals=X_DENSE,
+        y_limits=(-1.2, 1.2),
+        support_points=(x_support, y_support),
     )
-    plt.title(f"Generation {generation}")
-    plt.ylim(-1.2, 1.2)
-    plt.legend()
-    plt.tight_layout()
-
-    if SAVE_FRAMES:
-        plt.savefig(f"{FRAME_FOLDER}/gen_{generation:03d}.png")
-    plt.close()
 
 
 # Main
 def run_experiment() -> None:
-    pop = Pop(CONFIG_FILE)
-
-    dim = pop.sample_indiv.para["points"].dim
-    num_support_points = dim
-    x_support = np.linspace(0, 2 * np.pi, num_support_points)
-
-    pop.set_functions(fitness_function=make_fitness_function(x_support))
-
-    for gen in range(pop.max_generations):
-        pop.run_one_generation(sort=True)
-        plot_generation(pop.best(), gen, x_support)
-        pop.print_status(verbosity=1)
+    pop = Pop(CONFIG_FILE, fitness_function=fitness_function)
+    pop.run(verbosity=1, on_generation=save_plot)
 
 
 if __name__ == "__main__":

@@ -360,8 +360,10 @@ def plot_approximation(
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    ax.plot(x_vals, y_true, label=true_label, lw=2)
-    ax.plot(x_vals, y_pred, label=pred_label, lw=2, ls="--")
+    ax.plot(x_vals, y_true, color="black", label=true_label, marker=true_marker, lw=2)
+    ax.plot(
+        x_vals, y_pred, color="red", label=pred_label, marker=pred_marker, lw=2, ls="--"
+    )
 
     if support_points is not None:
         sx, sy = support_points
