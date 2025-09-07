@@ -316,8 +316,10 @@ def plot_approximation(
 
     fig, ax = plt.subplots(figsize=size, dpi=dpi)
     ax.set_title(title)
-    ax.plot(x_vals, y_true, label=true_label, marker=true_marker, lw=2)
-    ax.plot(x_vals, y_pred, label=pred_label, marker=pred_marker, lw=2, ls="--")
+    ax.plot(x_vals, y_true, color="black", label=true_label, marker=true_marker, lw=2)
+    ax.plot(
+        x_vals, y_pred, color="red", label=pred_label, marker=pred_marker, lw=2, ls="--"
+    )
     ax.legend(loc=legend_location)
     ax.grid(show_grid)
 
