@@ -13,7 +13,7 @@ from __future__ import annotations
 import os
 import tempfile
 import warnings
-from typing import Optional, Sequence, Union
+from typing import Literal, Optional, Sequence, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -272,38 +272,62 @@ def plot_approximation(
     dpi: int = 150,
     size: tuple[float, float] = (6, 4),
     fitness: float | None = None,
+    support_points: (
+        tuple[Sequence[float] | np.ndarray, Sequence[float] | np.ndarray] | None
+    ) = None,
+    support_label: str = "Support points",
+    support_marker: str = "o",
+    support_size: float = 30.0,
+    xlabel: str | None = None,
+    ylabel: str | None = None,
+    residuals_style: Optional[Literal["overlay", "subplot"]] = None,
+    residuals_label: str = "Residuals (target - prediction)",
+    residuals_alpha: float = 0.5,
+    residuals_linewidth: float = 1.0,
 ) -> None:
     """
-    Plot predicted values against targets.
+    Plot predicted values against targets with optional support points and residual
+    visualization.
 
     Args:
         y_pred: Predicted values (1D).
         y_true: Target values (1D), same length as ``y_pred``.
-        title: Plot title.
+        title: Plot title. If ``fitness`` is given, it is appended.
         show: If True, show the plot interactively.
         show_grid: Toggle background grid.
         legend_location: Matplotlib legend location string.
         save_path: If provided, save the figure to this path.
         pred_label: Legend label for predictions.
         true_label: Legend label for targets.
-        pred_marker: Optional marker for predictions.
-        true_marker: Optional marker for targets.
         x_vals: Optional x-axis values; defaults to ``range(len(y_true))``.
-        y_limits: Optional (ymin, ymax); if None, computed from data with padding.
+        y_limits: Optional (ymin, ymax) for the main plot; if None, computed
+                  with padding.
         dpi: Figure DPI.
         size: Figure size (width, height) in inches.
         fitness: Optional fitness to append to the title (e.g. MSE).
+
+        support_points: Optional (x_support, y_support) to visualize discrete
+                        support points.
+        support_label: Legend label for support points.
+        support_marker: Marker symbol for support points.
+        support_size: Marker size for support points.
+        xlabel, ylabel: Axis labels for the main plot.
+
+        residuals_style: "subplot" for a second axes below, or "overlay" to draw error
+                        segments in the main axes.
+        residuals_label: Legend label for residuals (subplot mode).
+        residuals_alpha: Transparency for residual drawing.
+        residuals_linewidth: Line width for residual drawing.
     """
     y_true = np.asarray(y_true, dtype=float).ravel()
     y_pred = np.asarray(y_pred, dtype=float).ravel()
-
     if y_true.shape != y_pred.shape:
         raise ValueError(
             f"Shape mismatch: y_true {y_true.shape} " f"vs y_pred {y_pred.shape}"
         )
 
     if x_vals is None:
-        x_vals = np.arange(len(y_true))
+        x_vals = np.arange(len(y_true), dtype=float)
     else:
         x_vals = np.asarray(x_vals, dtype=float).ravel()
         if x_vals.shape[0] != y_true.shape[0]:
@@ -314,29 +338,93 @@ def plot_approximation(
     if fitness is not None:
         title = f"{title} (fitness={fitness:.4f})"
 
-    fig, ax = plt.subplots(figsize=size, dpi=dpi)
+    # figure/axes creation
+    if residuals_style == "subplot":
+        fig, (ax, ax_res) = plt.subplots(
+            2,
+            1,
+            sharex=True,
+            figsize=(size[0], size[1] * 1.4),
+            dpi=dpi,
+            gridspec_kw={"height_ratios": [3, 1], "hspace": 0.05},
+            constrained_layout=True,
+        )
+        use_tight = False
+    else:
+        fig, ax = plt.subplots(figsize=size, dpi=dpi)
+        ax_res = None
+        use_tight = True
+
+    # main plot
     ax.set_title(title)
-    ax.plot(x_vals, y_true, color="black", label=true_label, marker=true_marker, lw=2)
-    ax.plot(
-        x_vals, y_pred, color="red", label=pred_label, marker=pred_marker, lw=2, ls="--"
-    )
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+
+    ax.plot(x_vals, y_true, label=true_label, lw=2)
+    ax.plot(x_vals, y_pred, label=pred_label, lw=2, ls="--")
+
+    if support_points is not None:
+        sx, sy = support_points
+        sx = np.asarray(sx, dtype=float).ravel()
+        sy = np.asarray(sy, dtype=float).ravel()
+        if sx.shape != sy.shape:
+            raise ValueError(
+                f"Support points shape mismatch: x {sx.shape} " f"vs y {sy.shape}"
+            )
+        ax.scatter(
+            sx, sy, label=support_label, s=support_size, marker=support_marker, zorder=3
+        )
+
     ax.legend(loc=legend_location)
     ax.grid(show_grid)
 
+    # y-limits (main)
     if y_limits is not None:
         ax.set_ylim(*y_limits)
     else:
-        # auto padding
-        y_all = np.concatenate([y_true, y_pred])
+        y_all = [y_true, y_pred]
+        if support_points is not None:
+            y_all.append(np.asarray(support_points[1], dtype=float).ravel())
+        y_all = np.concatenate(y_all)
         pad = 0.05 * (y_all.max() - y_all.min() + 1e-12)
         ax.set_ylim(y_all.min() - pad, y_all.max() + pad)
 
-    fig.tight_layout()
+    # residuals
+    if residuals_style is not None:
+        residuals = y_true - y_pred
+        if residuals_style == "subplot":
+            ax_res.plot(
+                x_vals, residuals, lw=1.5, alpha=residuals_alpha, label=residuals_label
+            )
+            ax_res.axhline(0.0, lw=1.0, alpha=0.7)
+            ax_res.set_ylabel("resid")
+            ax_res.grid(show_grid)
+            ax_res.legend(loc="upper right")
+        elif residuals_style == "overlay":
+            y_min = np.minimum(y_true, y_pred)
+            y_max = np.maximum(y_true, y_pred)
+            ax.vlines(
+                x_vals,
+                y_min,
+                y_max,
+                alpha=residuals_alpha,
+                linewidth=residuals_linewidth,
+            )
+        else:
+            raise ValueError('residuals_style must be "subplot" or "overlay"')
 
+    # layout handling
+    if use_tight:
+        fig.tight_layout()
+
+    # saving
     if save_path:
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        folder = os.path.dirname(save_path)
+        if folder:
+            os.makedirs(folder, exist_ok=True)
         fig.savefig(save_path, dpi=dpi)
 
+    # show/close
     if show:
         plt.show()
     else:
