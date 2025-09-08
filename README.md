@@ -30,7 +30,7 @@ It supports classical strategies such as (μ, λ) and (μ + λ), with configurab
 ---
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/05_advanced_topics/08_frames_vector_obstacles/08_vector_control_obstacles.gif" alt="Sample Plott" width="512"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/05_advanced_topics/05_frames_vector_obstacles/05_vector_control_obstacles.gif" alt="Sample Plott" width="512"/>
 </p>
 
 ---
