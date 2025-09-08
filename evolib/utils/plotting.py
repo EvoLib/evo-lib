@@ -13,7 +13,7 @@ from __future__ import annotations
 import os
 import tempfile
 import warnings
-from typing import Literal, Optional, Sequence, Union
+from typing import Iterable, Literal, Optional, Sequence, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -24,6 +24,16 @@ from PIL import Image
 from evolib.core.population import Pop
 
 PopOrDf = Union["Pop", pd.DataFrame]
+
+# Helper type: (x, y, label, style_dict)
+ExtraLines = Iterable[
+    tuple[
+        Sequence[float] | np.ndarray,
+        Sequence[float] | np.ndarray,
+        Optional[str],
+        Optional[dict],
+    ]
+]
 
 
 def _as_history_df(obj: PopOrDf) -> pd.DataFrame:
@@ -284,6 +294,8 @@ def plot_approximation(
     residuals_label: str = "Residuals (target - prediction)",
     residuals_alpha: float = 0.5,
     residuals_linewidth: float = 1.0,
+    residuals_ylimits: tuple[float, float] | None = None,
+    extra_lines: ExtraLines | None = None,
 ) -> None:
     """
     Plot predicted values against targets with optional support points and residual
@@ -318,6 +330,11 @@ def plot_approximation(
         residuals_label: Legend label for residuals (subplot mode).
         residuals_alpha: Transparency for residual drawing.
         residuals_linewidth: Line width for residual drawing.
+
+        extra_lines: Iterable of (x, y, label, style_dict). Each will be plotted via
+                     ax.plot(x, y, **style_dict). Use it e.g. for a noisy
+                     target line: (X, Y_noisy, "Noisy target",
+                     {"ls": ":", "alpha": 0.6})
     """
     y_true = np.asarray(y_true, dtype=float).ravel()
     y_pred = np.asarray(y_pred, dtype=float).ravel()
@@ -391,14 +408,45 @@ def plot_approximation(
         pad = 0.05 * (y_all.max() - y_all.min() + 1e-12)
         ax.set_ylim(y_all.min() - pad, y_all.max() + pad)
 
+    # Extra lines
+    if extra_lines is not None:
+        for xs, ys, lab, style in extra_lines:
+            xs_arr = np.asarray(xs, dtype=float).ravel()
+            ys_arr = np.asarray(ys, dtype=float).ravel()
+            if xs_arr.shape[0] != ys_arr.shape[0]:
+                raise ValueError(
+                    f"extra_lines length mismatch: x {xs_arr.shape[0]} "
+                    f"vs y {ys_arr.shape[0]}"
+                )
+            ax.plot(
+                xs_arr,
+                ys_arr,
+                color="grey",
+                label=lab if lab is not None else None,
+                **(style or {}),
+            )
+
     # residuals
     if residuals_style is not None:
         residuals = y_true - y_pred
         if residuals_style == "subplot":
             ax_res.plot(
-                x_vals, residuals, lw=1.5, alpha=residuals_alpha, label=residuals_label
+                x_vals,
+                residuals,
+                color="grey",
+                lw=1.5,
+                alpha=residuals_alpha,
+                label=residuals_label,
             )
-            ax_res.axhline(0.0, lw=1.0, alpha=0.7)
+
+            if residuals_ylimits is not None:
+                ax_res.set_ylim(*residuals_ylimits)
+            else:
+                m = float(np.max(np.abs(residuals)))
+                pad = 0.05 * (m + 1e-12)
+                ax_res.set_ylim(-(m + pad), +(m + pad))
+
+            ax_res.axhline(0.0, color="black", lw=1.0, alpha=0.7)
             ax_res.set_ylabel("resid")
             ax_res.grid(show_grid)
             ax_res.legend(loc="upper right")

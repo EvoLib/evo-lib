@@ -1,5 +1,6 @@
 from evolib.core.individual import Indiv as Individual
 from evolib.core.population import Pop as Population
+from evolib.interfaces.types import FitnessFunction
 from evolib.io.checkpoint import (
     load_best_indiv,
     resume_from_checkpoint,
@@ -92,6 +93,7 @@ __all__ = [
     "save_best_indiv",
     "load_best_indiv",
     "resume_or_create",
+    "FitnessFunction",
 ]
 
 Pop = Population

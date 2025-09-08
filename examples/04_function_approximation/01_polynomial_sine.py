@@ -63,7 +63,7 @@ def save_plot(pop: Pop) -> None:
 # Main
 def run_experiment() -> None:
     pop = Pop(CONFIG_FILE, fitness_function=fitness_function)
-    pop.run(verbosity=1, on_generation=save_plot)
+    pop.run(verbosity=1, on_generation_end=save_plot)
 
 
 if __name__ == "__main__":

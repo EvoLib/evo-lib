@@ -1,8 +1,10 @@
 # Sample configuration for 03_approximation_with_noise.py
 
+random_seed: 42  # Global random seed for reproducibility.
+
 parent_pool_size: 20
 offspring_pool_size: 40
-max_generations: 300
+max_generations: 170
 max_indiv_age: 0
 num_elites: 2
 

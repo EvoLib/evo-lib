@@ -1,5 +1,7 @@
 # Sample configuration for 02_sine_point_approximation.py
 
+random_seed: 42  # Global random seed for reproducibility.
+
 parent_pool_size: 20
 offspring_pool_size: 40
 max_generations: 300
