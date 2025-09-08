@@ -30,7 +30,8 @@ PopulationHook = Callable[["Pop"], None]
 
 # Specific hook aliases for clarity in Pop.run
 OnStartHook = Optional[PopulationHook]
-OnGenerationHook = Optional[PopulationHook]
+OnGenerationStartHook = Optional[PopulationHook]
+OnGenerationEndHook = Optional[PopulationHook]
 OnImprovementHook = Optional[PopulationHook]
 OnEndHook = Optional[PopulationHook]
 

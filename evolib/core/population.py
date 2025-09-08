@@ -37,7 +37,8 @@ from evolib.interfaces.enums import (
 from evolib.interfaces.types import (
     FitnessFunction,
     OnEndHook,
-    OnGenerationHook,
+    OnGenerationEndHook,
+    OnGenerationStartHook,
     OnImprovementHook,
     OnStartHook,
     ReplaceFunction,
@@ -656,7 +657,8 @@ class Pop:
         time_limit_s: Optional[float] = None,
         verbosity: int = 1,
         on_start: OnStartHook = None,
-        on_generation: OnGenerationHook = None,
+        on_generation_start: OnGenerationStartHook = None,
+        on_generation_end: OnGenerationEndHook = None,
         on_improvement: OnImprovementHook = None,
         on_end: OnEndHook = None,
     ) -> int:
@@ -731,12 +733,16 @@ class Pop:
             on_start(self)
 
         for _ in range(gen_cap):
+
+            # ON GENERATION START
+            if on_generation_start:
+                on_generation_start(self)
+
             self.run_one_generation(strategy=strategy)
             self.print_status(verbosity=1 if verbosity >= 1 else 0)
 
-            # ON GENERATION
-            if on_generation:
-                on_generation(self)
+            if on_generation_end:
+                on_generation_end(self)
 
             current_fitness = self.best().fitness
 
