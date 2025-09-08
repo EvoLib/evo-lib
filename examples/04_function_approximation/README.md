@@ -1,105 +1,68 @@
-# Function Approximation with Evolutionary Strategies
+# 04_function_approximation - Function Approximation Tasks
 
-This folder demonstrates how evolutionary optimization can be used to approximate a mathematical target function—specifically, the sine function—using two fundamentally different approaches:
+This folder contains examples that **approximate mathematical functions** using evolutionary optimization.  
+The focus is on understanding how different representations (polynomials, support points) and data conditions (noise) influence approximation quality.
 
----
+## Learning Goals
 
-## 📘 01 – Polynomial Approximation
+* Learn how to formulate **function approximation** as an evolutionary optimization problem.
+* Compare different **representation choices** (polynomial coefficients vs. support-point vectors).
+* Observe how **noise in the target signal** affects the evolutionary process.
+* Practice using custom fitness functions and plotting approximations with support points.
 
-- **File:** `01_polynomial_sine.py`
-- **Goal:** Approximate `f(x) = sin(x)` using a 7th-degree polynomial.
-- **Encoding:** Each individual contains polynomial coefficients.
-- **Mutation Strategy:** `adaptive_per_parameter` with self-adaptive mutation strengths `σ_i` per coefficient.
-- **Fitness:** Weighted MSE between the target function and the predicted polynomial over `[0, 2π]`, using Chebyshev-distributed evaluation points.
-- **Plot Output:** `01_frames_poly/`
+## Prerequisites
 
-🔍 Highlights:
-- Demonstrates the sensitivity of high-degree terms.
-- Uses Chebyshev-based sampling to mitigate edge instability.
-- Animation shows gradual convergence toward sine shape.
+* Knowledge from `01_basic_usage` (population setup, fitness definition).
+* Familiarity with `numpy` interpolation (`np.interp`) and polynomial evaluation (`np.polyval`).
+* Optional: experience with plotting approximations (`plot_approximation`).
 
-<p align="center">
-  <img src="./01_frames_poly/01_polynormal_sine.gif" alt="Sample" width="512"/>
-</p>
+## Files & Expected Output
 
+Running these scripts will generate frames in subfolders (`01_frames_poly`, `02_frames_point`, `03_frames_noise`).  
 
 ---
 
-## 📘 02 – Support Point Approximation
+### `01_polynomial_sine.py`
 
-- **File:** `02_sine_point_approximation.py`
-- **Goal:** Approximate `f(x) = sin(x)` by evolving y-values at fixed x-support points.
-- **Encoding:** Each individual holds 16 y-values; x-values are fixed.
-- **Interpolation:** Linear (`np.interp`) between support points.
-- **Mutation Strategy:** Constant Gaussian mutation.
-- **Fitness:** Weighted MSE over a dense evaluation grid.
-- **Plot Output:** `02_frames_point/`
-
-🔍 Highlights:
-- Local, intuitive encoding (each gene maps to a concrete point).
-- More stable than high-degree polynomials.
-- Supports visual interpretation of each gene's effect.
+Approximates **sin(x)** using a polynomial representation.  
+Each individual encodes the coefficients of a polynomial. Fitness is the weighted mean squared error (MSE) against the true sine values.
 
 <p align="center">
-  <img src="./02_frames_point/02_sine_point.gif" alt="Sample" width="512"/>
+  <img src="./01_frames_poly/01_polynormal_sine.gif" alt="Polynomial Approximation" width="512"/>
 </p>
 
 ---
 
-## 🎯 Comparison & Didactic Purpose
+### `02_sine_point_approximation.py`
 
-| Aspect               | Polynomial Approx.         | Point-Based Approx.          |
-|----------------------|-----------------------------|-------------------------------|
-| Representation       | Global (coefficients)       | Local (support y-values)      |
-| Expressiveness       | High, but unstable at edges | Moderate, but stable          |
-| Evolution Dynamics   | Sensitive to degree         | Robust and intuitive          |
-| Mutation Model       | Self-adaptive σ per gene    | Fixed mutation strength       |
-| Use Case             | Theory & numerical insight  | Practical robustness          |
+Approximates **sin(x)** via **support points** (Y-vectors at fixed X positions).  
+Predictions are obtained through interpolation.
 
-Both methods are excellent to introduce the effects of representation, mutation design, and objective shaping in evolutionary algorithms.
-
----
-
-## 📘 03 – Approximation with Noise
-
-- **File:** `03_approximation_with_noise.py`
-- **Goal:** Approximate noisy target values \( \sin(x) + \epsilon \), where \( \epsilon \sim \mathcal{N}(0, \sigma) \)
-- **Focus:** Tests robustness of approximation strategies against data uncertainty
-- **Encoding:** y-values at fixed support points (like Example 02)
-- **Fitness:** MSE against **new noise sample per generation**
-- **Plot Output:** `03_frames_noise/`
-
-🔍 Highlights:
-- Same representation as example 02, but under noisy conditions
-- Demonstrates how evolutionary optimization can still converge
-- Lays foundation for future smoothing/regularization
+More stable than polynomial representation.
 
 <p align="center">
-  <img src="./03_frames_noise/03_sine_noise.gif" alt="Sample" width="512"/>
+  <img src="./02_frames_point/02_sine_point.gif" alt="Support-Point Approximation" width="512"/>
 </p>
-
-
-## ▶️  Visualizations
-
-Animations of the approximation process are saved in:
-
-- `01_frames_poly/01_polynormal_sine.gif`
-- `02_frames_point/02_sine_point.gif`
-- `03_frames_point/03_sine_noise.gif`
 
 ---
 
-## 🧪 Usage
+### `03_approximation_with_noise.py`
 
-Each script can be run directly and generates plots for each generation:
+Approximates **sin(x)** when the target signal is corrupted with Gaussian noise.  
+A noisy target is re-sampled at the start of each generation.
 
-```bash
-python 01_polynomial_sine.py
-python 02_sine_point_approximation.py
-python 03_approximation_with_noise
-```
+Demonstrates robustness of evolutionary strategies under noise.
+Visualizes differences between true function, noisy samples, and approximation.
 
-## ▶️  Animations can be generated with:
-```bash
-ffmpeg -framerate 10 -i 03_frames_noise/gen_%03d.png -c:v libx264 -pix_fmt yuv420p noise_fit.mp4
-```
+<p align="center">
+  <img src="./03_frames_noise/03_sine_noise.gif" alt="Noisy Approximation" width="512"/>
+</p>
+
+---
+
+## See Also
+
+* [`../02_strategies/`](../02_strategies) — step-by-step operator application and strategies.
+* [`../03_comparisons/`](../03_comparisons) — mutation, crossover, and selection comparisons.
+* [`../06_netvector/`](../06_netvector) — neural-network-based function approximations.
+
