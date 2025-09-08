@@ -55,34 +55,34 @@ This section explores advanced scenarios where evolutionary strategies are appli
 ---
 
 
-### 📘 03 – Vector-Based Control (No Neural Net)
+### 📘 04 – Vector-Based Control (No Neural Net)
 
-* **File:** `03_vector_control.py`
+* **File:** `04_vector_control.py`
 * **Task:** Reach a target using a sequence of velocity vectors
 * **Representation:** Flat vector with 2×N dimensions (x/y velocity at each time step)
 * **Fitness:** Final distance to goal
-* **Output:** `03_frames_vector_control/`
+* **Output:** `04_frames_vector_control/`
 
 ---
 
 <p align="center">
-  <img src="./03_frames_vector_control/03_vector_control.gif" alt="Sample Plott" width="512"/>
+  <img src="./04_frames_vector_control/04_vector_control.gif" alt="Sample Plott" width="512"/>
 </p>
 
 ---
 
-### 📘 04 – Vector-Based Control with Obstacles
+### 📘 05 – Vector-Based Control with Obstacles
 
-* **File:** `04_vector_control_with_obstacles.py`
+* **File:** `05_vector_control_with_obstacles.py`
 * **Goal:** Reach target while avoiding circular obstacles
-* **Encoding:** Same as 03
+* **Encoding:** Same as 04
 * **Fitness:** Final distance + penalty for obstacle collisions
 * **Penalty:** Soft quadratic penalty per contact
-* **Output:** `04_frames_vector_obstacles/`
+* **Output:** `05_frames_vector_obstacles/`
 
 ---
 
 <p align="center">
-  <img src="./04_frames_vector_obstacles/04_vector_control_obstacles.gif" alt="Sample Plott" width="512"/>
+  <img src="./05_frames_vector_obstacles/04_vector_control_obstacles.gif" alt="Sample Plott" width="512"/>
 </p>
 
