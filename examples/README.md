@@ -116,7 +116,7 @@ Demonstrates how evolutionary optimization can be used to approximate a mathemat
 
 ## Sample output
 <p align="center">
-  <img src="./04_function_approximation/02_frames_point/02_sine_point.gif" alt="Sample" width="512"/>
+  <img src="./04_function_approximation/03_frames_noise/03_sine_noise.gif" alt="Sample" width="512"/>
 </p>
 
 
