@@ -1,61 +1,10 @@
 ## 🧠 Advanced Topics in Evolutionary Optimization
 
-This section explores advanced scenarios where evolutionary strategies are applied to more challenging or realistic problems. These include constrained optimization, multi-objective trade-offs, fitness landscape visualization, and vector-based control tasks.
+This section explores advanced scenarios where evolutionary strategies are applied to more challenging or realistic problems. These include multi-objective trade-offs, fitness landscape visualization, and vector-based control tasks.
 
 ---
 
-### 📘 01 – Constrained Optimization (Penalty)
-
-* **File:** `01_constrained_optimization.py`
-* **Goal:** Minimize a cost function within a circular constraint region
-* **Constraint Handling:** Quadratic penalty for violations
-* **Target:** Reach point (1,‑2) within radius $r = 1.5$
-* **Output:** `01_frames_constraints/`
-
----
-
-<p align="center">
-  <img src="./01_frames_constrained/01_constrained_optimum.gif" alt="Sample Plott" width="512"/>
-</p>
-
----
-
-### 📘 02 – Constrained Optimization (Repair Strategy)
-
-* **File:** `02_constrained_optimization_repair.py`
-* **Goal:** Same as Example 01
-* **Constraint Handling:** Projects individuals back to valid region after mutation
-* **Repair Function:** Norm-based projection onto circle boundary
-* **Output:** `02_frames_constraints_repair/`
-
----
-
-<p align="center">
-  <img src="./02_frames_constrained_repair/02_constrained_repair.gif" alt="Sample Plott" width="512"/>
-</p>
-
----
-
-### 📘 03 – Constrained Optimization with Multiple Constraints
-
-* **File:** `03_constrained_optimization_multi.py`
-* **Goal:** Minimize same objective under **multiple** constraints
-* **Constraints:**
-
-  * Circular constraint
-  * Box constraint: $x \in [-2, 2], y \in [-1, 1]$
-* **Penalty Strategy:** Combined quadratic penalty
-* **Output:** `03_frames_constraints_multi/`
-
----
-
-<p align="center">
-  <img src="./03_frames_constrained_multi/03_constrained_multi.gif" alt="Sample Plott" width="512"/>
-</p>
-
----
-
-### 📘 04 – Multi-Objective Optimization: Fit vs. Smoothness
+### 📘 01 – Multi-Objective Optimization: Fit vs. Smoothness
 
 * **File:** `04_multiobjective_tradeoff.py`
 * **Goal:** Approximate a sine function while balancing accuracy and smoothness
