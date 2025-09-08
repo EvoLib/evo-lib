@@ -83,6 +83,6 @@ This section explores advanced scenarios where evolutionary strategies are appli
 ---
 
 <p align="center">
-  <img src="./05_frames_vector_obstacles/04_vector_control_obstacles.gif" alt="Sample Plott" width="512"/>
+  <img src="./05_frames_vector_obstacles/05_vector_control_obstacles.gif" alt="Sample Plott" width="512"/>
 </p>
 
