@@ -1,5 +1,5 @@
 """
-Example 05-05 – Fitness Landscape Exploration with Path.
+Example 05-02 – Fitness Landscape Exploration with Path.
 
 This variant plots the trajectory of the best individual over a 2D fitness surface. It
 visualizes how evolution progresses over generations.
@@ -10,9 +10,9 @@ import numpy as np
 
 from evolib import Indiv, Pop, ackley_2d
 
-CONFIG_FILE = "05_fitness_landscape_exploration.yaml"
+CONFIG_FILE = "02_fitness_landscape_exploration.yaml"
 SAVE_FRAMES = True
-FRAME_FOLDER = "05_frames_landscape"
+FRAME_FOLDER = "02_frames_landscape"
 
 # Grid boundaries for landscape visualization
 X_MIN, X_MAX = -32, 32

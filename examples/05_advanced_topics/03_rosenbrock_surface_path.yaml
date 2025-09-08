@@ -1,5 +1,7 @@
 # Sample configuration for 06_rosenbrock_surface_path.py
 
+random_seed: 42  # Global random seed for reproducibility.
+
 parent_pool_size: 10
 offspring_pool_size: 30
 max_generations: 100

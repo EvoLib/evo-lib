@@ -1,5 +1,5 @@
 """
-Example 05-06 – Rosenbrock Surface with Optimization Path.
+Example 05-03 – Rosenbrock Surface with Optimization Path.
 
 Visualizes the 2D Rosenbrock function as a 3D surface and tracks the path of the best
 solution over time.
@@ -11,8 +11,8 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 from evolib import Indiv, Pop, rosenbrock_2d
 
-CONFIG_FILE = "06_rosenbrock_surface_path.yaml"
-FRAME_FOLDER = "06_frames_rosenbrock"
+CONFIG_FILE = "03_rosenbrock_surface_path.yaml"
+FRAME_FOLDER = "03_frames_rosenbrock"
 SAVE_FRAMES = True
 
 BOUNDS = (-2.0, 2.0)

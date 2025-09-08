@@ -1,5 +1,5 @@
 """
-Example 05-04 - Multi-Objective Optimization: Fit vs. Smoothness.
+Example 05-01 - Multi-Objective Optimization: Fit vs. Smoothness.
 
 This example illustrates multi-objective optimization using scalar logging and
 visualizable Pareto analysis. The fitness remains a scalar, but we log both error and
@@ -13,8 +13,8 @@ import numpy as np
 from evolib import Indiv, Pop
 
 SAVE_FRAMES = True
-FRAME_FOLDER = "04_frames_multiobjective"
-CONFIG_FILE = "04_multiobjective_tradeoff.yaml"
+FRAME_FOLDER = "01_frames_multiobjective"
+CONFIG_FILE = "01_multiobjective_tradeoff.yaml"
 
 X_DENSE = np.linspace(0, 2 * np.pi, 400)
 Y_TRUE = np.sin(X_DENSE)

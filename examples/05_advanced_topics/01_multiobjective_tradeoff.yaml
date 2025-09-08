@@ -1,4 +1,6 @@
-# Sample configuration for 04_multiobjective_tradeoff.py
+# Sample configuration for 01_multiobjective_tradeoff.py
+
+random_seed: 42  # Global random seed for reproducibility.
 
 parent_pool_size: 30
 offspring_pool_size: 60

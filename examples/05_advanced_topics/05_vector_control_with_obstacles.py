@@ -1,5 +1,5 @@
 """
-Example 05-08 – Vector Control with Obstacle Avoidance (Modern API)
+Example 05-05 – Vector Control with Obstacle Avoidance (Modern API)
 
 This variant adds circular obstacles to the vector control task. The agent is penalized
 for colliding with obstacles while trying to reach the goal.
@@ -11,8 +11,8 @@ import numpy as np
 from evolib import Indiv, Pop
 
 SAVE_FRAMES = True
-FRAME_FOLDER = "08_frames_vector_obstacles"
-CONFIG_FILE = "08_vector_control_with_obstacles.yaml"
+FRAME_FOLDER = "05_frames_vector_obstacles"
+CONFIG_FILE = "05_vector_control_with_obstacles.yaml"
 
 NUM_STEPS = 8
 TARGET = np.array([5.0, 5.0])

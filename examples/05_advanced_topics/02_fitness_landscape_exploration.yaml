@@ -1,4 +1,7 @@
-# Sample configuration for 05_fitness_landscape_exploration.py
+# Sample configuration for 02_fitness_landscape_exploration.py
+
+random_seed: 42  # Global random seed for reproducibility.
+
 parent_pool_size: 10
 offspring_pool_size: 30
 max_generations: 100

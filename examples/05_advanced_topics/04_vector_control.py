@@ -1,5 +1,5 @@
 """
-Example 05-07 – Vector-Based Control Task (No Neural Net)
+Example 05-04 – Vector-Based Control Task (No Neural Net)
 
 This example shows how a parameter vector directly controls an agent moving through 2D
 space. The goal is to reach a target point using a sequence of velocity vectors.
@@ -11,8 +11,8 @@ import numpy as np
 from evolib import Indiv, Pop
 
 SAVE_FRAMES = True
-FRAME_FOLDER = "07_frames_vector_control"
-CONFIG_FILE = "07_vector_control.yaml"
+FRAME_FOLDER = "04_frames_vector_control"
+CONFIG_FILE = "04_vector_control.yaml"
 
 NUM_STEPS = 8
 START = np.array([0.0, 0.0])
