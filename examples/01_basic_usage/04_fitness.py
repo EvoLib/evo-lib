@@ -6,15 +6,13 @@ This example demonstrates:
 - How EvoLib uses it automatically during evolution
 """
 
-import numpy as np
-
-from evolib import Indiv, resume_or_create
+from evolib import Indiv, resume_or_create, sphere
 
 
 # Sphere fitness: minimize sum of squares
 def sphere_fitness(indiv: Indiv) -> None:
-    vec = np.array(indiv.para["test-vector"].vector, dtype=float)
-    indiv.fitness = float(np.sum(vec * vec))
+    vec = indiv.para["test-vector"].vector
+    indiv.fitness = sphere(vec)
 
 
 def main() -> None:

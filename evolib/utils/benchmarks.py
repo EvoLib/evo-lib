@@ -4,7 +4,7 @@
 import numpy as np
 
 
-def simple_quadratic(x: np.ndarray) -> np.ndarray:
+def simple_quadratic(x: np.ndarray) -> float:
     """
     Simple 1D benchmark: f(x) = x^2
 
@@ -20,7 +20,7 @@ def simple_quadratic(x: np.ndarray) -> np.ndarray:
     return np.sum(x**2)
 
 
-def rastrigin(x: np.ndarray, A: int = 10) -> np.ndarray:
+def rastrigin(x: np.ndarray, A: int = 10) -> float:
     """
     Rastrigin-Funktion (n-dimensional).
 
@@ -45,7 +45,7 @@ def rastrigin(x: np.ndarray, A: int = 10) -> np.ndarray:
     return A * n + np.sum(x**2 - A * np.cos(2 * np.pi * x))
 
 
-def sphere(x: np.ndarray) -> np.ndarray:
+def sphere(x: np.ndarray) -> float:
     """
     Sphere function (n-dimensional).
 
@@ -67,7 +67,7 @@ def sphere(x: np.ndarray) -> np.ndarray:
     return np.sum(x**2)
 
 
-def rosenbrock(x: np.ndarray) -> np.ndarray:
+def rosenbrock(x: np.ndarray) -> float:
     """
     Rosenbrock function (n-dimensional).
 
@@ -91,7 +91,7 @@ def rosenbrock(x: np.ndarray) -> np.ndarray:
     return np.sum(100 * (x[1:] - x[:-1] ** 2) ** 2 + (1 - x[:-1]) ** 2)
 
 
-def ackley(x: np.ndarray) -> np.ndarray:
+def ackley(x: np.ndarray) -> float:
     """
     Ackley function (n-dimensional).
 
@@ -116,7 +116,7 @@ def ackley(x: np.ndarray) -> np.ndarray:
     return -20 * np.exp(-0.2 * np.sqrt(sum_sq / n)) - np.exp(sum_cos / n) + 20 + np.e
 
 
-def griewank(x: np.ndarray) -> np.ndarray:
+def griewank(x: np.ndarray) -> float:
     """
     Griewank function (n-dimensional).
 
@@ -140,7 +140,7 @@ def griewank(x: np.ndarray) -> np.ndarray:
     return sum_sq - prod_cos + 1
 
 
-def schwefel(x: np.ndarray) -> np.ndarray:
+def schwefel(x: np.ndarray) -> float:
     """
     Schwefel function (n-dimensional).
 
