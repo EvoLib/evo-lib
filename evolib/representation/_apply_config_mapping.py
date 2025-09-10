@@ -66,10 +66,12 @@ def apply_mutation_config(ep: EvoControlParams, m: MutationConfig) -> None:
         ep.mutation_dec_factor = m.decrease_factor
 
     elif m.strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
+        ep.mutation_probability = m.probability
         ep.min_mutation_strength = m.min_strength
         ep.max_mutation_strength = m.max_strength
 
     elif m.strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
+        ep.mutation_probability = m.probability
         ep.min_mutation_strength = m.min_strength
         ep.max_mutation_strength = m.max_strength
 

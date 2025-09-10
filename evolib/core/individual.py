@@ -88,10 +88,7 @@ class Indiv:
         specific `ParaBase` subclass (e.g. `Vector`, `ParaNet`, ...).
         """
 
-        if hasattr(self.para, "__iter__"):
-            for p in self.para:
-                p.mutate()
-        else:
+        if hasattr(self.para, "mutate"):
             self.para.mutate()
 
     def crossover(self) -> None:
@@ -102,11 +99,8 @@ class Indiv:
         This ensures that crossover behavior is defined polymorphically in the
         specific `ParaBase` subclass (e.g. `Vector`, `ParaNet`, ...).
         """
-        if hasattr(self.para, "__iter__"):
-            for p in self.para:
-                p.crossover()
-            else:
-                self.para.crossover()
+        if hasattr(self.para, "crossover"):
+            self.para.crossover()
 
     def get_status(self) -> str:
         """Get status string from all components."""
