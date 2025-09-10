@@ -11,8 +11,8 @@ import numpy as np
 from evolib import Indiv, Pop
 
 SAVE_FRAMES = True
-FRAME_FOLDER = "05_frames_vector_obstacles"
-CONFIG_FILE = "05_vector_control_with_obstacles.yaml"
+FRAME_FOLDER = "04_frames_vector_obstacles"
+CONFIG_FILE = "04_vector_control_with_obstacles.yaml"
 
 NUM_STEPS = 8
 TARGET = np.array([5.0, 5.0])

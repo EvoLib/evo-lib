@@ -1,0 +1,34 @@
+# Example 05-01 – Piecewise-Linear Approximation (xs + ys)
+
+parent_pool_size: 40
+offspring_pool_size: 80
+max_generations: 120
+max_indiv_age: 0
+num_elites: 0
+
+#random_seed: 42
+
+evolution:
+  strategy: mu_plus_lambda
+
+modules:
+  xs:
+    type: vector
+    dim: 6
+    initializer: random_vector
+    bounds: [0.0, 6.283185307]   # [0, 2π]
+    mutation:
+      strategy: adaptive_individual
+      probability: 0.8
+      min_strength: 0.01
+      max_strength: 0.05
+
+  ys:
+    type: vector
+    dim: 6
+    initializer: zero_vector
+    bounds: [-1.5, 1.5]
+    mutation:
+      strategy: constant
+      probability: 0.8
+      strength: 0.06

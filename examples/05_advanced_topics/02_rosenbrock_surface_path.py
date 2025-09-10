@@ -11,8 +11,8 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 from evolib import Indiv, Pop, rosenbrock_2d
 
-CONFIG_FILE = "03_rosenbrock_surface_path.yaml"
-FRAME_FOLDER = "03_frames_rosenbrock"
+CONFIG_FILE = "02_rosenbrock_surface_path.yaml"
+FRAME_FOLDER = "02_frames_rosenbrock"
 SAVE_FRAMES = True
 
 BOUNDS = (-2.0, 2.0)

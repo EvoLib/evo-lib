@@ -10,9 +10,9 @@ import numpy as np
 
 from evolib import Indiv, Pop, ackley_2d
 
-CONFIG_FILE = "02_fitness_landscape_exploration.yaml"
+CONFIG_FILE = "01_fitness_landscape_exploration.yaml"
 SAVE_FRAMES = True
-FRAME_FOLDER = "02_frames_landscape"
+FRAME_FOLDER = "01_frames_landscape"
 
 # Grid boundaries for landscape visualization
 X_MIN, X_MAX = -32, 32

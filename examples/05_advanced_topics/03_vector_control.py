@@ -11,8 +11,8 @@ import numpy as np
 from evolib import Indiv, Pop
 
 SAVE_FRAMES = True
-FRAME_FOLDER = "04_frames_vector_control"
-CONFIG_FILE = "04_vector_control.yaml"
+FRAME_FOLDER = "03_frames_vector_control"
+CONFIG_FILE = "03_vector_control.yaml"
 
 NUM_STEPS = 8
 START = np.array([0.0, 0.0])
