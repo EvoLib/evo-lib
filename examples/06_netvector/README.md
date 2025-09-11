@@ -1,67 +1,61 @@
-## NetVector Experiments
+# 06_netvector – Neural Networks as Vectors
 
-NetVector encodes a **feedforward neural network** as a flat parameter vector using `Vector` with `structure: net`.  At evaluation time, the vector is **interpreted** by `NetVector` (weights + biases) to perform forward passes.  This gives you a clean, didactic baseline before moving on to EvoNet’s explicit topology evolution.
-
----
-
-### What you’ll learn here
-
-* How to configure a fixed architecture in YAML and initialize it as a vector
-* How to evaluate a `Vector` via `NetVector.forward(...)`
-* How to combine modules with `ParaComposite` (e.g., a small controller vector + network)
-
-> All examples use **MSE** as fitness. Plots are shown with Matplotlib.
+This folder contains examples that approximate functions using a fixed **feedforward neural network** encoded as a flat parameter vector.  
+The network is stored in a `Vector` with `structure: net` and **interpreted** by `NetVector` (weights + biases) at evaluation time.  
 
 ---
 
-### 01 – Sine Approximation with NetVector
+## Learning Goals
 
-* **File:** `01_netvector_sine_approximation.py`
-* **Config:** `configs/01_netvector_sine_approximation.yaml`
-* **Goal:** Approximate `y = sin(x)` on `[0, 2π]`.
-* **Architecture:** Defined in YAML via `dim: [input, hidden..., output]` and an activation (e.g., `tanh`).
-* **Representation:** Parameters live in `Vector` (module name: `nnet`), interpreted by `NetVector` in the fitness function.
-* **Fitness:** MSE between predicted values and the analytic sine curve.
-* **Visualization:** Line plot of target vs. best individual (no files saved).
-
-**Key idea:** keep the evolved object simple (just one vector), and use `NetVector.forward(x, vector)` when evaluating.
+* Configure a fixed feedforward network in YAML.  
+* Initialize it as a vector and evaluate via `NetVector.forward(...)`.  
+* Combine modules with `ParaComposite` (e.g. small scalar controllers + network).  
 
 ---
 
-### 02 – Modulated Output (Gain)
+## Prerequisites
 
-* **File:** `02_netvector_modulated_output.py`
-* **Config:** `configs/02_netvector_modulated_output.yaml`
-* **Goal:** Learn a **gain** that scales the network output:
-  `ŷ = gain · net(x)`
-* **Representation:** `ParaComposite` with two modules:
-
-  * `controller`: a 1D `Vector` holding **gain**
-  * `nnet`: a `Vector` interpreted by `NetVector`
-* **Fitness:** MSE vs. `sin(x)`.
-* **Visualization:** Plot comparing target `sin(x)` and the modulated prediction.
-
-This showcases **composition**: small scalar controls can be evolved jointly with a network.
+* Knowledge from `01_basic_usage` (population setup, fitness definition).  
 
 ---
 
-### 03 – Gain and Bias Modulation
+### `01_netvector_sine_approximation.py`
 
-* **File:** `03_netvector_gain_and_bias.py`
-* **Config:** `configs/03_netvector_gain_and_bias.yaml`
-* **Goal:** Learn **gain** and **bias** in addition to the network:
-  `ŷ = gain · net(x) + bias`
-* **Target:** `f(x) = 0.8 · sin(x) + 0.2`
-* **Representation:** `ParaComposite` with:
+* **Config:** `configs/01_netvector_sine_approximation.yaml`  
+* **Goal:** Approximate `y = sin(x)` on `[0, 2π]`.  
+* **Architecture:** Defined in YAML via `dim: [input, hidden..., output]` and an activation (e.g. `tanh`).  
+* **Representation:** Parameters live in `Vector` (module name: `nnet`), interpreted by `NetVector` in the fitness function.  
+* **Fitness:** MSE between predicted values and the analytic sine curve.  
 
-  * `controller`: 2 scalars (**gain**, **bias**)
-  * `nnet`: network vector interpreted by `NetVector`
-* **Fitness:** MSE to the scaled & shifted sine.
-* **Visualization:** Plot of target vs. best individual with learned gain/bias shown in legend.
-
-This pattern is handy for cases where global scaling/offset improves fitting without making the network larger.
+**Key idea:** keep the evolved object simple (just one vector) and call `NetVector.forward(x, vector)` for evaluation.
 
 ---
+
+### `02_netvector_modulated_output.py`
+
+* **Config:** `configs/02_netvector_modulated_output.yaml`  
+* **Goal:** Learn a **gain** that scales the network output: `ŷ = gain · net(x)`  
+* **Representation:** `ParaComposite` with:  
+  * `controller`: 1D `Vector` holding the gain  
+  * `nnet`: network vector interpreted by `NetVector`  
+* **Fitness:** MSE vs. `sin(x)`.  
+
+This demonstrates **composition**: evolving a small scalar jointly with the network.
+
+---
+
+### `03_netvector_gain_and_bias.py`
+
+* **Config:** `configs/03_netvector_gain_and_bias.yaml`  
+* **Goal:** Learn **gain** and **bias** in addition to the network: `ŷ = gain · net(x) + bias`  
+* **Target:** `f(x) = 0.8 · sin(x) + 0.2`  
+* **Representation:** `ParaComposite` with:  
+  * `controller`: 2 scalars (**gain**, **bias**)  
+  * `nnet`: network vector interpreted by `NetVector`  
+* **Fitness:** MSE to the scaled & shifted sine.  
+
+Useful for cases where global scaling/offset improves fitting without making the network larger.
+
 
 ### Minimal YAML pattern
 
@@ -84,18 +78,4 @@ modules:
 
 > `initializer: normal_net` creates a vector with the correct size for the network
 > and fills it from a normal distribution, then clips to `bounds`.
-
----
-
-
-All scripts print the generation status to stdout and show a Matplotlib plot at the end.
-
----
-
-### When to use NetVector vs. EvoNet
-
-* **NetVector (this folder):** fixed feedforward topology, concise and fast; great for teaching and baselines.
-* **EvoNet (see `../07_evonet`):** explicit graph with potential **structural evolution** (add/remove neurons/edges, activation changes, etc.).
-
-Start with NetVector to validate problem framing and mutation settings, then switch to EvoNet when you need topological flexibility.
 
