@@ -10,22 +10,20 @@
   <img src="https://raw.githubusercontent.com/EvoLib/evolib/main/assets/evolib_256.png" alt="EvoLib Logo" width="256"/>
 </p>
 
-**EvoLib** is a modular and extensible Python framework for designing, analyzing, and teaching evolutionary algorithms.
-It supports classical strategies such as (μ, λ) and (μ + λ), with configurable mutation, selection, and crossover operators, as well as neuroevolution.
+EvoLib is a lightweight and transparent framework for evolutionary computation, focusing on simplicity, modularity, and clarity — aimed at experimentation, teaching, and small-scale research rather than industrial-scale applications.
 
 ---
 
 ## Key Features
 
-- **Configurable Evolution**: Define evolutionary strategies via simple YAML files.
-- **Modular Design**: Easily swap mutation, selection, and crossover strategies.
-- **Built-in Logging**: Fitness tracking and history recording out-of-the-box.
-- **Educational Focus**: Includes didactic examples and an extensible code structure.
-- **Neuroevolution**: Structured neural networks (`EvoNet`) and evolvable parameter vectors supported.
-- **Type-Checked**: With [mypy](https://mypy-lang.org/) and PEP8 compliance.
+- **Transparent design**: configuration via YAML, type-checked validation, and clear module boundaries.  
+- **Modularity**: mutation, selection, crossover, and parameter representations can be freely combined.  
+- **Educational value**: examples and a clean API make it practical for illustrating evolutionary concepts.  
+- **Neuroevolution support**: structural mutations (adding/removing neurons and connections) and evolvable networks via EvoNet.  
+- **Type-checked**: mypy typing, PEP8 compliance, and consistent code style.  
 
-> ⚠️ **This project is in alpha stage. APIs and configuration structure may change.**
 
+> ⚠️ **This project is in alpha. APIs and configuration structures may still change.**
 
 ---
 
@@ -59,7 +57,7 @@ evolib/
 pip install evolib
 ```
 
-Requirements: Python 3.9+ and packages in `requirements.txt`.
+Requirements: Python 3.10+ and packages in `requirements.txt`.
 
 ---
 
@@ -138,43 +136,52 @@ modules:
 
 ---
 
-## Supported Parameter Representations
-
-| Type      | Structure                 | Description                                        |
-|-----------|---------------------------|----------------------------------------------------|
-| vector    | flat, net, tensor, blocks | Evolvable vectors or neural network encodings      |
-| evonet    | —                         | Neural networks via EvoNet                         |
-
 > ℹ️ Multiple parameter types (e.g. vector + evonet) can be combined in a single individual. Each component evolves independently, using its own configuration.
 
 ---
 
 ## Use Cases
 
-EvoLib is designed for both research and education in evolutionary computation.
-It supports a wide range of applications, including:
+EvoLib is developed for clarity, modularity, and exploration in evolutionary computation.  
+It can be applied to:
 
-- **Function optimization**: Test and visualize search behavior on standard functions (e.g., Sphere, Ackley)
-- **Hyperparameter tuning**: Use evolutionary strategies to optimize black-box functions.
-- **Strategy comparison**: Test and evaluate different mutation, selection, and crossover methods.
-- **Educational use**: Clear API and examples for teaching evolutionary computation concepts.
-- **Neuroevolution**: Evolve neural networks with weights and structure.
+- **Illustrating concepts**: simple, transparent examples for teaching and learning.  
+- **Neuroevolution**: evolve weights and network structures using EvoNet.  
+- **Multi-module evolution**: combine different parameter types (e.g. controller + brain).  
+- **Strategy comparison**: benchmark and visualize mutation, selection, and crossover operators.  
+- **Function optimization**: test behavior on benchmark functions (Sphere, Ackley, …).  
+- **Showcases**: structural XOR, image approximation, and other demo tasks.  
+- **Rapid prototyping**: experiment with new evolutionary ideas in a lightweight environment.  
+
+---
+
+## Learn EvoLib in 5 Steps
+
+EvoLib includes a small set of examples that illustrate the core concepts step by step:
+
+1. [Hello Evolution](examples/01_basic_usage/04_fitness.py) – minimal run with a custom fitness function and visible improvement over generations.
+2. [Strategies in Action](examples/02_strategies/03_mu_lambda.py) – (μ + λ) evolution step by step.
+3. [Function Approximation](examples/04_function_approximation/02_sine_point_approximation.py) – evolve support points to match a sine curve.
+4. [Evolution as Control](examples/05_advanced_topics/04_vector_control_with_obstacles.py) – evolve a controller in an environment.
+5. [Neuroevolution with Structural Growth](examples/07_evonet/03_structural_xor.py) – evolve networks with growing topology.
+
+For deeper exploration, see the [full examples directory](examples/)
 
 ---
 
 ## Roadmap
 
-- [x] Adaptive Mutation (global, individual, per-parameter)
+- [X] Adaptive Mutation (global, individual, per-parameter)
 - [x] Flexible Crossover Strategies (BLX, intermediate, none)
-- [x] Strategy Comparisons via Examples
 - [X] Structured Neural Representations (EvoNet)
 - [X] Composite Parameters (multi-module individuals)
 - [X] Neuroevolution
-- [X] Topological Evolution (add/remove neurons, edges)
+- [X] Topological Evolution (neurons, edges)
 - [ ] Co-Evolution & Speciation Support
-- [ ] Advanced Visualization Tools
-- [ ] Ray Support for Parallel Evaluation
-- [ ] Game Environment Integration (pygame, PettingZoo)
+- [ ] Advanced Visualization
+- [ ] Game Environment Integration (pygame, PettingZoo - early prototypes)
+- [ ] Ray Support for Parallel Evaluation (early prototypes)
+
 
 ---
 
