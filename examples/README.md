@@ -137,7 +137,7 @@ These examples demonstrate how evolutionary strategies can handle structured env
 
 ## Sample output
 <p align="center">
-  <img src="./05_advanced_topics/03_frames_rosenbrock/03_rosenbrock.gif" alt="Sample" width="512"/>
+  <img src="./05_advanced_topics/02_frames_rosenbrock/02_rosenbrock.gif" alt="Sample" width="512"/>
 </p>
 
 📄 See: [`05_advanced_topics/README.md`](05_advanced_topics/README.md)
