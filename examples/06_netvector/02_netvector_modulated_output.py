@@ -8,11 +8,12 @@ This example evolves a composite individual with:
 The fitness is the MSE between gain * net(x) and sin(x).
 """
 
-import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, Pop, mse_loss
+from evolib import Indiv, Pop, mse_loss, plot_approximation
 from evolib.representation.netvector import NetVector
+
+CONFIG = "configs/02_netvector_modulated_output.yaml"
 
 # Target function
 X_RANGE = np.linspace(0, 2 * np.pi, 100)
@@ -34,31 +35,26 @@ def composite_fitness(indiv: Indiv) -> None:
     indiv.fitness = mse_loss(Y_TRUE, np.array(y_preds))
 
 
+def show_approximation_plot(pop: Pop) -> None:
+    # Visualize result
+    best = pop.best()
+
+    gain = best.para["controller"].vector[0]
+    net_vector = best.para["nnet"].vector
+    y_pred = [gain * net.forward(np.array([x]), net_vector).item() for x in X_RANGE]
+
+    plot_approximation(
+        y_pred,
+        Y_TRUE,
+        title="Function approximation - Modulated NetVector Output",
+        pred_label="Approximation",
+        show=True,
+        show_grid=False,
+        x_vals=X_RANGE,
+    )
+
+
 # Run evolution
-pop = Pop("configs/02_netvector_modulated_output.yaml")
-pop.set_functions(fitness_function=composite_fitness)
-
+pop = Pop(CONFIG, fitness_function=composite_fitness)
 net = NetVector.from_config(pop.config, module="nnet")
-
-for _ in range(pop.max_generations):
-    pop.run_one_generation()
-    pop.print_status()
-
-
-# Visualize result
-best = pop.best()
-
-gain = best.para["controller"].vector[0]
-net_vector = best.para["nnet"].vector
-
-y_final = [gain * net.forward(np.array([x]), net_vector).item() for x in X_RANGE]
-
-plt.plot(X_RANGE, Y_TRUE, label="Target: sin(x)")
-plt.plot(X_RANGE, y_final, "--", label=f"Best (gain={gain:.2f})")
-plt.title("Modulated NetVector Output")
-plt.xlabel("x")
-plt.ylabel("y")
-plt.legend()
-plt.grid(True)
-plt.tight_layout()
-plt.show()
+pop.run(on_end=show_approximation_plot)

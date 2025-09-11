@@ -60,8 +60,9 @@ def fitness_function(indiv: Indiv) -> None:
 
 
 # Plot best individual's path with obstacles
-def plot_trajectory(indiv: Indiv, generation: int) -> None:
-    path = simulate_trajectory(indiv.para["steps"].vector)
+def plot_trajectory(pop: Pop) -> None:
+    best = pop.best()
+    path = simulate_trajectory(best.para["steps"].vector)
 
     plt.figure(figsize=(5, 5))
     plt.plot(path[:, 0], path[:, 1], "o-", color="blue", label="Agent Path")
@@ -78,23 +79,18 @@ def plot_trajectory(indiv: Indiv, generation: int) -> None:
     plt.ylim(-1, 6)
     plt.grid(True)
     plt.legend()
-    plt.title(f"Generation {generation}")
+    plt.title(f"Generation {pop.generation_num}")
     plt.tight_layout()
 
     if SAVE_FRAMES:
-        plt.savefig(f"{FRAME_FOLDER}/gen_{generation:03d}.png")
+        plt.savefig(f"{FRAME_FOLDER}/gen_{pop.generation_num:03d}.png")
     plt.close()
 
 
 # Main loop
 def run_experiment() -> None:
-    pop = Pop(CONFIG_FILE)
-    pop.set_functions(fitness_function=fitness_function)
-
-    for gen in range(pop.max_generations):
-        pop.run_one_generation(sort=True)
-        plot_trajectory(pop.best(), gen)
-        pop.print_status(verbosity=1)
+    pop = Pop(CONFIG_FILE, fitness_function=fitness_function)
+    pop.run(on_generation_end=plot_trajectory)
 
 
 if __name__ == "__main__":

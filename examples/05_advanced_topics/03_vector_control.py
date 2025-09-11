@@ -37,12 +37,13 @@ def fitness_function(indiv: Indiv) -> None:
 
 
 # Plot trajectory of best individual
-def plot_trajectory(indiv: Indiv, generation: int) -> None:
+def plot_trajectory(pop: Pop) -> None:
+    best = pop.best()
     pos = START.copy()
     traj = [pos.copy()]
     for t in range(NUM_STEPS):
-        vx = np.clip(indiv.para["steps"].vector[t * 2 + 0], -MAX_SPEED, MAX_SPEED)
-        vy = np.clip(indiv.para["steps"].vector[t * 2 + 1], -MAX_SPEED, MAX_SPEED)
+        vx = np.clip(best.para["steps"].vector[t * 2 + 0], -MAX_SPEED, MAX_SPEED)
+        vy = np.clip(best.para["steps"].vector[t * 2 + 1], -MAX_SPEED, MAX_SPEED)
         pos += np.array([vx, vy])
         traj.append(pos.copy())
 
@@ -55,24 +56,19 @@ def plot_trajectory(indiv: Indiv, generation: int) -> None:
     plt.xlim(-1, 6)
     plt.ylim(-1, 6)
     plt.grid(True)
-    plt.title(f"Generation {generation}")
+    plt.title(f"Generation {pop.generation_num}")
     plt.legend()
     plt.tight_layout()
 
     if SAVE_FRAMES:
-        plt.savefig(f"{FRAME_FOLDER}/gen_{generation:03d}.png")
+        plt.savefig(f"{FRAME_FOLDER}/gen_{pop.generation_num:03d}.png")
     plt.close()
 
 
 # Main
 def run_experiment() -> None:
-    pop = Pop(CONFIG_FILE)
-    pop.set_functions(fitness_function=fitness_function)
-
-    for gen in range(pop.max_generations):
-        pop.run_one_generation(sort=True)
-        plot_trajectory(pop.best(), gen)
-        pop.print_status(verbosity=1)
+    pop = Pop(CONFIG_FILE, fitness_function=fitness_function)
+    pop.run(on_generation_end=plot_trajectory)
 
 
 if __name__ == "__main__":

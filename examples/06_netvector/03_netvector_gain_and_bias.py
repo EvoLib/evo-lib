@@ -11,11 +11,12 @@ The output is scaled and shifted:
 Target: f(x) = 0.8 * sin(x) + 0.2
 """
 
-import matplotlib.pyplot as plt
 import numpy as np
 
-from evolib import Indiv, Pop, mse_loss
+from evolib import Indiv, Pop, mse_loss, plot_approximation
 from evolib.representation.netvector import NetVector
+
+CONFIG = "configs/03_netvector_gain_and_bias.yaml"
 
 # Target function: sin(x) scaled and shifted
 X_RANGE = np.linspace(0, 2 * np.pi, 100)
@@ -37,31 +38,31 @@ def fitness_gain_bias(indiv: Indiv) -> None:
     indiv.fitness = mse_loss(Y_TARGET, np.array(predictions))
 
 
-# Run evolution
-pop = Pop("configs/03_netvector_gain_and_bias.yaml")
-pop.set_functions(fitness_function=fitness_gain_bias)
+def show_approximation_plot(pop: Pop) -> None:
+    # Visualize result
+    best = pop.best()
 
+    gain = best.para["controller"].vector[0]
+    bias = best.para["controller"].vector[1]
+    net_vector = best.para["nnet"].vector
+
+    y_pred = [
+        gain * net.forward(np.array([x]), net_vector).item() + bias for x in X_RANGE
+    ]
+
+    plot_approximation(
+        y_pred,
+        Y_TARGET,
+        title="NetVector with Gain + Bias Modulation (Target: 0.8·sin(x)+0.2)",
+        pred_label="Approximation",
+        show=True,
+        show_grid=False,
+        x_vals=X_RANGE,
+    )
+
+
+# Run evolution
+pop = Pop(CONFIG, fitness_function=fitness_gain_bias)
 net = NetVector.from_config(pop.config, module="nnet")
 
-for _ in range(pop.max_generations):
-    pop.run_one_generation()
-    pop.print_status()
-
-# Visualize result
-best = pop.best()
-
-gain = best.para["controller"].vector[0]
-bias = best.para["controller"].vector[1]
-net_vector = best.para["nnet"].vector
-
-y_pred = [gain * net.forward(np.array([x]), net_vector).item() + bias for x in X_RANGE]
-
-plt.plot(X_RANGE, Y_TARGET, label="Target: 0.8·sin(x)+0.2")
-plt.plot(X_RANGE, y_pred, "--", label=f"Best (gain={gain:.2f}, bias={bias:.2f})")
-plt.title("NetVector with Gain + Bias Modulation")
-plt.xlabel("x")
-plt.ylabel("y")
-plt.legend()
-plt.grid(True)
-plt.tight_layout()
-plt.show()
+pop.run(on_end=show_approximation_plot)

@@ -29,7 +29,8 @@ def fitness_function(indiv: Indiv) -> None:
 
 
 # Plotting
-def plot_surface_with_path(generation: int, best: Indiv) -> None:
+def plot_surface_with_path(pop: Pop) -> None:
+    best = pop.best()
     fig = plt.figure(figsize=(6, 5))
     ax: Axes3D = fig.add_subplot(111, projection="3d")
 
@@ -62,7 +63,7 @@ def plot_surface_with_path(generation: int, best: Indiv) -> None:
     ax.set_xlim(*BOUNDS)
     ax.set_ylim(*BOUNDS)
     ax.set_zlim(*ZLIM)
-    ax.set_title(f"Rosenbrock Surface – Generation {generation}")
+    ax.set_title(f"Rosenbrock Surface – Generation {pop.generation_num}")
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("f(x, y)")
@@ -70,19 +71,14 @@ def plot_surface_with_path(generation: int, best: Indiv) -> None:
     ax.legend()
 
     if SAVE_FRAMES:
-        plt.savefig(f"{FRAME_FOLDER}/gen_{generation:03d}.png")
+        plt.savefig(f"{FRAME_FOLDER}/gen_{pop.generation_num:03d}.png")
     plt.close()
 
 
 # Main
 def run_experiment() -> None:
-    pop = Pop(CONFIG_FILE)
-    pop.set_functions(fitness_function=fitness_function)
-
-    for gen in range(pop.max_generations):
-        pop.run_one_generation(sort=True)
-        plot_surface_with_path(gen, pop.best())
-        pop.print_status(verbosity=1)
+    pop = Pop(CONFIG_FILE, fitness_function=fitness_function)
+    pop.run(on_generation_end=plot_surface_with_path)
 
 
 if __name__ == "__main__":

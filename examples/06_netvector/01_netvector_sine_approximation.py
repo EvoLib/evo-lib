@@ -9,6 +9,9 @@ import numpy as np
 from evolib import Indiv, Pop, mse_loss, plot_approximation
 from evolib.representation.netvector import NetVector
 
+CONFIG_FILE = "configs/01_netvector_sine_approximation.yaml"
+
+
 # Define target function
 X_RANGE = np.linspace(0, 2 * np.pi, 100)
 Y_TRUE = np.sin(X_RANGE)
@@ -39,11 +42,6 @@ def on_end(pop: Pop) -> None:
 
 
 # Run evolution
-pop = Pop(
-    config_path="configs/01_netvector_sine_approximation.yaml",
-    fitness_function=netvector_fitness,
-)
-
+pop = Pop(CONFIG_FILE, fitness_function=netvector_fitness)
 net = NetVector.from_config(pop.config, module="nnet")
-
 pop.run(on_end=on_end)
