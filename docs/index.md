@@ -155,20 +155,6 @@ It can be applied to:
 
 ---
 
-## Learn EvoLib in 5 Steps
-
-EvoLib includes a small set of examples that illustrate the core concepts step by step:
-
-1. [Hello Evolution](examples/01_basic_usage/04_fitness.py) – minimal run with a custom fitness function and visible improvement over generations.
-2. [Strategies in Action](examples/02_strategies/03_mu_lambda.py) – (μ + λ) evolution step by step.
-3. [Function Approximation](examples/04_function_approximation/02_sine_point_approximation.py) – evolve support points to match a sine curve.
-4. [Evolution as Control](examples/05_advanced_topics/04_vector_control_with_obstacles.py) – evolve a controller in an environment.
-5. [Neuroevolution with Structural Growth](examples/07_evonet/03_structural_xor.py) – evolve networks with growing topology.
-
-For deeper exploration, see the [full examples directory](examples/)
-
----
-
 ## Roadmap
 
 - [X] Adaptive Mutation (global, individual, per-parameter)
@@ -210,6 +196,7 @@ api_core_individual
 
 ```{toctree}
 :maxdepth: 1
+:hidden:
 :caption: API – Representations
 
 api_representation_vector
@@ -219,6 +206,7 @@ api_representation_evonet
 
 ```{toctree}
 :maxdepth: 2
+:hidden:
 :caption: API – Operators
 
 api_operators_strategy
@@ -232,6 +220,18 @@ api_operators_evonet_structural_mutation
 
 ```{toctree}
 :maxdepth: 2
+:hidden:
+:caption: API – I/O & Utils
+
+api_utils_loss_functions
+api_utils_benchmarks
+api_utils_plotting
+api_utils_history_logger
+```
+
+```{toctree}
+:maxdepth: 2
+:hidden:
 :caption: API – Advanced
 
 api_public_api
