@@ -1,8 +1,9 @@
 """
-EvoLib wrapper for EvoNet.
+EvoLib integration layer for EvoNet.
 
-Implements the ParaBase interface for use within EvoLib's evolutionary pipeline.
-Supports mutation, crossover, vector conversion, and configuration.
+Provides an interface to EvoNet networks so it can be used inside EvoLib’s evolutionary
+pipeline. Supports configuration, mutation, crossover, and conversion to/from vector
+form.
 """
 
 import random as rng
@@ -42,15 +43,19 @@ def _append_if_not_none(parts: list[str], prefix: str, value: Any) -> None:
 
 class EvoNet(ParaBase):
     """
-    ParaBase wrapper for EvoNet.
+    Wrapper class for EvoNet.
 
-    Provides mutation, crossover, and vector I/O for integration with EvoLib.
+    Responsibilities:
+    - Build and configure neural networks from YAML/typed configs
+    - Provide mutation (weights, biases, activations, structure)
+    - Provide crossover at weight/bias level (no structural crossover)
+    - Expose network parameters as flat vectors for integration
     """
 
     def __init__(self) -> None:
         self.net = Nnet()
 
-        # Bounds of parameter (z. B. [-1, 1])
+        # Bounds for weights and biases (e.g., [-1.0, 1.0])
         self.weight_bounds: tuple[float, float] | None = None
         self.bias_bounds: tuple[float, float] | None = None
 
@@ -63,7 +68,7 @@ class EvoNet(ParaBase):
         self.activation_probability: float | None = None
         self.allowed_activations: list[str] | None = None
 
-        # Optional for structur mutation
+        # Optional configuration for structural mutation
         self.structural_cfg: StructuralMutationConfig | None = None
 
     def apply_config(self, cfg: ModuleConfig) -> None:
@@ -73,7 +78,7 @@ class EvoNet(ParaBase):
 
         evo_params = self.evo_params
 
-        # Assign dimensions
+        # Define network architecture
         self.dim = cfg.dim
 
         # Bounds
@@ -93,7 +98,7 @@ class EvoNet(ParaBase):
             self.bias_evo_params = EvoControlParams()
             apply_mutation_config(self.bias_evo_params, cfg.mutation.biases)
 
-        # Optional activation mutatation
+        # Optional activation mutation settings
         if cfg.mutation.activations is not None:
             self.activation_probability = cfg.mutation.activations.probability
             self.allowed_activations = cfg.mutation.activations.allowed
@@ -121,13 +126,13 @@ class EvoNet(ParaBase):
             self.net.add_layer()
 
             if layer_idx == 0:
-                # InputLayer
+                # Input Layer
                 role = NeuronRole.INPUT
             elif layer_idx == len(self.dim) - 1:
-                # OutputLayer
+                # Output Layer
                 role = NeuronRole.OUTPUT
             else:
-                # HiddenLayer
+                # Hidden Layer
                 role = NeuronRole.HIDDEN
 
             if num_neurons > 0:
@@ -177,15 +182,15 @@ class EvoNet(ParaBase):
                 ):
                     mutate_activation(neuron, activations=self.allowed_activations)
 
-        # Structure
+        # Structural mutation (optional)
         if self.structural_cfg is not None:
             mutate_structure(self.net, self.structural_cfg)
 
     def crossover_with(self, partner: ParaBase) -> None:
         """
-        Weight-level crossover if vectors are compatible.
+        Perform crossover on weights and biases if topologies are compatible.
 
-        No structural crossover.
+        Structural crossover is not supported.
         """
 
         if not isinstance(partner, EvoNet):
@@ -245,7 +250,7 @@ class EvoNet(ParaBase):
     ) -> None:
 
         ep = self.evo_params
-        """Update mutation parameters based on strategy and generation."""
+        """Update mutation parameters according to the chosen strategy."""
         if ep.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
             ep.mutation_strength = exponential_mutation_strength(
                 ep, generation, max_generations
@@ -279,7 +284,7 @@ class EvoNet(ParaBase):
             )
 
         elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
-            # Ensure tau is initialized
+            # Initialize tau if not yet set (for self-adaptation)
             if ep.tau is None or ep.tau == 0.0:
                 ep.tau = adapted_tau(len(self.get_vector()))
 
@@ -291,7 +296,7 @@ class EvoNet(ParaBase):
             if self.weight_bounds is None:
                 raise ValueError("bounds must be set")
 
-            # Ensure mutation_strength is initialized
+            # Initialize mutation_strength if missing
             if ep.mutation_strength is None:
                 ep.mutation_strength = np.random.uniform(
                     ep.min_mutation_strength, ep.max_mutation_strength
@@ -350,7 +355,7 @@ class EvoNet(ParaBase):
                 bep.mutation_strength = adapt_mutation_strength(bep, self.bias_bounds)
 
     def get_vector(self) -> np.ndarray:
-        """Returns a flat vector of all weights and biases."""
+        """Return a flat vector containing all weights and biases."""
         weights = self.net.get_weights()
         biases = self.net.get_biases()
         return np.concatenate([weights, biases])
