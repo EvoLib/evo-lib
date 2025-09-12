@@ -213,5 +213,26 @@ api_core_individual
 :caption: API – Representations
 
 api_representation_vector
+api_representation_netvector
 api_representation_evonet
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: API – Operators
+
+api_operators_strategy
+api_operators_selection
+api_operators_replacement
+api_operators_reproduction
+api_operators_mutation
+api_operators_crossover
+api_operators_evonet_structural_mutation
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: API – Advanced
+
+api_public_api
 ```
