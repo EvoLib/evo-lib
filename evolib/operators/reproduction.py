@@ -10,22 +10,22 @@ from evolib.utils.copy_indiv import copy_indiv
 
 def generate_cloned_offspring(parents: List[Any], lambda_: int) -> List[Any]:
     """
-    Creates lambda_ cloned offspring by randomly selecting parents with replacement.
+    Creates ``lambda_`` cloned offspring by randomly selecting parents with replacement.
 
     Each offspring is a deep copy of a randomly chosen parent.
     This method performs no crossover or mutation and is typically used in evolutionary
-    strategies such as (mu, lambda), (mu + lambda), or steady-state evolution to
+    strategies such as (mu, ``lambda``), (mu + ``lambda``), or steady-state evolution to
     initialize raw offspring before variation operators are applied.
 
     Args:
         parents (List[Any]): List of parent individuals to clone from.
-        lambda_ (int): Number of offspring to create.
+        ``lambda_`` (int): Number of offspring to create.
 
     Returns:
         List[Any]: List of cloned offspring individuals.
 
     Raises:
-        ValueError: If the parent list is empty or lambda_ is not positive.
+        ValueError: If the parent list is empty or ``lambda_`` is not positive.
     """
     if not parents:
         raise ValueError("parents cannot be empty")
