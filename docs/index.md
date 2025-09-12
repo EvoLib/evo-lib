@@ -190,32 +190,27 @@ For deeper exploration, see the [full examples directory](examples/)
 MIT License – see [MIT License](https://github.com/EvoLib/evo-lib/tree/main/LICENSE).
 
 ---
+```{toctree}
+:maxdepth: 1
+:hidden:
+:caption: Start here
+
+getting_started
+config_guide
+```
 
 ```{toctree}
 :maxdepth: 2
-:caption: API Modules
+:hidden:
+:caption: API – Core
 
-api_population
-api_individual
-api_mutation
-api_selection
-api_benchmarks
-api_crossover
-api_replacement
-api_strategy
-api_reproduction
-api_plotting
-api_loss_functions
-api_config_loader
-api_copy_indiv
-api_history_logger
-api_registry
-api_math_utils
-api_config_validator
-api_enums
-api_structs
-api_types
-api_numeric
-api_utils
+api_core_population
+api_core_individual
 ```
-IT License – see [MIT License](https://github.com/EvoLib/evo-lib/tree/main/LICENSE).
+
+```{toctree}
+:maxdepth: 1
+:caption: API – Representations
+
+api_representation_vector
+```

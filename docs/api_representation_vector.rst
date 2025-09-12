@@ -1,7 +1,7 @@
-Historylogger
+Vector
 ===================
 
-.. automodule:: evolib.utils.history_logger
+.. automodule:: evolib.representation.vector
    :members:
    :undoc-members:
    :show-inheritance:

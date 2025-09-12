@@ -1,7 +1,7 @@
-Population-Modul
+Population
 ================
 
-.. automodule:: evolib.core.population
+.. autoclass:: evolib.core.population.Pop
    :members:
    :undoc-members:
    :show-inheritance:

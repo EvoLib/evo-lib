@@ -1,7 +1,7 @@
-Indiv-Class
+Individual
 ============
 
-.. automodule:: evolib.core.individual
+.. autoclass:: evolib.core.individual.Indiv
    :members:
    :undoc-members:
    :show-inheritance:
