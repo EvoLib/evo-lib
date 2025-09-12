@@ -24,32 +24,47 @@ from evolib.representation.netvector import NetVector
 
 
 class Vector(ParaBase):
-    def __init__(self) -> None:
+    """
+    A parameter vector representation used as an evolutionary module.
 
-        # Parametervektor
+    This class supports different structural interpretations of the parameter dimension
+    (flat, tensor, net, etc.), bounds, mutation strategies, and crossover.
+    """
+
+    def __init__(self) -> None:
+        # Core parameter vector
         self.vector: np.ndarray = np.zeros(1)
         self.shape: tuple[int, ...] = (1,)
 
+        # Whether to randomize initial mutation strengths
         self.randomize_mutation_strengths: bool | None = None
 
-        # Bounds of parameter (z. B. [-1, 1])
+        # Parameter bounds (e.g. [-1, 1])
         self.bounds: tuple[float, float] | None = None
         self.init_bounds: tuple[float, float] | None = None
 
-        # EvoControlParams
+        # Evolution control parameters (mutation, crossover, etc.)
         self.evo_params = EvoControlParams()
 
     def apply_config(self, cfg: ModuleConfig) -> None:
+        """
+        Apply a configuration object to initialize this Vector.
+
+        Args:
+            cfg: A VectorComponentConfig defining dimension, structure,
+                 initialization, and mutation/crossover strategies.
+        """
 
         if not isinstance(cfg, VectorComponentConfig):
             raise TypeError("Expected VectorComponentConfig")
 
         evo_params = self.evo_params
 
-        # structure-based interpretation of dimenson
+        # Interpret dimension based on structure type
         structure = getattr(cfg, "structure", "flat")
 
         if structure == "net":
+            # Map to a neural-network-like parameter vector
             if not isinstance(cfg.dim, list):
                 raise ValueError("structure='net' requires dim as list[int]")
             net = NetVector(dim=cfg.dim, activation=cfg.activation or "tanh")
@@ -83,7 +98,7 @@ class Vector(ParaBase):
         else:
             raise ValueError(f"Unknown structure type: '{structure}'")
 
-        # Assign dimensions
+        # Assign dimensions and allocate vector
         self.dim = cfg.dim
         self.shape = cfg.shape or (cfg.dim,)
         self.vector = np.zeros(self.dim)
@@ -100,21 +115,18 @@ class Vector(ParaBase):
 
         evo_params.mutation_strategy = cfg.mutation.strategy
 
-        # Apply Mutation Config
+        # Apply mutation and crossover configs
         apply_mutation_config(evo_params, cfg.mutation)
-
-        # Apply Crossover Config
         apply_crossover_config(evo_params, cfg.crossover)
 
     def mutate(self) -> None:
         """
-        Applies Gaussian mutation to the parameter vector.
+        Apply Gaussian mutation to the parameter vector.
 
-        If `mutation_strengths` is defined, per-parameter mutation is used.
-        Otherwise, global mutation strength and optional mutation probability
-        determine mutation behavior.
+        Two modes are supported:
+        - Per-parameter mutation strengths (`mutation_strengths` defined).
+        - Global mutation strength with optional mutation probability.
         """
-
         if self.evo_params.mutation_strengths is not None:
 
             # Adaptive per-parameter mutation
@@ -126,7 +138,7 @@ class Vector(ParaBase):
         else:
             if self.evo_params.mutation_strength is None:
                 raise ValueError("mutation_strength must be set.")
-            # Global mutation path (scalar mutation_strength required)
+            # Global mutation (single sigma applied to all parameters)
             noise = np.random.normal(
                 loc=0.0, scale=self.evo_params.mutation_strength, size=self.vector.shape
             )
@@ -138,11 +150,16 @@ class Vector(ParaBase):
             self.vector = np.clip(self.vector, *self.bounds)
 
     def print_status(self) -> None:
+        """Convenience: print the formatted internal state string."""
         status = self.get_status()
         print(status)
 
     def get_status(self) -> str:
-        """Returns a formatted string summarizing the internal state of the Vector."""
+        """
+        Return a human-readable summary of the internal state.
+
+        Includes vector preview, mutation strength(s), tau, and crossover probability.
+        """
         parts = []
 
         vector_preview = np.round(self.vector[:4], 3).tolist()
@@ -171,9 +188,10 @@ class Vector(ParaBase):
 
     def get_history(self) -> dict[str, float]:
         """
-        Return a dictionary of internal mutation-relevant values for logging.
+        Return mutation-related values for logging.
 
-        This supports both global and per-parameter adaptive strategies.
+        Includes global tau, global mutation strength, and statistics on per-parameter
+        strengths if applicable.
         """
         history = {}
 
@@ -201,6 +219,15 @@ class Vector(ParaBase):
     def update_mutation_parameters(
         self, generation: int, max_generations: int, diversity_ema: float | None = None
     ) -> None:
+        """
+        Update mutation parameters based on the chosen strategy.
+
+        Args:
+            generation: Current generation index.
+            max_generations: Maximum number of generations planned.
+            diversity_ema: Exponential moving average of population diversity
+                           (required for adaptive-global strategies).
+        """
 
         ep = self.evo_params
         """Update mutation parameters based on strategy and generation."""
@@ -282,11 +309,10 @@ class Vector(ParaBase):
 
     def crossover_with(self, partner: "ParaBase") -> None:
         """
-        Applies crossover with another ParaBase-compatible instance.
+        Perform crossover with another Vector instance.
 
-        This method is specific to Vector and expects the partner to also be a Vector.
-        The internal _crossover_fn may return either a single offspring vector or a
-        tuple of two.
+        The internal crossover function may produce either one or two offspring. Bounds
+        are applied to clip the resulting parameter values.
         """
         if not isinstance(partner, Vector):
             return

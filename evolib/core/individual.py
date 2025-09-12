@@ -26,21 +26,38 @@ from evolib.interfaces.enums import Origin
 
 
 class Indiv:
-    """
-    Represents an individual in an evolutionary optimization algorithm.
+    """Represents an individual in an evolutionary optimization algorithm."""
 
-    Attributes:
-        para (Any): Parameters of the individual (e.g., list, array).
-        fitness (float): Fitness value of the individual.
-            None means the individual has not yet been evaluated.
-        is_evaluated (bool): Flag indicating whether the individual's fitness
-            has been evaluated. False after initialization, True after the first
-            call to a fitness evaluation.
-        age (int): Current age of the individual.
-        max_age (Optional[int]): Maximum allowed age of the individual.
-        origin (str): Origin of the individual ('parent' or 'child').
-        parent_idx (Optional[int]): Index of the parent individual.
-    """
+    #: para (Any, optional): Parameter values of the individual. Default: None.
+    para: Any | None
+
+    #: fitness (float): Fitness value of the individual.
+    #: None means the individual has not yet been evaluated.
+    fitness: float | None
+
+    #: is_evaluated (bool): Flag indicating whether the individual's fitness
+    #: has been evaluated. False after initialization, True after the first
+    #: call to a fitness evaluation.
+    is_evaluated: bool
+
+    #: age (int): Current age of the individual. 0 means "no limit".
+    age: int
+
+    #: max_age (Optional[int]): Maximum allowed age of the individual.
+    max_age: int
+
+    #: origin (str): Origin of the individual (e.g. Origin.PARENT, Origin.OFFSPRING).
+    origin: Origin
+
+    #: parent_idx (Optional[int]): Index of the parent individual.
+    parent_idx: Optional[int]
+
+    #: is_elite (bool): Flag to explicitly mark elites for logging/analysis.
+    is_elite: bool
+
+    #: extra_metrics (dict[str, float]): Optional extra per-individual
+    #: metrics for logging.
+    extra_metrics: dict[str, float]
 
     __slots__ = (
         "para",
@@ -54,24 +71,15 @@ class Indiv:
         "is_elite",
     )
 
-    extra_metrics: dict[str, float]
-
     def __init__(self, para: Any = None):
-        """
-        Initializes an individual with the given parameters.
-
-        Args:
-            para (Any, optional): Parameter values of the individual. Default: None.
-        """
         self.para = para
-        self.fitness: float | None = None
-        self.is_evaluated: bool = False
+        self.fitness = None
+        self.is_evaluated = False
         self.age = 0
         self.max_age = 0
-        self.origin: Origin = Origin.PARENT
-        self.parent_idx: Optional[int] = None
-        self.is_elite: bool = False
-
+        self.origin = Origin.PARENT
+        self.parent_idx = None
+        self.is_elite = False
         self.extra_metrics = {}
 
     def __lt__(self, other: "Indiv") -> bool:
@@ -88,7 +96,7 @@ class Indiv:
         specific `ParaBase` subclass (e.g. `Vector`, `ParaNet`, ...).
         """
 
-        if hasattr(self.para, "mutate"):
+        if self.para is not None and hasattr(self.para, "mutate"):
             self.para.mutate()
 
     def crossover(self) -> None:
@@ -99,23 +107,31 @@ class Indiv:
         This ensures that crossover behavior is defined polymorphically in the
         specific `ParaBase` subclass (e.g. `Vector`, `ParaNet`, ...).
         """
-        if hasattr(self.para, "crossover"):
+        if self.para is not None and hasattr(self.para, "crossover"):
             self.para.crossover()
 
     def get_status(self) -> str:
-        """Get status string from all components."""
+        """Get a one-line status string of the parameter representation."""
+        if self.para is None:
+            return "<no parameter>"
+
         if hasattr(self.para, "get_status"):
             return self.para.get_status()
         return "para has no status method"
 
     def print_status(self) -> None:
-        """Prints information about the individual."""
+        """Print a human-readable status summary of this individual and its
+        components."""
         print("Individual:")
         print(f"  Fitness: {self.fitness}")
         print(f"  Age: {self.age}")
         print(f"  Max Age: {self.max_age}")
         print(f"  Origin: {self.origin}")
         print(f"  Parent Index: {self.parent_idx}")
+
+        if self.para is None:
+            print("<no parameter>")
+            return
 
         if hasattr(self.para, "__iter__"):
             for i, p in enumerate(self.para):

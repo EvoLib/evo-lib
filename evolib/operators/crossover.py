@@ -213,6 +213,9 @@ def crossover_offspring(pop: "Pop", offspring: list["Indiv"]) -> None:
         child1 = offspring[i]
         child2 = offspring[i + 1]
 
+        if child1.para is None or child2.para is None:
+            continue
+
         for module_name in child1.para.components:
             module1 = child1.para.components[module_name]
             module2 = child2.para.components[module_name]

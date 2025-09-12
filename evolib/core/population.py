@@ -507,11 +507,15 @@ class Pop:
             "diversity": self.diversity,
         }
 
-        if hasattr(self.best(), "para") and hasattr(self.best().para, "get_history"):
-            row.update(self.best().para.get_history())
+        para = getattr(self.best(), "para", None)
 
-        if hasattr(self.best().para, "get_status"):
-            row["status_str"] = self.best().para.get_status()
+        get_history = getattr(para, "get_history", None)
+        if callable(get_history):
+            row.update(get_history())
+
+        get_status = getattr(para, "get_status", None)
+        if callable(get_status):
+            row["status_str"] = get_status()
 
         self.history_logger.log(row)
 
