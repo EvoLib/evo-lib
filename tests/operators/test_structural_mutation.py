@@ -1,7 +1,7 @@
 from evolib.config.base_component_config import StructuralMutationConfig
 from evolib.config.schema import FullConfig
 from evolib.initializers.evonet_initializers import initializer_normal_evonet
-from evolib.operators.evonet_structual_mutation import (
+from evolib.operators.evonet_structural_mutation import (
     count_non_input_neurons,
     mutate_structure,
 )
