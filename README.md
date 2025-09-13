@@ -33,24 +33,6 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 
 ---
 
-## Directory Structure
-
-```
-evolib/
-├── core/           # Individual, Population
-├── config/         # Typed component configuration (Vector, EvoNet, etc.)
-├── interfaces/     # Enums, types, helper protocols
-├── initializers/   # Initializer registry and implementations
-├── operators/      # Mutation, crossover, selection, etc.
-├── registry/       # Strategy and operator registries
-├── representation/ # ParaBase + Vector, EvoNet, Composite etc.
-├── utils/          # Logging, plotting, math, config loader
-└── examples/       # Educational examples and test runs
-
-```
-
----
-
 ## Installation
 
 ```bash
@@ -58,12 +40,6 @@ pip install evolib
 ```
 
 Requirements: Python 3.10+ and packages in `requirements.txt`.
-
----
-
-## Documentation 
-
-Documentation for EvoLib is available at: 👉 https://evolib.readthedocs.io/en/latest/
 
 ---
 
@@ -89,6 +65,11 @@ For full examples, see 📁[`examples/`](https://github.com/EvoLib/evo-lib/tree/
 ---
 
 # Configuration Example (YAML)
+
+A core idea of EvoLib is that experiments are defined entirely through YAML configuration files.
+This makes runs explicit, reproducible, and easy to adapt. The example below demonstrates
+different modules (vector + EvoNet) with mutation, structural growth, and stopping criteria.
+
 
 ```yaml
 parent_pool_size: 20
@@ -147,6 +128,13 @@ modules:
 
 ---
 
+## Documentation 
+
+Documentation for EvoLib is available at: 👉 https://evolib.readthedocs.io/en/latest/
+
+---
+
+
 ## Use Cases
 
 EvoLib is developed for clarity, modularity, and exploration in evolutionary computation.  
@@ -168,7 +156,7 @@ Early prototypes explore how evolutionary algorithms can be applied to agents in
 The goal is to demonstrate how controllers evolve in dynamic settings, with feedback from sensors and collisions.
 
 <p align="center">
-  <img src="assets/ants.gif" alt="Pygame Integration Preview" width="512"/>
+  <img src="assets/ant.gif" alt="Pygame Integration Preview" width="512"/>
 </p>
 
 *In this video, agents use simple sensors to learn how to collect food while avoiding collisions with the environment.*
