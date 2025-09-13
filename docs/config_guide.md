@@ -1,206 +1,166 @@
 # Configuration Guide
 
-This guide provides an overview of the configuration parameters available in EvoLib.
-Configurations are written in **YAML** and passed to a `Population` instance.
+EvoLib experiments are defined via **YAML configuration files**.  
+This makes setups explicit, reproducible, and easy to adapt.
 
-The parameters are grouped into **global parameters**, **evolution strategy settings**, and **module-specific parameters**.
+Below you find three representative configurations:
 
----
+- **A minimal example** – the smallest viable run.  
+- **A full vector-based setup** – showing multiple modules, selection, and replacement.  
+- **A full EvoNet setup** – demonstrating weight and structural mutation.  
 
-## Global Parameters
-
-| Parameter             | Type | Default | Explanation                                                          |
-| --------------------- | ---- | ------- | -------------------------------------------------------------------- |
-| `parent_pool_size`    | int  | —       | Number of parents selected for the next generation.                  |
-| `offspring_pool_size` | int  | —       | Number of offspring generated each generation.                       |
-| `max_generations`     | int  | —       | Maximum number of generations before termination.                    |
-| `num_elites`          | int  | 0       | Number of top individuals copied unchanged into the next generation. |
-| `max_indiv_age`       | int  | 0       | Maximum age of individuals (0 = no age limit).                       |
+Each snippet is commented inline for clarity.
 
 ---
 
-## Stopping Criteria
+## A) Minimal configuration
 
-Stopping criteria can be defined to terminate runs early.
-
-| Parameter        | Type  | Default | Explanation                                                     |
-| ---------------- | ----- | ------- | --------------------------------------------------------------- |
-| `target_fitness` | float | —       | Stop once best fitness reaches this threshold.                  |
-| `patience`       | int   | —       | Allow this many generations without improvement before stop.    |
-| `min_delta`      | float | 0.0     | Minimum improvement considered as progress.                     |
-| `minimize`       | bool  | true    | Whether the target fitness is minimized (default) or maximized. |
-
-Example:
+This is the smallest possible (μ + λ) run.  
+It demonstrates the core building blocks: pools, a single vector module, and constant mutation.  
+A fitness function (e.g. `sphere`) must still be provided in practice.
 
 ```yaml
-stopping:
-  target_fitness: 0.01
-  patience: 20
-  min_delta: 0.0001
-  minimize: true
-```
+# Minimum configuration — smallest viable building block for a (μ + λ) run.
+parent_pool_size: 2         # μ: number of parents kept
+offspring_pool_size: 4      # λ: number of offspring produced
+max_generations: 10         # hard stop
+num_elites: 0               # no elitism
 
----
-
-## Evolution Settings
-
-| Parameter  | Type | Default | Explanation                                                                  |
-| ---------- | ---- | ------- | ---------------------------------------------------------------------------- |
-| `strategy` | str  | —       | The evolutionary strategy to use (e.g. `mu_comma_lambda`, `mu_plus_lambda`). |
-
-Example:
-
-```yaml
 evolution:
-  strategy: mu_comma_lambda
+  strategy: mu_plus_lambda  # classic (μ + λ) evolution strategy
+
+modules:
+  test-vector:              # logical module name
+    type: vector
+    initializer: random_vector
+    dim: 2
+    bounds: [-1.0, 1.0]
+
+    mutation:
+      strategy: constant    # fixed-strength perturbation
+      strength: 0.01
+      probability: 1.0
 ```
 
 ---
 
-## Modules
+## B) Maximum Vector configuration
 
-Modules define the parameter representation(s) of each individual. Multiple modules can be combined.
-
-### Common Fields
-
-| Parameter     | Type | Default | Explanation                                                 |
-| ------------- | ---- | ------- | ----------------------------------------------------------- |
-| `type`        | str  | —       | Type of parameter representation (`vector`, `evonet`, ...). |
-| `initializer` | str  | —       | Initialization method for the module.                       |
-| `bounds`      | list | —       | Lower and upper limits for values (only for vectors).       |
-
----
-
-### Vector Module
-
-| Parameter     | Type | Default | Explanation                                   |
-| ------------- | ---- | ------- | --------------------------------------------- |
-| `dim`         | int  | —       | Dimensionality of the vector.                 |
-| `initializer` | str  | —       | Initialization method (e.g. `normal_vector`). |
-| `mutation`    | dict | —       | Mutation settings for the vector.             |
-
-Example:
+This example shows a more complete setup: tournament selection, steady-state replacement, stopping criteria, and two vector modules with different operator settings.
 
 ```yaml
+
+random_seed: 42             # reproducibility
+
+parent_pool_size: 40
+offspring_pool_size: 80
+max_generations: 120
+max_indiv_age: 2
+num_elites: 4
+
+stopping:
+  target_fitness: 0.001
+
+evolution:
+  strategy: flexible
+
+selection:
+  strategy: tournament
+  tournament_size: 3
+
+replacement:
+  strategy: steady_state
+  num_replace: 5
+
 modules:
-  main:
+  xs:
     type: vector
-    dim: 8
-    initializer: normal_vector
-    bounds: [-1.0, 1.0]
+    dim: 6
+    initializer: random_vector
+    bounds: [0.0, 6.283185307]   # [0, 2π]
     mutation:
       strategy: adaptive_individual
-      probability: 1.0
-      strength: 0.1
-```
+      probability: 0.8
+      min_strength: 0.01
+      max_strength: 0.05
 
----
-
-### EvoNet Module
-
-| Parameter     | Type | Default | Explanation                                                   |
-| ------------- | ---- | ------- | ------------------------------------------------------------- |
-| `dim`         | list | —       | Layer sizes, e.g. `[4, 6, 2]`.                                |
-| `activation`  | list | —       | Activation functions per layer (e.g. `[linear, tanh, tanh]`). |
-| `initializer` | str  | —       | Network initialization method (e.g. `normal_evonet`).         |
-| `mutation`    | dict | —       | Mutation settings (weights, biases, structure).               |
-
-Example:
-
-```yaml
-modules:
-  brain:
-    type: evonet
-    dim: [4, 6, 2]
-    activation: [linear, tanh, tanh]
-    initializer: normal_evonet
+  ys:
+    type: vector
+    dim: 6
+    initializer: zero_vector
+    bounds: [-1.5, 1.5]
     mutation:
       strategy: constant
-      probability: 1.0
-      strength: 0.05
+      probability: 0.8
+      strength: 0.06
+    crossover:
+      strategy: constant
+      probability: 0.3
+      operator: blx
 
-      activations:
-        probability: 0.01
-        allowed: [tanh, relu, sigmoid]
-
-      structural:
-        add_neuron: 0.01
-        add_connection: 0.05
-        remove_connection: 0.02
-        recurrent: local  # none | direct | local | all
-        keep_connected: true
 ```
 
 ---
 
-## Mutation Settings
+## C) Maximum EvoNet configuration
 
-Mutation can be specified per module. Parameters vary by strategy, but common fields are:
-
-| Parameter     | Type  | Default | Explanation                                                 |
-| ------------- | ----- | ------- | ----------------------------------------------------------- |
-| `strategy`    | str   | —       | Mutation strategy (e.g. `constant`, `adaptive_individual`). |
-| `probability` | float | 1.0     | Probability of mutating a given parameter.                  |
-| `strength`    | float | —       | Standard deviation / scale of the mutation.                 |
-
----
-
-## Initializers
-
-Available initializers depend on the module type:
-
-* **Vectors**: `normal_vector`, `uniform_vector` …
-* **EvoNet**: `normal_evonet`
-
----
-
-## Putting It All Together
-
-A complete configuration may combine several modules:
+This configuration demonstrates EvoNet evolution: weight mutation, bias-specific overrides, and structural mutation.
+The `dim: [2, 0, 0, 1]` starts with minimal topology, letting structural mutation grow hidden nodes and edges.
+`max_nodes` and `max_edges` keep growth bounded.
 
 ```yaml
 parent_pool_size: 20
-offspring_pool_size: 60
-max_generations: 100
-num_elites: 2
+offspring_pool_size: 40
+max_generations: 200
+max_indiv_age: 0
+num_elites: 0
 
 stopping:
-  target_fitness: 0.01
-  patience: 20
-  min_delta: 0.0001
-  minimize: true
+  target_fitness: 0.001
 
 evolution:
-  strategy: mu_comma_lambda
+  strategy: mu_plus_lambda
 
 modules:
-  controller:
-    type: vector
-    dim: 8
-    initializer: normal_vector
-    bounds: [-1.0, 1.0]
-    mutation:
-      strategy: adaptive_individual
-      probability: 1.0
-      strength: 0.1
-
   brain:
     type: evonet
-    dim: [4, 6, 2]
-    activation: [linear, tanh, tanh]
+    dim: [2, 0, 0, 1]       # minimal topology; hidden layers start empty
+    activation: [linear, tanh, tanh, sigmoid]
     initializer: normal_evonet
+    weight_bounds: [-5.0, 5.0]
+    bias_bounds:   [-1.0, 1.0]
+
     mutation:
       strategy: constant
-      probability: 1.0
-      strength: 0.05
-      activations:
-        probability: 0.01
-        allowed: [tanh, relu, sigmoid]
+      strength: 0.1
+      probability: 0.9
+
+      biases:
+        strategy: constant
+        strength: 0.05
+        probability: 0.8
+
       structural:
-        add_neuron: 0.01
+        add_neuron: 0.03
+        recurrent: "none"    # none | direct | local | all
+        remove_neuron: 0.01
         add_connection: 0.05
-        remove_connection: 0.02
-        recurrent: local
-        keep_connected: true
+        remove_connection: 0.01
+        split_connection: 0.02
+
+        max_nodes: 3
+        max_edges: 20
+
 ```
 
+---
+
+## Further examples
+
+For complete, runnable examples including fitness definitions and visualization,
+please refer to the GitHub repository:
+
+👉 [EvoLib Examples on GitHub](https://github.com/EvoLib/evo-lib/tree/main/examples)
+
+For a complete list of all available configuration fields,
+see the [Configuration Parameters](config_parameter.md) reference.

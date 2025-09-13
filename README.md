@@ -4,7 +4,7 @@
 [![Code Quality & Tests](https://github.com/EvoLib/evo-lib/actions/workflows/ci.yml/badge.svg)](https://github.com/EvoLib/evo-lib/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PyPI version](https://badge.fury.io/py/evolib.svg)](https://pypi.org/project/evolib/)
-[![Project Status: Alpha](https://img.shields.io/badge/status-alpha-orange.svg)](https://github.com/EvoLib/evo-lib)
+[![Project Status: Beta](https://img.shields.io/badge/status-beta-blue.svg)](https://github.com/EvoLib/evo-lib)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/EvoLib/evolib/main/assets/evolib_256.png" alt="EvoLib Logo" width="256"/>
@@ -20,15 +20,15 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 - **Modularity**: mutation, selection, crossover, and parameter representations can be freely combined.  
 - **Educational value**: examples and a clean API make it practical for illustrating evolutionary concepts.  
 - **Neuroevolution support**: structural mutations (adding/removing neurons and connections) and evolvable networks via EvoNet.  
-- **Type-checked**: mypy typing, PEP8 compliance, and consistent code style.  
+- **Type-checked**: PEP8 compliant, and consistent code style.  
 
 
-> ⚠️ **This project is in alpha. APIs and configuration structures may still change.**
+> **EvoLib is currently in beta. The core API and configuration format are stable, but some features are still under development.**
 
 ---
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/05_advanced_topics/04_frames_vector_obstacles/04_vector_control_obstacles.gif" alt="Sample Plott" width="512"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/05_advanced_topics/04_frames_vector_obstacles/04_vector_control_obstacles.gif" alt="Sample Plot" width="512"/>
 </p>
 
 ---
@@ -172,7 +172,7 @@ For deeper exploration, see the [full examples directory](examples/)
 ## Roadmap
 
 - [X] Adaptive Mutation (global, individual, per-parameter)
-- [x] Flexible Crossover Strategies (BLX, intermediate, none)
+- [X] Flexible Crossover Strategies (BLX, intermediate, none)
 - [X] Structured Neural Representations (EvoNet)
 - [X] Composite Parameters (multi-module individuals)
 - [X] Neuroevolution
