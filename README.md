@@ -61,6 +61,13 @@ Requirements: Python 3.10+ and packages in `requirements.txt`.
 
 ---
 
+## Documentation 
+
+Documentation for EvoLib is available at: 👉 https://evolib.readthedocs.io/en/latest/
+
+---
+
+
 ## Example Usage
 
 ```python
@@ -155,6 +162,19 @@ It can be applied to:
 
 ---
 
+## Preview: Pygame Integration
+
+Early prototypes explore how evolutionary algorithms can be applied to agents in simulated 2D worlds, using **pygame** as a simple yet flexible environment.
+The goal is to demonstrate how controllers evolve in dynamic settings, with feedback from sensors and collisions.
+
+<p align="center">
+  <img src="assets/ants.gif" alt="Pygame Integration Preview" width="512"/>
+</p>
+
+*In this video, agents use simple sensors to learn how to collect food while avoiding collisions with the environment.*
+
+---
+
 ## Learn EvoLib in 5 Steps
 
 EvoLib includes a small set of examples that illustrate the core concepts step by step:
@@ -185,11 +205,6 @@ For deeper exploration, see the [full examples directory](examples/)
 
 ---
 
-## Documentation 
-
-Documentation for EvoLib is available at: 👉 https://evolib.readthedocs.io/en/latest/
-
----
 
 ## License
 
