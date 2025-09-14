@@ -26,28 +26,9 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 > **EvoLib is currently in beta. The core API and configuration format are stable, but some features are still under development.**
 
 ---
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/05_advanced_topics/04_frames_vector_obstacles/04_vector_control_obstacles.gif" alt="Sample Plot" width="512"/>
 </p>
-
----
-
-## Directory Structure
-
-```
-evolib/
-├── core/           # Individual, Population
-├── config/         # Typed component configuration (Vector, EvoNet, etc.)
-├── interfaces/     # Enums, types, helper protocols
-├── initializers/   # Initializer registry and implementations
-├── operators/      # Mutation, crossover, selection, etc.
-├── registry/       # Strategy and operator registries
-├── representation/ # ParaBase + Vector, EvoNet, Composite etc.
-├── utils/          # Logging, plotting, math, config loader
-└── examples/       # Educational examples and test runs
-
-```
 
 ---
 
@@ -60,6 +41,7 @@ pip install evolib
 Requirements: Python 3.10+ and packages in `requirements.txt`.
 
 ---
+
 
 ## Example Usage
 
@@ -82,6 +64,11 @@ For full examples, see 📁[`examples/`](https://github.com/EvoLib/evo-lib/tree/
 ---
 
 # Configuration Example (YAML)
+
+A core idea of EvoLib is that experiments are defined entirely through YAML configuration files.
+This makes runs explicit, reproducible, and easy to adapt. The example below demonstrates
+different modules (vector + EvoNet) with mutation, structural growth, and stopping criteria.
+
 
 ```yaml
 parent_pool_size: 20
@@ -155,6 +142,46 @@ It can be applied to:
 
 ---
 
+## Preview: Pygame Integration
+
+Early prototypes demonstrate how evolutionary algorithms can evolve both neural networks and sensor properties such as number, range, and orientation for agents in 2D worlds built with pygame. This illustrates how networks and sensors co-adapt to dynamic environments with collisions and feedback.
+
+### Ant/Food Prototype
+
+In this video, agents use simple sensors to learn how to collect food while avoiding collisions with the environment.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/assets/ant.gif" alt="Pygame Integration Preview" width="640"/>
+</p>
+
+### Flappy Bird–style Prototype
+
+Another prototype uses a **Flappy Bird–like 2D world**, where agents must pass through moving gaps.
+Both the **neural controller** and the **sensors** (number, length, angle) are evolved, allowing perception and action to adapt together.
+This illustrates how EvoLib can be applied to simple game-like environments, making the joint evolution of sensing and control directly observable.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/assets/flappy.gif" alt="Pygame Integration Preview" width="160"/>
+</p>
+
+*This video shows the best agent from the final generation rather than the full evolutionary process.*
+
+---
+
+## Learn EvoLib in 5 Steps
+
+EvoLib includes a small set of examples that illustrate the core concepts step by step:
+
+1. [Hello Evolution](examples/01_basic_usage/04_fitness.py) – minimal run with a custom fitness function and visible improvement over generations.
+2. [Strategies in Action](examples/02_strategies/03_mu_lambda.py) – (μ + λ) evolution step by step.
+3. [Function Approximation](examples/04_function_approximation/02_sine_point_approximation.py) – evolve support points to match a sine curve.
+4. [Evolution as Control](examples/05_advanced_topics/04_vector_control_with_obstacles.py) – evolve a controller in an environment.
+5. [Neuroevolution with Structural Growth](examples/07_evonet/03_structural_xor.py) – evolve networks with growing topology.
+
+For deeper exploration, see the [full examples directory](examples/)
+
+---
+
 ## Roadmap
 
 - [X] Adaptive Mutation (global, individual, per-parameter)
@@ -171,11 +198,13 @@ It can be applied to:
 
 ---
 
+
 ## License
 
 MIT License – see [MIT License](https://github.com/EvoLib/evo-lib/tree/main/LICENSE).
 
 ---
+
 ```{toctree}
 :maxdepth: 1
 :hidden:

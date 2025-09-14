@@ -153,14 +153,14 @@ It can be applied to:
 
 Early prototypes demonstrate how evolutionary algorithms can evolve both neural networks and sensor properties such as number, range, and orientation for agents in 2D worlds built with pygame. This illustrates how networks and sensors co-adapt to dynamic environments with collisions and feedback.
 
-
+### Ant/Food Prototype
 In this video, agents use simple sensors to learn how to collect food while avoiding collisions with the environment.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/assets/ant.gif" alt="Pygame Integration Preview" width="640"/>
 </p>
 
-
+### Flappy Bird–style Prototype
 Another prototype uses a **Flappy Bird–like 2D world**, where agents must pass through moving gaps.
 Both the **neural controller** and the **sensors** (number, length, angle) are evolved, allowing perception and action to adapt together.
 This illustrates how EvoLib can be applied to simple game-like environments, making the joint evolution of sensing and control directly observable.
