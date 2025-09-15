@@ -7,13 +7,13 @@ form.
 """
 
 import random as rng
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 import numpy as np
 from evonet.activation import random_function_name
 from evonet.core import Nnet
 from evonet.enums import NeuronRole
-from evonet.mutation import mutate_activation, mutate_bias, mutate_weight
+from evonet.mutation import mutate_activations, mutate_bias, mutate_weight
 
 from evolib.config.base_component_config import StructuralMutationConfig
 from evolib.config.evonet_component_config import EvoNetComponentConfig
@@ -67,6 +67,7 @@ class EvoNet(ParaBase):
         # Optional override for activation mutation
         self.activation_probability: float | None = None
         self.allowed_activations: list[str] | None = None
+        self.activation_layers: dict[int, list[str] | Literal["all"]] | None = None
 
         # Optional configuration for structural mutation
         self.structural_cfg: StructuralMutationConfig | None = None
@@ -102,6 +103,7 @@ class EvoNet(ParaBase):
         if cfg.mutation.activations is not None:
             self.activation_probability = cfg.mutation.activations.probability
             self.allowed_activations = cfg.mutation.activations.allowed
+            self.activation_layers = cfg.mutation.activations.layers
 
         if cfg.mutation.structural is not None:
             self.structural_cfg = cfg.mutation.structural
@@ -175,12 +177,12 @@ class EvoNet(ParaBase):
 
         # Activations
         if self.activation_probability and self.activation_probability > 0.0:
-            for neuron in self.net.get_all_neurons():
-                if (
-                    rng.random() < self.activation_probability
-                    and neuron.role != NeuronRole.INPUT
-                ):
-                    mutate_activation(neuron, activations=self.allowed_activations)
+            mutate_activations(
+                self.net,
+                probability=self.activation_probability,
+                activations=self.allowed_activations,
+                layers=self.activation_layers,
+            )
 
         # Structural mutation (optional)
         if self.structural_cfg is not None:
