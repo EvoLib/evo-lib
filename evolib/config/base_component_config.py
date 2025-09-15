@@ -8,7 +8,7 @@ should be configured, not *how* it is executed. Any runtime behavior belongs
 into the respective Para* representations and operator modules.
 """
 
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -199,14 +199,24 @@ class ActivationMutationConfig(BaseModel):
     )
     allowed: Optional[list[str]] = Field(
         default=None,
-        description="Whitelist of activation names; if None, "
-        "all registered activations.",
+        description="Global whitelist of activation names; "
+        "applies to all hidden layers.",
+    )
+    layers: Optional[dict[int, Union[list[str], Literal["all"]]]] = Field(
+        default=None,
+        description="Optional mapping from layer index to allowed activations. "
+        "Overrides `allowed` if given.",
     )
 
     @model_validator(mode="after")
-    def _check_probability(self) -> "ActivationMutationConfig":
+    def _check_valid(self) -> "ActivationMutationConfig":
         if not (0.0 <= self.probability <= 1.0):
             raise ValueError("activations.probability must be in [0, 1].")
+
+        if self.allowed is not None and self.layers is not None:
+            # Warn about ambiguity, or raise (designentscheidung)
+            raise ValueError("Specify either `allowed` or `layers`, not both.")
+
         return self
 
 
