@@ -6,6 +6,7 @@
 - `mutate_activations`: optional `layers` parameter for finer control.
 
 ### Changed
+- Added safeguard in remove_old_indivs(): if all individuals exceed max_indiv_age, the best individual is retained to prevent population collapse.
 - Evolution strategies now respect max_indiv_age: individuals exceeding the configured age are removed after replacement (not applicable for (mu, lambda)).
 - Internal refactor of activation mutation logic (no change to defaults).
 
