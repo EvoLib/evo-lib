@@ -44,6 +44,9 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
     if not pop.indivs:
         raise ValueError("Population is empty.")
 
+    # Age all current individuals
+    pop.age_indivs()
+
     # Update mutation/crossover parameters
     pop.update_parameters()
 
@@ -78,6 +81,9 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
         )
     if not pop.indivs:
         raise ValueError("Population is empty.")
+
+    # Age all current individuals
+    pop.age_indivs()
 
     pop.evaluate_fitness()
 
@@ -138,6 +144,9 @@ def evolve_steady_state(pop: "Pop") -> None:
             "to your YAML configuration."
         )
 
+    # Age all current individuals
+    pop.age_indivs()
+
     # Select parents (configurable)
     if (
         pop.config.selection is not None
@@ -191,6 +200,9 @@ def evolve_flexible(pop: "Pop") -> None:
         raise ValueError("Selection function not configured.")
     if pop._replacement_fn is None:
         raise ValueError("Replacement function not configured.")
+
+    # Age all current individuals
+    pop.age_indivs()
 
     # Fitness
     pop.evaluate_fitness()
