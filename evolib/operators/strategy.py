@@ -67,6 +67,9 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
     # Select the best individuals
     replace_mu_lambda(pop, combined)
 
+    # Remove individuals that exceed max_age
+    pop.remove_old_indivs()
+
     pop.update_statistics()
 
 
@@ -175,6 +178,9 @@ def evolve_steady_state(pop: "Pop") -> None:
     # Replace worst individuals (excluding elites)
     replace_steady_state(pop, offspring, num_replace=pop.lambda_)
 
+    # Remove individuals that exceed max_age
+    pop.remove_old_indivs()
+
     # Update population statistics (including aging, diversity, fitness metrics)
     pop.update_statistics()
 
@@ -234,6 +240,9 @@ def evolve_flexible(pop: "Pop") -> None:
 
     # Replacement (via configured strategy)
     pop._replacement_fn(pop, offspring)
+
+    # Remove individuals that exceed max_age
+    pop.remove_old_indivs()
 
     # Update statistics
     pop.update_statistics()
