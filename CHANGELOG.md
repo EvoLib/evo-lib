@@ -6,6 +6,7 @@
 - `mutate_activations`: optional `layers` parameter for finer control.
 
 ### Changed
+- Evolution strategies now respect max_indiv_age: individuals exceeding the configured age are removed after replacement (not applicable for (mu, lambda)).
 - Internal refactor of activation mutation logic (no change to defaults).
 
 ### Fixed

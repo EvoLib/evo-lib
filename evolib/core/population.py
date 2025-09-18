@@ -442,8 +442,16 @@ class Pop:
             if indiv.age < self.max_indiv_age
         ]
 
+        if not survivors:
+            survivors = [self.best()]
+            print(
+                f"[Warning] All individuals exceeded max_age={self.max_indiv_age}. "
+                "Keeping best individual to prevent population collapse."
+            )
+
         removed_count = len(self.indivs) - len(survivors)
-        self.indivs = survivors
+        if removed_count > 0:
+            self.indivs = survivors
 
         return removed_count
 
@@ -743,7 +751,7 @@ class Pop:
                 on_generation_start(self)
 
             self.run_one_generation(strategy=strategy)
-            self.print_status(verbosity=1 if verbosity >= 1 else 0)
+            self.print_status(verbosity)
 
             if on_generation_end:
                 on_generation_end(self)
