@@ -277,6 +277,10 @@ def plot_approximation(
     true_label: str = "Target",
     pred_marker: str | None = None,
     true_marker: str | None = None,
+    pred_lw: int = 2,
+    true_lw: int = 2,
+    pred_ls: str = "--",
+    true_ls: str = "-",
     x_vals: Sequence[float] | np.ndarray | None = None,
     y_limits: tuple[float, float] | None = None,
     dpi: int = 150,
@@ -377,9 +381,23 @@ def plot_approximation(
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    ax.plot(x_vals, y_true, color="black", label=true_label, marker=true_marker, lw=2)
     ax.plot(
-        x_vals, y_pred, color="red", label=pred_label, marker=pred_marker, lw=2, ls="--"
+        x_vals,
+        y_true,
+        color="black",
+        label=true_label,
+        marker=true_marker,
+        lw=true_lw,
+        ls=true_ls,
+    )
+    ax.plot(
+        x_vals,
+        y_pred,
+        color="red",
+        label=pred_label,
+        marker=pred_marker,
+        lw=pred_lw,
+        ls=pred_ls,
     )
 
     if support_points is not None:
