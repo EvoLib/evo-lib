@@ -657,6 +657,10 @@ class Pop:
         if sort:
             self.sort_by_fitness()
 
+    def step(self) -> None:
+        """Alias for run_one_generation()."""
+        return self.run_one_generation()
+
     def run(
         self,
         *,
