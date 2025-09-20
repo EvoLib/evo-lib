@@ -19,7 +19,10 @@ from evolib.config.base_component_config import StructuralMutationConfig
 from evolib.config.evonet_component_config import EvoNetComponentConfig
 from evolib.interfaces.enums import MutationStrategy
 from evolib.interfaces.types import ModuleConfig
-from evolib.operators.evonet_structural_mutation import mutate_structure
+from evolib.operators.evonet_structural_mutation import (
+    mutate_structure,
+    resolve_recurrent_kinds,
+)
 from evolib.operators.mutation import (
     adapt_mutation_probability_by_diversity,
     adapt_mutation_strength,
@@ -143,8 +146,12 @@ class EvoNet(ParaBase):
                 # Hidden Layer
                 role = NeuronRole.HIDDEN
 
+            recurrent_kinds = resolve_recurrent_kinds(cfg.recurrent)
             self.net.add_neuron(
-                count=num_neurons, activation=activation_name, role=role
+                count=num_neurons,
+                activation=activation_name,
+                role=role,
+                recurrent=recurrent_kinds if role != NeuronRole.INPUT else None,
             )
 
     def calc(self, input_values: list[float]) -> list[float]:

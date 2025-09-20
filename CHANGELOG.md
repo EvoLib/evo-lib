@@ -1,6 +1,8 @@
 ## [0.2.0b2] - unreleased
 
 ### Added
+- Added: `recurrent` option in EvoNet module config.
+  Allows selecting initial recurrent connections via presets (`none`, `direct`, `local`, `all`).
 - Added: `activations_allowed` option for EvoNet modules.
   This restricts the pool of activation functions when using `activation: random`.
 - Added `plot_bit_prediction` in plotting.py: specialized visualization for bit sequence prediction, combining raster (Input/Target/Pred) and line/scatter view.

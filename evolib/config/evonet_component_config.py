@@ -63,6 +63,9 @@ class EvoNetComponentConfig(BaseModel):
         "neurons in hidden layers.",
     )
 
+    # Recurrent connections
+    recurrent: Optional[Literal["none", "direct", "local", "all"]] = "none"
+
     # Name of the initializer function (resolved via initializer registry)
     initializer: str = Field(..., description="Name of the initializer to use")
 
@@ -119,3 +122,16 @@ class EvoNetComponentConfig(BaseModel):
                 f"Valid options are: {list(ACTIVATIONS.keys())}"
             )
         return act_name
+
+    @validator("recurrent")
+    def validate_recurrent(cls, recurrent: Optional[str]) -> str:
+        """Ensure recurrent preset is valid and normalized."""
+        if recurrent is None:
+            return "none"
+        allowed = {"none", "direct", "local", "all"}
+        if recurrent not in allowed:
+            raise ValueError(
+                f"Invalid recurrent preset '{recurrent}'. "
+                f"Valid options are: {sorted(allowed)}"
+            )
+        return recurrent
