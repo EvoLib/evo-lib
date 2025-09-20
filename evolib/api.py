@@ -42,6 +42,7 @@ from evolib.utils.loss_functions import (
 )
 from evolib.utils.plotting import (
     plot_approximation,
+    plot_bit_prediction,
     plot_diversity,
     plot_fitness,
     plot_fitness_comparison,
@@ -60,6 +61,7 @@ __all__ = [
     "plot_fitness",
     "plot_approximation",
     "save_combined_net_plot",
+    "plot_bit_prediction",
     "plot_history",
     "plot_diversity",
     "plot_mutation_trends",

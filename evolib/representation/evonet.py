@@ -111,6 +111,7 @@ class EvoNet(ParaBase):
         # Apply crossover config
         apply_crossover_config(evo_params, cfg.crossover)
 
+        # Activation functions per layer
         if isinstance(cfg.activation, list):
             activations = cfg.activation
         else:
@@ -119,11 +120,16 @@ class EvoNet(ParaBase):
             activations = ["linear"] + [cfg.activation] * (len(cfg.dim) - 1)
 
         for layer_idx, num_neurons in enumerate(self.dim):
+            if num_neurons == 0:
+                continue
 
             activation_name = activations[layer_idx]
 
             if activation_name == "random":
-                activation_name = random_function_name()
+                if cfg.activations_allowed is not None:
+                    activation_name = random_function_name(cfg.activations_allowed)
+                else:
+                    activation_name = random_function_name()
 
             self.net.add_layer()
 
@@ -137,10 +143,9 @@ class EvoNet(ParaBase):
                 # Hidden Layer
                 role = NeuronRole.HIDDEN
 
-            if num_neurons > 0:
-                self.net.add_neuron(
-                    count=num_neurons, activation=activation_name, role=role
-                )
+            self.net.add_neuron(
+                count=num_neurons, activation=activation_name, role=role
+            )
 
     def calc(self, input_values: list[float]) -> list[float]:
         return self.net.calc(input_values)

@@ -1,6 +1,10 @@
 ## [0.2.0b2] - unreleased
 
 ### Added
+- Added: `activations_allowed` option for EvoNet modules.
+  This restricts the pool of activation functions when using `activation: random`.
+- Added `plot_bit_prediction` in plotting.py: specialized visualization for bit sequence prediction, combining raster (Input/Target/Pred) and line/scatter view.
+- Added `Population.step()` as a shorthand for `run_one_generation()`.
 - Added pred_lw, true_lw, pred_ls, and true_ls parameters to plot_approximation() for customizing line width and style.
 - Added automatic aging of individuals: age_indivs() is now called at the beginning of each generation in all strategies.
 - `mutate_activations`: optional `layers` parameter for finer control.

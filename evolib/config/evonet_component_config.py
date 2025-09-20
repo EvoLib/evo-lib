@@ -13,7 +13,8 @@ config resolution.
 
 from typing import Literal, Optional, Tuple, Union
 
-from pydantic import BaseModel, Field, field_validator
+from evonet.activation import ACTIVATIONS
+from pydantic import BaseModel, Field, field_validator, validator
 from pydantic_core import core_schema
 
 from evolib.config.base_component_config import (
@@ -54,6 +55,13 @@ class EvoNetComponentConfig(BaseModel):
 
     # Either a single activation function or one per layer
     activation: Union[str, list[str]] = "tanh"
+
+    # Whitelist for random activation selection
+    activations_allowed: Optional[list[str]] = Field(
+        default=None,
+        description="Whitelist of activation names applied to "
+        "neurons in hidden layers.",
+    )
 
     # Name of the initializer function (resolved via initializer registry)
     initializer: str = Field(..., description="Name of the initializer to use")
@@ -101,3 +109,13 @@ class EvoNetComponentConfig(BaseModel):
         if isinstance(act, list) and dim and len(act) != len(dim):
             raise ValueError("Length of 'activation' list must match 'dim'")
         return act
+
+    @validator("activations_allowed", each_item=True)
+    def validate_activation_name(cls, act_name: str) -> str:
+        """Ensure only valid activation function names are allowed."""
+        if act_name not in ACTIVATIONS:
+            raise ValueError(
+                f"Invalid activation function '{act_name}'. "
+                f"Valid options are: {list(ACTIVATIONS.keys())}"
+            )
+        return act_name
