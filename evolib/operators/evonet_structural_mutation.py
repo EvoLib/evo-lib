@@ -2,7 +2,7 @@
 
 import numpy as np
 from evonet.core import Nnet
-from evonet.enums import NeuronRole, RecurrentKind
+from evonet.enums import NeuronRole
 from evonet.mutation import (
     add_random_connection,
     add_random_neuron,
@@ -12,19 +12,7 @@ from evonet.mutation import (
 )
 
 from evolib.config.base_component_config import StructuralMutationConfig
-
-
-def resolve_recurrent_kinds(preset: str | None) -> set[RecurrentKind]:
-    if preset == "none" or preset is None:
-        return set()
-    elif preset == "direct":
-        return {RecurrentKind.DIRECT}
-    elif preset == "local":
-        return {RecurrentKind.DIRECT, RecurrentKind.LATERAL}
-    elif preset == "all":
-        return {RecurrentKind.DIRECT, RecurrentKind.LATERAL, RecurrentKind.INDIRECT}
-    else:
-        raise ValueError(f"Unknown recurrent preset: {preset}")
+from evolib.interfaces.enum_helpers import resolve_recurrent_kinds
 
 
 def mutate_structure(net: Nnet, cfg: StructuralMutationConfig) -> None:

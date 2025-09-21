@@ -17,12 +17,10 @@ from evonet.mutation import mutate_activations, mutate_bias, mutate_weight
 
 from evolib.config.base_component_config import StructuralMutationConfig
 from evolib.config.evonet_component_config import EvoNetComponentConfig
+from evolib.interfaces.enum_helpers import resolve_recurrent_kinds
 from evolib.interfaces.enums import MutationStrategy
 from evolib.interfaces.types import ModuleConfig
-from evolib.operators.evonet_structural_mutation import (
-    mutate_structure,
-    resolve_recurrent_kinds,
-)
+from evolib.operators.evonet_structural_mutation import mutate_structure
 from evolib.operators.mutation import (
     adapt_mutation_probability_by_diversity,
     adapt_mutation_strength,
