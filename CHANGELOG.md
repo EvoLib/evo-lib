@@ -23,6 +23,8 @@
 - Internal refactor of activation mutation logic (no change to defaults).
 
 ### Fixed
+- `update_mutation_parameters`: Parents now receive adaptive parameters only once during population initialization.
+  In all subsequent generations, only offspring parameters are updated.
 - Fixed `selection_random` removal logic (now removes original parent).
 - `selection_rank_based` now respects the `exp_base` parameter.
 - Fixed adaptive update of mutation strength to consistently use min/max bounds instead of weight/bias value ranges.

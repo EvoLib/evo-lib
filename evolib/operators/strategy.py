@@ -47,11 +47,11 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
     # Age all current individuals
     pop.age_indivs()
 
-    # Update mutation/crossover parameters
-    pop.update_parameters()
-
     # CREATE OFFSPRING
     offspring = generate_cloned_offspring(pop.indivs, pop.offspring_pool_size)
+
+    # Update mutation/crossover parameters
+    pop.update_parameters(offspring)
 
     # Crossover
     crossover_offspring(pop, offspring)
@@ -90,11 +90,11 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
 
     pop.evaluate_fitness()
 
-    # Update mutation/crossover parameters
-    pop.update_parameters()
-
     # CREATE OFFSPRING
     offspring = generate_cloned_offspring(pop.indivs, pop.offspring_pool_size)
+
+    # Update mutation/crossover parameters
+    pop.update_parameters(offspring)
 
     # Crossover
     crossover_offspring(pop, offspring)
@@ -164,7 +164,7 @@ def evolve_steady_state(pop: "Pop") -> None:
     offspring = generate_cloned_offspring(parents, pop.lambda_)
 
     # Update mutation/crossover parameters
-    pop.update_parameters()
+    pop.update_parameters(offspring)
 
     # Crossover
     crossover_offspring(pop, offspring)
@@ -226,11 +226,11 @@ def evolve_flexible(pop: "Pop") -> None:
     # Reproduction
     offspring = generate_cloned_offspring(parents, pop.lambda_)
 
+    # Mutation & Crossover Parameters
+    pop.update_parameters(offspring)
+
     # Crossover
     crossover_offspring(pop, offspring)
-
-    # Mutation & Crossover Parameters
-    pop.update_parameters()
 
     # Mutation
     mutate_offspring(pop, offspring)

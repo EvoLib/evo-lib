@@ -73,7 +73,7 @@ class Indiv:
         "is_elite",
     )
 
-    def __init__(self, para: Any = None):
+    def __init__(self, para: Any | None = None):
         self.id: str = str(uuid4())
         self.para = para
         self.fitness = None

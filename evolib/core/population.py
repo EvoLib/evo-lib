@@ -208,6 +208,10 @@ class Pop:
             para = init_fn(self)
             self.add_indiv(Indiv(para=para))
 
+        # initialize adaptive parameters for initial parents
+        if self.indivs:
+            self.update_parameters(self.indivs)
+
     def set_fitness_function(self, func: FitnessFunction) -> None:
         """
         Sets the fitness function to be used for evaluating individuals.
@@ -567,7 +571,7 @@ class Pop:
 
         self.history_logger.reset()
 
-    def update_parameters(self) -> None:
+    def update_parameters(self, indivs: list[Indiv]) -> None:
         """
         Update all strategy-dependent parameters for the current generation.
 
@@ -577,43 +581,54 @@ class Pop:
             ValueError or AttributeError if the population or its individuals
             are invalid.
         """
-        self.update_mutation_parameters()
-        self.update_crossover_parameters()
+        self.update_mutation_parameters(indivs)
+        self.update_crossover_parameters(indivs)
 
-    def update_mutation_parameters(self) -> None:
+    def update_mutation_parameters(self, indivs: list[Indiv]) -> None:
         """
-        Triggers per-generation mutation parameter updates for all individuals in the
-        population via their `para` objects.
+        Update mutation-related parameters for a given set of individuals via their
+        `para` objects.
 
-        This ensures that all individuals – including parents – are updated consistently
-        based on current generation number.
+        Typical usage:
+            - During population initialization: called once on all parents to ensure
+              they start with valid adaptive parameters.
+            - During evolution: called on offspring *before* mutation, so that new
+              individuals use up-to-date parameters (e.g. annealing schedules).
 
-        Uses a polymorphic call to `para.update_mutation_parameters()`, preserving
-        encapsulation.
+        Notes:
+            - Parents are not updated in every generation. They keep the parameters
+              assigned at initialization, ensuring selection acts on stable values.
+            - Offspring are updated once per generation, prior to mutation.
         """
-        for indiv in self.indivs:
+
+        for indiv in indivs:
+            assert indiv.para is not None
             indiv.para.update_mutation_parameters(
                 self.generation_num, self.max_generations, self.diversity_ema
             )
 
-    def update_crossover_parameters(self) -> None:
+    def update_crossover_parameters(self, indivs: list[Indiv]) -> None:
         """
-        Triggers per-generation update of crossover parameters for all individuals.
+        Update crossover-related parameters for a given set of individuals.
 
-        Applies strategy-dependent crossover control (e.g. exponential decay or
-        adaptive global), using generation number and population diversity.
+        Typical usage:
+            - During population initialization: called once on all parents to ensure
+              they start with valid crossover parameters.
+            - During evolution: called on offspring *before* crossover, so that new
+              individuals use up-to-date parameters (e.g. annealing schedules or
+              adaptive rates).
 
-        Raises:
-            ValueError: If population is uninitialized or empty.
-            AttributeError: If an individual lacks a valid 'para' object with method
-                            'update_crossover_parameters'.
+        Notes:
+            - Parents are not updated in every generation. They keep the parameters
+              assigned at initialization, ensuring selection acts on stable values.
+            - Offspring are updated once per generation, prior to crossover.
         """
-        if not self.indivs:
+        if not indivs:
             raise ValueError(
                 "Population is empty – cannot update crossover parameters."
             )
 
-        for indiv in self.indivs:
+        for indiv in indivs:
             if not hasattr(indiv, "para") or not hasattr(
                 indiv.para, "update_crossover_parameters"
             ):
@@ -622,6 +637,7 @@ class Pop:
                     "with 'update_crossover_parameters' method."
                 )
 
+            assert indiv.para is not None
             indiv.para.update_crossover_parameters(
                 self.generation_num,
                 self.max_generations,
