@@ -163,14 +163,43 @@ class Indiv:
         """Return True if the individual is an offspring."""
         return self.origin == Origin.OFFSPRING
 
-    def copy(self) -> "Indiv":
+    def copy(
+        self,
+        *,
+        reset_id: bool = True,
+        reset_fitness: bool = False,
+        reset_age: bool = False,
+        reset_evaluation: bool = False,
+        reset_origin: bool = False,
+    ) -> "Indiv":
         """
-        Create a copy of the individual.
+        Create a copy of the individual, with optional resets.
 
-        This method can be overridden in subclasses to implement
-        optimized or custom copy behavior.
+        Args:
+            reset_id (bool): If True (default), assign a new unique ID to the copy.
+            reset_fitness (bool): If True, set fitness to None in the copy.
+            reset_age (bool): If True, set age to 0 in the copy.
+            reset_evaluation (bool): If True, set is_evaluated = False in the copy.
+            reset_origin (bool): If True, set origin = Origin.OFFSPRING
+                                 and parent_idx = None in the copy.
 
         Returns:
-            Indiv: A copy of this individual.
+            Indiv: A (possibly reset) copy of this individual.
         """
-        return deepcopy(self)
+        new_indiv: Indiv = deepcopy(self)
+
+        if reset_id:
+            new_indiv.id = str(uuid4())
+        if reset_fitness:
+            new_indiv.fitness = None
+        if reset_age:
+            new_indiv.age = 0
+        if reset_evaluation:
+            new_indiv.is_evaluated = False
+        if reset_origin:
+            from evolib.interfaces.enums import Origin
+
+            new_indiv.origin = Origin.OFFSPRING
+            new_indiv.parent_idx = None
+
+        return new_indiv

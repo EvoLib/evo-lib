@@ -1,6 +1,10 @@
 ## [0.2.0b2] - unreleased
 
 ### Added
+- Each individual now has a unique `indiv.id` (UUID) for tracking and debugging.
+- `Indiv.copy()` extended with `reset_*` flags (`reset_id`, `reset_fitness`,
+  `reset_age`, `reset_evaluation`, `reset_origin`) for flexible cloning.
+  By default, `reset_id=True` ensures every copy gets a new unique ID.
 - Added: `recurrent` option in EvoNet module config.
   Allows selecting initial recurrent connections via presets (`none`, `direct`, `local`, `all`).
 - Added: `activations_allowed` option for EvoNet modules.

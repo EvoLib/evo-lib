@@ -4,8 +4,6 @@ from typing import Any, List
 
 import numpy as np
 
-from evolib.interfaces.enums import Origin
-
 
 def generate_cloned_offspring(parents: List[Any], lambda_: int) -> List[Any]:
     """
@@ -36,11 +34,13 @@ def generate_cloned_offspring(parents: List[Any], lambda_: int) -> List[Any]:
 
     for idx in parent_indices:
         parent = parents[idx]
-        child = parent.copy()
-        child.age = 0
-        child.fitness = None
-        child.is_evaluated = False
-        child.origin = Origin.OFFSPRING
+        child = parent.copy(
+            reset_id=True,
+            reset_fitness=True,
+            reset_age=True,
+            reset_evaluation=True,
+            reset_origin=True,
+        )
         child.parent_idx = idx
         offspring.append(child)
 
