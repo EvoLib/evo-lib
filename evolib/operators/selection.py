@@ -12,10 +12,9 @@ Included methods:
 - Truncation Selection
 
 All methods operate on a population of individuals with assigned fitness values and
-return deep copies of selected parents.
+return copies of selected parents.
 """
 
-import copy
 import random
 from typing import TYPE_CHECKING, Any, List, Optional
 
@@ -124,7 +123,7 @@ def selection_tournament(
             )
 
         # Kopie des besten Individuums hinzufuegen
-        selected_parents.append(copy.deepcopy(pop.indivs[best_idx]))
+        selected_parents.append(pop.indivs[best_idx].copy())
 
         # Entfernen, falls gewuenscht
         if remove_selected:
@@ -159,7 +158,7 @@ def selection_rank_based(
         Default: False (minimization).
 
     Returns:
-        List[Any]: List of selected individuals (deep copies).
+        List[Any]: List of selected individuals (copies).
 
     Raises:
         ValueError: If parameters are invalid (e.g., empty population,
@@ -180,8 +179,6 @@ def selection_rank_based(
 
     if mode == "exponential" and exp_base is None:
         raise ValueError("exp_base must be set when using exponential rank selection.")
-
-    exp_base = 1.0
 
     fitnesses = [indiv.fitness for indiv in pop.indivs]
     if any(f is None or np.isnan(f) for f in fitnesses):
@@ -222,7 +219,7 @@ def selection_rank_based(
         # Select an individual based on rank probability
         list_index = np.random.choice(population_size, p=probabilities)
         selected_idx = available_indices[list_index]
-        selected_parents.append(copy.deepcopy(pop.indivs[selected_idx]))
+        selected_parents.append(pop.indivs[selected_idx].copy())
 
         # Optionally remove selected individual
         if remove_selected:
@@ -260,13 +257,13 @@ def selection_random(pop: "Pop", remove_selected: bool = False) -> List[Indiv]:
 
         # Randomly select individual from the population
         selected_parent = random.choice(available_indivs)
-        parent = copy.deepcopy(selected_parent)
+        parent = selected_parent.copy()
 
         # Append the best individual to offspring
         selected_parents.append(parent)
 
         if remove_selected:
-            available_indivs.remove(parent)
+            available_indivs.remove(selected_parent)
 
     return selected_parents
 
@@ -282,7 +279,7 @@ def selection_roulette(
         fitness_maximization (bool): If True, higher fitness is better.
 
     Returns:
-        List[Any]: List of selected individuals (deep copies).
+        List[Any]: List of selected individuals (copies).
     """
     if not pop.indivs:
         raise ValueError("Population is empty")
@@ -302,7 +299,7 @@ def selection_roulette(
     probabilities = fitnesses / total_fitness
     indices = np.random.choice(len(pop.indivs), size=num_parents, p=probabilities)
 
-    return [copy.deepcopy(pop.indivs[i]) for i in indices]
+    return [pop.indivs[i].copy() for i in indices]
 
 
 def selection_sus(
@@ -316,7 +313,7 @@ def selection_sus(
         fitness_maximization (bool): If True, higher fitness is better.
 
     Returns:
-        List[Any]: Selected individuals (deep copies).
+        List[Any]: Selected individuals (copies).
     """
     if not pop.indivs:
         raise ValueError("Population is empty")
@@ -345,7 +342,7 @@ def selection_sus(
     for p in pointers:
         while p > cumulative[i]:
             i += 1
-        selected.append(copy.deepcopy(pop.indivs[i]))
+        selected.append(pop.indivs[i].copy())
 
     return selected
 
@@ -365,7 +362,7 @@ def selection_boltzmann(
         fitness_maximization (bool): If True, higher fitness is better.
 
     Returns:
-        List[Any]: Selected individuals (deep copies).
+        List[Any]: Selected individuals (copies).
     """
     if not pop.indivs:
         raise ValueError("Population is empty")
@@ -388,7 +385,7 @@ def selection_boltzmann(
     probabilities = exp_values / np.sum(exp_values)
 
     indices = np.random.choice(len(pop.indivs), size=num_parents, p=probabilities)
-    return [copy.deepcopy(pop.indivs[i]) for i in indices]
+    return [pop.indivs[i].copy() for i in indices]
 
 
 def selection_truncation(
@@ -402,7 +399,7 @@ def selection_truncation(
         fitness_maximization (bool): If True, selects best fitness; else lowest.
 
     Returns:
-        List[Any]: Selected individuals (deep copies).
+        List[Any]: Selected individuals (copies).
     """
 
     if not pop.indivs:
@@ -419,4 +416,4 @@ def selection_truncation(
         sorted_indices = sorted_indices[::-1]
 
     selected_indices = sorted_indices[:num_parents]
-    return [copy.deepcopy(pop.indivs[i]) for i in selected_indices]
+    return [pop.indivs[i].copy() for i in selected_indices]

@@ -5,7 +5,6 @@ from typing import Any, List
 import numpy as np
 
 from evolib.interfaces.enums import Origin
-from evolib.utils.copy_indiv import copy_indiv
 
 
 def generate_cloned_offspring(parents: List[Any], lambda_: int) -> List[Any]:
@@ -37,7 +36,7 @@ def generate_cloned_offspring(parents: List[Any], lambda_: int) -> List[Any]:
 
     for idx in parent_indices:
         parent = parents[idx]
-        child = copy_indiv(parent)
+        child = parent.copy()
         child.age = 0
         child.fitness = None
         child.is_evaluated = False

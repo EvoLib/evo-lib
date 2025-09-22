@@ -12,9 +12,13 @@
 - `mutate_activations`: optional `layers` parameter for finer control.
 
 ### Changed
+- Unified individual copy handling: all strategies now use `Indiv.copy()`
+  instead of `deepcopy` or `copy_indiv`.
 - Added safeguard in remove_old_indivs(): if all individuals exceed max_indiv_age, the best individual is retained to prevent population collapse.
 - Evolution strategies now respect max_indiv_age: individuals exceeding the configured age are removed after replacement (not applicable for (mu, lambda)).
 - Internal refactor of activation mutation logic (no change to defaults).
 
 ### Fixed
+- Fixed `selection_random` removal logic (now removes original parent).
+- `selection_rank_based` now respects the `exp_base` parameter.
 - Fixed adaptive update of mutation strength to consistently use min/max bounds instead of weight/bias value ranges.

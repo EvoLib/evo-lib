@@ -21,6 +21,7 @@ Classes:
 
 from copy import deepcopy
 from typing import Any, Dict, Optional
+from uuid import uuid4
 
 from evolib.interfaces.enums import Origin
 
@@ -60,6 +61,7 @@ class Indiv:
     extra_metrics: dict[str, float]
 
     __slots__ = (
+        "id",
         "para",
         "fitness",
         "is_evaluated",
@@ -72,6 +74,7 @@ class Indiv:
     )
 
     def __init__(self, para: Any = None):
+        self.id: str = str(uuid4())
         self.para = para
         self.fitness = None
         self.is_evaluated = False
