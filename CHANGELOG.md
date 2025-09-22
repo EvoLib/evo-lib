@@ -17,3 +17,4 @@
 - Internal refactor of activation mutation logic (no change to defaults).
 
 ### Fixed
+- Fixed adaptive update of mutation strength to consistently use min/max bounds instead of weight/bias value ranges.

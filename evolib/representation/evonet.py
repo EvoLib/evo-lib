@@ -315,7 +315,8 @@ class EvoNet(ParaBase):
                 )
 
             # Perform adaptive update
-            ep.mutation_strength = adapt_mutation_strength(ep, self.weight_bounds)
+            bounds = (ep.min_mutation_strength, ep.max_mutation_strength)
+            ep.mutation_strength = adapt_mutation_strength(ep, bounds)
 
         # If Bias-Override exists
         if self.bias_evo_params is not None:
@@ -364,7 +365,10 @@ class EvoNet(ParaBase):
                     bep.mutation_strength = np.random.uniform(
                         bep.min_mutation_strength, bep.max_mutation_strength
                     )
-                bep.mutation_strength = adapt_mutation_strength(bep, self.bias_bounds)
+
+                # Perform adaptive update
+                bounds = (bep.min_mutation_strength, bep.max_mutation_strength)
+                bep.mutation_strength = adapt_mutation_strength(bep, bounds)
 
     def get_vector(self) -> np.ndarray:
         """Return a flat vector containing all weights and biases."""
