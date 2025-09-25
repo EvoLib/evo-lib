@@ -1,7 +1,105 @@
 # SPDX-License-Identifier: MIT
 """Common mathematical benchmark functions for optimization tasks."""
 
+from typing import Sequence
+
 import numpy as np
+
+
+def lfsr_sequence(
+    length: int,
+    seed: int = 0b10011,
+    taps: tuple[int, ...] = (5, 2),
+    invert_feedback: bool = True,
+) -> list[int]:
+    """
+    Generate a binary sequence using an n-bit LFSR (Linear Feedback Shift Register).
+
+    Parameters
+    ----------
+    length : int
+        Number of output bits to generate.
+    seed : int, optional
+        Initial state of the LFSR (must be non-zero). Default: 0b10011.
+    taps : tuple[int, ...], optional
+        Tap positions (1-based, e.g. (5, 2) for x^5 + x^2 + 1).
+    invert_feedback : bool, optional
+        If True (default), the feedback bit is inverted at initialization.
+        This variant ensures a maximal-length sequence for (5, 2).
+        If False, the classical Fibonacci-LFSR update rule is used.
+
+    Returns
+    -------
+    list[int]
+        Generated bit sequence of the given length.
+    """
+    n = max(taps)
+    if seed == 0:
+        raise ValueError("Seed must be non-zero for LFSR.")
+
+    state = seed & ((1 << n) - 1)
+    seq: list[int] = []
+
+    for _ in range(length):
+        bit = state & 1
+        seq.append(bit)
+
+        fb = 1 if invert_feedback else 0
+        for t in taps:
+            fb ^= (state >> (t - 1)) & 1
+
+        state = (state >> 1) | (fb << (n - 1))
+
+    return seq
+
+
+def xor_sequence(length: int, k: int = 2, seed: Sequence[int] = (0, 1)) -> list[int]:
+    """
+    Generate a sequence where each new bit is the XOR of the last k bits.
+
+    Parameters
+    ----------
+    length : int
+        Length of the sequence to generate.
+    k : int, optional
+        Window size for XOR. Default: 2 (classic XOR sequence).
+    seed : Sequence[int], optional
+        Initial bits to start the sequence. Must have length >= k.
+
+    Returns
+    -------
+    list[int]
+        Generated bit sequence of the given length.
+    """
+    if len(seed) < k:
+        raise ValueError(f"Seed must have at least {k} bits.")
+    seq = list(seed)
+    while len(seq) < length:
+        next_bit = 0
+        for i in range(1, k + 1):
+            next_bit ^= seq[-i]
+        seq.append(next_bit)
+    return seq[:length]
+
+
+def random_fixed_sequence(length: int, seed: int = 1234) -> list[int]:
+    """
+    Generate a reproducible random bit sequence with a fixed seed.
+
+    Parameters
+    ----------
+    length : int
+        Length of the sequence.
+    seed : int, optional
+        Random seed for reproducibility. Default: 1234.
+
+    Returns
+    -------
+    list[int]
+        Generated random bit sequence (0/1).
+    """
+    rng = np.random.RandomState(seed)
+    return rng.randint(0, 2, size=length).tolist()
 
 
 def simple_quadratic(x: np.ndarray) -> float:
