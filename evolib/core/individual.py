@@ -24,13 +24,14 @@ from typing import Any, Dict, Optional
 from uuid import uuid4
 
 from evolib.interfaces.enums import Origin
+from evolib.representation.dummy import ParaDummy
 
 
 class Indiv:
     """Represents an individual in an evolutionary optimization algorithm."""
 
-    #: para (Any, optional): Parameter values of the individual. Default: None.
-    para: Any | None
+    #: para (Any): Parameter values of the individual. Default: None.
+    para: Any
 
     #: fitness (float): Fitness value of the individual.
     #: None means the individual has not yet been evaluated.
@@ -73,9 +74,9 @@ class Indiv:
         "is_elite",
     )
 
-    def __init__(self, para: Any | None = None):
+    def __init__(self, para: Any = None):
         self.id: str = str(uuid4())
-        self.para = para
+        self.para = para if para is not None else ParaDummy()
         self.fitness = None
         self.is_evaluated = False
         self.age = 0
