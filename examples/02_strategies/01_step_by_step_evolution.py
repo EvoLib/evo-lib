@@ -74,13 +74,13 @@ pop = Pop(config_path="01_step_by_step_evolution.yaml", fitness_function=my_fitn
 pop.evaluate_fitness()
 print_indivs("0) Evaluate parents :", pop.indivs)
 
-# Step 1) Update per-generation parameters (mutation/crossover controls)
-pop.update_parameters()
-print_indivs("1) Update parameters: ", pop.indivs)
-
-# Step 2) Produce offspring by cloning
+# Step 1) Produce offspring by cloning
 offspring = generate_cloned_offspring(pop.indivs, pop.offspring_pool_size)
 print_indivs("2) Reproduction (clone parents -> offspring): ", offspring)
+
+# Step 2) Update per-generation parameters (mutation/crossover controls)
+pop.update_parameters(offspring)
+print_indivs("1) Update parameters: ", pop.indivs)
 
 # Step 3) Crossover pairs (in-place)
 crossover_offspring(pop, offspring)
