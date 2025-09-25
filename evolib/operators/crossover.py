@@ -196,9 +196,11 @@ def crossover_intermediate(
 
 def crossover_offspring(pop: "Pop", offspring: list["Indiv"]) -> None:
     """
-    Perform crossover for each pair of offspring individuals. Supports ParaComposite by
-    applying module-specific crossover operators and probabilities defined in the
-    configuration.
+    Perform crossover for each pair of offspring individuals.
+
+    Delegates the actual crossover logic to the individuals' parameter
+    representations (ParaBase subclasses). Works for both single-module
+    (e.g. Vector, EvoNet) and multi-module (ParaComposite) individuals.
 
     Notes:
         - Offspring are assumed to be copied before this call.
@@ -216,20 +218,11 @@ def crossover_offspring(pop: "Pop", offspring: list["Indiv"]) -> None:
         if child1.para is None or child2.para is None:
             continue
 
-        for module_name in child1.para.components:
-            module1 = child1.para.components[module_name]
-            module2 = child2.para.components[module_name]
-
-            prob1 = module1.evo_params.crossover_probability
-            prob2 = module2.evo_params.crossover_probability
-
-            if prob1 is None or prob2 is None:
-                continue
-
-            effective_prob = min(prob1, prob2)
-
-            if effective_prob <= 0.0 or np.random.rand() >= effective_prob:
-                continue
-
-            # Perform crossover
-            module1.crossover_with(module2)
+        # Delegate crossover to para (Vector, EvoNet, or ParaComposite)
+        try:
+            child1.para.crossover_with(child2.para)
+        except Exception as e:
+            # Optional: log or raise, depending on how strict du es haben willst
+            raise RuntimeError(
+                f"Crossover failed for individuals {child1.id} and {child2.id}: {e}"
+            )
