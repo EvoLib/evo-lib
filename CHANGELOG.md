@@ -1,6 +1,8 @@
 ## [0.2.0b2] - unreleased
 
 ### Added
+- Add new example recurrent_bit_prediction for EvoNet bit sequence forecasting
+- Add lfsr_sequence, xor_sequence, random_fixed_sequence to benchmarks
 - Added normal_evonet, random_evonet, and zero_evonet.
 - Each individual now has a unique `indiv.id` (UUID) for tracking and debugging.
 - `Indiv.copy()` extended with `reset_*` flags (`reset_id`, `reset_fitness`,
@@ -17,6 +19,8 @@
 - `mutate_activations`: optional `layers` parameter for finer control.
 
 ### Changed
+- Add DummyPara as placeholder for uninitialized individuals
+- `crossover_offspring`: now delegates crossover to `para.crossover_with`
 - Unified individual copy handling: all strategies now use `Indiv.copy()`
   instead of `deepcopy` or `copy_indiv`.
 - Added safeguard in remove_old_indivs(): if all individuals exceed max_indiv_age, the best individual is retained to prevent population collapse.
