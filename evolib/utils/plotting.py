@@ -632,6 +632,9 @@ def plot_bit_prediction(
     axes[1].set_ylabel("Value")
     axes[1].legend(loc="upper right")
 
+    # add threshold line at 0.5
+    axes[1].axhline(0.5, color="gray", linestyle="--", linewidth=1, alpha=0.6)
+
     # save/show
     if save_path:
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
