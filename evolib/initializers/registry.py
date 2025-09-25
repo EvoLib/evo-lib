@@ -16,7 +16,11 @@ from typing import Any, Callable
 from evolib.config.schema import FullConfig
 
 # EvoNet-based initializer
-from evolib.initializers.evonet_initializers import initializer_normal_evonet
+from evolib.initializers.evonet_initializers import (
+    initializer_normal_evonet,
+    initializer_random_evonet,
+    initializer_zero_evonet,
+)
 
 # NetVector-based initializer
 from evolib.initializers.net_initializers import initializer_normal_net
@@ -45,6 +49,8 @@ INITIALIZER_REGISTRY: dict[str, InitializerFunction] = {
     "adaptive_vector": initializer_adaptive_vector,
     "normal_net": initializer_normal_net,
     "normal_evonet": initializer_normal_evonet,
+    "random_evonet": initializer_random_evonet,
+    "zero_evonet": initializer_zero_evonet,
 }
 
 

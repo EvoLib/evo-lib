@@ -10,14 +10,12 @@ import random as rng
 from typing import Any, Literal, Optional
 
 import numpy as np
-from evonet.activation import random_function_name
 from evonet.core import Nnet
 from evonet.enums import NeuronRole
 from evonet.mutation import mutate_activations, mutate_bias, mutate_weight
 
 from evolib.config.base_component_config import StructuralMutationConfig
 from evolib.config.evonet_component_config import EvoNetComponentConfig
-from evolib.interfaces.enum_helpers import resolve_recurrent_kinds
 from evolib.interfaces.enums import MutationStrategy
 from evolib.interfaces.types import ModuleConfig
 from evolib.operators.evonet_structural_mutation import mutate_structure
@@ -111,46 +109,6 @@ class EvoNet(ParaBase):
 
         # Apply crossover config
         apply_crossover_config(evo_params, cfg.crossover)
-
-        # Activation functions per layer
-        if isinstance(cfg.activation, list):
-            activations = cfg.activation
-        else:
-            # Apply the same activation to all hidden/output layers,
-            # but force input layer to be linear
-            activations = ["linear"] + [cfg.activation] * (len(cfg.dim) - 1)
-
-        for layer_idx, num_neurons in enumerate(self.dim):
-            if num_neurons == 0:
-                continue
-
-            activation_name = activations[layer_idx]
-
-            if activation_name == "random":
-                if cfg.activations_allowed is not None:
-                    activation_name = random_function_name(cfg.activations_allowed)
-                else:
-                    activation_name = random_function_name()
-
-            self.net.add_layer()
-
-            if layer_idx == 0:
-                # Input Layer
-                role = NeuronRole.INPUT
-            elif layer_idx == len(self.dim) - 1:
-                # Output Layer
-                role = NeuronRole.OUTPUT
-            else:
-                # Hidden Layer
-                role = NeuronRole.HIDDEN
-
-            recurrent_kinds = resolve_recurrent_kinds(cfg.recurrent)
-            self.net.add_neuron(
-                count=num_neurons,
-                activation=activation_name,
-                role=role,
-                recurrent=recurrent_kinds if role != NeuronRole.INPUT else None,
-            )
 
     def calc(self, input_values: list[float]) -> list[float]:
         return self.net.calc(input_values)

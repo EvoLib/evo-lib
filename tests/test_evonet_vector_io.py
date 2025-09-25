@@ -17,21 +17,21 @@ def _build_net_2_3_1(para: EvoNet) -> None:
         role=NeuronRole.INPUT,
         activation="linear",
         count=2,
-        connect_layer=False,
+        connection_init="none",
     )
     para.net.add_neuron(
         layer_idx=1,
         role=NeuronRole.HIDDEN,
         activation="linear",
         count=3,
-        connect_layer=True,
+        connection_init="random",
     )
     para.net.add_neuron(
         layer_idx=2,
         role=NeuronRole.OUTPUT,
         activation="linear",
         count=1,
-        connect_layer=True,
+        connection_init="random",
     )
 
 
@@ -44,14 +44,14 @@ def _build_net_1_1(para: EvoNet) -> None:
         role=NeuronRole.INPUT,
         activation="linear",
         count=1,
-        connect_layer=False,
+        connection_init="none",
     )
     para.net.add_neuron(
         layer_idx=1,
         role=NeuronRole.OUTPUT,
         activation="linear",
         count=1,
-        connect_layer=True,
+        connection_init="random",
     )
 
 
