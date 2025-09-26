@@ -1,9 +1,74 @@
 # SPDX-License-Identifier: MIT
 """Common mathematical benchmark functions for optimization tasks."""
 
-from typing import Sequence
+from typing import Literal, Sequence
 
 import numpy as np
+
+
+def generate_timeseries(
+    length: int,
+    normalize: bool = True,
+    pattern: Literal[
+        "default", "trend_switch", "parabolic", "zigzag", "shock"
+    ] = "default",
+) -> np.ndarray:
+    """
+    Generate synthetic time series data for evolution or forecasting.
+
+    Args:
+        length (int): Number of time steps.
+        normalize (bool): Whether to scale the output to [-1, 1].
+        pattern (str): Pattern to generate:
+            - "default": Trend + Sinus + Noise
+            - "trend_switch": Linear trend up, then down
+            - "parabolic": Smooth U-shaped curve (trend reversal)
+            - "zigzag": Periodic linear up/down pattern
+            - "shock": Trend followed by sharp reversal
+
+    Returns:
+        np.ndarray: The generated time series.
+    """
+    t = np.arange(length)
+
+    if pattern == "trend_switch":
+        trend = np.where(t < length // 2, 0.01 * t, -0.01 * (t - length // 2))
+        seasonal = np.sin(t * 0.1)
+        noise = np.random.normal(0, 0.03, size=length)
+        series = trend + seasonal + noise
+
+    elif pattern == "parabolic":
+        trend = -0.0005 * (t - length / 2) ** 2 + 1.0
+        seasonal = 0.5 * np.sin(t * 0.1)
+        noise = np.random.normal(0, 0.02, size=length)
+        series = trend + seasonal + noise
+
+    elif pattern == "zigzag":
+        period = 40
+        trend = 0.01 * ((t // period) % 2 * 2 - 1) * (t % period)
+        seasonal = 0.3 * np.sin(t * 0.2)
+        noise = np.random.normal(0, 0.03, size=length)
+        series = trend + seasonal + noise
+
+    elif pattern == "shock":
+        trend = 0.01 * t
+        shock = np.where(t > length * 0.6, -0.03 * (t - length * 0.6), 0.0)
+        seasonal = 0.5 * np.sin(t * 0.1)
+        noise = np.random.normal(0, 0.04, size=length)
+        series = trend + shock + seasonal + noise
+
+    else:  # "default"
+        trend = 0.01 * t
+        seasonal = np.sin(t * 0.1)
+        noise = np.random.normal(0, 0.05, size=length)
+        series = trend + seasonal + noise
+
+    if normalize:  # Normalize to [-1, 1]
+        min_val = np.min(series)
+        max_val = np.max(series)
+        series = 2 * (series - min_val) / (max_val - min_val) - 1
+
+    return series
 
 
 def lfsr_sequence(
