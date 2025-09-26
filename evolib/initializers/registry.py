@@ -17,6 +17,7 @@ from evolib.config.schema import FullConfig
 
 # EvoNet-based initializer
 from evolib.initializers.evonet_initializers import (
+    initializer_identity_evonet,
     initializer_normal_evonet,
     initializer_random_evonet,
     initializer_zero_evonet,
@@ -51,6 +52,7 @@ INITIALIZER_REGISTRY: dict[str, InitializerFunction] = {
     "normal_evonet": initializer_normal_evonet,
     "random_evonet": initializer_random_evonet,
     "zero_evonet": initializer_zero_evonet,
+    "identity_evonet": initializer_identity_evonet,
 }
 
 

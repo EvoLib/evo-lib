@@ -8,7 +8,7 @@ initialized EvoNet instance.
 
 import numpy as np
 from evonet.activation import random_function_name
-from evonet.enums import NeuronRole
+from evonet.enums import ConnectionType, NeuronRole
 
 from evolib.config.evonet_component_config import EvoNetComponentConfig
 from evolib.config.schema import FullConfig
@@ -141,4 +141,53 @@ def initializer_zero_evonet(config: FullConfig, module: str) -> EvoNet:
 
     para.net.set_weights(np.zeros(para.net.num_weights))
     para.net.set_biases(np.zeros(para.net.num_biases))
+    return para
+
+
+def initializer_identity_evonet(config: FullConfig, module: str) -> EvoNet:
+    """
+    Initialize EvoNet with damped self-recurrence and zeroed weights elsewhere.
+
+    - All feedforward weights are near-zero
+    - Self-recurrent connections get weight ~0.8 (memory)
+    - Biases are randomized slightly to break symmetry
+
+    This initializer encourages stable internal state retention from the start,
+    making recurrent behavior immediately available to evolution.
+
+    Args:
+        config (FullConfig): Full experiment configuration
+        module (str): Name of the EvoNet module in the config
+
+    Returns:
+        EvoNet: Initialized network with identity-style dynamics
+    """
+
+    SELF_LOOP_WEIGHT = 0.8
+    ALPHA = 0.01
+
+    para = EvoNet()
+    cfg = config.modules[module].model_copy(deep=True)
+    para.apply_config(cfg)
+
+    _build_architecture(para, cfg)
+
+    para.net.set_weights(np.zeros(para.net.num_weights))
+    para.net.set_biases(np.zeros(para.net.num_biases))
+
+    for neuron in para.net.get_all_neurons():
+        # Small random bias to break symmetry
+        neuron.bias = np.random.uniform(-ALPHA, ALPHA)
+        for connection in neuron.outgoing:
+            # Damped self-recurrence: acts like memory cell
+            if (
+                connection.type == ConnectionType.RECURRENT
+                and connection.source.id == connection.target.id
+            ):
+                connection.weight = SELF_LOOP_WEIGHT
+
+            # Small random feedforward weight to allow weak stimulus flow
+            if connection.type == ConnectionType.STANDARD:
+                connection.weight = np.random.uniform(-ALPHA, ALPHA)
+
     return para
