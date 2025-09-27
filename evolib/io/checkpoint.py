@@ -14,6 +14,7 @@ All files are stored in the 'checkpoints/' directory by default.
 from pathlib import Path
 from typing import Any, Optional, cast
 
+from evolib.config.schema import FullConfig
 from evolib.core.individual import Indiv
 from evolib.core.population import Pop
 from evolib.initializers.registry import build_composite_initializer
@@ -24,6 +25,8 @@ from evolib.io.serialization import (
     save_indiv,
     save_population_pickle,
 )
+from evolib.utils.config_loader import load_config
+from evolib.utils.random import set_random_seed
 
 # Internal checkpoint directory
 _CHECKDIR = Path("checkpoints")
@@ -116,6 +119,9 @@ def resume_or_create(
     )
 
     if pop is not None:
+        cfg: FullConfig = load_config(config_path)
+        random_seed = cfg.random_seed
+        set_random_seed(random_seed)
         return pop
 
     return Pop(config_path=config_path, fitness_function=fitness_fn)
