@@ -41,35 +41,58 @@ def generate_timeseries(
 
     t = np.arange(length)
 
-    if pattern == "trend_switch":
-        trend = np.where(t < length // 2, 0.01 * t, -0.01 * (t - length // 2))
-        seasonal = np.sin(t * 0.1)
-        noise = rng.normal(0, 0.03, size=length)
-        series = trend + seasonal + noise
+    if pattern == "shock":
+        # Random switch point + optional shock slope variation
+        switch_point = rng.integers(length // 3, 2 * length // 3)
+        slope_up = rng.uniform(0.005, 0.015)
+        slope_down = rng.uniform(-0.015, -0.005)
+        shock = np.where(
+            t < switch_point, slope_up * t, slope_down * (t - switch_point)
+        )
+        phase = rng.uniform(0, 2 * np.pi)
+        seasonal = np.sin(t * 0.1 + phase)
+        noise = rng.normal(0.05, 0.1, size=length)
+        series = shock + seasonal + noise
 
     elif pattern == "parabolic":
-        trend = -0.0005 * (t - length / 2) ** 2 + 1.0
-        seasonal = 0.5 * np.sin(t * 0.1)
+        # Random shift of parabola + curvature
+        center = rng.integers(length // 3, 2 * length // 3)
+        curvature = rng.uniform(0.0002, 0.0004)
+        trend = -curvature * (t - center) ** 2 + 1.0
+        phase = rng.uniform(0, 2 * np.pi)
+        seasonal = 0.5 * np.sin(t * 0.1 + phase)
         noise = rng.normal(0, 0.02, size=length)
         series = trend + seasonal + noise
 
     elif pattern == "zigzag":
-        period = 40
-        trend = 0.01 * ((t // period) % 2 * 2 - 1) * (t % period)
-        seasonal = 0.3 * np.sin(t * 0.2)
+        # Random zigzag period and slope
+        period = rng.integers(20, 60)
+        slope = rng.uniform(0.008, 0.015)
+        trend = slope * ((t // period) % 2 * 2 - 1) * (t % period)
+        phase = rng.uniform(0, 2 * np.pi)
+        seasonal = 0.3 * np.sin(t * 0.2 + phase)
         noise = rng.normal(0, 0.03, size=length)
         series = trend + seasonal + noise
 
-    elif pattern == "shock":
+    elif pattern == "trend_switch":
+        # Random trend_switch position + strength
+        trend_switch_pos = rng.integers(length // 3, 2 * length // 3)
+        trend_switch_strength = rng.uniform(-0.04, -0.02)
         trend = 0.01 * t
-        shock = np.where(t > length * 0.6, -0.03 * (t - length * 0.6), 0.0)
-        seasonal = 0.5 * np.sin(t * 0.1)
+        trend_switch = np.where(
+            t > trend_switch_pos, trend_switch_strength * (t - trend_switch_pos), 0.0
+        )
+        phase = rng.uniform(0, 2 * np.pi)
+        seasonal = 0.5 * np.sin(t * 0.1 + phase)
         noise = rng.normal(0, 0.04, size=length)
-        series = trend + shock + seasonal + noise
+        series = trend + trend_switch + seasonal + noise
 
     else:  # "default"
-        trend = 0.01 * t
-        seasonal = np.sin(t * 0.1)
+        # Minor phase + trend variation
+        slope = rng.uniform(0.008, 0.012)
+        phase = rng.uniform(0, 2 * np.pi)
+        trend = slope * t
+        seasonal = np.sin(t * 0.1 + phase)
         noise = rng.normal(0, 0.05, size=length)
         series = trend + seasonal + noise
 
