@@ -408,14 +408,14 @@ class Pop:
 
         self.indivs.sort(key=lambda indivs: indivs.fitness, reverse=reverse)
 
-    def best(self, sort: bool = False) -> Indiv:
+    def best(self, sort: bool = True) -> Indiv:
         """
         Return the best individual (lowest fitness).
 
         Args:
             sort (bool): If True, sort the population before returning the best.
                          If False, return first individual as-is.
-                         Default: False.
+                         Default: True.
         """
 
         if not self.indivs:
