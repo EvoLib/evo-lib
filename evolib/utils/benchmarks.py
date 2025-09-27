@@ -4,6 +4,7 @@
 from typing import Literal, Sequence
 
 import numpy as np
+from numpy.random import default_rng
 
 
 def generate_timeseries(
@@ -12,9 +13,11 @@ def generate_timeseries(
     pattern: Literal[
         "default", "trend_switch", "parabolic", "zigzag", "shock"
     ] = "default",
+    seed: int | None = None,
 ) -> np.ndarray:
     """
-    Generate synthetic time series data for evolution or forecasting.
+    Generate synthetic time series data for evolution or forecasting. Uses local RNG to
+    avoid modifying global numpy random state.
 
     Args:
         length (int): Number of time steps.
@@ -29,38 +32,45 @@ def generate_timeseries(
     Returns:
         np.ndarray: The generated time series.
     """
+
+    if seed is not None:
+        rng = default_rng(seed)
+    else:
+        # Use global np.random set via config
+        rng = np.random.default_rng(np.random.randint(0, 2**32 - 1))
+
     t = np.arange(length)
 
     if pattern == "trend_switch":
         trend = np.where(t < length // 2, 0.01 * t, -0.01 * (t - length // 2))
         seasonal = np.sin(t * 0.1)
-        noise = np.random.normal(0, 0.03, size=length)
+        noise = rng.normal(0, 0.03, size=length)
         series = trend + seasonal + noise
 
     elif pattern == "parabolic":
         trend = -0.0005 * (t - length / 2) ** 2 + 1.0
         seasonal = 0.5 * np.sin(t * 0.1)
-        noise = np.random.normal(0, 0.02, size=length)
+        noise = rng.normal(0, 0.02, size=length)
         series = trend + seasonal + noise
 
     elif pattern == "zigzag":
         period = 40
         trend = 0.01 * ((t // period) % 2 * 2 - 1) * (t % period)
         seasonal = 0.3 * np.sin(t * 0.2)
-        noise = np.random.normal(0, 0.03, size=length)
+        noise = rng.normal(0, 0.03, size=length)
         series = trend + seasonal + noise
 
     elif pattern == "shock":
         trend = 0.01 * t
         shock = np.where(t > length * 0.6, -0.03 * (t - length * 0.6), 0.0)
         seasonal = 0.5 * np.sin(t * 0.1)
-        noise = np.random.normal(0, 0.04, size=length)
+        noise = rng.normal(0, 0.04, size=length)
         series = trend + shock + seasonal + noise
 
     else:  # "default"
         trend = 0.01 * t
         seasonal = np.sin(t * 0.1)
-        noise = np.random.normal(0, 0.05, size=length)
+        noise = rng.normal(0, 0.05, size=length)
         series = trend + seasonal + noise
 
     if normalize:  # Normalize to [-1, 1]
