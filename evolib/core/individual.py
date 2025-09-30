@@ -30,6 +30,9 @@ from evolib.representation.dummy import ParaDummy
 class Indiv:
     """Represents an individual in an evolutionary optimization algorithm."""
 
+    #: unique identifier (UUID)
+    id: str
+
     #: para (Any): Parameter values of the individual. Default: None.
     para: Any
 

@@ -49,6 +49,7 @@ from evolib.registry.selection_registry import build_selection_registry
 from evolib.registry.strategy_registry import strategy_registry
 from evolib.utils.config_loader import load_config
 from evolib.utils.history_logger import HistoryLogger
+from evolib.utils.parallel import map_fitness
 from evolib.utils.random import set_random_seed
 
 
@@ -127,6 +128,16 @@ class Pop:
             self.replacement_strategy = None
             self._replacement_registry = {}
             self._replacement_fn = None
+
+        # Parallel backend
+        if cfg.parallel:
+            self.parallel_backend = cfg.parallel.backend
+            self.parallel_num_cpus = cfg.parallel.num_cpus
+            self.parallel_address = cfg.parallel.address
+        else:
+            self.parallel_backend = "none"
+            self.parallel_num_cpus = None
+            self.parallel_address = None
 
         # Statistics
         self.history_logger = HistoryLogger(
@@ -242,21 +253,27 @@ class Pop:
         """Evaluate the fitness function for all individuals in the population."""
         if self.fitness_function is None:
             raise ValueError("No fitness function has been set.")
-        for indiv in self.indivs:
-            result = self.fitness_function(indiv)
-            if result is not None:
-                indiv.fitness = float(result)
-            indiv.is_evaluated = True
+
+        map_fitness(
+            self.indivs,
+            self.fitness_function,
+            backend=self.parallel_backend,
+            num_cpus=self.parallel_num_cpus,
+            address=self.parallel_address,
+        )
 
     def evaluate_indivs(self, indivs: list[Indiv]) -> None:
         """Evaluate fitness for a custom list of individuals."""
         if self.fitness_function is None:
             raise ValueError("No fitness function has been set.")
-        for indiv in indivs:
-            result = self.fitness_function(indiv)
-            if result is not None:
-                indiv.fitness = float(result)
-            indiv.is_evaluated = True
+
+        map_fitness(
+            indivs,
+            self.fitness_function,
+            backend=self.parallel_backend,
+            num_cpus=self.parallel_num_cpus,
+            address=self.parallel_address,
+        )
 
     def get_elites(self) -> list[Indiv]:
         """Return a list of elite individuals and set their is_elite flag."""

@@ -88,6 +88,30 @@ class StoppingCriteria(BaseModel):
     )
 
 
+class ParallelConfig(BaseModel):
+    """
+    Optional parallelization backend.
+
+    Controls whether fitness evaluation is run sequentially or distributed (currently
+    only Ray is supported).
+    """
+
+    backend: str = Field(
+        default="none",
+        description="Parallel backend to use: 'none' (default) or 'ray'.",
+    )
+    num_cpus: Optional[int] = Field(
+        default=None,
+        description="Number of CPUs to allocate (Ray only). "
+        "If None, Ray chooses automatically.",
+    )
+    address: Optional[str] = Field(
+        default=None,
+        description="Ray cluster address (e.g. 'auto' or '127.0.0.1:6379'). "
+        "If None, starts a local Ray instance.",
+    )
+
+
 class FullConfig(BaseModel):
     """
     Main configuration model for an evolutionary run.
@@ -139,6 +163,11 @@ class FullConfig(BaseModel):
     )
     replacement: ReplacementConfig | None = Field(
         default=None, description="Survivor selection (replacement) configuration."
+    )
+
+    # Optional parallelization backend
+    parallel: Optional[ParallelConfig] = Field(
+        default=None, description="Optional parallelization backend configuration."
     )
 
     @model_validator(mode="before")

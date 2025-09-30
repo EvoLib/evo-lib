@@ -1,6 +1,11 @@
 ## [0.2.0b2] - unreleased
 
 ### Added
+- Basic Ray support for parallel fitness evaluation.
+  - New `parallel:` block in YAML configs (`backend: none|ray`, `num_cpus`, `address`).
+  - Population transparently uses Ray for fitness evaluation when configured.
+  - Default behavior remains sequential if no parallel section is provided.
+- New EvoNet initializer `identity_evonet`: sets self-recurrent connections to 0.8 and initializes other weights near zero. Encourages internal memory dynamics from the start.
 - Add new example recurrent_bit_prediction for EvoNet bit sequence forecasting
 - Add lfsr_sequence, xor_sequence, random_fixed_sequence to benchmarks
 - Added normal_evonet, random_evonet, and zero_evonet.
@@ -19,6 +24,7 @@
 - `mutate_activations`: optional `layers` parameter for finer control.
 
 ### Changed
+- Changed Pop.best() to sort the population by default (sort=True) to ensure consistent retrieval of the best individual.
 - Add DummyPara as placeholder for uninitialized individuals
 - `crossover_offspring`: now delegates crossover to `para.crossover_with`
 - Unified individual copy handling: all strategies now use `Indiv.copy()`
@@ -28,6 +34,7 @@
 - Internal refactor of activation mutation logic (no change to defaults).
 
 ### Fixed
+- Fixed resume_or_create() to reload random_seed from config when resuming a population, ensuring deterministic behavior across restarts.
 - `update_mutation_parameters`: Parents now receive adaptive parameters only once during population initialization.
   In all subsequent generations, only offspring parameters are updated.
 - Fixed `selection_random` removal logic (now removes original parent).
