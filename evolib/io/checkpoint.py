@@ -119,11 +119,13 @@ def resume_or_create(
     )
 
     if pop is not None:
+        print(f"[Resume] Loaded checkpoint for run_name={run_name}")
         cfg: FullConfig = load_config(config_path)
         random_seed = cfg.random_seed
         set_random_seed(random_seed)
         return pop
 
+    print(f"[Create] New population for run_name={run_name}")
     return Pop(config_path=config_path, fitness_function=fitness_fn)
 
 
