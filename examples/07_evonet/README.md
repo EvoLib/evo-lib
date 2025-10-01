@@ -97,14 +97,18 @@ Key aspects:
 ### `06_recurrent_trading.py`
 
 Evolves a recurrent EvoNet to act as a **trading strategy**.  
-Unlike the previous function-approximation tasks, the network does **not** predict exact values.  
-Instead, it performs **time-series classification** (5 classes: strongly down … strongly up)  
-and converts these predictions into trading actions (open, close, switch).  
+At each time step, the network sees only the **current input** (price at time *t*),  
+not the entire series at once. Its recurrent connections provide the necessary memory  
+to classify short-term trends.  
+
+The network performs a **classification** into 5 discrete categories  
+(from *strongly down* to *strongly up*) and converts these predictions  
+into trading actions (open, close, switch).  
 
 The purpose of this example is **not to design a real trading system**,  
-but to illustrate how classification of sequential data can be coupled with decision-making.  
+but to illustrate how sequential classification can be coupled with decision-making.  
 Fitness is based on trading profit (averaged across episodes).  
-Frames show both price series with trade markers and the resulting equity curve.
+Frames show both the price series with trade markers and the resulting equity curve.
 
 <p align="center">
   <img src="./06_frames/06_recurrent_trading.png" alt="Recurrent Trading Strategy" width="512"/>
