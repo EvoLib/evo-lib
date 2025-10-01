@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 """Common mathematical benchmark functions for optimization tasks."""
 
-from typing import Literal, Sequence
+from typing import Sequence
 
 import numpy as np
 from numpy.random import default_rng
@@ -10,9 +10,7 @@ from numpy.random import default_rng
 def generate_timeseries(
     length: int,
     normalize: bool = True,
-    pattern: Literal[
-        "default", "trend_switch", "parabolic", "zigzag", "shock"
-    ] = "default",
+    pattern: str = "default",
     seed: int | None = None,
 ) -> np.ndarray:
     """
@@ -32,6 +30,9 @@ def generate_timeseries(
     Returns:
         np.ndarray: The generated time series.
     """
+
+    if pattern not in {"default", "trend_switch", "parabolic", "zigzag", "shock"}:
+        raise ValueError(f"Unknown pattern: {pattern}")
 
     if seed is not None:
         rng = default_rng(seed)
