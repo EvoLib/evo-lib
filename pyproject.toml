@@ -36,6 +36,7 @@ classifiers = [
 dev = [
     "mypy",
     "types-PyYAML",
+    "ray",
 ]
 docs = [
   "sphinx",
