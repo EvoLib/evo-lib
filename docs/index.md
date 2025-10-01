@@ -20,6 +20,7 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 - **Modularity**: mutation, selection, crossover, and parameter representations can be freely combined.  
 - **Educational value**: examples and a clean API make it practical for illustrating evolutionary concepts.  
 - **Neuroevolution support**: structural mutations (adding/removing neurons and connections) and evolvable networks via EvoNet.  
+- **Parallel evaluation (optional)**: basic support for [Ray](https://www.ray.io/) to speed up fitness evaluations.  
 - **Type-checked**: PEP8 compliant, and consistent code style.  
 
 
@@ -190,7 +191,7 @@ For deeper exploration, see the [full examples directory](examples/)
 - [X] Composite Parameters (multi-module individuals)
 - [X] Neuroevolution
 - [X] Topological Evolution (neurons, edges)
-- [ ] Co-Evolution & Speciation Support
+- [X] Ray Support for Parallel Evaluation (early prototypes)
 - [ ] Advanced Visualization
 - [ ] Game Environment Integration (pygame, PettingZoo - early prototypes)
 - [ ] Ray Support for Parallel Evaluation (early prototypes)
