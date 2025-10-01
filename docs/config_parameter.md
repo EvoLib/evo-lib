@@ -17,6 +17,26 @@ The parameters are grouped into **global parameters**, **evolution strategy sett
 | `num_elites`          | int  | 0       | Number of top individuals copied unchanged into the next generation. |
 | `max_indiv_age`       | int  | 0       | Maximum age of individuals (0 = no age limit).                       |
 
+
+## Parallelization Settings
+
+Optional parameters to enable parallel evaluation of individuals.
+
+| Parameter   | Type | Default | Explanation                                                                 |
+| ----------- | ---- | ------- | --------------------------------------------------------------------------- |
+| `backend`   | str  | none    | Parallel backend (`ray` or `none`).                                          |
+| `num_cpus`  | int  | 1       | Number of logical CPUs Ray may use for evaluation.                          |
+| `address`   | str  | auto    | `"auto"` = local Ray; or `ray://host:port` for connecting to a remote Ray cluster. |
+
+Example:
+
+```yaml
+parallel:
+  backend: ray
+  num_cpus: 4
+  address: auto
+```
+
 ---
 
 ## Stopping Criteria

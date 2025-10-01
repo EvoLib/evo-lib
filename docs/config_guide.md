@@ -155,6 +155,21 @@ modules:
 
 ---
 
+## D) Parallel Evaluation (optional)
+
+For expensive problems, EvoLib can evaluate individuals in parallel using [Ray](https://www.ray.io/).
+
+```yaml
+parallel:
+  backend: ray         # backend: none | ray
+  num_cpus: 2          # number of logical CPUs (only used in local mode)
+  address: auto        # "auto" = local Ray; or "ray://host:10001" for remote
+```
+
+If omitted, EvoLib runs in single-threaded mode.
+
+---
+
 ## Further examples
 
 For complete, runnable examples including fitness definitions and visualization,
