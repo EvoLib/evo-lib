@@ -74,6 +74,42 @@ Frames shows input, target, and predicted bits (raster + line plot)
 
 ---
 
+### `05_recurrent_timeseries.py`
+
+Predicts **x[t+PRED_LEN] from x[t]** on synthetic sequences with trend switches.
+Unlike previous function-approximation tasks, the network does **not** see the full input at once.
+Instead, the time series is fed **step by step through a single input channel**.
+Recurrent connections allow the EvoNet to maintain internal state and look ahead.
+
+Key aspects:
+* Fitness is the mean squared error (MSE) between prediction and future values.
+* Multiple evaluation runs with different seeds improve robustness.
+* Each generation’s best individual is plotted against the input sequence.
+* A naive baseline predictor (`y_pred = x[t]`) is included for comparison.
+* At the end, an optional **generalization test** shows performance on a completely new sequence.
+
+<p align="center">
+  <img src="./05_frames/05_recurrent_timeseries.png" alt="Recurrent Time Series Prediction" width="512"/>
+</p>
+
+---
+
+### `06_recurrent_trading.py`
+
+Evolves a recurrent EvoNet to act as a **trading strategy**.  
+Unlike the previous function-approximation tasks, the network does **not** predict exact values.  
+Instead, it performs **time-series classification** (5 classes: strongly down … strongly up)  
+and converts these predictions into trading actions (open, close, switch).  
+
+The purpose of this example is **not to design a real trading system**,  
+but to illustrate how classification of sequential data can be coupled with decision-making.  
+Fitness is based on trading profit (averaged across episodes).  
+Frames show both price series with trade markers and the resulting equity curve.
+
+<p align="center">
+  <img src="./06_frames/06_recurrent_trading.png" alt="Recurrent Trading Strategy" width="512"/>
+</p>
+
 ## See Also
 
 * [`../06_netvector/`](../06_netvector) — fixed-topology networks as vectors.  
