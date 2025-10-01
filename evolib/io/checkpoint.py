@@ -66,7 +66,7 @@ def save_checkpoint(pop: Pop, *, run_name: str = "default") -> None:
 
 def resume_from_checkpoint(
     run_name: str = "default",
-    fitness_fn: Optional[FitnessFunction] = None,
+    fitness_function: Optional[FitnessFunction] = None,
     silent_fail: bool = True,
 ) -> Optional[Pop]:
     """
@@ -74,7 +74,7 @@ def resume_from_checkpoint(
 
     Args:
     run_name (str): Identifier of the checkpoint file.
-    fitness_fn (callable, optional): Fitness function to assign.
+    fitness_function (callable, optional): Fitness function to assign.
     silent_fail (bool): If True, return None instead of raising FileNotFoundError.
 
 
@@ -89,8 +89,8 @@ def resume_from_checkpoint(
 
     pop = load_population_pickle(path)
 
-    if fitness_fn:
-        pop.set_fitness_function(fitness_fn)
+    if fitness_function:
+        pop.set_fitness_function(fitness_function)
 
     # Restore initializer
     pop.para_initializer = build_composite_initializer(pop.config)
@@ -99,14 +99,14 @@ def resume_from_checkpoint(
 
 
 def resume_or_create(
-    config_path: str, fitness_fn: FitnessFunction, run_name: str = "default"
+    config_path: str, fitness_function: FitnessFunction, run_name: str = "default"
 ) -> Pop:
     """
     Try to resume a saved run, otherwise initialize a new population.
 
     Args:
     config_path (str): Path to the YAML configuration.
-    fitness_fn (callable): Fitness function for individuals.
+    fitness_function (callable): Fitness function for individuals.
     run_name (str): Optional name for checkpoint file.
 
 
@@ -115,7 +115,7 @@ def resume_or_create(
     """
 
     pop = resume_from_checkpoint(
-        run_name=run_name, fitness_fn=fitness_fn, silent_fail=True
+        run_name=run_name, fitness_function=fitness_function, silent_fail=True
     )
 
     if pop is not None:
@@ -126,7 +126,7 @@ def resume_or_create(
         return pop
 
     print(f"[Create] New population for run_name={run_name}")
-    return Pop(config_path=config_path, fitness_function=fitness_fn)
+    return Pop(config_path=config_path, fitness_function=fitness_function)
 
 
 def save_best_indiv(pop: Pop, *, run_name: str = "default") -> None:
