@@ -513,7 +513,7 @@ def save_combined_net_plot(
     Saves a combined image of network structure and approximation plot.
 
     Args:
-        net: EvoNet instance with .print_graph().
+        net: EvoNet instance with .plot().
         X (np.ndarray): Input values (for plotting).
         Y_true (np.ndarray): Ground truth values (e.g. sin(x)).
         Y_pred (np.ndarray): Network prediction values.
@@ -523,7 +523,7 @@ def save_combined_net_plot(
     """
     with tempfile.TemporaryDirectory() as tmpdir:
         graph_path = os.path.join(tmpdir, "net")
-        net.print_graph(graph_path, fillcolors_on=True, thickness_on=True)
+        net.plot(graph_path, fillcolors_on=True, thickness_on=True)
         img_net = Image.open(graph_path + ".png")
 
         # Create approximation plot

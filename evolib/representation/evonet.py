@@ -392,7 +392,7 @@ class EvoNet(ParaBase):
     def print_status(self) -> None:
         print(f"[EvoNet] : {self.net} ")
 
-    def print_graph(
+    def plot(
         self,
         name: str,
         engine: str = "neato",
@@ -412,7 +412,7 @@ class EvoNet(ParaBase):
             thickness_on (bool): Adjust edge thickness by weight.
             fillcolors_on (bool): Fill nodes with colors by type.
         """
-        self.net.print_graph(
+        self.net.plot(
             name=name,
             engine=engine,
             labels_on=labels_on,

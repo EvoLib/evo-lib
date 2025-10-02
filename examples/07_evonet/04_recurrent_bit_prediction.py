@@ -102,6 +102,4 @@ if __name__ == "__main__":
     pop.run(verbosity=0, on_generation_end=save_plot)
 
     best = pop.best()
-    best.para["brain"].net.print_graph(
-        "04_recurrent_bit_prediction", fillcolors_on=True
-    )
+    best.para["brain"].net.plot("04_recurrent_bit_prediction", fillcolors_on=True)
