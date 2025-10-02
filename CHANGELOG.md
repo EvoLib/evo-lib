@@ -24,6 +24,7 @@
 - `mutate_activations`: optional `layers` parameter for finer control.
 
 ### Changed
+- rename print_graph() -> plot()
 - Changed Pop.best() to sort the population by default (sort=True) to ensure consistent retrieval of the best individual.
 - Add DummyPara as placeholder for uninitialized individuals
 - `crossover_offspring`: now delegates crossover to `para.crossover_with`
