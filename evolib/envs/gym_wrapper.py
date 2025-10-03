@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-from typing import Union
+from typing import Any, Union, cast
 
 import gymnasium as gym
 import imageio
@@ -93,5 +93,6 @@ class GymEnvWrapper:
         if filename is None:
             filename = f"{self.env_name}_gen{gen:04d}.gif"
 
-        imageio.mimsave(filename, frames, fps=fps)  # type: ignore[arg-type]
+        imageio.mimsave(filename, cast(list[Any], frames), fps=fps)
+
         return filename
