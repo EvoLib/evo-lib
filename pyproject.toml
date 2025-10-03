@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "evolib"
-version = "0.2.0b2"
+version = "0.2.0b3dev1"
 description = "A modular framework for evolutionary strategies and neuroevolution."
 authors = [
     { name = "EvoLib", email = "evolib@dismail.de" }
@@ -37,6 +37,8 @@ dev = [
     "mypy",
     "types-PyYAML",
     "ray",
+    "gymnasium",
+    "imageio"
 ]
 docs = [
   "sphinx",

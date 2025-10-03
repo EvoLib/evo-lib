@@ -1,10 +1,22 @@
-## [0.2.0b2] - unreleased
+## EvoLib 0.2.0b3dev1 [unreleased]
+
+### Added
+- Added `GymEnvWrapper` in `evolib.envs` to evaluate Individuals in Gymnasium environments.
+  Includes `.evaluate()` for fitness calculation and `.visualize()` to render episodes as GIFs.
+
+### Changed
+
+### Fixed
+
+
+## EvoLib 0.2.0b2 (2025-10-03)
 
 ### Added
 - Basic Ray support for parallel fitness evaluation.
   - New `parallel:` block in YAML configs (`backend: none|ray`, `num_cpus`, `address`).
   - Population transparently uses Ray for fitness evaluation when configured.
   - Default behavior remains sequential if no parallel section is provided.
+- New example: `05_recurrent_timeseries`, `06_recurrent_trading.py` 
 - New EvoNet initializer `identity_evonet`: sets self-recurrent connections to 0.8 and initializes other weights near zero. Encourages internal memory dynamics from the start.
 - Add new example recurrent_bit_prediction for EvoNet bit sequence forecasting
 - Add lfsr_sequence, xor_sequence, random_fixed_sequence to benchmarks
