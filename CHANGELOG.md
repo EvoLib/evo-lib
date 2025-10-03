@@ -24,6 +24,8 @@
 - `mutate_activations`: optional `layers` parameter for finer control.
 
 ### Changed
+- Config validation tightened:
+  - All config models now use `extra="forbid"` (typos/unexpected fields raise errors).
 - rename print_graph() -> plot()
 - Changed Pop.best() to sort the population by default (sort=True) to ensure consistent retrieval of the best individual.
 - Add DummyPara as placeholder for uninitialized individuals
