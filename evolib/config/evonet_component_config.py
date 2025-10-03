@@ -14,7 +14,7 @@ config resolution.
 from typing import Literal, Optional, Tuple, Union
 
 from evonet.activation import ACTIVATIONS
-from pydantic import BaseModel, Field, field_validator, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, validator
 from pydantic_core import core_schema
 
 from evolib.config.base_component_config import (
@@ -46,6 +46,8 @@ class EvoNetComponentConfig(BaseModel):
               probability: 0.8
               strength: 0.05
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     # Module type is fixed to "evonet"
     type: Literal["evonet"] = "evonet"

@@ -10,7 +10,7 @@ into the respective Para* representations and operator modules.
 
 from typing import Literal, Optional, Union
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from evolib.interfaces.enums import (
     CrossoverOperator,
@@ -58,6 +58,8 @@ class MutationConfig(BaseModel):
     state updates occur in the corresponding Para* implementations or update
     helpers.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     strategy: MutationStrategy = Field(..., description="Mutation strategy to use.")
 
@@ -133,11 +135,15 @@ class MutationConfig(BaseModel):
         # Strategy-specific light requirements
         if self.strategy.name == "CONSTANT":
             if self.strength is None:
-                raise ValueError("CONSTANT strategy requires 'strength'.")
+                raise ValueError("CONSTANT requires 'strength'.")
+            if self.init_strength is not None or self.init_probability is not None:
+                raise ValueError("CONSTANT must not define init_* fields.")
 
         if self.strategy.name == "EXPONENTIAL_DECAY":
             if self.init_strength is None:
                 raise ValueError("EXPONENTIAL_DECAY requires 'init_strength'.")
+            if self.strength is not None:
+                raise ValueError("EXPONENTIAL_DECAY must not define 'strength'.")
 
         if self.strategy.name == "ADAPTIVE_GLOBAL":
             if self.init_strength is None or self.init_probability is None:
@@ -168,6 +174,8 @@ class StructuralMutationConfig(BaseModel):
     max_edges: Optional[int] = None
     recurrent: Optional[Literal["none", "direct", "local", "all"]] = "none"
 
+    model_config = ConfigDict(extra="forbid")
+
     @model_validator(mode="after")
     def _check_ranges(self) -> "StructuralMutationConfig":
         for name in [
@@ -194,6 +202,9 @@ class StructuralMutationConfig(BaseModel):
 
 
 class ActivationMutationConfig(BaseModel):
+
+    model_config = ConfigDict(extra="forbid")
+
     probability: float = Field(
         ..., description="Per-neuron mutation probability in [0,1]."
     )
@@ -230,6 +241,8 @@ class EvoNetMutationConfig(MutationConfig):
         - structural: MutationConfig for structural choices (optional)
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     biases: Optional[MutationConfig] = Field(
         default=None, description="Optional override for bias mutation."
     )
@@ -264,6 +277,8 @@ class CrossoverConfig(BaseModel):
         - INTERMEDIATE (uses blend_range)
         - ...others can be added as needed
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     strategy: CrossoverStrategy = Field(..., description="Crossover strategy to use.")
     operator: Optional[CrossoverOperator] = Field(

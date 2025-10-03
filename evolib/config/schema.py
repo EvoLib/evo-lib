@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from evolib.config.component_registry import get_component_config_class
 from evolib.interfaces.enums import (
@@ -19,6 +19,8 @@ class EvolutionConfig(BaseModel):
     Para* representations and operator modules.
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     strategy: EvolutionStrategy = Field(
         ..., description="High-level evolution strategy (e.g. (mu_plus_lambda)."
     )
@@ -31,6 +33,8 @@ class SelectionConfig(BaseModel):
     Depending on the selected strategy, only some fields are relevant; the actual
     semantics are implemented in the selection registry.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     strategy: SelectionStrategy = Field(
         ..., description="Parent selection strategy (e.g. tournament, ranking)."
@@ -56,6 +60,8 @@ class ReplacementConfig(BaseModel):
     Concrete behavior is implemented in the replacement registry.
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     strategy: ReplacementStrategy = Field(
         ..., description="Survivor selection strategy (e.g. replace_worst, anneal)."
     )
@@ -69,6 +75,8 @@ class ReplacementConfig(BaseModel):
 
 class StoppingCriteria(BaseModel):
     """Optional stopping criteria for early stopping."""
+
+    model_config = ConfigDict(extra="forbid")
 
     target_fitness: Optional[float] = Field(
         None,
@@ -95,6 +103,8 @@ class ParallelConfig(BaseModel):
     Controls whether fitness evaluation is run sequentially or distributed (currently
     only Ray is supported).
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     backend: str = Field(
         default="none",
@@ -123,6 +133,8 @@ class FullConfig(BaseModel):
     resolves each raw 'modules[name]' dict into a    typed ComponentConfig (e.g.
     VectorComponentConfig, EvoNetComponentConfig).
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     # Global run parameters
     parent_pool_size: int = Field(
@@ -199,3 +211,20 @@ class FullConfig(BaseModel):
 
         data["modules"] = resolved
         return data
+
+    @model_validator(mode="after")
+    def _check_consistency(self) -> "FullConfig":
+        """Global sanity checks for the main configuration."""
+        if self.parent_pool_size <= 0:
+            raise ValueError("parent_pool_size must be > 0")
+        if self.offspring_pool_size <= 0:
+            raise ValueError("offspring_pool_size must be > 0")
+        if self.num_elites < 0:
+            raise ValueError("num_elites must be >= 0")
+        if self.num_elites > self.parent_pool_size:
+            raise ValueError("num_elites cannot exceed parent_pool_size")
+        if self.max_generations <= 0:
+            raise ValueError("max_generations must be > 0")
+        if self.max_indiv_age < 0:
+            raise ValueError("max_indiv_age must be >= 0")
+        return self

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 from typing import Any, Literal, Optional, Tuple, Union
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from evolib.config.base_component_config import CrossoverConfig, MutationConfig
 from evolib.interfaces.enums import RepresentationType
@@ -28,6 +28,8 @@ class VectorComponentConfig(BaseModel):
               probability: 1.0
               strength: 0.05
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     # Fixed module type: "vector"
     type: RepresentationType = Field(
