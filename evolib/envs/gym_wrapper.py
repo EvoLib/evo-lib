@@ -3,7 +3,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Union, cast
 
-import gymnasium as gym
+try:
+    import gymnasium as gym
+except ImportError as e:
+    raise ImportError(
+        "Gymnasium is required for GymEnv. Please install with `pip install gymnasium`."
+    ) from e
+
 import imageio
 import numpy as np
 
