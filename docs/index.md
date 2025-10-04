@@ -156,7 +156,7 @@ This allows you to evaluate evolutionary agents directly on well-known benchmark
 👉 [Examples](https://github.com/EvoLib/evo-lib/tree/main/examples/08_gym)
 
 ```python
-from evolibs.gym_wrapper import GymEnv
+from evolib import GymEnv
 
 env = GymEnv("CartPole-v1", max_steps=500)
 fitness = env.evaluate(indiv)         # run one episode
