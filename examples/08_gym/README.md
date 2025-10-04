@@ -88,7 +88,7 @@ The agent receives the 4-dimensional observation (cart position, velocity, pole 
 * Visualization: best individual of each generation rendered as GIFs.  
 
 <p align="center">
-  <img src="./03_frames/03_cartpole.gif" alt="CartPole Evolution" width="512"/>
+  <img src="./03_frames/03_cartpole.gif" alt="CartPole Evolution" width="600"/>
 </p>
 
 ---
@@ -105,7 +105,7 @@ land safely between the flags.
 * Visualization: every 20 generations (and at the end), the best individual is rendered and saved as an animated GIF.
 
 <p align="center">
-  <img src="./04_frames/04_lunarlander.gif" alt="LunarLander Evolution" width="512"/>
+  <img src="./04_frames/04_lunarlander.gif" alt="LunarLander Evolution" width="600"/>
 </p>
 
 ---
