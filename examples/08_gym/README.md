@@ -77,6 +77,20 @@ The value lies in understanding how the fitness definition and the reward struct
 
 ---
 
+### `03_cartpole.py`
+
+Evolves a neural controller to solve [CartPole-v1](https://gymnasium.farama.org/environments/classic_control/cart_pole).  
+The agent receives the 4-dimensional observation (cart position, velocity, pole angle, angular velocity) and outputs a discrete action (left or right).  
+Fitness is based on the episode reward (number of balanced steps), and the best individual of each generation is visualized as a GIF.
+
+<p align="center">
+  <img src="./03_frames/03_cartpole.gif" alt="CartPole Evolution" width="512"/>
+</p>
+
+---
+
+### `03_cartpole.py`
+
 ## See Also
 
 * [`../07_evonet/`](../07_evonet) — evolvable neural networks for function approximation.  
