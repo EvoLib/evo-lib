@@ -20,6 +20,7 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 - **Modularity**: mutation, selection, crossover, and parameter representations can be freely combined.  
 - **Educational value**: examples and a clean API make it practical for illustrating evolutionary concepts.  
 - **Neuroevolution support**: structural mutations (adding/removing neurons and connections) and evolvable networks via EvoNet.  
+- **Gymnasium integration**: run [Gymnasium](https://gymnasium.farama.org) benchmarks (e.g. CartPole, LunarLander) via a simple wrapper.
 - **Parallel evaluation (optional)**: basic support for [Ray](https://www.ray.io/) to speed up fitness evaluations.  
 - **Type-checked**: PEP8 compliant, and consistent code style.  
 
@@ -150,6 +151,27 @@ It can be applied to:
 
 ---
 
+### Gymnasium Integration
+
+EvoLib provides a lightweight wrapper for [Gymnasium](https://gymnasium.farama.org/) environments.
+This allows you to evaluate evolutionary agents directly on well-known benchmarks such as **CartPole**, **LunarLander**, or **Pendulum**.
+
+- **Headless evaluation**: returns total episode reward as fitness.
+- **Visualization**: render episodes and save them as GIFs.
+- **Discrete & continuous action spaces** are both supported.
+
+👉 [Examples](https://github.com/EvoLib/evo-lib/tree/main/examples/08_gym)
+
+```python
+from evolibs.gym_wrapper import GymEnv
+
+env = GymEnv("CartPole-v1", max_steps=500)
+fitness = env.evaluate(indiv)         # run one episode
+gif = env.visualize(indiv, gen=10)    # render & save as GIF
+```
+
+---
+
 ## Preview: Pygame Integration
 
 Early prototypes demonstrate how evolutionary algorithms can evolve both neural networks and sensor properties such as number, range, and orientation for agents in 2D worlds built with pygame. This illustrates how networks and sensors co-adapt to dynamic environments with collisions and feedback.
@@ -197,6 +219,7 @@ For deeper exploration, see the [full examples directory](examples/)
 - [X] Neuroevolution
 - [X] Topological Evolution (neurons, edges)
 - [X] Ray Support for Parallel Evaluation (early prototypes)
+- [X] OpenAI Gymnasium / Gym Wrapper
 - [ ] Advanced Visualization
 - [ ] Game Environment Integration (pygame, PettingZoo - early prototypes)
 
