@@ -43,6 +43,40 @@ Output: GIFs in `01_frames/` show the current best policy navigating the grid.
 
 ---
 
+### `02_cliff_walking.py`
+
+Trains on the **CliffWalking-v1** environment.
+Although part of Gymnasium’s *ToyText* suite and described as “extremely simple,” it is in fact a **very challenging setup** for both Reinforcement Learning and Evolutionary Algorithms.
+
+The difficulty stems from the **reward structure**:
+
+- Every step costs `-1`, regardless of movement or standing still.
+- Falling into the cliff adds `-100` and ends the episode.
+- Reaching the goal yields `0`.
+
+This creates a **paradoxical fitness landscape** where apparent progress is rare, and strategies that are actually suboptimal may be preferred by evolution.
+
+---
+
+#### Example rewards (1 episode, `max_steps=20`)
+
+| Behavior                  | Reward | Interpretation |
+|----------------------------|--------|----------------|
+| Stand still (20 steps)     | -20    | “safe but useless” |
+| Fall into cliff at step 5  | -105   | much worse |
+| Fall into cliff at step 15 | -115   | even worse |
+| Reach goal in 12 steps     | -12    | best |
+
+---
+
+**Takeaway:**
+CliffWalking effectively acts as an **anti-evolution environment**:
+progress appears only rarely, and evolution tends to preserve “standing” strategies while truly successful behaviors (reaching the goal) emerge only by chance.
+
+The value lies in understanding how the fitness definition and the reward structure interact, sometimes leading to counterintuitive or stagnant evolutionary dynamics.
+
+---
+
 ## See Also
 
 * [`../07_evonet/`](../07_evonet) — evolvable neural networks for function approximation.  

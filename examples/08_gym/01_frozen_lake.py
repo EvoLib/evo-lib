@@ -1,16 +1,10 @@
 """
-FrozenLake-v1 Example with EvoLib.
+Example: Training on the FrozenLake-v1 environment.
 
-This script evolves neural network policies to solve the Gymnasium
-FrozenLake environment on an 8x8 grid with slippery transitions.
-
-Key aspects:
-- Uses EvoLib's Population and Individual classes for evolutionary search.
-- The environment is initialized once and reused for all individuals.
-- Fitness is defined as the negative average reward across 5 episodes
-  to account for the stochastic nature of the environment.
-- At the end of each generation, the best individual is visualized as a GIF
-  showing its path across the FrozenLake grid.
+FrozenLake is a task where the agent must reach the goal while
+avoiding holes on a slippery surface.
+This example demonstrates how stochastic transitions make
+evolutionary training noisy and challenging.
 """
 
 from evolib import GymEnv, Individual, Population, resume_or_create

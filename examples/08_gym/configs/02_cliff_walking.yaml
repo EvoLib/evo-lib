@@ -1,0 +1,23 @@
+parent_pool_size: 10
+offspring_pool_size: 20
+max_generations: 100
+num_elites: 2
+
+evolution:
+  strategy: mu_plus_lambda
+
+modules:
+  brain:
+    type: evonet
+    dim: [1, 8, 4]     # 1 obs, 4 actions
+    activation: [linear, tanh, linear]
+    recurrent: none
+    initializer: identity_evonet
+    weight_bounds: [-2.0, 2.0]
+    bias_bounds: [-1.0, 1.0]
+
+    mutation:
+      strategy: adaptive_individual
+      min_strength: 0.01
+      max_strength: 0.1
+      probability: 0.6
