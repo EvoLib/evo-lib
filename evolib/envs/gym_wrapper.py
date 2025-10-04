@@ -14,33 +14,70 @@ if TYPE_CHECKING:
 class GymEnv:
     """Thin wrapper to run OpenAI Gymnasium environments with EvoLib Individuals."""
 
-    def __init__(self, env_name: str, max_steps: int = 500):
+    def __init__(self, env_name: str, max_steps: int = 500, **env_kwargs: Any):
+        """
+        Initialize a Gym environment.
+
+        Args:
+            env_name: Name of the Gymnasium environment, e.g. "FrozenLake-v1".
+            max_steps: Maximum number of steps per episode.
+            **env_kwargs: Extra arguments passed directly to gym.make(),
+                          e.g. is_slippery=False for FrozenLake.
+        """
         self.env_name = env_name
         self.max_steps = max_steps
+        self.env_kwargs = env_kwargs
         # headless env (no Render)
-        self.env = gym.make(env_name)
+        self.env = gym.make(env_name, **env_kwargs)
 
-    def evaluate(self, indiv: Individual, module: str = "brain") -> float:
-        """Run one episode headless and return total reward (fitness)."""
-        obs, _ = self.env.reset()
+    def evaluate(
+        self,
+        indiv: Individual,
+        module: str = "brain",
+        episodes: int = 1,
+    ) -> float:
+        """
+        Run one or multiple episodes headless and return average total reward.
+
+        Args:
+            indiv: Individual whose network acts in the environment.
+            module: Which module in para to use for decision making.
+            episodes: How many episodes to average over (default: 1).
+
+        Returns:
+            Average total reward across all episodes.
+        """
         total_reward = 0.0
 
-        for _ in range(self.max_steps):
-            obs_list = obs.tolist() if isinstance(obs, np.ndarray) else list(obs)
-            action = indiv.para[module].net.calc(obs_list)
+        for _ in range(episodes):
+            obs, _ = self.env.reset()
+            ep_reward = 0.0
 
-            # Discrete Action-Spaces --> argmax
-            if hasattr(self.env.action_space, "n"):
-                action = int(np.argmax(action))
-            else:
-                action = np.array(action, dtype=np.float32)
+            for _ in range(self.max_steps):
+                if isinstance(obs, np.ndarray):
+                    obs_list = obs.tolist()
+                elif np.isscalar(obs):
+                    obs_list = [float(cast(float, obs))]
+                else:
+                    obs_list = list(obs)
 
-            obs, reward, terminated, truncated, _ = self.env.step(action)
-            total_reward += float(reward)
-            if terminated or truncated:
-                break
+                action = indiv.para[module].net.calc(obs_list)
 
-        return total_reward
+                # Discrete Action-Spaces --> argmax
+                if hasattr(self.env.action_space, "n"):
+                    action = int(np.argmax(action))
+                else:
+                    action = np.array(action, dtype=np.float32)
+
+                obs, reward, terminated, truncated, _ = self.env.step(action)
+                ep_reward += float(reward)
+
+                if terminated or truncated:
+                    break
+
+            total_reward += ep_reward
+
+        return total_reward / episodes
 
     def visualize(
         self,
@@ -65,7 +102,10 @@ class GymEnv:
         """
 
         env = gym.make(
-            self.env_name, render_mode="rgb_array", max_episode_steps=self.max_steps
+            self.env_name,
+            render_mode="rgb_array",
+            max_episode_steps=self.max_steps,
+            **self.env_kwargs,
         )
         obs, _ = env.reset()
 
@@ -73,7 +113,13 @@ class GymEnv:
         frames: list[np.ndarray] = []
 
         for _ in range(self.max_steps):
-            obs_list = obs.tolist() if isinstance(obs, np.ndarray) else list(obs)
+            if isinstance(obs, np.ndarray):
+                obs_list = obs.tolist()
+            elif np.isscalar(obs):
+                obs_list = [float(cast(float, obs))]
+            else:
+                obs_list = list(obs)
+
             action = indiv.para[module].net.calc(obs_list)
 
             if hasattr(env.action_space, "n"):
