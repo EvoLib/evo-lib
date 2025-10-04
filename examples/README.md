@@ -176,7 +176,7 @@ Examples where EvoLib individuals interact with **Gymnasium environments**
   <img src="./08_gym/04_frames/04_lunarlander.gif" alt="LunarLander" width="512"/>
 </p>
 
-📄 See: [`08_gym/README.md`](08_gmy/README.md)
+📄 See: [`08_gym/README.md`](08_gym/README.md)
 
 ---
 
