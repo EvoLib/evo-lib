@@ -1,16 +1,17 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-from typing import Any, Union, cast
+from typing import TYPE_CHECKING, Any, Union, cast
 
 import gymnasium as gym
 import imageio
 import numpy as np
 
-from evolib import Individual  # dein Core-Typ
+if TYPE_CHECKING:
+    from evolib import Individual
 
 
-class GymEnvWrapper:
+class GymEnv:
     """Thin wrapper to run OpenAI Gymnasium environments with EvoLib Individuals."""
 
     def __init__(self, env_name: str, max_steps: int = 500):
@@ -62,6 +63,7 @@ class GymEnvWrapper:
         Returns:
             Path to saved GIF.
         """
+
         env = gym.make(
             self.env_name, render_mode="rgb_array", max_episode_steps=self.max_steps
         )
