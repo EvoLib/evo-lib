@@ -35,7 +35,8 @@ jobs:
             docformatter \
             types-PyYAML \
             matplotlib \
-            gymnasium
+            gymnasium \
+            imageio
 
       - name: Run black
         run: black --check evolib/ tests/
