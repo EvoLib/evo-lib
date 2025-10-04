@@ -1,0 +1,24 @@
+# configs/02_lunarlander.yaml
+parent_pool_size: 40
+offspring_pool_size: 200
+max_generations: 200
+num_elites: 4
+
+evolution:
+  strategy: mu_plus_lambda
+
+modules:
+  brain:
+    type: evonet
+    dim: [8, 16, 4]     # 4 obs, 2 actions
+    activation: [linear, tanh, linear]
+    recurrent: none
+    initializer: identity_evonet
+    weight_bounds: [-2.0, 2.0]
+    bias_bounds: [-1.0, 1.0]
+
+    mutation:
+      strategy: adaptive_individual
+      min_strength: 0.001
+      max_strength: 0.1
+      probability: 0.6

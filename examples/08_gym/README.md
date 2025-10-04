@@ -13,7 +13,10 @@ observations, rewards, and termination signals.
 
 * Basic Gymnasium concepts (`env.reset()`, `env.step(action)`).  
 * EvoLib basics: populations, individuals, fitness assignment.  
-* Installed extras: `gymnasium`, `imageio` (for GIF rendering).  
+* Installed extras:  
+  ```bash
+  pip install gymnasium[box2d] imageio
+  ```
 
 ---
 
@@ -81,7 +84,8 @@ The value lies in understanding how the fitness definition and the reward struct
 
 Evolves a neural controller to solve [CartPole-v1](https://gymnasium.farama.org/environments/classic_control/cart_pole).  
 The agent receives the 4-dimensional observation (cart position, velocity, pole angle, angular velocity) and outputs a discrete action (left or right).  
-Fitness is based on the episode reward (number of balanced steps), and the best individual of each generation is visualized as a GIF.
+* Fitness: cumulative reward (number of balanced steps).  
+* Visualization: best individual of each generation rendered as GIFs.  
 
 <p align="center">
   <img src="./03_frames/03_cartpole.gif" alt="CartPole Evolution" width="512"/>
@@ -89,7 +93,22 @@ Fitness is based on the episode reward (number of balanced steps), and the best 
 
 ---
 
-### `03_cartpole.py`
+### `04_lunarlander.py`
+
+Evolves a neural-network controller for the [LunarLander](https://gymnasium.farama.org/environments/box2d/lunar_lander) environment.  
+The agent learns to control a lander with discrete thruster commands in order to 
+land safely between the flags.  
+
+* Fitness: negative cumulative reward from one episode (minimization).  
+* Observation space: continuous (position, velocity, angle, contact flags).  
+* Action space: discrete thruster commands.  
+* Visualization: every 20 generations (and at the end), the best individual is rendered and saved as an animated GIF.
+
+<p align="center">
+  <img src="./04_frames/04_lunarlander.gif" alt="LunarLander Evolution" width="512"/>
+</p>
+
+---
 
 ## See Also
 
