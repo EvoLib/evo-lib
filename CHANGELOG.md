@@ -1,6 +1,10 @@
 ## EvoLib 0.2.0b3dev1 [unreleased]
 
 ### Added
+- `GymEnv` now accepts additional `**env_kwargs` to forward environment-specific
+  parameters directly to `gym.make`.
+- `evaluate()` in `GymEnv` supports an optional `episodes` argument to average
+  fitness over multiple runs for more stable evaluation in stochastic environments.
 - Added `GymEnvWrapper` in `evolib.envs` to evaluate Individuals in Gymnasium environments.
   Includes `.evaluate()` for fitness calculation and `.visualize()` to render episodes as GIFs.
 
