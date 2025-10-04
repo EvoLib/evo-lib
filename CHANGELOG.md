@@ -1,6 +1,7 @@
 ## EvoLib 0.2.0b3dev1 [unreleased]
 
 ### Added
+- Added new example: CliffWalking
 - Added new example: FrozenLake-v1 with slippery transitions (stochastic environment)
 - `GymEnv` now accepts additional `**env_kwargs` to forward environment-specific
   parameters directly to `gym.make`.
