@@ -31,7 +31,6 @@ class GymEnv:
         self,
         env_name: str,
         max_steps: int = 500,
-        normalize: bool = True,
         **env_kwargs: Any,
     ):
         """
@@ -45,22 +44,9 @@ class GymEnv:
         """
         self.env_name = env_name
         self.max_steps = max_steps
-        self.normalize = normalize
         self.env_kwargs = env_kwargs
         # headless env (no Render)
         self.env = gym.make(env_name, **env_kwargs)
-
-    def normalize_obs(self, obs: Any, clip_value: float = 5.0) -> np.ndarray:
-        """
-        Normalize observations to [-1, 1].
-
-        This helps stabilize evolution by keeping all input features within a consistent
-        numeric range.
-        """
-        obs = np.array(obs, dtype=np.float32)
-        obs = np.clip(obs, -clip_value, clip_value)
-        obs /= clip_value
-        return obs
 
     def evaluate(
         self,
@@ -84,9 +70,6 @@ class GymEnv:
         for _ in range(episodes):
             obs, _ = self.env.reset()
 
-            if self.normalize:
-                obs = self.normalize_obs(obs)
-
             ep_reward = 0.0
 
             for _ in range(self.max_steps):
@@ -105,12 +88,7 @@ class GymEnv:
                 else:
                     action = np.array(action, dtype=np.float32)
 
-                next_obs, reward, terminated, truncated, _ = self.env.step(action)
-
-                if self.normalize:
-                    next_obs = self.normalize_obs(next_obs)
-
-                obs = next_obs
+                obs, reward, terminated, truncated, _ = self.env.step(action)
 
                 ep_reward += float(reward)
 
@@ -151,9 +129,6 @@ class GymEnv:
         )
         obs, _ = env.reset()
 
-        if self.normalize:
-            obs = self.normalize_obs(obs)
-
         RenderFrame = Union[np.ndarray, list[np.ndarray], None]
         frames: list[np.ndarray] = []
 
@@ -172,12 +147,7 @@ class GymEnv:
             else:
                 action = np.array(action, dtype=np.float32)
 
-            next_obs, reward, terminated, truncated, _ = env.step(action)
-
-            if self.normalize:
-                next_obs = self.normalize_obs(next_obs)
-
-            obs = next_obs
+            obs, reward, terminated, truncated, _ = env.step(action)
 
             frame: RenderFrame = env.render()
             if isinstance(frame, np.ndarray):
