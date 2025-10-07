@@ -70,6 +70,9 @@ class GymEnv:
         for _ in range(episodes):
             obs, _ = self.env.reset()
 
+            net = indiv.para[module].net
+            net.reset(full=True)  # Reset recurrent/internal state
+
             ep_reward = 0.0
 
             for _ in range(self.max_steps):
@@ -80,7 +83,7 @@ class GymEnv:
                 else:
                     obs_list = list(obs)
 
-                action = indiv.para[module].net.calc(obs_list)
+                action = net.calc(obs_list)
 
                 # Discrete Action-Spaces --> argmax
                 if hasattr(self.env.action_space, "n"):
@@ -129,6 +132,9 @@ class GymEnv:
         )
         obs, _ = env.reset()
 
+        net = indiv.para[module].net
+        net.reset(full=True)  # Reset recurrent/internal state
+
         RenderFrame = Union[np.ndarray, list[np.ndarray], None]
         frames: list[np.ndarray] = []
 
@@ -140,7 +146,7 @@ class GymEnv:
             else:
                 obs_list = list(obs)
 
-            action = indiv.para[module].net.calc(obs_list)
+            action = net.calc(obs_list)
 
             if hasattr(env.action_space, "n"):
                 action = int(np.argmax(action))
