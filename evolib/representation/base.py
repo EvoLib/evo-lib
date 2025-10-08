@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: MIT
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Callable, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 import numpy as np
 
 if TYPE_CHECKING:
+    from evolib.core.individual import Indiv
     from evolib.interfaces.types import ModuleConfig
 
 
@@ -19,6 +20,10 @@ class ParaBase(ABC):
     """
 
     def __init__(self) -> None:
+
+        # Optional link back to owning Individual
+        self._owner: Optional["Indiv"] = None
+
         self._crossover_fn: (
             Callable[
                 [np.ndarray, np.ndarray],
