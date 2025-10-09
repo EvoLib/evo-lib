@@ -1,6 +1,29 @@
-## EvoLib 0.2.0b3dev1 [unreleased]
+## EvoLib 0.2.0b3dev6 [unreleased]
 
 ### Added
+- **HELI (Hierarchical Evolution with Lineage Incubation):**
+  New operator enabling short local micro-evolutions for structure-mutated
+  individuals. Each mutated topology spawns a temporary subpopulation that
+  evolves for a few generations before reintegration into the main pool.
+
+  **Highlights**
+  - Configurable via `evolution.heli` in YAML configs  
+  - Parameters: `generations`, `offspring_per_seed`, `max_fraction`, `reduce_sigma_factor`  
+  - Uses fixed `(μ + λ)` strategy per subpopulation  
+  - Compatible with `EvoNet` and structural mutation logic  
+  - Verbosity control via `pop.heli_verbosity`
+
+  Example YAML snippet:
+  ```yaml
+  evolution:
+    strategy: mu_plus_lambda
+    heli:
+      generations: 5
+      offspring_per_seed: 10
+      max_fraction: 0.1
+      reduce_sigma_factor: 0.5
+   ```
+
 - Added new examples: LunarLander, CartPole, CliffWalking, FrozenLake
 - `GymEnv` now accepts additional `**env_kwargs` to forward environment-specific
   parameters directly to `gym.make`.

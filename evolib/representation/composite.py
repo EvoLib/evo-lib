@@ -25,6 +25,7 @@ class ParaComposite(ParaBase):
     """
 
     def __init__(self, components: Dict[str, ParaBase]):
+        super().__init__()
         self.components = components
 
     def __getitem__(self, key: str | int) -> ParaBase:
@@ -38,6 +39,8 @@ class ParaComposite(ParaBase):
     def mutate(self) -> None:
         for comp in self.components.values():
             comp.mutate()
+            if getattr(comp, "has_structural_change", False):
+                self._has_structural_change = True
 
     def apply_config(self, cfg: ModuleConfig) -> None:
         """

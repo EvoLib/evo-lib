@@ -1,12 +1,11 @@
 # SPDX-License-Identifier: MIT
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Union
 
 import numpy as np
 
 if TYPE_CHECKING:
-    from evolib.core.individual import Indiv
     from evolib.interfaces.types import ModuleConfig
 
 
@@ -21,8 +20,7 @@ class ParaBase(ABC):
 
     def __init__(self) -> None:
 
-        # Optional link back to owning Individual
-        self._owner: Optional["Indiv"] = None
+        self._has_structural_change: bool = False
 
         self._crossover_fn: (
             Callable[
@@ -31,6 +29,11 @@ class ParaBase(ABC):
             ]
             | None
         ) = None
+
+    @property
+    def has_structural_change(self) -> bool:
+        """Return True if a structural mutation occurred during the last mutation."""
+        return self._has_structural_change
 
     @abstractmethod
     def apply_config(self, cfg: "ModuleConfig") -> None:

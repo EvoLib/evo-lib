@@ -139,6 +139,21 @@ class Pop:
             self.parallel_num_cpus = None
             self.parallel_address = None
 
+        # HELI parameters
+        self.heli_enabled = False
+        self.heli_verbosity = 2
+        if cfg.evolution is not None and cfg.evolution.heli:
+            self.heli_enabled = True
+            self.heli_generations = cfg.evolution.heli.generations
+            self.heli_offspring_per_seed = cfg.evolution.heli.offspring_per_seed
+            self.heli_max_fraction = cfg.evolution.heli.max_fraction
+            self.heli_reduce_sigma_factor = cfg.evolution.heli.reduce_sigma_factor
+        else:
+            self.heli_generations = 0
+            self.heli_offspring_per_seed = 0
+            self.heli_max_fraction = 0.0
+            self.heli_reduce_sigma_factor = 1.0
+
         # Statistics
         self.history_logger = HistoryLogger(
             columns=[
@@ -200,6 +215,67 @@ class Pop:
     def history_dicts(self) -> List[Dict[str, Any]]:
         """Return history as list of dicts (pandas-free)."""
         return self.history_logger.to_dicts()
+
+    @classmethod
+    def from_config(
+        cls,
+        cfg: FullConfig,
+        fitness_function: Optional[FitnessFunction] = None,
+        initialize: bool = False,
+    ) -> "Pop":
+        """Create a new population from an existing validated config."""
+        pop = cls.__new__(cls)
+        pop.config = cfg
+        pop.fitness_function = fitness_function
+
+        # Core runtime fields
+        pop.indivs = []
+        pop.history_logger = HistoryLogger(
+            columns=[
+                "generation",
+                "best_fitness",
+                "worst_fitness",
+                "mean_fitness",
+                "median_fitness",
+                "std_fitness",
+                "iqr_fitness",
+                "diversity",
+            ]
+        )
+        pop.generation_num = 0
+        pop.best_fitness = 0.0
+        pop.worst_fitness = 0.0
+        pop.mean_fitness = 0.0
+        pop.median_fitness = 0.0
+        pop.std_fitness = 0.0
+        pop.iqr_fitness = 0.0
+        pop.diversity = 0.0
+        pop.diversity_ema = 0.0
+
+        # Parallel backend (same as parent)
+        pop.parallel_backend = cfg.parallel.backend if cfg.parallel else "none"
+        pop.parallel_num_cpus = cfg.parallel.num_cpus if cfg.parallel else None
+        pop.parallel_address = cfg.parallel.address if cfg.parallel else None
+
+        # HELI
+        if cfg.evolution is not None and cfg.evolution.heli is not None:
+            pop.heli_generations = cfg.evolution.heli.generations
+            pop.heli_offspring_per_seed = cfg.evolution.heli.offspring_per_seed
+            pop.heli_max_fraction = cfg.evolution.heli.max_fraction
+            pop.heli_reduce_sigma_factor = cfg.evolution.heli.reduce_sigma_factor
+
+        # Initializer + sizes
+        pop.para_initializer = build_composite_initializer(cfg)
+        pop.parent_pool_size = cfg.parent_pool_size
+        pop.offspring_pool_size = cfg.offspring_pool_size
+        pop.max_generations = cfg.max_generations
+        pop.max_indiv_age = cfg.max_indiv_age
+        pop.num_elites = cfg.num_elites
+
+        if initialize:
+            pop.initialize_population()
+
+        return pop
 
     def initialize_population(
         self, initializer: Callable[["Pop"], Any] | None = None

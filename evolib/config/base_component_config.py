@@ -325,3 +325,66 @@ class CrossoverConfig(BaseModel):
                 raise ValueError("min_probability must be <= max_probability.")
 
         return self
+
+
+class HeliConfig(BaseModel):
+    """
+    HELI (Hierarchical Evolution with Lineage Incubation) configuration block.
+
+    Defines how local micro-evolutions for structure-mutated individuals are run.
+
+    Parameters:
+
+    generations : int
+        Number of micro-evolution generations per seed individual.
+    offspring_per_seed : int
+        Number of offspring to create per incubated seed (λᵢ).
+    max_fraction : float
+        Upper fraction of offspring eligible for incubation (0–1).
+    reduce_sigma_factor : float
+        Damping factor for mutation strength during incubation
+        (<1.0 → less exploration).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    generations: int = Field(
+        5,
+        ge=1,
+        description="Number of local generations each incubation subpopulation runs.",
+    )
+    offspring_per_seed: int = Field(
+        10,
+        ge=1,
+        description="Number of offspring generated per incubated seed individual.",
+    )
+    max_fraction: float = Field(
+        0.1,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Maximum fraction of offspring that can enter incubation "
+            "(e.g. 0.1 → at most 10 % of offspring)."
+        ),
+    )
+    reduce_sigma_factor: float = Field(
+        0.5,
+        ge=0.0,
+        description=(
+            "Optional damping factor for mutation strength during incubation. "
+            "Values <1.0 reduce mutation strength."
+        ),
+    )
+
+    @model_validator(mode="after")
+    def _check_consistency(self) -> "HeliConfig":
+        """Ensure all values are within valid ranges and logically consistent."""
+        if self.generations <= 0:
+            raise ValueError("generations must be > 0")
+        if self.offspring_per_seed <= 0:
+            raise ValueError("offspring_per_seed must be > 0")
+        if not (0.0 <= self.max_fraction <= 1.0):
+            raise ValueError("max_fraction must be between 0 and 1.")
+        if self.reduce_sigma_factor < 0.0:
+            raise ValueError("reduce_sigma_factor must be ≥ 0.")
+        return self

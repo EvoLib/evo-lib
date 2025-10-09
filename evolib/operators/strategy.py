@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from evolib.core.population import Pop
 
 from evolib.operators.crossover import crossover_offspring
+from evolib.operators.heli import run_heli
 from evolib.operators.mutation import mutate_offspring
 from evolib.operators.replacement import replace_mu_lambda, replace_steady_state
 from evolib.operators.reproduction import generate_cloned_offspring
@@ -58,6 +59,10 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
 
     # OFFSPRING MUTATION
     mutate_offspring(pop, offspring)
+
+    # Optional HELI
+    if pop.heli_enabled is True:
+        run_heli(pop, offspring)
 
     combined = pop.indivs + offspring
 
@@ -101,6 +106,10 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
 
     # OFFSPRING MUTATION
     mutate_offspring(pop, offspring)
+
+    # Optional HELI
+    if pop.heli_enabled is True:
+        run_heli(pop, offspring)
 
     # Evaluate offspring fitness
     pop.evaluate_indivs(offspring)
@@ -171,6 +180,10 @@ def evolve_steady_state(pop: "Pop") -> None:
 
     # Mutate offspring
     mutate_offspring(pop, offspring)
+
+    # Optional HELI
+    if pop.heli_enabled is True:
+        run_heli(pop, offspring)
 
     # Evaluate offspring fitness
     pop.evaluate_indivs(offspring)

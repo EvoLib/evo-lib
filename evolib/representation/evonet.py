@@ -52,6 +52,8 @@ class EvoNet(ParaBase):
     """
 
     def __init__(self) -> None:
+        super().__init__()
+
         self.net = Nnet()
 
         # Bounds for weights and biases (e.g., [-1.0, 1.0])
@@ -115,6 +117,8 @@ class EvoNet(ParaBase):
 
     def mutate(self) -> None:
 
+        self._has_structural_change = False
+
         # Weights
         if self.evo_params.mutation_strength is None:
             raise ValueError("mutation_strength must be set.")
@@ -154,7 +158,8 @@ class EvoNet(ParaBase):
 
         # Structural mutation (optional)
         if self.structural_cfg is not None:
-            mutate_structure(self.net, self.structural_cfg)
+            struct_mutated = mutate_structure(self.net, self.structural_cfg)
+            self._has_structural_change = bool(struct_mutated)
 
     def crossover_with(self, partner: ParaBase) -> None:
         """

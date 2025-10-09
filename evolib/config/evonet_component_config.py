@@ -14,7 +14,13 @@ config resolution.
 from typing import Literal, Optional, Tuple, Union
 
 from evonet.activation import ACTIVATIONS
-from pydantic import BaseModel, ConfigDict, Field, field_validator, validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    validator,
+)
 from pydantic_core import core_schema
 
 from evolib.config.base_component_config import (

@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from evolib.config.base_component_config import HeliConfig
 from evolib.config.component_registry import get_component_config_class
 from evolib.interfaces.enums import (
     EvolutionStrategy,
@@ -23,6 +24,15 @@ class EvolutionConfig(BaseModel):
 
     strategy: EvolutionStrategy = Field(
         ..., description="High-level evolution strategy (e.g. (mu_plus_lambda)."
+    )
+
+    heli: Optional[HeliConfig] = Field(
+        default=None,
+        description=(
+            "Optional HELI (Hierarchical Evolution with Lineage Incubation)"
+            "configuration. "
+            "Defines local subpopulation incubation for structure-mutated individuals."
+        ),
     )
 
 
