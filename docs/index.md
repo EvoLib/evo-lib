@@ -22,6 +22,8 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 - **Neuroevolution support**: structural mutations (adding/removing neurons and connections) and evolvable networks via EvoNet.  
 - **Gymnasium integration**: run [Gymnasium](https://gymnasium.farama.org) benchmarks (e.g. CartPole, LunarLander) via a simple wrapper.  
 - **Parallel evaluation (optional)**: basic support for [Ray](https://www.ray.io/) to speed up fitness evaluations.  
+- **HELI (Hierarchical Evolution with Lineage Incubation)**
+  Runs short micro-evolutions ("incubations") for structure-mutated individuals, allowing new topologies to stabilize before rejoining the main population.  
 - **Type-checked**: PEP8 compliant, and consistent code style.  
 
 
