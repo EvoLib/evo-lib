@@ -37,6 +37,10 @@ class ParaComposite(ParaBase):
         return len(self.components)
 
     def mutate(self) -> None:
+        """Mutate all subcomponents and propagate structural change flag."""
+        # Reset structural change status before mutation
+        self._has_structural_change = False
+
         for comp in self.components.values():
             comp.mutate()
             if getattr(comp, "has_structural_change", False):

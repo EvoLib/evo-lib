@@ -65,6 +65,9 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
             print(f"[HELI] Gen: {pop.generation_num} - No struct_mutants")
         return
 
+    if pop.heli_verbosity >= 2:
+        print(f"[HELI] Number of structural mutants: {len(struct_mutants)}")
+
     # 2: Limit number of incubated seeds
     max_seeds = max(1, round(len(offspring) * pop.heli_max_fraction))
     seeds = struct_mutants[:max_seeds]
@@ -118,7 +121,8 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
             best = subpop.best()
             if pop.heli_verbosity >= 2:
                 print(
-                    f"[HELI] Candidate: {seed_idx+1} Gen: {gen+1} Fit: {best.fitness}"
+                    f"[HELI] Candidate: {seed_idx+1}/{len(seeds)} "
+                    f"Gen: {gen+1} Fit: {best.fitness}"
                 )
 
         # best = subpop.best()
