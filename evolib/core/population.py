@@ -499,7 +499,14 @@ class Pop:
             reverse (bool): If True, sort in descending order.
         """
 
-        self.indivs.sort(key=lambda indivs: indivs.fitness, reverse=reverse)
+        # Filter or safely handle None fitness
+        def safe_key(indiv: Indiv) -> float:
+            # Treat unevaluated individuals as +inf (worst) for ascending sort
+            if indiv.fitness is None or not math.isfinite(indiv.fitness):
+                return math.inf if not reverse else -math.inf
+            return indiv.fitness
+
+        self.indivs.sort(key=safe_key, reverse=reverse)
 
     def best(self, sort: bool = True) -> Indiv:
         """
