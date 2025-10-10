@@ -153,8 +153,8 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
             # For maximization: worse if seed < mean
             # For minimization: worse if seed > mean
             delta_fitness = (mu - fit_seed) if maximize else (fit_seed - mu)
-            denom = max(1e-12, abs(mu - fit_main_best))
-            drift = max(0.0, delta_fitness) / denom
+            scale = max(1e-8, abs(mu) + abs(fit_main_best))
+            drift = max(0.0, delta_fitness) / scale
 
             if pop.heli_verbosity >= 2:
                 print(
@@ -173,7 +173,7 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
                         print(
                             f"[HELI] Aborting incubation: "
                             f"drift={drift:.2f} > {max_drift:.2f} "
-                            f"(FitSeed={fit_seed:.3f}, mean={mu:.3f})"
+                            f"(FitSeed={fit_seed:.3f}, FitMainMean={mu:.3f})"
                         )
                     break  # abort subpopulation evolution early
 
@@ -191,5 +191,4 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
     offspring.extend(new_candidates)
 
     if pop.heli_verbosity >= 2:
-        print(f"[HELI] Reattached {len(new_candidates)} improved candidates.")
-        print("[HELI] End")
+        print("[HELI] End.")
