@@ -62,8 +62,8 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
     if not offspring or not pop.heli_enabled:
         return
 
-    # Skip HELI until the main population has been evaluated at least once
-    if pop.mean_fitness is None:
+    # Skip HELI in generation 0 (no evaluation baseline yet)
+    if pop.generation_num == 0:
         if pop.heli_verbosity >= 1:
             print("[HELI] Skipped: main population not yet evaluated.")
         return
