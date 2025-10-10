@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "evolib"
-version = "0.2.0b3dev10"
+version = "0.2.0b3dev11"
 description = "A modular framework for evolutionary strategies and neuroevolution."
 authors = [
     { name = "EvoLib", email = "evolib@dismail.de" }
