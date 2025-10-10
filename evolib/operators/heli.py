@@ -1,25 +1,19 @@
 # SPDX-License-Identifier: MIT
 """
-HELI (Hierarchical Evolution with Lineage Incubation) operator.
+HELI (Hierarchical Evolution with Lineage Incubation)
+----------------------------------------------------
 
-This module provides the logic for running short micro-evolutions ("incubations")
-on structure-mutated individuals of a specific module (e.g., EvoNet).
-The goal is to allow newly created topologies to stabilize before rejoining
-the main population.
+Runs short micro-evolutions (“incubations”) on structure-mutated individuals.
+Allow topologically changed individuals (e.g. via add/remove neuron) to
+stabilize before rejoining the main population.
 
-Usage
------
-Called from within a module mutation routine, e.g.:
+This operator is **module-local** and does not modify the global evolution loop.
 
-    if self.heli_cfg:
-        run_heli(pop, offspring, self.heli_cfg)
-
-Design
-------
-- HELI is *module-local*: each module decides independently
-  whether and how to run incubation.
-- HELI does *not* alter global evolution strategy or scheduling.
-- Fitness evaluations during incubation are isolated from the main loop.
+Workflow:
+    1. Identify structural mutants
+    2. Spawn a subpopulation per seed
+    3. Run μ+λ micro-evolution for a few generations
+    4. Return best candidate to main offspring pool
 """
 
 from __future__ import annotations
@@ -89,15 +83,15 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
         if seed in offspring:
             offspring.remove(seed)
 
-    new_candidates = []
+    new_candidates: list[Indiv] = []
 
     if pop.heli_verbosity >= 1:
-        print(f"[HELI] Running for {len(seeds)} candidates")
+        print(f"[HELI] Running for {len(seeds)} seeds")
 
     # 3: Incubate each selected seed
     for seed_idx, seed in enumerate(seeds):
         if pop.heli_verbosity >= 1:
-            print(f"[HELI] Candidate: {seed_idx+1}")
+            print(f"[HELI] Seed: {seed_idx+1}")
 
         # Create SubPopulation
         cfg = deepcopy(pop.config)
@@ -121,7 +115,7 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
         para_dict = vars(indiv.para)
         comp_dict = para_dict["components"]
 
-        # Backup original mutation config
+        # Backup original evolutionary parameters and apply temporary HELI damping
         for module_name, module in comp_dict.items():
             heli_backup[module_name] = backup_module_state(module)
             apply_heli_overrides(module, pop.heli_reduce_sigma_factor)
@@ -130,10 +124,36 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
         for gen in range(pop.heli_generations):
             evolve_mu_plus_lambda(subpop)
             best = subpop.best()
+
+            # Early termination if fitness drift too large
+            heli_cfg = getattr(cfg.evolution, "heli", None)
+            if heli_cfg and heli_cfg.drift_threshold is not None:
+
+                max_drift = heli_cfg.drift_threshold
+
+                # Reference values from main population
+                mu = float(pop.mean_fitness or 0.0)
+                best_parent = pop.best().fitness if pop.best() is not None else mu
+                best_parent = float(best_parent or 0.0)
+                best_fit = float(best.fitness or 0.0)
+
+                denom = max(1e-12, abs(mu - best_parent))
+                drift = abs(best_fit - mu) / denom
+
+                if drift > max_drift:
+                    if pop.heli_verbosity > 1:
+                        print(
+                            f"[HELI] Aborting incubation: "
+                            f"drift={drift:.2f} > {max_drift:.2f} "
+                            f"(seed fitness={best.fitness:.3f}, mean={mu:.3f})"
+                        )
+                    break  # abort subpopulation evolution early
+
             if pop.heli_verbosity >= 2:
                 print(
-                    f"[HELI] Candidate: {seed_idx+1}/{len(seeds)} "
-                    f"Gen: {gen+1}/pop.generation_num Fit: {best.fitness:.3f}"
+                    f"[HELI] Seed {seed_idx+1}/{len(seeds)} "
+                    f"| Gen {gen+1}/{pop.heli_generations} "
+                    f"| Fit={best.fitness:.3f}"
                 )
 
         # Restore evo_params

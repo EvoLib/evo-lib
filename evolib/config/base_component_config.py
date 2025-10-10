@@ -393,6 +393,15 @@ class HeliConfig(BaseModel):
             "Values <1.0 reduce mutation strength."
         ),
     )
+    drift_threshold: float | None = Field(
+        default=None,
+        ge=0.0,
+        description=(
+            "Optional early termination threshold for incubating structural mutants. "
+            "If |fitness - mean| / max(eps, |mean - best|) > drift_threshold, "
+            "the HELI run for that seed is aborted early. None disables this behavior."
+        ),
+    )
 
     @model_validator(mode="after")
     def _check_consistency(self) -> "HeliConfig":
@@ -405,4 +414,6 @@ class HeliConfig(BaseModel):
             raise ValueError("max_fraction must be between 0 and 1.")
         if self.reduce_sigma_factor < 0.0:
             raise ValueError("reduce_sigma_factor must be ≥ 0.")
+        if self.drift_threshold is not None and self.drift_threshold < 0.0:
+            raise ValueError("drift_threshold must be ≥ 0.")
         return self
