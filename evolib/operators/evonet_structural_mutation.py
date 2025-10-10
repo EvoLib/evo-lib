@@ -42,10 +42,10 @@ def mutate_structure(net: Nnet, cfg: StructuralMutationConfig) -> bool:
     if cfg.remove_connection and np.random.rand() < cfg.remove_connection:
         remove_random_connection(net)
 
-    # Add Neuron (significant)
+    # Add Neuron (significant). Uses allowed activations if provided.
     if cfg.add_neuron and np.random.rand() < cfg.add_neuron:
         if cfg.max_nodes is None or count_non_input_neurons(net) < cfg.max_nodes:
-            add_random_neuron(net)
+            add_random_neuron(net, cfg.activations_allowed)
             structure_mutated = True
 
     # Remove Neuron (significant)

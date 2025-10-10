@@ -10,7 +10,8 @@ into the respective Para* representations and operator modules.
 
 from typing import Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from evonet.activation import ACTIVATIONS
+from pydantic import BaseModel, ConfigDict, Field, model_validator, validator
 
 from evolib.interfaces.enums import (
     CrossoverOperator,
@@ -174,6 +175,13 @@ class StructuralMutationConfig(BaseModel):
     max_edges: Optional[int] = None
     recurrent: Optional[Literal["none", "direct", "local", "all"]] = "none"
 
+    # Whitelist for random activation selection
+    activations_allowed: Optional[list[str]] = Field(
+        default=None,
+        description="Whitelist of activation names applied to "
+        "neurons in hidden layers.",
+    )
+
     model_config = ConfigDict(extra="forbid")
 
     @model_validator(mode="after")
@@ -199,6 +207,16 @@ class StructuralMutationConfig(BaseModel):
             raise ValueError(f"Invalid value for recurrent: {self.recurrent}")
 
         return self
+
+    @validator("activations_allowed", each_item=True)
+    def validate_activation_name(cls, act_name: str) -> str:
+        """Ensure only valid activation function names are allowed."""
+        if act_name not in ACTIVATIONS:
+            raise ValueError(
+                f"Invalid activation function '{act_name}'. "
+                f"Valid options are: {list(ACTIVATIONS.keys())}"
+            )
+        return act_name
 
 
 class ActivationMutationConfig(BaseModel):
