@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """
 HELI (Hierarchical Evolution with Lineage Incubation) operator.
 
@@ -30,6 +31,12 @@ if TYPE_CHECKING:
     from evolib.core.individual import Indiv
     from evolib.core.population import Pop
 
+from evolib.utils.heli_utils import (
+    apply_heli_overrides,
+    backup_module_state,
+    restore_module_state,
+)
+
 
 def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
     """
@@ -52,7 +59,7 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
     - Mutation strength can be damped by `reduce_sigma_factor`.
     """
 
-    from evolib import Population
+    from evolib.core.population import Pop
     from evolib.operators.strategy import evolve_mu_plus_lambda
 
     if not offspring or not pop.heli_enabled:
@@ -66,7 +73,7 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
         return
 
     if pop.heli_verbosity >= 2:
-        print(f"[HELI] Number of structural mutants: {len(struct_mutants)}")
+        print(f"[HELI] Start: Number of structural mutants: {len(struct_mutants)}")
 
     # 2: Limit number of incubated seeds
     max_seeds = max(1, round(len(offspring) * pop.heli_max_fraction))
@@ -84,7 +91,7 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
 
     new_candidates = []
 
-    if pop.heli_verbosity >= 0:
+    if pop.heli_verbosity >= 1:
         print(f"[HELI] Running for {len(seeds)} candidates")
 
     # 3: Incubate each selected seed
@@ -99,7 +106,7 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
         if cfg.evolution is not None:
             cfg.evolution.heli = None
 
-        subpop = Population.from_config(
+        subpop = Pop.from_config(
             cfg, fitness_function=pop.fitness_function, initialize=False
         )
         subpop.indivs = [seed.copy()]
@@ -108,12 +115,16 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
         subpop.max_generations = pop.heli_generations
         subpop.heli_enabled = False
 
-        # Optionally reduce mutation strength
+        heli_backup = {}
 
-        for indiv in subpop.indivs:
-            evo_params = getattr(indiv.para, "evo_params", None)
-            if evo_params and getattr(evo_params, "mutation_strength", None):
-                evo_params.mutation_strength *= pop.heli_reduce_sigma_factor
+        indiv = subpop.indivs[0]
+        para_dict = vars(indiv.para)
+        comp_dict = para_dict["components"]
+
+        # Backup original mutation config
+        for module_name, module in comp_dict.items():
+            heli_backup[module_name] = backup_module_state(module)
+            apply_heli_overrides(module, pop.heli_reduce_sigma_factor)
 
         # Run short local evolution
         for gen in range(pop.heli_generations):
@@ -122,13 +133,21 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
             if pop.heli_verbosity >= 2:
                 print(
                     f"[HELI] Candidate: {seed_idx+1}/{len(seeds)} "
-                    f"Gen: {gen+1} Fit: {best.fitness}"
+                    f"Gen: {gen+1}/pop.generation_num Fit: {best.fitness:.3f}"
                 )
 
-        # best = subpop.best()
+        # Restore evo_params
+        para_dict = vars(best.para)
+        comp_dict = para_dict["components"]
+
+        for module_name, module in comp_dict.items():
+            restore_module_state(module, heli_backup.get(module_name, {}))
 
         # 4: Reintegration
         new_candidates.append(best)
 
     # 5: Reattach improved candidates to the main offspring
     offspring.extend(new_candidates)
+
+    if pop.heli_verbosity >= 2:
+        print("[HELI] End")
