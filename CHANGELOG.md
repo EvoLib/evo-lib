@@ -35,6 +35,7 @@
 ### Changed
 
 ### Fixed
+- Handle None fitness values safely in sort_by_fitness()
 
 
 ## EvoLib 0.2.0b2 (2025-10-03)

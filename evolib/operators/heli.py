@@ -51,12 +51,21 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
       to avoid double evaluation.
     - Only the best individual from each incubation subpopulation is returned.
     - Mutation strength can be damped by `reduce_sigma_factor`.
+
+    Drift rule:
+        drift = max(0, Δfitness) / |mean_parent - best_parent|
     """
 
     from evolib.core.population import Pop
     from evolib.operators.strategy import evolve_mu_plus_lambda
 
     if not offspring or not pop.heli_enabled:
+        return
+
+    # Skip HELI until the main population has been evaluated at least once
+    if pop.mean_fitness is None:
+        if pop.heli_verbosity >= 1:
+            print("[HELI] Skipped: main population not yet evaluated.")
         return
 
     # 1: Select structure-mutated offspring
@@ -126,35 +135,47 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
             best = subpop.best()
 
             # Early termination if fitness drift too large
-            heli_cfg = getattr(cfg.evolution, "heli", None)
-            if heli_cfg and heli_cfg.drift_threshold is not None:
+            heli_cfg = getattr(pop.config.evolution, "heli", None)
 
-                max_drift = heli_cfg.drift_threshold
+            maximize = (
+                getattr(pop.config.selection, "fitness_maximization", False)
+                if pop.config.selection
+                else False
+            )
 
-                # Reference values from main population
-                mu = float(pop.mean_fitness or 0.0)
-                best_parent = pop.best().fitness if pop.best() is not None else mu
-                best_parent = float(best_parent or 0.0)
-                best_fit = float(best.fitness or 0.0)
+            # Reference values from main population
+            mu = float(pop.mean_fitness or 0.0)
+            main_best = pop.best()
+            fit_main_best = float(main_best.fitness or mu if main_best else mu)
+            fit_seed = float(best.fitness or 0.0)
 
-                denom = max(1e-12, abs(mu - best_parent))
-                drift = abs(best_fit - mu) / denom
-
-                if drift > max_drift:
-                    if pop.heli_verbosity > 1:
-                        print(
-                            f"[HELI] Aborting incubation: "
-                            f"drift={drift:.2f} > {max_drift:.2f} "
-                            f"(seed fitness={best.fitness:.3f}, mean={mu:.3f})"
-                        )
-                    break  # abort subpopulation evolution early
+            # Only penalize fitness *worsening* relative to main population
+            # For maximization: worse if seed < mean
+            # For minimization: worse if seed > mean
+            delta_fitness = (mu - fit_seed) if maximize else (fit_seed - mu)
+            denom = max(1e-12, abs(mu - fit_main_best))
+            drift = max(0.0, delta_fitness) / denom
 
             if pop.heli_verbosity >= 2:
                 print(
                     f"[HELI] Seed {seed_idx+1}/{len(seeds)} "
                     f"| Gen {gen+1}/{pop.heli_generations} "
-                    f"| Fit={best.fitness:.3f}"
+                    f"| FitSeed={fit_seed:.3f} "
+                    f"| FitMainBest={fit_main_best:.3f} "
+                    f"| FitMainMean={mu:.3f} "
+                    f"| Drift={drift:.3f}"
                 )
+
+            if heli_cfg and heli_cfg.drift_threshold is not None:
+                max_drift = heli_cfg.drift_threshold
+                if drift > max_drift:
+                    if pop.heli_verbosity > 1:
+                        print(
+                            f"[HELI] Aborting incubation: "
+                            f"drift={drift:.2f} > {max_drift:.2f} "
+                            f"(FitSeed={fit_seed:.3f}, mean={mu:.3f})"
+                        )
+                    break  # abort subpopulation evolution early
 
         # Restore evo_params
         para_dict = vars(best.para)
@@ -170,4 +191,5 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
     offspring.extend(new_candidates)
 
     if pop.heli_verbosity >= 2:
+        print(f"[HELI] Reattached {len(new_candidates)} improved candidates.")
         print("[HELI] End")
