@@ -393,13 +393,20 @@ class HeliConfig(BaseModel):
             "Values <1.0 reduce mutation strength."
         ),
     )
-    drift_threshold: float | None = Field(
+    drift_stop_above: float | None = Field(
         default=None,
         ge=0.0,
         description=(
             "Optional early termination threshold for incubating structural mutants. "
-            "If |fitness - mean| / max(eps, |mean - best|) > drift_threshold, "
-            "the HELI run for that seed is aborted early. None disables this behavior."
+            "None disables this behavior."
+        ),
+    )
+    drift_stop_below: float | None = Field(
+        default=None,
+        le=0.0,
+        description=(
+            "Optional early termination threshold for incubating structural mutants. "
+            "None disables this behavior."
         ),
     )
 
@@ -413,7 +420,9 @@ class HeliConfig(BaseModel):
         if not (0.0 <= self.max_fraction <= 1.0):
             raise ValueError("max_fraction must be between 0 and 1.")
         if self.reduce_sigma_factor < 0.0:
-            raise ValueError("reduce_sigma_factor must be ≥ 0.")
-        if self.drift_threshold is not None and self.drift_threshold < 0.0:
-            raise ValueError("drift_threshold must be ≥ 0.")
+            raise ValueError("reduce_sigma_factor must be >= 0.")
+        if self.drift_stop_above is not None and self.drift_stop_above <= 0.0:
+            raise ValueError("drift_stop_above must be > 0.0")
+        if self.drift_stop_below is not None and self.drift_stop_below >= 0.0:
+            raise ValueError("drift_stop_above must be <= 0.0")
         return self

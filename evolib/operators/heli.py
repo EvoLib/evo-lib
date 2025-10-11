@@ -32,6 +32,75 @@ from evolib.utils.heli_utils import (
 )
 
 
+def evaluate_heli_drift(
+    pop: "Pop", best: "Indiv", seed_idx: int, gen: int, n_seeds: int
+) -> float | None:
+    """
+    Compute and evaluate HELI drift for one subpopulation generation.
+
+    Drift measures how far a seed's fitness lies outside the main population's
+    survival window (using the worst individual as reference).
+
+    Positive drift: seed worse than population (hopeless)
+    Negative drift: seed better than population (already viable)
+
+    Returns
+    -------
+    drift : float | None
+        Drift value if evaluated; None if HELI config not found.
+    """
+
+    heli_cfg = getattr(pop.config.evolution, "heli", None)
+    if heli_cfg is None:
+        if pop.heli_verbosity >= 2:
+            print("[HELI] Skipped drift check: no HELI config found.")
+        return None
+
+    maximize = (
+        getattr(pop.config.selection, "fitness_maximization", False)
+        if pop.config.selection
+        else False
+    )
+
+    # Reference values from main population
+    fit_main_best = float(pop.best_fitness or 0.0)
+    fit_main_worst = float(pop.worst_fitness or 0.0)
+    fit_seed = float(best.fitness or 0.0)
+
+    # Compute direction-aware drift relative to worst fitness
+    delta_fitness = (fit_main_worst - fit_seed) * (1 if maximize else -1)
+    drift = delta_fitness / max(1e-8, abs(fit_main_worst))
+
+    # Verbose diagnostics
+    if pop.heli_verbosity >= 2:
+        print(
+            f"[HELI] Seed {seed_idx+1}/{n_seeds} | Gen {gen+1}/{pop.heli_generations} "
+            f"| FitSeed={fit_seed:.3f} | FitMainBest={fit_main_best:.3f} "
+            f"| FitMainWorst={fit_main_worst:.3f} | Drift={drift:.3f}"
+        )
+
+    stop_above = getattr(heli_cfg, "drift_stop_above", None)
+    stop_below = getattr(heli_cfg, "drift_stop_below", None)
+
+    if stop_above is not None and drift > stop_above:
+        if pop.heli_verbosity > 1:
+            print(
+                f"[HELI] Aborting incubation: drift={drift:.2f} > {stop_above:.2f} "
+                f"(FitSeed={fit_seed:.3f}, WorstMain={fit_main_worst:.3f})"
+            )
+        return float("inf")  # signal → hopeless
+
+    if stop_below is not None and drift < stop_below:
+        if pop.heli_verbosity > 1:
+            print(
+                f"[HELI] Early finish: drift={drift:.2f} < {stop_below:.2f} "
+                f"(FitSeed={fit_seed:.3f}, WorstMain={fit_main_worst:.3f})"
+            )
+        return float("-inf")  # signal → already viable
+
+    return drift
+
+
 def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
     """
     Run HELI incubation for structure-mutated offspring.
@@ -51,13 +120,16 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
       to avoid double evaluation.
     - Only the best individual from each incubation subpopulation is returned.
     - Mutation strength can be damped by `reduce_sigma_factor`.
-
-    Drift rule:
-        drift = max(0, Δfitness) / |mean_parent - best_parent|
     """
 
     from evolib.core.population import Pop
     from evolib.operators.strategy import evolve_mu_plus_lambda
+
+    heli_cfg = getattr(pop.config.evolution, "heli", None)
+    if heli_cfg is None:
+        if pop.heli_verbosity >= 1:
+            print("[HELI] Warning: run_heli() called without HELI config. Skipping.")
+        return
 
     if not offspring or not pop.heli_enabled:
         return
@@ -134,48 +206,10 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
             evolve_mu_plus_lambda(subpop)
             best = subpop.best()
 
-            # Early termination if fitness drift too large
-            heli_cfg = getattr(pop.config.evolution, "heli", None)
-
-            maximize = (
-                getattr(pop.config.selection, "fitness_maximization", False)
-                if pop.config.selection
-                else False
-            )
-
-            # Reference values from main population
-            mu = float(pop.mean_fitness or 0.0)
-            main_best = pop.best()
-            fit_main_best = float(main_best.fitness or mu if main_best else mu)
-            fit_seed = float(best.fitness or 0.0)
-
-            # Only penalize fitness *worsening* relative to main population
-            # For maximization: worse if seed < mean
-            # For minimization: worse if seed > mean
-            delta_fitness = (mu - fit_seed) if maximize else (fit_seed - mu)
-            scale = max(1e-8, abs(mu) + abs(fit_main_best))
-            drift = max(0.0, delta_fitness) / scale
-
-            if pop.heli_verbosity >= 2:
-                print(
-                    f"[HELI] Seed {seed_idx+1}/{len(seeds)} "
-                    f"| Gen {gen+1}/{pop.heli_generations} "
-                    f"| FitSeed={fit_seed:.3f} "
-                    f"| FitMainBest={fit_main_best:.3f} "
-                    f"| FitMainMean={mu:.3f} "
-                    f"| Drift={drift:.3f}"
-                )
-
-            if heli_cfg and heli_cfg.drift_threshold is not None:
-                max_drift = heli_cfg.drift_threshold
-                if drift > max_drift:
-                    if pop.heli_verbosity > 1:
-                        print(
-                            f"[HELI] Aborting incubation: "
-                            f"drift={drift:.2f} > {max_drift:.2f} "
-                            f"(FitSeed={fit_seed:.3f}, FitMainMean={mu:.3f})"
-                        )
-                    break  # abort subpopulation evolution early
+            # Drift evaluation
+            drift = evaluate_heli_drift(pop, best, seed_idx, gen, len(seeds))
+            if drift == float("inf") or drift == float("-inf"):
+                break  # abort incubation early
 
         # Restore evo_params
         para_dict = vars(best.para)
