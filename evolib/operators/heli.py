@@ -67,9 +67,15 @@ def evaluate_heli_drift(
     fit_main_worst = float(pop.worst_fitness or 0.0)
     fit_seed = float(best.fitness or 0.0)
 
-    # Compute direction-aware drift relative to worst fitness
-    delta_fitness = (fit_main_worst - fit_seed) * (1 if maximize else -1)
-    drift = delta_fitness / max(1e-8, abs(fit_main_worst))
+    # Compute drift
+    if maximize:
+        gap = fit_main_worst - fit_seed
+        span = max(1e-8, fit_main_best - fit_main_worst)
+    else:
+        gap = fit_seed - fit_main_worst
+        span = max(1e-8, fit_main_worst - fit_main_best)
+
+    drift = gap / span
 
     # Verbose diagnostics
     if pop.heli_verbosity >= 2:
