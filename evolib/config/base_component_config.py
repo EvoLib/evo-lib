@@ -362,6 +362,10 @@ class HeliConfig(BaseModel):
     reduce_sigma_factor : float
         Damping factor for mutation strength during incubation
         (<1.0 → less exploration).
+    drift_stop_above : float, optional
+        Abort incubation if drift exceeds this value (seed too poor).
+    drift_stop_below : float, optional
+        Abort incubation if drift goes below this value (seed already good).
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -380,34 +384,24 @@ class HeliConfig(BaseModel):
         0.1,
         ge=0.0,
         le=1.0,
-        description=(
-            "Maximum fraction of offspring that can enter incubation "
-            "(e.g. 0.1 → at most 10 % of offspring)."
-        ),
+        description="Maximum fraction of offspring that can enter incubation (0–1).",
     )
     reduce_sigma_factor: float = Field(
         0.5,
         ge=0.0,
-        description=(
-            "Optional damping factor for mutation strength during incubation. "
-            "Values <1.0 reduce mutation strength."
-        ),
+        description="Damping factor for mutation strength during incubation"
+        "(<1.0 reduces it).",
     )
-    drift_stop_above: float | None = Field(
+
+    drift_stop_above: Optional[float] = Field(
         default=None,
-        ge=0.0,
-        description=(
-            "Optional early termination threshold for incubating structural mutants. "
-            "None disables this behavior."
-        ),
+        gt=0.0,
+        description="Abort incubation if drift > threshold (too poor).",
     )
-    drift_stop_below: float | None = Field(
+    drift_stop_below: Optional[float] = Field(
         default=None,
         le=0.0,
-        description=(
-            "Optional early termination threshold for incubating structural mutants. "
-            "None disables this behavior."
-        ),
+        description="Abort incubation if drift < threshold (already viable).",
     )
 
     @model_validator(mode="after")
@@ -423,6 +417,6 @@ class HeliConfig(BaseModel):
             raise ValueError("reduce_sigma_factor must be >= 0.")
         if self.drift_stop_above is not None and self.drift_stop_above <= 0.0:
             raise ValueError("drift_stop_above must be > 0.0")
-        if self.drift_stop_below is not None and self.drift_stop_below >= 0.0:
-            raise ValueError("drift_stop_above must be <= 0.0")
+        if self.drift_stop_below is not None and self.drift_stop_below > 0.0:
+            raise ValueError("drift_stop_below must be <= 0.0")
         return self
