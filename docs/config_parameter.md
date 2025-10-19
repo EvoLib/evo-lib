@@ -183,7 +183,7 @@ modules:
 
 ```
 
-# EvoNet — Structural Mutation Parameters
+### EvoNet - Structural Mutation Parameters
 
 This table summarizes the structural mutation parameters available for **EvoNet modules** in EvoLib.
 They control how neurons and connections are added, removed, or initialized during evolution.
