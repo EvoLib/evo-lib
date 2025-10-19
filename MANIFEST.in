@@ -23,3 +23,10 @@ recursive-include docs/_static *
 
 # Package-specific README files
 recursive-include evolib **/README.md
+
+
+# Exclude caches everywhere
+global-exclude __pycache__/*
+global-exclude .mypy_cache/*
+prune **/__pycache__
+prune **/.mypy_cache
