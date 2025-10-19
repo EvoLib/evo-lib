@@ -174,6 +174,7 @@ class StructuralMutationConfig(BaseModel):
     max_nodes: Optional[int] = None
     max_edges: Optional[int] = None
     recurrent: Optional[Literal["none", "direct", "local", "all"]] = "none"
+    connection_init: Optional[Literal["none", "zero", "near_zero", "random"]] = "zero"
 
     # Whitelist for random activation selection
     activations_allowed: Optional[list[str]] = Field(
@@ -205,6 +206,11 @@ class StructuralMutationConfig(BaseModel):
 
         if self.recurrent not in {None, "none", "direct", "local", "all"}:
             raise ValueError(f"Invalid value for recurrent: {self.recurrent}")
+
+        if self.connection_init not in {None, "none", "zero", "near_zero", "random"}:
+            raise ValueError(
+                f"Invalid value for connection_init: " f"{self.connection_init}"
+            )
 
         return self
 
@@ -320,7 +326,7 @@ class CrossoverConfig(BaseModel):
         default=None, description="BLX-alpha parameter (typ. in [0, 1] or small >1)."
     )
     eta: Optional[float] = Field(
-        default=None, description="SBX-eta (non-negative; larger → more local)."
+        default=None, description="SBX-eta (non-negative; larger -> more local)."
     )
     blend_range: Optional[float] = Field(
         default=None, description="Range for intermediate/blend crossover."
@@ -361,7 +367,7 @@ class HeliConfig(BaseModel):
         Upper fraction of offspring eligible for incubation (0–1).
     reduce_sigma_factor : float
         Damping factor for mutation strength during incubation
-        (<1.0 → less exploration).
+        (<1.0 -> less exploration).
     drift_stop_above : float, optional
         Abort incubation if drift exceeds this value (seed too poor).
     drift_stop_below : float, optional
