@@ -63,19 +63,16 @@ def evaluate_heli_drift(
     )
 
     # Reference values from main population
-    fit_main_best = float(pop.best_fitness or 0.0)
-    fit_main_worst = float(pop.worst_fitness or 0.0)
     fit_seed = float(best.fitness or 0.0)
+    fit_main_worst = float(pop.worst_fitness or 0.0)
+    fit_main_best = float(pop.best_fitness or 0.0)
 
     # Compute drift
-    if maximize:
-        gap = fit_main_worst - fit_seed
-        span = max(1e-8, fit_main_best - fit_main_worst)
-    else:
-        gap = fit_seed - fit_main_worst
-        span = max(1e-8, fit_main_worst - fit_main_best)
-
-    drift = gap / span
+    delta_fitness = (fit_main_worst - fit_seed) * (1 if maximize else -1)
+    scale = abs(fit_main_worst) + max(
+        1e-12, 0.001 * abs(fit_main_best - fit_main_worst)
+    )
+    drift = delta_fitness / scale
 
     # Verbose diagnostics
     if pop.heli_verbosity >= 2:

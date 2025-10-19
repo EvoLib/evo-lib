@@ -66,6 +66,8 @@ def _build_architecture(
             connection_init=connection_init,
             bias=0.0,
             recurrent=recurrent_kinds if role != NeuronRole.INPUT else None,
+            connection_scope=para.connection_scope,
+            connection_density=para.connection_density,
         )
 
 

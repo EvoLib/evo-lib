@@ -77,6 +77,26 @@ class EvoNetComponentConfig(BaseModel):
     # Name of the initializer function (resolved via initializer registry)
     initializer: str = Field(..., description="Name of the initializer to use")
 
+    # Connection topology for initialization
+    connection_scope: Literal["adjacent", "crosslayer"] = Field(
+        default="adjacent",
+        description=(
+            "Defines how layers are connected during initialization. "
+            "'adjacent' connects only consecutive layers, while 'crosslayer' "
+            "connects all earlier layers to all later layers."
+        ),
+    )
+
+    connection_density: float = Field(
+        default=1.0,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Fraction of possible connections actually created during initialization. "
+            "1.0 = fully connected, <1.0 = sparse."
+        ),
+    )
+
     # Numeric bounds for values; used by initialization and mutation
     weight_bounds: Tuple[float, float] = (-1.0, 1.0)
     bias_bounds: Tuple[float, float] = (-0.5, 0.5)
@@ -143,3 +163,23 @@ class EvoNetComponentConfig(BaseModel):
                 f"Valid options are: {sorted(allowed)}"
             )
         return recurrent
+
+    @field_validator("connection_scope")
+    @classmethod
+    def validate_connection_scope(cls, scope: str) -> str:
+        """Ensure connection_scope is one of the supported options."""
+        allowed = {"adjacent", "crosslayer"}
+        if scope not in allowed:
+            raise ValueError(
+                f"Invalid connection_scope '{scope}'. "
+                f"Valid options are: {sorted(allowed)}"
+            )
+        return scope
+
+    @field_validator("connection_density")
+    @classmethod
+    def validate_connection_density(cls, density: float) -> float:
+        """Ensure connection_density is within [0, 1]."""
+        if not (0.0 <= density <= 1.0):
+            raise ValueError(f"connection_density must be in [0, 1], got {density}.")
+        return density

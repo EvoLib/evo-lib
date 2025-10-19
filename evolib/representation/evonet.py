@@ -87,6 +87,9 @@ class EvoNet(ParaBase):
         self.weight_bounds = cfg.weight_bounds or (-1.0, 1.0)
         self.bias_bounds = cfg.bias_bounds or (-0.5, 0.5)
 
+        self.connection_scope = cfg.connection_scope
+        self.connection_density = cfg.connection_density
+
         # Mutation
         if cfg.mutation is None:
             raise ValueError("Mutation config is required for EvoNet.")

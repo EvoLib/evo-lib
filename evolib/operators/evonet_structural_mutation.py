@@ -36,7 +36,12 @@ def mutate_structure(net: Nnet, cfg: StructuralMutationConfig) -> bool:
     if cfg.add_connection and np.random.rand() < cfg.add_connection:
         if cfg.max_edges is None or len(net.get_all_connections()) < cfg.max_edges:
             allowed_kinds = resolve_recurrent_kinds(cfg.recurrent)
-            add_random_connection(net, allowed_recurrent=allowed_kinds)
+            add_random_connection(
+                net,
+                allowed_recurrent=allowed_kinds,
+                connection_init=cfg.connection_init,
+            )
+            structure_mutated = True
 
     # Remove Connection (minor)
     if cfg.remove_connection and np.random.rand() < cfg.remove_connection:
@@ -45,7 +50,13 @@ def mutate_structure(net: Nnet, cfg: StructuralMutationConfig) -> bool:
     # Add Neuron (significant). Uses allowed activations if provided.
     if cfg.add_neuron and np.random.rand() < cfg.add_neuron:
         if cfg.max_nodes is None or count_non_input_neurons(net) < cfg.max_nodes:
-            add_random_neuron(net, cfg.activations_allowed)
+            add_random_neuron(
+                net,
+                cfg.activations_allowed,
+                cfg.connection_init,
+                cfg.connection_scope,
+                cfg.connection_density,
+            )
             structure_mutated = True
 
     # Remove Neuron (significant)

@@ -183,6 +183,23 @@ class StructuralMutationConfig(BaseModel):
         "neurons in hidden layers.",
     )
 
+    # Structural connection topology (for add_connection mutations)
+    connection_scope: Optional[Literal["adjacent", "crosslayer"]] = Field(
+        default="adjacent",
+        description=(
+            "Scope of possible new connections during structural mutation. "
+            "'adjacent' = connect only neighboring layers, "
+            "'crosslayer' = connect across multiple layers."
+        ),
+    )
+
+    connection_density: Optional[float] = Field(
+        default=1.0,
+        ge=0.0,
+        le=1.0,
+        description="Fraction of allowed connections to actually add (0–1).",
+    )
+
     model_config = ConfigDict(extra="forbid")
 
     @model_validator(mode="after")
@@ -210,6 +227,16 @@ class StructuralMutationConfig(BaseModel):
         if self.connection_init not in {None, "none", "zero", "near_zero", "random"}:
             raise ValueError(
                 f"Invalid value for connection_init: " f"{self.connection_init}"
+            )
+
+        if self.connection_density is not None and not (
+            0.0 <= self.connection_density <= 1.0
+        ):
+            raise ValueError("connection_density must be in [0, 1].")
+
+        if self.connection_scope not in {None, "adjacent", "crosslayer"}:
+            raise ValueError(
+                f"Invalid value for connection_scope: " f"{self.connection_scope}"
             )
 
         return self
