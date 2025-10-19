@@ -200,6 +200,21 @@ class StructuralMutationConfig(BaseModel):
         description="Fraction of allowed connections to actually add (0–1).",
     )
 
+    max_new_connections: int = Field(
+        default=1,
+        ge=1,
+        description=(
+            "Maximum number of new connections to add per structural mutation event."
+        ),
+    )
+    max_removed_connections: int = Field(
+        default=1,
+        ge=1,
+        description=(
+            "Maximum number of connections to remove per structural mutation event."
+        ),
+    )
+
     model_config = ConfigDict(extra="forbid")
 
     @model_validator(mode="after")
@@ -238,6 +253,15 @@ class StructuralMutationConfig(BaseModel):
             raise ValueError(
                 f"Invalid value for connection_scope: " f"{self.connection_scope}"
             )
+
+        if self.max_new_connections is not None and self.max_new_connections <= 0:
+            raise ValueError("max_new_connections must be > 0")
+
+        if (
+            self.max_removed_connections is not None
+            and self.max_removed_connections <= 0
+        ):
+            raise ValueError("max_new_connections must be > 0")
 
         return self
 

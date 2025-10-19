@@ -23,6 +23,7 @@
       max_fraction: 0.1
       reduce_sigma_factor: 0.5
    ```
+- Added max_new_connections and max_removed_connections to StructuralMutationConfig to allow multiple connections to be added or removed per mutation event.
 - Added `connection_scope` and `connection_density` parameters for EvoNet initialization  
   control which layers connect (`adjacent` vs. `crosslayer`) and the fraction of connections created.  
   Corresponding fields added to `StructuralMutationConfig` for fine-grained control of
@@ -38,6 +39,7 @@
   Includes `.evaluate()` for fitness calculation and `.visualize()` to render episodes as GIFs.
 
 ### Changed
+- Structural mutation now applies exactly one mutation type per call instead of multiple simultaneous operations.
 
 ### Fixed
 - Handle None fitness values safely in sort_by_fitness()

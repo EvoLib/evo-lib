@@ -32,23 +32,46 @@ def mutate_structure(net: Nnet, cfg: StructuralMutationConfig) -> bool:
 
     structure_mutated = False
 
-    # Add Connection (minor)
+    # Collect all eligible mutation types (based on probability)
+    ops = []
     if cfg.add_connection and np.random.rand() < cfg.add_connection:
+        ops.append("add_connection")
+    if cfg.remove_connection and np.random.rand() < cfg.remove_connection:
+        ops.append("remove_connection")
+    if cfg.add_neuron and np.random.rand() < cfg.add_neuron:
+        ops.append("add_neuron")
+    if cfg.remove_neuron and np.random.rand() < cfg.remove_neuron:
+        ops.append("remove_neuron")
+    if cfg.split_connection and np.random.rand() < cfg.split_connection:
+        ops.append("split_connection")
+
+    # Nothing triggered
+    if not ops:
+        return False
+
+    # Choose one mutation type to apply
+    op = np.random.choice(ops)
+
+    # Add Connection (minor)
+    if op == "add_connection":
         if cfg.max_edges is None or len(net.get_all_connections()) < cfg.max_edges:
             allowed_kinds = resolve_recurrent_kinds(cfg.recurrent)
-            add_random_connection(
-                net,
-                allowed_recurrent=allowed_kinds,
-                connection_init=cfg.connection_init,
-            )
+            for _ in range(np.random.randint(1, cfg.max_new_connections + 1)):
+                add_random_connection(
+                    net,
+                    allowed_recurrent=allowed_kinds,
+                    connection_init=cfg.connection_init,
+                )
             structure_mutated = True
 
     # Remove Connection (minor)
-    if cfg.remove_connection and np.random.rand() < cfg.remove_connection:
-        remove_random_connection(net)
+    elif op == "remove_connection":
+        for _ in range(np.random.randint(1, cfg.max_removed_connections + 1)):
+            remove_random_connection(net)
+            structure_mutated = True
 
     # Add Neuron (significant). Uses allowed activations if provided.
-    if cfg.add_neuron and np.random.rand() < cfg.add_neuron:
+    elif op == "add_neuron":
         if cfg.max_nodes is None or count_non_input_neurons(net) < cfg.max_nodes:
             add_random_neuron(
                 net,
@@ -60,12 +83,12 @@ def mutate_structure(net: Nnet, cfg: StructuralMutationConfig) -> bool:
             structure_mutated = True
 
     # Remove Neuron (significant)
-    if cfg.remove_neuron and np.random.rand() < cfg.remove_neuron:
+    elif op == "remove_neuron":
         remove_random_neuron(net)
         structure_mutated = True
 
     # Split Connection (significant)
-    if cfg.split_connection and np.random.rand() < cfg.split_connection:
+    elif op == "split_connection":
         if cfg.max_nodes is None or count_non_input_neurons(net) < cfg.max_nodes:
             split_connection(net)
             structure_mutated = True
