@@ -151,6 +151,10 @@ modules:
         max_nodes: 3
         max_edges: 20
 
+        max_new_connections: 2
+        max_removed_connections: 2
+        connection_scope: crosslayer   # adjacent | crosslayer
+
 ```
 
 ---
