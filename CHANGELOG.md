@@ -23,7 +23,12 @@
       max_fraction: 0.1
       reduce_sigma_factor: 0.5
    ```
-
+- Added `connection_scope` and `connection_density` parameters for EvoNet initialization  
+  control which layers connect (`adjacent` vs. `crosslayer`) and the fraction of connections created.  
+  Corresponding fields added to `StructuralMutationConfig` for fine-grained control of
+  structural mutations.
+- Added unconnected_evonet initializer to create EvoNet instances without any initial connections.
+- Added connection_init option to StructuralMutationConfig
 - Added new examples: LunarLander, CartPole, CliffWalking, FrozenLake
 - `GymEnv` now accepts additional `**env_kwargs` to forward environment-specific
   parameters directly to `gym.make`.
