@@ -6,6 +6,8 @@ These initializers convert a module configuration with `type: evonet` into a ful
 initialized EvoNet instance.
 """
 
+from typing import Literal
+
 import numpy as np
 from evonet.activation import random_function_name
 from evonet.enums import ConnectionType, NeuronRole
@@ -16,7 +18,11 @@ from evolib.interfaces.enum_helpers import resolve_recurrent_kinds
 from evolib.representation.evonet import EvoNet
 
 
-def _build_architecture(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
+def _build_architecture(
+    para: EvoNet,
+    cfg: EvoNetComponentConfig,
+    connection_init: Literal["random", "zero", "near_zero", "none"] = "zero",
+) -> None:
     """
     Build the EvoNet architecture (layers, neurons, activations) from config.
 
@@ -32,6 +38,9 @@ def _build_architecture(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
         activations = ["linear"] + [cfg.activation] * (len(cfg.dim) - 1)
 
     for layer_idx, num_neurons in enumerate(cfg.dim):
+
+        para.net.add_layer()
+
         if num_neurons == 0:
             continue
 
@@ -41,8 +50,6 @@ def _build_architecture(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
                 activation_name = random_function_name(cfg.activations_allowed)
             else:
                 activation_name = random_function_name()
-
-        para.net.add_layer()
 
         if layer_idx == 0:
             role = NeuronRole.INPUT
@@ -56,10 +63,33 @@ def _build_architecture(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
             count=num_neurons,
             activation=activation_name,
             role=role,
-            connection_init="zero",
+            connection_init=connection_init,
             bias=0.0,
             recurrent=recurrent_kinds if role != NeuronRole.INPUT else None,
         )
+
+
+def initializer_unconnected_evonet(config: FullConfig, module: str) -> EvoNet:
+    """
+    Initializes an EvoNet without connections.
+
+    Args:
+        config (FullConfig): Full experiment configuration
+        module (str): Module name (e.g. "brain")
+
+    Returns:
+        EvoNet: Initialized EvoNet representation
+    """
+    para = EvoNet()
+    cfg = config.modules[module].model_copy(deep=True)
+    para.apply_config(cfg)
+
+    _build_architecture(para, cfg, connection_init="none")
+
+    # Initialize biases
+    para.net.set_biases(np.zeros(para.net.num_biases))
+
+    return para
 
 
 def initializer_normal_evonet(config: FullConfig, module: str) -> EvoNet:
@@ -104,20 +134,14 @@ def initializer_random_evonet(config: FullConfig, module: str) -> EvoNet:
     cfg = config.modules[module].model_copy(deep=True)
     para.apply_config(cfg)
 
-    _build_architecture(para, cfg)
+    _build_architecture(para, cfg, connection_init="random")
 
-    # Use weight_bounds if available, else fall back to bounds
-    weight_bounds = cfg.weight_bounds or (-1.0, 1.0)
-    min_weight = weight_bounds[0]
-    max_weight = weight_bounds[1]
     bias_bounds = cfg.bias_bounds or (-0.5, 0.5)
     min_bias = bias_bounds[0]
     max_bias = bias_bounds[1]
 
-    weights = np.random.uniform(min_weight, max_weight, size=para.net.num_weights)
     biases = np.random.uniform(min_bias, max_bias, size=para.net.num_biases)
 
-    para.net.set_weights(weights)
     para.net.set_biases(biases)
     return para
 
@@ -137,9 +161,8 @@ def initializer_zero_evonet(config: FullConfig, module: str) -> EvoNet:
     cfg = config.modules[module].model_copy(deep=True)
     para.apply_config(cfg)
 
-    _build_architecture(para, cfg)
+    _build_architecture(para, cfg, connection_init="zero")
 
-    para.net.set_weights(np.zeros(para.net.num_weights))
     para.net.set_biases(np.zeros(para.net.num_biases))
     return para
 

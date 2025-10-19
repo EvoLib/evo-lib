@@ -20,6 +20,7 @@ from evolib.initializers.evonet_initializers import (
     initializer_identity_evonet,
     initializer_normal_evonet,
     initializer_random_evonet,
+    initializer_unconnected_evonet,
     initializer_zero_evonet,
 )
 
@@ -53,6 +54,7 @@ INITIALIZER_REGISTRY: dict[str, InitializerFunction] = {
     "random_evonet": initializer_random_evonet,
     "zero_evonet": initializer_zero_evonet,
     "identity_evonet": initializer_identity_evonet,
+    "unconnected_evonet": initializer_unconnected_evonet,
 }
 
 
