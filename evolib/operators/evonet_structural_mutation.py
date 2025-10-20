@@ -57,41 +57,41 @@ def mutate_structure(net: Nnet, cfg: StructuralMutationConfig) -> bool:
         if cfg.max_edges is None or len(net.get_all_connections()) < cfg.max_edges:
             allowed_kinds = resolve_recurrent_kinds(cfg.recurrent)
             for _ in range(np.random.randint(1, cfg.max_new_connections + 1)):
-                add_random_connection(
+                if add_random_connection(
                     net,
                     allowed_recurrent=allowed_kinds,
                     connection_init=cfg.connection_init,
-                )
-            structure_mutated = True
+                ):
+                    structure_mutated = True
 
     # Remove Connection (minor)
     elif op == "remove_connection":
         for _ in range(np.random.randint(1, cfg.max_removed_connections + 1)):
-            remove_random_connection(net)
-            structure_mutated = True
+            if remove_random_connection(net):
+                structure_mutated = True
 
     # Add Neuron (significant). Uses allowed activations if provided.
     elif op == "add_neuron":
         if cfg.max_nodes is None or count_non_input_neurons(net) < cfg.max_nodes:
-            add_random_neuron(
+            if add_random_neuron(
                 net,
                 cfg.activations_allowed,
                 cfg.connection_init,
                 cfg.connection_scope,
                 cfg.connection_density,
-            )
-            structure_mutated = True
+            ):
+                structure_mutated = True
 
     # Remove Neuron (significant)
     elif op == "remove_neuron":
-        remove_random_neuron(net)
-        structure_mutated = True
+        if remove_random_neuron(net):
+            structure_mutated = True
 
     # Split Connection (significant)
     elif op == "split_connection":
         if cfg.max_nodes is None or count_non_input_neurons(net) < cfg.max_nodes:
-            split_connection(net)
-            structure_mutated = True
+            if split_connection(net):
+                structure_mutated = True
 
     return structure_mutated
 
