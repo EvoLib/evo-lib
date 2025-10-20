@@ -43,6 +43,7 @@
 
 ### Fixed
 - Handle None fitness values safely in sort_by_fitness()
+- Fixed logic for structure_mutated flag in structural mutation
 
 
 ## EvoLib 0.2.0b2 (2025-10-03)
