@@ -69,7 +69,6 @@ def replace_mu_lambda(
     replace_truncation(pop, offspring, fitness_maximization)
 
     for indiv in pop.indivs:
-        indiv.parent_idx = None
         indiv.origin = Origin.PARENT
 
 

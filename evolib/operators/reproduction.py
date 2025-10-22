@@ -5,7 +5,9 @@ from typing import Any, List
 import numpy as np
 
 
-def generate_cloned_offspring(parents: List[Any], lambda_: int) -> List[Any]:
+def generate_cloned_offspring(
+    parents: List[Any], lambda_: int, *, current_gen: int = 0
+) -> List[Any]:
     """
     Creates ``lambda_`` cloned offspring by randomly selecting parents with replacement.
 
@@ -14,9 +16,15 @@ def generate_cloned_offspring(parents: List[Any], lambda_: int) -> List[Any]:
     strategies such as (mu, ``lambda``), (mu + ``lambda``), or steady-state evolution to
     initialize raw offspring before variation operators are applied.
 
+    Lineage tracking:
+        - Sets parent_id to parent's ID
+        - Sets birth_gen to current_gen
+        - Resets structural and HELI flags
+
     Args:
         parents (List[Any]): List of parent individuals to clone from.
         ``lambda_`` (int): Number of offspring to create.
+        current_gen: current generation index (for birth_gen annotation).
 
     Returns:
         List[Any]: List of cloned offspring individuals.
@@ -41,7 +49,13 @@ def generate_cloned_offspring(parents: List[Any], lambda_: int) -> List[Any]:
             reset_evaluation=True,
             reset_origin=True,
         )
-        child.parent_idx = idx
+
+        child.parent_id = parent.id
+        child.birth_gen = current_gen
+        child.is_structural_mutant = False
+        child.heli_seed = False
+        child.heli_reintegrated = False
+
         offspring.append(child)
 
     return offspring

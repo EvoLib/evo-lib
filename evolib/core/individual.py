@@ -54,15 +54,37 @@ class Indiv:
     #: origin (str): Origin of the individual (e.g. Origin.PARENT, Origin.OFFSPRING).
     origin: Origin
 
-    #: parent_idx (Optional[int]): Index of the parent individual.
-    parent_idx: Optional[int]
-
     #: is_elite (bool): Flag to explicitly mark elites for logging/analysis.
     is_elite: bool
 
     #: extra_metrics (dict[str, float]): Optional extra per-individual
     #: metrics for logging.
     extra_metrics: dict[str, float]
+
+    #: parent_id (Optional[str]): Unique identifier of the parent individual.
+    #: Used for lineage and survival tracking.
+    parent_id: Optional[str]
+
+    #: birth_gen (int): Generation in which this individual was created.
+    #: Set by the reproduction operator. Defaults to 0 for the initial population.
+    birth_gen: int
+
+    #: death_gen (Optional[int]): Generation in which this individual was removed
+    #: from the population. None if still alive. Can be assigned during analysis.
+    death_gen: Optional[int]
+
+    #: is_structural_mutant (bool): Indicates whether this individual resulted
+    #: from a structural mutation (e.g., add/remove neuron, connection, etc.).
+    #: Used for distinguishing structural from weight-only mutations.
+    is_structural_mutant: bool
+
+    #: heli_seed (bool): True if this individual was created as a HELI seed
+    #: during micro-evolution incubation.
+    heli_seed: bool
+
+    #: heli_reintegrated (bool): True if this individual was reintegrated into
+    #: the main population after a HELI subpopulation run.
+    heli_reintegrated: bool
 
     __slots__ = (
         "id",
@@ -72,9 +94,15 @@ class Indiv:
         "age",
         "max_age",
         "origin",
-        "parent_idx",
         "extra_metrics",
         "is_elite",
+        # --- Lineage tracking extensions ---
+        "birth_gen",
+        "parent_id",
+        "death_gen",
+        "heli_seed",
+        "heli_reintegrated",
+        "is_structural_mutant",
     )
 
     def __init__(self, para: Any = None):
@@ -85,9 +113,16 @@ class Indiv:
         self.age = 0
         self.max_age = 0
         self.origin = Origin.PARENT
-        self.parent_idx = None
         self.is_elite = False
         self.extra_metrics = {}
+
+        # --- Lineage tracking extensions ---
+        self.birth_gen = 0
+        self.death_gen = None
+        self.parent_id = None
+        self.heli_seed = False
+        self.heli_reintegrated = False
+        self.is_structural_mutant = False
 
     def __lt__(self, other: "Indiv") -> bool:
         if self.fitness is None or other.fitness is None:
@@ -105,6 +140,10 @@ class Indiv:
 
         if self.para is not None and hasattr(self.para, "mutate"):
             self.para.mutate()
+
+        # Synchronize structural change flag
+        struct_mutated = getattr(self.para, "has_structural_change", False)
+        self.is_structural_mutant = bool(struct_mutated)
 
     def crossover(self) -> None:
         """
@@ -134,7 +173,14 @@ class Indiv:
         print(f"  Age: {self.age}")
         print(f"  Max Age: {self.max_age}")
         print(f"  Origin: {self.origin}")
-        print(f"  Parent Index: {self.parent_idx}")
+
+        print(f"   ID: {self.id}")
+        print(f"   Parent-ID: {self.parent_id}")
+        print(f"   birth_gen: {self.birth_gen}")
+        print(f"   is_elite: {self.is_elite}")
+        print(f"   is_structural_mutant: {self.is_structural_mutant}")
+        print(f"   heli_seed: {self.heli_seed}")
+        print(f"   heli_reintegrated: {self.heli_reintegrated}")
 
         if self.para is None:
             print("<no parameter>")
@@ -185,7 +231,6 @@ class Indiv:
             reset_age (bool): If True, set age to 0 in the copy.
             reset_evaluation (bool): If True, set is_evaluated = False in the copy.
             reset_origin (bool): If True, set origin = Origin.OFFSPRING
-                                 and parent_idx = None in the copy.
 
         Returns:
             Indiv: A (possibly reset) copy of this individual.
@@ -204,6 +249,13 @@ class Indiv:
             from evolib.interfaces.enums import Origin
 
             new_indiv.origin = Origin.OFFSPRING
-            new_indiv.parent_idx = None
+
+        # Lineage reset
+        new_indiv.parent_id = self.id
+        new_indiv.birth_gen = 0  # assigned later by population
+        new_indiv.death_gen = None
+        new_indiv.is_structural_mutant = False
+        new_indiv.heli_seed = False
+        new_indiv.heli_reintegrated = False
 
         return new_indiv

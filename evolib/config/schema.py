@@ -132,6 +132,12 @@ class ParallelConfig(BaseModel):
     )
 
 
+class LoggingConfig(BaseModel):
+    # Enable detailed per-individual lineage tracking (default: False)
+    model_config = ConfigDict(extra="forbid")
+    lineage: bool = False  # default off
+
+
 class FullConfig(BaseModel):
     """
     Main configuration model for an evolutionary run.
@@ -190,6 +196,11 @@ class FullConfig(BaseModel):
     # Optional parallelization backend
     parallel: Optional[ParallelConfig] = Field(
         default=None, description="Optional parallelization backend configuration."
+    )
+
+    # Optional runtime logging options
+    logging: Optional[LoggingConfig] = Field(
+        default=None, description="Optional runtime logging options."
     )
 
     @model_validator(mode="before")

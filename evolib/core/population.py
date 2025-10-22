@@ -177,6 +177,13 @@ class Pop:
         self.diversity = 0.0
         self.diversity_ema = 0.0
 
+        # Lineage Logging
+        self.lineage_logger = None
+        if cfg.logging is not None and cfg.logging.lineage is not False:
+            from evolib.utils.lineage_logger import LineageLogger
+
+            self.lineage_logger = LineageLogger(path="lineage_log.csv")
+
         # Autoinitialize Population
         if initialize is True:
             self.initialize_population()
@@ -630,6 +637,10 @@ class Pop:
             row["status_str"] = get_status()
 
         self.history_logger.log(row)
+
+        # Optional micro-level logging
+        if hasattr(self, "lineage_logger") and self.lineage_logger is not None:
+            self.lineage_logger.log_generation(self.indivs, self.generation_num)
 
     def fitness_diversity(self, method: DiversityMethod = DiversityMethod.IQR) -> float:
         """
