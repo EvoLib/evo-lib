@@ -69,9 +69,9 @@ class Indiv:
     #: Set by the reproduction operator. Defaults to 0 for the initial population.
     birth_gen: int
 
-    #: death_gen (Optional[int]): Generation in which this individual was removed
+    #: exit_gen (Optional[int]): Generation in which this individual was removed
     #: from the population. None if still alive. Can be assigned during analysis.
-    death_gen: Optional[int]
+    exit_gen: Optional[int]
 
     #: is_structural_mutant (bool): Indicates whether this individual resulted
     #: from a structural mutation (e.g., add/remove neuron, connection, etc.).
@@ -99,7 +99,7 @@ class Indiv:
         # --- Lineage tracking extensions ---
         "birth_gen",
         "parent_id",
-        "death_gen",
+        "exit_gen",
         "heli_seed",
         "heli_reintegrated",
         "is_structural_mutant",
@@ -118,7 +118,7 @@ class Indiv:
 
         # --- Lineage tracking extensions ---
         self.birth_gen = 0
-        self.death_gen = None
+        self.exit_gen = None
         self.parent_id = None
         self.heli_seed = False
         self.heli_reintegrated = False
@@ -253,7 +253,7 @@ class Indiv:
         # Lineage reset
         new_indiv.parent_id = self.id
         new_indiv.birth_gen = 0  # assigned later by population
-        new_indiv.death_gen = None
+        new_indiv.exit_gen = None
         new_indiv.is_structural_mutant = False
         new_indiv.heli_seed = False
         new_indiv.heli_reintegrated = False

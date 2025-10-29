@@ -75,6 +75,7 @@ class LineageLogger:
                         getattr(indiv, "id", ""),
                         getattr(indiv, "parent_id", ""),
                         getattr(indiv, "birth_gen", 0),
+                        getattr(indiv, "exit_gen", 0),
                         int(getattr(indiv, "is_elite", False)),
                         getattr(indiv, "fitness", None),
                         getattr(indiv, "age", 0),

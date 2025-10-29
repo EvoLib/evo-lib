@@ -553,6 +553,10 @@ class Pop:
             if indiv.age < self.max_indiv_age
         ]
 
+        # Identify removed individuals
+        removed = [indiv for indiv in self.indivs if indiv not in survivors]
+        removed_count = len(removed)
+
         if not survivors:
             survivors = [self.best()]
             print(
@@ -560,8 +564,11 @@ class Pop:
                 "Keeping best individual to prevent population collapse."
             )
 
-        removed_count = len(self.indivs) - len(survivors)
         if removed_count > 0:
+            # Mark removed individuals with their exit generation
+            for indiv in removed:
+                indiv.exit_gen = self.generation_num
+
             self.indivs = survivors
 
         return removed_count

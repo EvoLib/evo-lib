@@ -13,6 +13,15 @@ from evolib.interfaces.enums import Origin
 from evolib.utils.fitness import sort_by_fitness
 
 
+def _mark_removed_indivs(
+    all_candidates: list[Indiv], survivors: list[Indiv], generation: int
+) -> None:
+    """Mark all individuals not surviving selection with their exit generation."""
+    for indiv in all_candidates:
+        if indiv not in survivors:
+            indiv.exit_gen = generation
+
+
 def replace_truncation(
     pop: "Pop", offspring: List[Indiv], fitness_maximization: bool = False
 ) -> None:
@@ -48,10 +57,14 @@ def replace_truncation(
     elites = pop.get_elites()
 
     # Select remaining individuals
-    remaining = sorted_offspring[: pop.parent_pool_size - len(elites)]
+    survivors = sorted_offspring[: pop.parent_pool_size - len(elites)]
+
+    # Mark old parents and non-selected offspring as removed
+    all_candidates = pop.indivs + offspring
+    _mark_removed_indivs(all_candidates, survivors, pop.generation_num)
 
     # Combine elites + top offspring
-    pop.indivs = elites + remaining
+    pop.indivs = elites + survivors
 
 
 def replace_mu_lambda(
@@ -123,6 +136,10 @@ def replace_generational(
     # Sort by fitness (best first)
     sorted_survivors = sort_by_fitness(survivors, maximize=fitness_maximization)
 
+    # Mark old parents and non-selected offspring as removed
+    all_candidates = pop.indivs + offspring
+    _mark_removed_indivs(all_candidates, survivors, pop.generation_num)
+
     # Truncate to desired population size
     pop.indivs = sorted_survivors[: pop.parent_pool_size]
 
@@ -193,6 +210,10 @@ def replace_steady_state(
         elites + sorted_non_elites[:-num_replace] + sorted_offspring[:num_replace]
     )
 
+    # Mark old parents and non-selected offspring as removed
+    all_candidates = pop.indivs + offspring
+    _mark_removed_indivs(all_candidates, survivors, pop.generation_num)
+
     # Final sort for consistency
     survivors = sort_by_fitness(survivors, maximize=fitness_maximization)
     pop.indivs = survivors
@@ -240,8 +261,14 @@ def replace_random(pop: "Pop", offspring: List[Indiv]) -> None:
     for i, idx in enumerate(replace_indices):
         non_elites[idx] = offspring[i]
 
+    survivors = elites + non_elites
+
+    # Mark old parents and non-selected offspring as removed
+    all_candidates = pop.indivs + offspring
+    _mark_removed_indivs(all_candidates, survivors, pop.generation_num)
+
     # Combine and sort final population
-    pop.indivs = elites + non_elites
+    pop.indivs = survivors
 
 
 def replace_weighted_stochastic(
@@ -308,7 +335,12 @@ def replace_weighted_stochastic(
     for i, idx in enumerate(replace_indices):
         non_elites[idx] = offspring[i]
 
+    survivors = elites + non_elites
+
+    # Mark old parents and non-selected offspring as removed
+    all_candidates = pop.indivs + offspring
+    _mark_removed_indivs(all_candidates, survivors, pop.generation_num)
+
     # Recombine and sort
-    combined = elites + non_elites
-    combined = sort_by_fitness(combined, maximize=fitness_maximization)
-    pop.indivs = combined
+    survivors = sort_by_fitness(survivors, maximize=fitness_maximization)
+    pop.indivs = survivors
