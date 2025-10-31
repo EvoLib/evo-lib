@@ -23,64 +23,106 @@ def _mark_removed_indivs(
 
 
 def replace_truncation(
+    pop: "Pop", pool: List[Indiv], fitness_maximization: bool = False
+) -> None:
+    """
+    Generic truncation replacement selecting the top μ individuals from a given pool.
+    Pass a pool that already contains what should compete (e.g., parents+offspring for
+    μ+λ, or offspring only for μ,λ).
+
+    Args:
+        pop: Population handle (μ taken from pop.parent_pool_size).
+        pool: Candidate list to pick survivors from.
+        fitness_maximization: If True, higher fitness is better.
+    """
+    if not pool:
+        raise ValueError("Pool must not be empty.")
+    if pop.parent_pool_size <= 0:
+        raise ValueError("Parent pool size (mu) must be positive.")
+    if len(pool) < pop.parent_pool_size:
+        raise ValueError("Pool smaller than parent_pool_size; cannot truncate cleanly.")
+
+    sorted_pool = sort_by_fitness(pool, maximize=fitness_maximization)
+    survivors = sorted_pool[: pop.parent_pool_size]
+
+    # Deduplicate and mark removed
+    all_candidates = list({x.id: x for x in (pop.indivs + pool)}.values())
+    _mark_removed_indivs(all_candidates, survivors, pop.generation_num)
+
+    pop.indivs = survivors
+    for indiv in pop.indivs:
+        indiv.origin = Origin.PARENT
+
+
+def replace_mu_plus_lambda(
     pop: "Pop", offspring: List[Indiv], fitness_maximization: bool = False
 ) -> None:
     """
-    Replacement via truncation: select the top μ individuals from a given list
-    (e.g., offspring or parents + offspring) based on fitness.
+    (μ + λ) replacement: parents and offspring compete together; keep best μ.
 
-    This strategy performs a pure replacement without elitism, aging,
-    or additional constraints.
+    Precondition:
+        - Fitness of *both* parents and offspring has been evaluated
+          (same environmental context).
 
-    Suitable for:
-    - (μ, λ) strategies
-    - (μ + λ) strategies without elitism
-    - educational purposes (clean, minimal logic)
-
-    See also: `replace_generational` for elitism and aging support.
+    Effect:
+        - No explicit 'elitism' branch needed; if a parent is truly elite,
+          it simply ranks among the top μ and survives.
 
     Args:
-        pop (Pop): The population object whose individuals will be replaced.
-        offspring (List[Indiv]): A list of newly generated offspring individuals.
-        fitness_maximization: If True, higher fitness is better.
+        pop: Population object (parents in pop.indivs).
+        offspring: Newly generated offspring.
+        fitness_maximization: Whether fitness is to be maximized.
+    """
+    if not offspring:
+        raise ValueError("Offspring list must not be empty.")
+
+    combined = pop.indivs + offspring
+    replace_truncation(pop, combined, fitness_maximization)
+
+
+def replace_mu_comma_lambda(
+    pop: "Pop",
+    offspring: list[Indiv],
+    fitness_maximization: bool = False,
+) -> None:
+    """
+    (mu, lambda) replacement: ONLY offspring compete; keep best mu offspring, top
+    `num_elites` parents are preserved. Parents do not compete and cannot survive solely
+    due to elitism.
+
+    Precondition:
+        - Fitness of offspring has been evaluated.
+        - Parents may have fitness values, but they are not considered here.
+
+    Args:
+        pop: Population object (current parents are in pop.indivs).
+        offspring: Newly generated and evaluated offspring.
+        fitness_maximization: Whether fitness is to be maximized.
     """
 
     if not offspring:
         raise ValueError("Offspring list must not be empty.")
-    if len(offspring) < pop.parent_pool_size:
-        raise ValueError("Not enough offspring to fill the parent pool.")
+    if pop.num_elites < 0:
+        raise ValueError("num_elites cannot be negative.")
+    if pop.num_elites > pop.parent_pool_size:
+        raise ValueError("num_elites cannot exceed μ.")
 
-    # Sort offspring by fitness in ascending order (assuming lower is better)
+    # Keep elites from parents
+    elites = pop.get_elites() if pop.num_elites > 0 else []
+
+    # Mark all non-elites as removed (parents that die this gen)
+    old_non_elites = [ind for ind in pop.indivs if ind not in elites]
+    _mark_removed_indivs(old_non_elites, [], pop.generation_num)
+
+    # Select best (mu - num_elites) offspring
     sorted_offspring = sort_by_fitness(offspring, maximize=fitness_maximization)
+    survivors = elites + sorted_offspring[: pop.parent_pool_size - len(elites)]
 
-    # Keep current elites from previous generation
-    elites = pop.get_elites()
+    # Mark any remaining offspring that were not chosen as removed
+    _mark_removed_indivs(offspring, survivors, pop.generation_num)
 
-    # Select remaining individuals
-    survivors = sorted_offspring[: pop.parent_pool_size - len(elites)]
-
-    # Mark old parents and non-selected offspring as removed
-    all_candidates = pop.indivs + offspring
-    _mark_removed_indivs(all_candidates, survivors, pop.generation_num)
-
-    # Combine elites + top offspring
-    pop.indivs = elites + survivors
-
-
-def replace_mu_lambda(
-    pop: "Pop", offspring: List[Indiv], fitness_maximization: bool = False
-) -> None:
-    """
-    Replaces the population with new offspring using the mu+lambda strategy, followed by
-    resetting the parent index and origin of the individuals.
-
-    Args:
-        pop (Pop): The population object whose individuals will be replaced.
-        offspring (List[Indiv]): A list of newly generated offspring individuals.
-    """
-
-    replace_truncation(pop, offspring, fitness_maximization)
-
+    # Replace population
+    pop.indivs = survivors
     for indiv in pop.indivs:
         indiv.origin = Origin.PARENT
 

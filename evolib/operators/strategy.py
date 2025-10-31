@@ -29,7 +29,11 @@ if TYPE_CHECKING:
 from evolib.operators.crossover import crossover_offspring
 from evolib.operators.heli import run_heli
 from evolib.operators.mutation import mutate_offspring
-from evolib.operators.replacement import replace_mu_lambda, replace_steady_state
+from evolib.operators.replacement import (
+    replace_mu_comma_lambda,
+    replace_mu_plus_lambda,
+    replace_steady_state,
+)
 from evolib.operators.reproduction import generate_cloned_offspring
 
 
@@ -38,10 +42,7 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
     selected from parents + offspring."""
 
     if pop.fitness_function is None:
-        raise ValueError(
-            "No fitness function set in population."
-            "Use pop.set_functions() before evolving."
-        )
+        raise ValueError("No fitness function set in population.")
     if not pop.indivs:
         raise ValueError("Population is empty.")
 
@@ -72,7 +73,7 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
     pop.evaluate_indivs(combined)
 
     # Select the best individuals
-    replace_mu_lambda(pop, combined)
+    replace_mu_plus_lambda(pop, offspring)
 
     # Remove individuals that exceed max_age
     pop.remove_old_indivs()
@@ -81,8 +82,12 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
 
 
 def evolve_mu_comma_lambda(pop: "Pop") -> None:
-    """Parents generate offspring, but only offspring compete for the next generation
-    (no elitism)."""
+    """
+    Only offspring compete for survival; parents are replaced.
+
+    If `num_elites > 0`, top elite parents are preserved and their fitness is re-
+    evaluated before offspring generation.
+    """
 
     if pop.fitness_function is None:
         raise ValueError(
@@ -95,7 +100,9 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
     # Age all current individuals
     pop.age_indivs()
 
-    pop.evaluate_fitness()
+    # Evaluate current parents only if elites will be preserved
+    if pop.num_elites > 0:
+        pop.evaluate_fitness()
 
     # CREATE OFFSPRING
     offspring = generate_cloned_offspring(
@@ -119,7 +126,7 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
     pop.evaluate_indivs(offspring)
 
     # REPLACE PARENTS
-    replace_mu_lambda(pop, offspring)
+    replace_mu_comma_lambda(pop, offspring)
 
     pop.update_statistics()
 
