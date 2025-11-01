@@ -163,6 +163,7 @@ class EvoNet(ParaBase):
         if self.structural_cfg is not None:
             struct_mutated = mutate_structure(self.net, self.structural_cfg)
             self._has_structural_change = bool(struct_mutated)
+            self.is_structural_mutant = bool(struct_mutated)
 
     def crossover_with(self, partner: ParaBase) -> None:
         """

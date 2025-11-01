@@ -225,6 +225,10 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
         # 4: Reintegration
         new_candidates.append(best)
 
+    # Mark seeds as reintegrated
+    for candidate in new_candidates:
+        candidate.heli_reintegrated = True
+
     # 5: Reattach improved candidates to the main offspring
     offspring.extend(new_candidates)
 
