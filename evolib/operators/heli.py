@@ -192,6 +192,7 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
         subpop.offspring_pool_size = pop.heli_offspring_per_seed
         subpop.max_generations = pop.heli_generations
         subpop.heli_enabled = False
+        subpop.lineage_logger = None
 
         heli_backup = {}
 
