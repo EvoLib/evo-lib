@@ -54,6 +54,10 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
         pop.indivs, pop.offspring_pool_size, current_gen=pop.generation_num
     )
 
+    # Lineage Logging
+    if pop.lineage_logger is not None:
+        pop.lineage_logger.log_population(offspring, pop.generation_num, event="born")
+
     # Update mutation/crossover parameters
     pop.update_parameters(offspring)
 
@@ -77,6 +81,12 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
 
     # Remove individuals that exceed max_age
     pop.remove_old_indivs()
+
+    # Lineage Logging
+    if pop.lineage_logger is not None:
+        pop.lineage_logger.log_population(
+            pop.indivs, pop.generation_num, event="survived"
+        )
 
     pop.update_statistics()
 
@@ -109,6 +119,10 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
         pop.indivs, pop.offspring_pool_size, current_gen=pop.generation_num
     )
 
+    # Lineage Logging
+    if pop.lineage_logger is not None:
+        pop.lineage_logger.log_population(offspring, pop.generation_num, event="born")
+
     # Update mutation/crossover parameters
     pop.update_parameters(offspring)
 
@@ -127,6 +141,12 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
 
     # REPLACE PARENTS
     replace_mu_comma_lambda(pop, offspring)
+
+    # Lineage Logging
+    if pop.lineage_logger is not None:
+        pop.lineage_logger.log_population(
+            pop.indivs, pop.generation_num, event="survived"
+        )
 
     pop.update_statistics()
 
@@ -185,6 +205,10 @@ def evolve_steady_state(pop: "Pop") -> None:
         parents, pop.lambda_, current_gen=pop.generation_num
     )
 
+    # Lineage Logging
+    if pop.lineage_logger is not None:
+        pop.lineage_logger.log_population(offspring, pop.generation_num, event="born")
+
     # Update mutation/crossover parameters
     pop.update_parameters(offspring)
 
@@ -206,6 +230,12 @@ def evolve_steady_state(pop: "Pop") -> None:
 
     # Remove individuals that exceed max_age
     pop.remove_old_indivs()
+
+    # Lineage Logging
+    if pop.lineage_logger is not None:
+        pop.lineage_logger.log_population(
+            pop.indivs, pop.generation_num, event="survived"
+        )
 
     # Update population statistics (including aging, diversity, fitness metrics)
     pop.update_statistics()
@@ -254,6 +284,10 @@ def evolve_flexible(pop: "Pop") -> None:
         parents, pop.lambda_, current_gen=pop.generation_num
     )
 
+    # Lineage Logging
+    if pop.lineage_logger is not None:
+        pop.lineage_logger.log_population(offspring, pop.generation_num, event="born")
+
     # Mutation & Crossover Parameters
     pop.update_parameters(offspring)
 
@@ -271,6 +305,12 @@ def evolve_flexible(pop: "Pop") -> None:
 
     # Remove individuals that exceed max_age
     pop.remove_old_indivs()
+
+    # Lineage Logging
+    if pop.lineage_logger is not None:
+        pop.lineage_logger.log_population(
+            pop.indivs, pop.generation_num, event="survived"
+        )
 
     # Update statistics
     pop.update_statistics()

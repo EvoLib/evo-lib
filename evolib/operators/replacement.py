@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 import random
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 import numpy as np
 
@@ -11,15 +11,27 @@ if TYPE_CHECKING:
 from evolib.core.population import Indiv
 from evolib.interfaces.enums import Origin
 from evolib.utils.fitness import sort_by_fitness
+from evolib.utils.lineage_logger import LineageLogger
 
 
 def _mark_removed_indivs(
-    all_candidates: list[Indiv], survivors: list[Indiv], generation: int
+    all_candidates: list["Indiv"],
+    survivors: list["Indiv"],
+    generation: int,
+    lineage_logger: Optional["LineageLogger"] = None,
 ) -> None:
-    """Mark all individuals not surviving selection with their exit generation."""
+    """Mark individuals removed from population and optionally log them."""
+    removed = []
     for indiv in all_candidates:
         if indiv not in survivors:
             indiv.exit_gen = generation
+            removed.append(indiv)
+
+    # Log removal events immediately
+    if lineage_logger is not None and removed:
+        lineage_logger.log_population(
+            removed, generation, event="died", note="removed in replacement"
+        )
 
 
 def replace_truncation(
@@ -47,7 +59,9 @@ def replace_truncation(
 
     # Deduplicate and mark removed
     all_candidates = list({x.id: x for x in (pop.indivs + pool)}.values())
-    _mark_removed_indivs(all_candidates, survivors, pop.generation_num)
+    _mark_removed_indivs(
+        all_candidates, survivors, pop.generation_num, pop.lineage_logger
+    )
 
     pop.indivs = survivors
     for indiv in pop.indivs:
@@ -112,14 +126,14 @@ def replace_mu_comma_lambda(
 
     # Mark all non-elites as removed (parents that die this gen)
     old_non_elites = [ind for ind in pop.indivs if ind not in elites]
-    _mark_removed_indivs(old_non_elites, [], pop.generation_num)
+    _mark_removed_indivs(old_non_elites, [], pop.generation_num, pop.lineage_logger)
 
     # Select best (mu - num_elites) offspring
     sorted_offspring = sort_by_fitness(offspring, maximize=fitness_maximization)
     survivors = elites + sorted_offspring[: pop.parent_pool_size - len(elites)]
 
     # Mark any remaining offspring that were not chosen as removed
-    _mark_removed_indivs(offspring, survivors, pop.generation_num)
+    _mark_removed_indivs(offspring, survivors, pop.generation_num, pop.lineage_logger)
 
     # Replace population
     pop.indivs = survivors
@@ -180,7 +194,9 @@ def replace_generational(
 
     # Mark old parents and non-selected offspring as removed
     all_candidates = pop.indivs + offspring
-    _mark_removed_indivs(all_candidates, survivors, pop.generation_num)
+    _mark_removed_indivs(
+        all_candidates, survivors, pop.generation_num, pop.lineage_logger
+    )
 
     # Truncate to desired population size
     pop.indivs = sorted_survivors[: pop.parent_pool_size]
@@ -254,7 +270,9 @@ def replace_steady_state(
 
     # Mark old parents and non-selected offspring as removed
     all_candidates = pop.indivs + offspring
-    _mark_removed_indivs(all_candidates, survivors, pop.generation_num)
+    _mark_removed_indivs(
+        all_candidates, survivors, pop.generation_num, pop.lineage_logger
+    )
 
     # Final sort for consistency
     survivors = sort_by_fitness(survivors, maximize=fitness_maximization)
@@ -307,7 +325,9 @@ def replace_random(pop: "Pop", offspring: List[Indiv]) -> None:
 
     # Mark old parents and non-selected offspring as removed
     all_candidates = pop.indivs + offspring
-    _mark_removed_indivs(all_candidates, survivors, pop.generation_num)
+    _mark_removed_indivs(
+        all_candidates, survivors, pop.generation_num, pop.lineage_logger
+    )
 
     # Combine and sort final population
     pop.indivs = survivors
@@ -381,7 +401,9 @@ def replace_weighted_stochastic(
 
     # Mark old parents and non-selected offspring as removed
     all_candidates = pop.indivs + offspring
-    _mark_removed_indivs(all_candidates, survivors, pop.generation_num)
+    _mark_removed_indivs(
+        all_candidates, survivors, pop.generation_num, pop.lineage_logger
+    )
 
     # Recombine and sort
     survivors = sort_by_fitness(survivors, maximize=fitness_maximization)

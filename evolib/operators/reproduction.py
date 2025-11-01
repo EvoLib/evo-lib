@@ -55,6 +55,7 @@ def generate_cloned_offspring(
         child.is_structural_mutant = False
         child.heli_seed = False
         child.heli_reintegrated = False
+        child.is_elite = False
 
         offspring.append(child)
 

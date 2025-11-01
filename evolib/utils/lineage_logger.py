@@ -1,86 +1,103 @@
 # SPDX-License-Identifier: MIT
 """
-lineage_logger.py — Optional micro-level lineage logging.
+Event-based lineage logging.
 
-This logger writes one record per individual and generation, tracking ancestry,
-structural events, and HELI involvement.
+This logger records evolutionary events, it is designed for detailed analysis of
+individual lifecycles, including birth, survival, death, structural mutations and HELI-
+related transitions.
+
+The output CSV file can be used directly with Pandas, Plotly, or other visual analytics
+tools to reconstruct full lineage graphs.
 """
 
 from __future__ import annotations
 
 import csv
-import os
+from pathlib import Path
+from typing import TYPE_CHECKING
 
-from evolib.core.individual import Indiv
+if TYPE_CHECKING:
+    from evolib.population import Indiv
 
 
 class LineageLogger:
-    """
-    Lightweight CSV-based lineage logger.
+    """Event-based lineage logger for evolutionary analysis."""
 
-    It records per-individual information per generation,
-    enabling survival-time and innovation-retention analyses.
+    def __init__(self, filename: str | Path):
+        self.filename = Path(filename)
+        self._init_csv()
 
-    Parameters
-    ----------
-    path : str
-        Target file path for CSV output.
-    """
+    def _init_csv(self) -> None:
+        """Initialize the CSV file with header columns."""
+        with self.filename.open("w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(
+                [
+                    "generation",
+                    "indiv_id",
+                    "parent_id",
+                    "event",
+                    "birth_gen",
+                    "exit_gen",
+                    "is_elite",
+                    "is_structural_mutant",
+                    "heli_seed",
+                    "heli_reintegrated",
+                    "notes",
+                ]
+            )
 
-    def __init__(self, path: str = "lineage_log.csv") -> None:
-        self.path = path
-        self._initialized = False
+    def log_event(
+        self,
+        indiv: Indiv,
+        generation: int,
+        event: str,
+        note: str = "",
+    ) -> None:
+        """Log a single evolutionary event."""
+        with self.filename.open("a", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(
+                [
+                    generation,
+                    getattr(indiv, "id", None),
+                    getattr(indiv, "parent_id", None),
+                    event,
+                    getattr(indiv, "birth_gen", None),
+                    getattr(indiv, "exit_gen", None),
+                    int(getattr(indiv, "is_elite", False)),
+                    int(getattr(indiv, "is_structural_mutant", False)),
+                    int(getattr(indiv, "heli_seed", False)),
+                    int(getattr(indiv, "heli_reintegrated", False)),
+                    note,
+                ]
+            )
 
-    def _ensure_header(self) -> None:
-        """Create file and write header if not present."""
-        if not os.path.exists(self.path):
-            with open(self.path, "w", newline="") as f:
-                writer = csv.writer(f)
-                writer.writerow(
-                    [
-                        "generation",
-                        "indiv_id",
-                        "parent_id",
-                        "birth_gen",
-                        "is_elite",
-                        "fitness",
-                        "age",
-                        "is_structural_mutant",
-                        "heli_seed",
-                        "heli_reintegrated",
-                    ]
-                )
-            self._initialized = True
-
-    def log_generation(self, indivs: list[Indiv], generation: int) -> None:
-        """
-        Append lineage info for a generation.
-
-        Parameters
-        ----------
-        indivs : list[Indiv]
-            List of individuals in the current population.
-        generation : int
-            Current generation index.
-        """
-        if not self._initialized:
-            self._ensure_header()
-
-        with open(self.path, "a", newline="") as f:
+    def log_population(
+        self,
+        indivs: list[Indiv],
+        generation: int,
+        event: str,
+        note: str = "",
+    ) -> None:
+        """Log the same event for multiple individuals."""
+        if not indivs:
+            return
+        with self.filename.open("a", newline="") as f:
             writer = csv.writer(f)
             for indiv in indivs:
                 writer.writerow(
                     [
                         generation,
-                        getattr(indiv, "id", ""),
-                        getattr(indiv, "parent_id", ""),
-                        getattr(indiv, "birth_gen", 0),
-                        getattr(indiv, "exit_gen", 0),
+                        getattr(indiv, "id", None),
+                        getattr(indiv, "parent_id", None),
+                        event,
+                        getattr(indiv, "birth_gen", None),
+                        getattr(indiv, "exit_gen", None),
                         int(getattr(indiv, "is_elite", False)),
-                        getattr(indiv, "fitness", None),
-                        getattr(indiv, "age", 0),
                         int(getattr(indiv, "is_structural_mutant", False)),
                         int(getattr(indiv, "heli_seed", False)),
                         int(getattr(indiv, "heli_reintegrated", False)),
+                        note,
                     ]
                 )
