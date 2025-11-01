@@ -41,7 +41,6 @@ class LineageLogger:
                     "exit_gen",
                     "is_elite",
                     "is_structural_mutant",
-                    "heli_seed",
                     "heli_reintegrated",
                     "notes",
                 ]
@@ -67,7 +66,6 @@ class LineageLogger:
                     getattr(indiv, "exit_gen", None),
                     int(getattr(indiv, "is_elite", False)),
                     int(getattr(indiv, "is_structural_mutant", False)),
-                    int(getattr(indiv, "heli_seed", False)),
                     int(getattr(indiv, "heli_reintegrated", False)),
                     note,
                 ]
@@ -96,7 +94,6 @@ class LineageLogger:
                         getattr(indiv, "exit_gen", None),
                         int(getattr(indiv, "is_elite", False)),
                         int(getattr(indiv, "is_structural_mutant", False)),
-                        int(getattr(indiv, "heli_seed", False)),
                         int(getattr(indiv, "heli_reintegrated", False)),
                         note,
                     ]
