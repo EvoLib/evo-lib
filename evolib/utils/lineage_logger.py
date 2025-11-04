@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import csv
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from evolib.population import Indiv
@@ -23,8 +23,8 @@ if TYPE_CHECKING:
 class LineageLogger:
     """Event-based lineage logger for evolutionary analysis."""
 
-    def __init__(self, filename: str | Path):
-        self.filename = Path(filename)
+    def __init__(self, filename: Union[str, Path]) -> None:
+        self.filename: Path = filename if isinstance(filename, Path) else Path(filename)
         self._init_csv()
 
     def _init_csv(self) -> None:
