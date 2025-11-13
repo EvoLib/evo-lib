@@ -68,8 +68,10 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
     mutate_offspring(pop, offspring)
 
     # Optional HELI
+    pop.heli_fitness_evaluations_gen = 0
     if pop.heli_enabled is True:
-        run_heli(pop, offspring)
+        pop.heli_fitness_evaluations_gen = run_heli(pop, offspring)
+        pop.heli_fitness_evaluations_total += pop.heli_fitness_evaluations_gen
 
     combined = pop.indivs + offspring
 
@@ -133,8 +135,10 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
     mutate_offspring(pop, offspring)
 
     # Optional HELI
+    pop.heli_fitness_evaluations_gen = 0
     if pop.heli_enabled is True:
-        run_heli(pop, offspring)
+        pop.heli_fitness_evaluations_gen = run_heli(pop, offspring)
+        pop.heli_fitness_evaluations_total += pop.heli_fitness_evaluations_gen
 
     # Evaluate offspring fitness
     pop.evaluate_indivs(offspring)
@@ -219,8 +223,10 @@ def evolve_steady_state(pop: "Pop") -> None:
     mutate_offspring(pop, offspring)
 
     # Optional HELI
+    pop.heli_fitness_evaluations_gen = 0
     if pop.heli_enabled is True:
-        run_heli(pop, offspring)
+        pop.heli_fitness_evaluations_gen = run_heli(pop, offspring)
+        pop.heli_fitness_evaluations_total += pop.heli_fitness_evaluations_gen
 
     # Evaluate offspring fitness
     pop.evaluate_indivs(offspring)

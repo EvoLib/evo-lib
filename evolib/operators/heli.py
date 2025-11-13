@@ -85,26 +85,26 @@ def evaluate_heli_drift(
     stop_above = getattr(heli_cfg, "drift_stop_above", None)
     stop_below = getattr(heli_cfg, "drift_stop_below", None)
 
-    if stop_above is not None and drift > stop_above:
+    if stop_above is not None and drift >= stop_above:
         if pop.heli_verbosity > 1:
             print(
                 f"[HELI] Aborting incubation: drift={drift:.2f} > {stop_above:.2f} "
                 f"(FitSeed={fit_seed:.3f}, WorstMain={fit_main_worst:.3f})"
             )
-        return float("inf")  # signal → hopeless
+        return float("inf")  # signal --> hopeless
 
-    if stop_below is not None and drift < stop_below:
+    if stop_below is not None and drift <= stop_below:
         if pop.heli_verbosity > 1:
             print(
                 f"[HELI] Early finish: drift={drift:.2f} < {stop_below:.2f} "
                 f"(FitSeed={fit_seed:.3f}, WorstMain={fit_main_worst:.3f})"
             )
-        return float("-inf")  # signal → already viable
+        return float("-inf")  # signal --> already viable
 
     return drift
 
 
-def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
+def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
     """
     Run HELI incubation for structure-mutated offspring.
 
@@ -128,27 +128,29 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
     from evolib.core.population import Pop
     from evolib.operators.strategy import evolve_mu_plus_lambda
 
+    fitness_evaluations = 0
+
     heli_cfg = getattr(pop.config.evolution, "heli", None)
     if heli_cfg is None:
         if pop.heli_verbosity >= 1:
             print("[HELI] Warning: run_heli() called without HELI config. Skipping.")
-        return
+        return fitness_evaluations
 
     if not offspring or not pop.heli_enabled:
-        return
+        return fitness_evaluations
 
     # Skip HELI in generation 0 (no evaluation baseline yet)
     if pop.generation_num == 0:
         if pop.heli_verbosity >= 1:
             print("[HELI] Skipped: main population not yet evaluated.")
-        return
+        return fitness_evaluations
 
     # 1: Select structure-mutated offspring
     struct_mutants = [indiv for indiv in offspring if indiv.para.has_structural_change]
     if not struct_mutants:
         if pop.heli_verbosity >= 2:
             print(f"[HELI] Gen: {pop.generation_num} - No struct_mutants")
-        return
+        return fitness_evaluations
 
     if pop.heli_verbosity >= 2:
         print(f"[HELI] Start: Number of structural mutants: {len(struct_mutants)}")
@@ -160,7 +162,7 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
     if len(seeds) < 1:
         if pop.heli_verbosity >= 2:
             print(f"[HELI] Gen: {pop.generation_num} - No Seed")
-        return
+        return fitness_evaluations
 
     # Remove selected seeds from the main offspring pool
     for seed in seeds:
@@ -215,6 +217,8 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
             if drift == float("inf") or drift == float("-inf"):
                 break  # abort incubation early
 
+        fitness_evaluations += gen * subpop.offspring_pool_size
+
         # Restore evo_params
         para_dict = vars(best.para)
         comp_dict = para_dict["components"]
@@ -235,3 +239,5 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> None:
 
     if pop.heli_verbosity >= 2:
         print("[HELI] End.")
+
+    return fitness_evaluations

@@ -187,6 +187,11 @@ class Pop:
 
             self.lineage_logger = LineageLogger(filename=lineage_file)
 
+        # Evaluation statistics
+        self.fitness_evaluations_total = 0
+        self.heli_fitness_evaluations_total = 0
+        self.heli_fitness_evaluations_gen = 0
+
         # Autoinitialize Population
         if initialize is True:
             self.initialize_population()
@@ -274,6 +279,11 @@ class Pop:
             pop.heli_max_fraction = cfg.evolution.heli.max_fraction
             pop.heli_reduce_sigma_factor = cfg.evolution.heli.reduce_sigma_factor
 
+        # Evaluation statistics
+        pop.fitness_evaluations_total = 0
+        pop.heli_fitness_evaluations_total = 0
+        pop.heli_fitness_evaluations_gen = 0
+
         # Initializer + sizes
         pop.para_initializer = build_composite_initializer(cfg)
         pop.parent_pool_size = cfg.parent_pool_size
@@ -354,6 +364,8 @@ class Pop:
             address=self.parallel_address,
         )
 
+        self.fitness_evaluations_total += len(self.indivs)
+
     def evaluate_indivs(self, indivs: list[Indiv]) -> None:
         """Evaluate fitness for a custom list of individuals."""
         if self.fitness_function is None:
@@ -366,6 +378,8 @@ class Pop:
             num_cpus=self.parallel_num_cpus,
             address=self.parallel_address,
         )
+
+        self.fitness_evaluations_total += len(indivs)
 
     def get_elites(self) -> list[Indiv]:
         """Return a list of elite individuals and set their is_elite flag."""
