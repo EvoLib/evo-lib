@@ -507,33 +507,57 @@ def save_combined_net_plot(
     path: str,
     *,
     dpi: int = 100,
-    title: str = "EvoNet Fit to sin(x)",
+    title: str = "Approximation",
+    xlabel: str = "x",
+    ylabel: str = "y",
+    true_label: str = "Target",
+    pred_label: str = "Network Output",
+    show_grid: bool = True,
 ) -> None:
     """
-    Saves a combined image of network structure and approximation plot.
+    Save a side-by-side image of the network graph and an approximation plot.
 
-    Args:
-        net: EvoNet instance with .plot().
-        X (np.ndarray): Input values (for plotting).
-        Y_true (np.ndarray): Ground truth values (e.g. sin(x)).
-        Y_pred (np.ndarray): Network prediction values.
-        path (str): Output path for PNG image.
-        dpi (int): DPI resolution for the output.
-        title (str): Plot title.
+    Parameters
+    ----------
+    net : Nnet
+        EvoNet instance; must provide `plot(out_path_base, ...)`.
+    X : np.ndarray
+        X values used for plotting (1D).
+    Y_true : np.ndarray
+        Ground-truth targets aligned with X.
+    Y_pred : np.ndarray
+        Model predictions aligned with X.
+    path : str
+        Output PNG file.
+    dpi : int, optional
+        DPI for the approximation subplot.
+    title, xlabel, ylabel : str, optional
+        Plot annotations.
+    true_label, pred_label : str, optional
+        Legend labels for target and prediction.
+    show_grid : bool, optional
+        Toggle grid in the approximation subplot.
     """
+
+    # ensure folder exists
+    folder = os.path.dirname(path)
+    if folder:
+        os.makedirs(folder, exist_ok=True)
+
     with tempfile.TemporaryDirectory() as tmpdir:
+        # left: network graph
         graph_path = os.path.join(tmpdir, "net")
         net.plot(graph_path, fillcolors_on=True, thickness_on=True)
         img_net = Image.open(graph_path + ".png")
 
-        # Create approximation plot
+        # right: approximation plot
         fig, ax = plt.subplots(figsize=(5, 4))
-        ax.plot(X, Y_true, label="Target: sin(x)")
-        ax.plot(X, Y_pred, label="Network Output", linestyle="--")
-        ax.set_xlabel("x")
-        ax.set_ylabel("y")
+        ax.plot(X, Y_true, label=true_label, linestyle="-")
+        ax.plot(X, Y_pred, label=pred_label, linestyle="--")
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
         ax.set_title(title)
-        ax.grid(True)
+        ax.grid(show_grid)
         ax.legend()
         fig.tight_layout()
 
@@ -543,10 +567,9 @@ def save_combined_net_plot(
 
         img_plot = Image.open(plot_path)
 
-        # Combine horizontally
+        # combine
         total_width = img_net.width + img_plot.width
         height = max(img_net.height, img_plot.height)
-
         combined = Image.new("RGB", (total_width, height), "white")
         combined.paste(img_net, (0, 0))
         combined.paste(img_plot, (img_net.width, 0))
