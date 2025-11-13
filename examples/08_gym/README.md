@@ -105,7 +105,7 @@ land safely between the flags.
 * Visualization: every 20 generations (and at the end), the best individual is rendered and saved as an animated GIF.
 
 <p align="center">
-  <img src="./04_frames/04_lunarlander.gif" alt="LunarLander Evolution" width="600"/>
+  <img src="./04_frames/04_lunarlander.gif" alt="LunarLander Evolution" width="512"/>
 </p>
 
 ---

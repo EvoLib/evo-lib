@@ -60,7 +60,7 @@ class Pop:
     def __init__(
         self,
         config_path: str,
-        lineage_filename: str = "lineage_log.csv",
+        lineage_file: str = "lineage_log.csv",
         fitness_function: Optional[FitnessFunction] = None,
         initialize: bool = True,
     ):
@@ -72,7 +72,7 @@ class Pop:
 
         Args:
             config_path (str): Path to the YAML configuration file.
-            lineage_filename (str, optional): Filename for lineage logging output.
+            lineage_file (str, optional): Filename for lineage logging output.
                 Defaults to "lineage_log.csv".
             fitness_function (Callable[[Indiv], None], optional): Fitness function.
                 If provided, it is stored and used during evolution. Can also be set
@@ -185,7 +185,7 @@ class Pop:
         if cfg.logging is not None and cfg.logging.lineage is not False:
             from evolib.utils.lineage_logger import LineageLogger
 
-            self.lineage_logger = LineageLogger(filename=lineage_filename)
+            self.lineage_logger = LineageLogger(filename=lineage_file)
 
         # Autoinitialize Population
         if initialize is True:

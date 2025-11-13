@@ -31,6 +31,7 @@ class GymEnv:
         self,
         env_name: str,
         max_steps: int = 500,
+        deterministic_init: bool = False,
         **env_kwargs: Any,
     ):
         """
@@ -44,6 +45,7 @@ class GymEnv:
         """
         self.env_name = env_name
         self.max_steps = max_steps
+        self.deterministic_init = deterministic_init
         self.env_kwargs = env_kwargs
         # headless env (no Render)
         self.env = gym.make(env_name, **env_kwargs)
@@ -53,6 +55,7 @@ class GymEnv:
         indiv: Individual,
         module: str = "brain",
         episodes: int = 1,
+        seed: int | None = None,
     ) -> float:
         """
         Run one or multiple episodes headless and return average total reward.
@@ -68,7 +71,21 @@ class GymEnv:
         total_reward = 0.0
 
         for _ in range(episodes):
-            obs, _ = self.env.reset()
+            obs, _ = self.env.reset(seed=seed)
+
+            if self.deterministic_init:
+                unwrapped = self.env.unwrapped
+                if hasattr(unwrapped, "state") and isinstance(
+                    unwrapped.state, np.ndarray
+                ):
+                    unwrapped.state = np.zeros_like(unwrapped.state)
+                    obs = unwrapped.state
+                else:
+                    obs = np.zeros_like(obs)
+
+                assert np.allclose(
+                    obs, 0.0
+                ), "Deterministic init failed: state not zeroed."
 
             net = indiv.para[module].net
             net.reset(full=True)  # Reset recurrent/internal state
@@ -109,6 +126,7 @@ class GymEnv:
         filename: str | None = None,
         fps: int = 30,
         module: str = "brain",
+        seed: int | None = None,
     ) -> str:
         """
         Render an episode with the given individual and save as GIF using imageio.
@@ -130,7 +148,17 @@ class GymEnv:
             max_episode_steps=self.max_steps,
             **self.env_kwargs,
         )
-        obs, _ = env.reset()
+        obs, _ = env.reset(seed=seed)
+
+        if self.deterministic_init:
+            unwrapped = env.unwrapped
+            if hasattr(unwrapped, "state") and isinstance(unwrapped.state, np.ndarray):
+                unwrapped.state = np.zeros_like(unwrapped.state)
+                obs = unwrapped.state
+            else:
+                obs = np.zeros_like(obs)
+
+            assert np.allclose(obs, 0.0), "Deterministic init failed: state not zeroed."
 
         net = indiv.para[module].net
         net.reset(full=True)  # Reset recurrent/internal state

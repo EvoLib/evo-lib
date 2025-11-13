@@ -230,8 +230,8 @@ For deeper exploration, see the [full examples directory](examples/)
 
 ### Acknowledgement
 
-Parts of documentation, docstrings, and code refactoring were supported by ChatGPT (OpenAI) for language clarity and consistency.
-All conceptual design, experiments, and implementation decisions originate from the author.
+Parts of the documentation, docstrings, and code refactoring were supported by ChatGPT (OpenAI) for language clarity and consistency.
+All conceptual design, experiments, and implementation decisions were made by the author.
 
 ---
 

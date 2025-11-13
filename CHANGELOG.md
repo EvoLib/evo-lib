@@ -23,6 +23,12 @@
       max_fraction: 0.1
       reduce_sigma_factor: 0.5
    ```
+- `deterministic_init` and `seed` parameters in `GymEnv` to enable fully deterministic environment initialization and reproducible evaluations.
+- Introduced lineage logging system for evolutionary events.
+  Each individual is now tracked across generations with fields such as
+  `indiv_id`, `parent_id`, `event`, `birth_gen`, `exit_gen`, `is_elite`,
+  `is_structural_mutant`, and `heli_reintegrated`.
+  Enables detailed analysis of ancestry, survival dynamics, and HELI reintegration.
 - Added max_new_connections and max_removed_connections to StructuralMutationConfig to allow multiple connections to be added or removed per mutation event.
 - Added `connection_scope` and `connection_density` parameters for EvoNet initialization  
   control which layers connect (`adjacent` vs. `crosslayer`) and the fraction of connections created.  
