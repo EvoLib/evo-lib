@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from evolib.core.individual import Indiv
     from evolib.core.population import Pop
 
+from evolib.utils.fitness import sort_by_fitness
 from evolib.utils.heli_utils import (
     apply_heli_overrides,
     backup_module_state,
@@ -157,6 +158,9 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
 
     # 2: Limit number of incubated seeds
     max_seeds = max(1, round(len(offspring) * pop.heli_max_fraction))
+    if len(struct_mutants) > max_seeds:
+        pop.evaluate_indivs(struct_mutants)
+        struct_mutants = sort_by_fitness(struct_mutants)
     seeds = struct_mutants[:max_seeds]
 
     if len(seeds) < 1:

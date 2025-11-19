@@ -23,6 +23,10 @@
       max_fraction: 0.1
       reduce_sigma_factor: 0.5
    ```
+- New evaluation statistics in `Pop`:
+  - `fitness_evaluations_total`: cumulative fitness evaluations.
+  - `heli_fitness_evaluations_total`: cumulative HELI evaluations.
+  - `heli_fitness_evaluations_gen`: HELI evaluations in the current generation.
 - `deterministic_init` and `seed` parameters in `GymEnv` to enable fully deterministic environment initialization and reproducible evaluations.
 - Introduced lineage logging system for evolutionary events.
   Each individual is now tracked across generations with fields such as
@@ -46,6 +50,7 @@
 
 ### Changed
 - Structural mutation now applies exactly one mutation type per call instead of multiple simultaneous operations.
+- HELI: Select best structural mutants as seeds (fitness-evaluated and sorted) 
 
 ### Fixed
 - Handle None fitness values safely in sort_by_fitness()
