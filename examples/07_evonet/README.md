@@ -52,7 +52,7 @@ Frames show target and prediction side by side.
 
 ### `03_structural_xor.py`
 
-Solves the XOR problem using **structural mutations** (`add_neuron`, `add_connection`, `split_connection`).  
+Solves the XOR problem using **structural mutations** (`add_neuron`, `add_connection`).  
 Starts from a minimal `[2, 1]` net and grows topology as needed.  
 Frames show both network graph and XOR predictions.
 

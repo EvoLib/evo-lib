@@ -117,12 +117,10 @@ modules:
         allowed: [tanh, relu, sigmoid]
 
       structural:
-        add_neuron: 0.01
-        add_connection: 0.05
-        remove_connection: 0.02
-        recurrent: local  # none | direct | local | all
-        keep_connected: true
-
+          add_neuron:
+          probability: 0.015
+          init_connection_ratio: 0.5
+[...]
 ```
 
 ---

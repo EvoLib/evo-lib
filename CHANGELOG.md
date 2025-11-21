@@ -51,10 +51,17 @@
 ### Changed
 - Structural mutation now applies exactly one mutation type per call instead of multiple simultaneous operations.
 - HELI: Select best structural mutants as seeds (fitness-evaluated and sorted) 
+- Structural mutation configuration redesigned:
+  - New operator blocks: `add_neuron`, `remove_neuron`, `add_connection`, `remove_connection`
+  - Added `topology` block with `recurrent`, `connection_scope`, `max_neurons`, `max_connections`
+  - Removed legacy flat parameters and deprecated fields
 
 ### Fixed
 - Handle None fitness values safely in sort_by_fitness()
 - Fixed logic for structure_mutated flag in structural mutation
+
+### Removed
+- `split_connection` operator and all related configuration options
 
 
 ## EvoLib 0.2.0b2 (2025-10-03)

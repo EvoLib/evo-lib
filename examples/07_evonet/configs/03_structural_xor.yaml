@@ -15,7 +15,7 @@ modules:
     type: evonet
     dim: [2, 0, 0, 1]
     activation: [linear, tanh, tanh, sigmoid]
-    initializer: normal_evonet
+    initializer: unconnected_evonet
     weight_bounds: [-5.0, 5.0]
     bias_bounds: [-1.0, 1.0]
 
@@ -30,12 +30,23 @@ modules:
         probability: 0.8
 
       structural:
-        add_neuron: 0.03
-        recurrent: "none"  # Optionen: none | direct | local | all
-        remove_neuron: 0.01
-        add_connection: 0.05
-        remove_connection: 0.01
-        split_connection: 0.02
+        add_neuron: 
+          probability: 0.03
+          init_connection_ratio: 1.0
+          activations_allowed: [tanh]
+          init: random
 
-        max_nodes: 3
-        max_edges: 20
+        remove_neuron:
+          probability: 0.01
+
+        add_connection: 
+          probability: 0.05
+
+        remove_connection:
+          probability: 0.01
+
+        topology:
+          connection_scope: crosslayer
+          recurrent: "none"  # Optionen: none | direct | local | all
+          max_neurons: 3
+          max_connections: 20

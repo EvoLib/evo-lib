@@ -162,19 +162,15 @@ class MutationConfig(BaseModel):
         return self
 
 
-class StructuralMutationConfig(BaseModel):
-    """Structural mutation configuration (shared across evolvable networks)."""
-
-    add_connection: Optional[float] = 0.0
-    remove_connection: Optional[float] = 0.0
-    add_neuron: Optional[float] = 0.0
-    remove_neuron: Optional[float] = 0.0
-    split_connection: Optional[float] = 0.0
-    keep_connected: Optional[bool] = True
-    max_nodes: Optional[int] = None
-    max_edges: Optional[int] = None
-    recurrent: Optional[Literal["none", "direct", "local", "all"]] = "none"
-    connection_init: Optional[Literal["none", "zero", "near_zero", "random"]] = "zero"
+class AddNeuron(BaseModel):
+    probability: float = Field(0.0, ge=0.0, le=1.0)
+    init_connection_ratio: Optional[float] = Field(
+        default=1.0,
+        ge=0.0,
+        le=1.0,
+        description="Fraction of allowed connections to actually add [0.0, 1.0]).",
+    )
+    init: Optional[Literal["none", "zero", "near_zero", "random"]] = "zero"
 
     # Whitelist for random activation selection
     activations_allowed: Optional[list[str]] = Field(
@@ -182,88 +178,6 @@ class StructuralMutationConfig(BaseModel):
         description="Whitelist of activation names applied to "
         "neurons in hidden layers.",
     )
-
-    # Structural connection topology (for add_connection mutations)
-    connection_scope: Optional[Literal["adjacent", "crosslayer"]] = Field(
-        default="adjacent",
-        description=(
-            "Scope of possible new connections during structural mutation. "
-            "'adjacent' = connect only neighboring layers, "
-            "'crosslayer' = connect across multiple layers."
-        ),
-    )
-
-    connection_density: Optional[float] = Field(
-        default=1.0,
-        ge=0.0,
-        le=1.0,
-        description="Fraction of allowed connections to actually add (0–1).",
-    )
-
-    max_new_connections: int = Field(
-        default=1,
-        ge=1,
-        description=(
-            "Maximum number of new connections to add per structural mutation event."
-        ),
-    )
-    max_removed_connections: int = Field(
-        default=1,
-        ge=1,
-        description=(
-            "Maximum number of connections to remove per structural mutation event."
-        ),
-    )
-
-    model_config = ConfigDict(extra="forbid")
-
-    @model_validator(mode="after")
-    def _check_ranges(self) -> "StructuralMutationConfig":
-        for name in [
-            "add_connection",
-            "remove_connection",
-            "add_neuron",
-            "remove_neuron",
-            "split_connection",
-        ]:
-            val = getattr(self, name)
-            if val is not None and not (0.0 <= val <= 1.0):
-                raise ValueError(f"{name} must be in [0, 1], got {val}")
-
-        if self.max_nodes is not None and self.max_nodes <= 0:
-            raise ValueError("max_nodes must be > 0 or None")
-
-        if self.max_edges is not None and self.max_edges <= 0:
-            raise ValueError("max_edges must be > 0 or None")
-
-        if self.recurrent not in {None, "none", "direct", "local", "all"}:
-            raise ValueError(f"Invalid value for recurrent: {self.recurrent}")
-
-        if self.connection_init not in {None, "none", "zero", "near_zero", "random"}:
-            raise ValueError(
-                f"Invalid value for connection_init: " f"{self.connection_init}"
-            )
-
-        if self.connection_density is not None and not (
-            0.0 <= self.connection_density <= 1.0
-        ):
-            raise ValueError("connection_density must be in [0, 1].")
-
-        if self.connection_scope not in {None, "adjacent", "crosslayer"}:
-            raise ValueError(
-                f"Invalid value for connection_scope: " f"{self.connection_scope}"
-            )
-
-        if self.max_new_connections is not None and self.max_new_connections <= 0:
-            raise ValueError("max_new_connections must be > 0")
-
-        if (
-            self.max_removed_connections is not None
-            and self.max_removed_connections <= 0
-        ):
-            raise ValueError("max_new_connections must be > 0")
-
-        return self
 
     @validator("activations_allowed", each_item=True)
     def validate_activation_name(cls, act_name: str) -> str:
@@ -274,6 +188,143 @@ class StructuralMutationConfig(BaseModel):
                 f"Valid options are: {list(ACTIVATIONS.keys())}"
             )
         return act_name
+
+
+class RemoveNeuron(BaseModel):
+    probability: float = Field(0.0, ge=0.0, le=1.0)
+
+
+class AddConnection(BaseModel):
+    probability: float = Field(0.0, ge=0.0, le=1.0)
+    max: int = Field(
+        default=1,
+        ge=1,
+        description=(
+            "Maximum number of new connections to add per structural mutation event."
+        ),
+    )
+    init: Optional[Literal["none", "zero", "near_zero", "random"]] = "zero"
+
+
+class RemoveConnection(BaseModel):
+    probability: float = Field(0.0, ge=0.0, le=1.0)
+    max: int = Field(
+        default=1,
+        ge=1,
+        description=(
+            "Maximum number of connections to remove per structural mutation event."
+        ),
+    )
+
+
+class StructuralTopology(BaseModel):
+    """
+    Configuration of global structural constraints for EvoNet.
+
+    These parameters regulate the *allowed topology* of the network, independent of
+    mutation operators.
+    """
+
+    recurrent: Optional[Literal["none", "direct", "local", "all"]] = "none"
+    connection_scope: Optional[Literal["adjacent", "crosslayer"]] = "adjacent"
+
+    max_neurons: Optional[int] = Field(
+        default=None,
+        description="Upper bound on the number of neurons allowed in the network.",
+        ge=1,
+    )
+    max_connections: Optional[int] = Field(
+        default=None,
+        description="Upper bound on total number of connections "
+        "allowed in the network.",
+        ge=1,
+    )
+
+    @model_validator(mode="after")
+    def _validate_topology(self) -> "StructuralTopology":
+        if self.recurrent not in {None, "none", "direct", "local", "all"}:
+            raise ValueError(f"Invalid recurrent value: {self.recurrent}")
+
+        if self.connection_scope not in {None, "adjacent", "crosslayer"}:
+            raise ValueError(f"Invalid connection_scope: {self.connection_scope}")
+
+        # Only positive limits allowed
+        if self.max_connections is not None and self.max_connections <= 0:
+            raise ValueError("max_connections must be > 0")
+
+        if self.max_neurons is not None and self.max_neurons <= 0:
+            raise ValueError("max_neurons must be > 0")
+
+        return self
+
+
+class StructuralMutationConfig(BaseModel):
+    """Structural mutation configuration (shared across evolvable networks)."""
+
+    add_neuron: Optional[AddNeuron] = Field(
+        default=None, description="Optional for structural mutation."
+    )
+    remove_neuron: Optional[RemoveNeuron] = Field(
+        default=None, description="Optional for structural mutation."
+    )
+    add_connection: Optional[AddConnection] = Field(
+        default=None, description="Optional for structural mutation."
+    )
+    remove_connection: Optional[RemoveConnection] = Field(
+        default=None, description="Optional for structural mutation."
+    )
+    topology: StructuralTopology = Field(
+        default_factory=StructuralTopology,
+        description="Global structural constraints independent of mutation operators.",
+    )
+
+    model_config = ConfigDict(extra="forbid")
+
+    @model_validator(mode="after")
+    def _check_ranges(self) -> "StructuralMutationConfig":
+        # Block-based mutation probability
+        if self.add_neuron is not None:
+            probability = self.add_neuron.probability
+            if not (0.0 <= probability <= 1.0):
+                raise ValueError(
+                    f"add_neuron.probability must be in [0, 1], got {probability}"
+                )
+            # Initial Connection Ratio
+            if self.add_neuron.init_connection_ratio is not None:
+                ratio = self.add_neuron.init_connection_ratio
+                if not (0.0 <= ratio <= 1.0):
+                    raise ValueError(
+                        f"init_connection_ratio must be " f"in [0, 1], got {ratio}"
+                    )
+
+        if self.remove_neuron is not None:
+            probability = self.remove_neuron.probability
+            if not (0.0 <= probability <= 1.0):
+                raise ValueError(
+                    f"remove_neuron.probability must be in [0, 1], got {probability}"
+                )
+        if self.add_connection is not None:
+            probability = self.add_connection.probability
+            if not (0.0 <= probability <= 1.0):
+                raise ValueError(
+                    f"add_connection.probability must be in [0, 1], got {probability}"
+                )
+            max = self.add_connection.max
+            if max < 1:
+                raise ValueError(f"add_connection.max must be >= 1, got {max}")
+
+        if self.remove_connection is not None:
+            probability = self.remove_connection.probability
+            if not (0.0 <= probability <= 1.0):
+                raise ValueError(
+                    f"remove_connection.probability must be in [0, 1], "
+                    f"got {probability}"
+                )
+            max = self.remove_connection.max
+            if max < 1:
+                raise ValueError(f"remove_connection.max must be >= 1, got {max}")
+
+        return self
 
 
 class ActivationMutationConfig(BaseModel):
@@ -452,12 +503,10 @@ class HeliConfig(BaseModel):
 
     drift_stop_above: Optional[float] = Field(
         default=None,
-        gt=0.0,
         description="Abort incubation if drift > threshold (too poor).",
     )
     drift_stop_below: Optional[float] = Field(
         default=None,
-        le=0.0,
         description="Abort incubation if drift < threshold (already viable).",
     )
 
@@ -472,8 +521,4 @@ class HeliConfig(BaseModel):
             raise ValueError("max_fraction must be between 0 and 1.")
         if self.reduce_sigma_factor < 0.0:
             raise ValueError("reduce_sigma_factor must be >= 0.")
-        if self.drift_stop_above is not None and self.drift_stop_above <= 0.0:
-            raise ValueError("drift_stop_above must be > 0.0")
-        if self.drift_stop_below is not None and self.drift_stop_below > 0.0:
-            raise ValueError("drift_stop_below must be <= 0.0")
         return self
