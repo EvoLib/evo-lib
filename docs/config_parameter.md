@@ -160,7 +160,7 @@ modules:
 This table summarizes the structural mutation parameters available for **EvoNet modules** in EvoLib.
 They control how neurons and connections are added, removed, or initialized during evolution.
 
-## 1. Overview
+### Overview
 
 Structural mutations are part of the `mutation.structural` block inside a module of type `evonet`.
 Four operator groups are available:
@@ -174,9 +174,9 @@ Topology-level constraints (e.g., max number of neurons) are defined inside a se
 
 ---
 
-# 2. Structural Mutation Operators
+### Structural Mutation Operators
 
-## 2.1 Add Neuron
+#### Add Neuron
 
 | Field | Type | Default | Description |
 |-------|-------|----------|-------------|
@@ -187,7 +187,7 @@ Topology-level constraints (e.g., max number of neurons) are defined inside a se
 
 ---
 
-## 2.2 Remove Neuron
+#### Remove Neuron
 
 | Field | Type | Default | Description |
 |-------|-------|----------|-------------|
@@ -195,7 +195,7 @@ Topology-level constraints (e.g., max number of neurons) are defined inside a se
 
 ---
 
-## 2.3 Add Connection
+#### Add Connection
 
 | Field | Type | Default | Description |
 |-------|-------|----------|-------------|
@@ -205,7 +205,7 @@ Topology-level constraints (e.g., max number of neurons) are defined inside a se
 
 ---
 
-## 2.4 Remove Connection
+#### Remove Connection
 
 | Field | Type | Default | Description |
 |-------|-------|----------|-------------|
@@ -214,7 +214,7 @@ Topology-level constraints (e.g., max number of neurons) are defined inside a se
 
 ---
 
-# 3. Topology Constraints
+#### Topology Constraints
 
 Topology-related parameters define global rules for allowed edges and network size.
 
@@ -235,7 +235,7 @@ structural:
 
 ---
 
-# 4. EvoNet Initializer
+#### EvoNet Initializer
 
 The EvoNet module uses:
 
@@ -250,7 +250,7 @@ The EvoNet module uses:
 
 ---
 
-# 5. Full Example (Current Valid Syntax)
+#### Full Example (Current Valid Syntax)
 
 ```yaml
 parent_pool_size: 20
@@ -322,7 +322,7 @@ modules:
 
 ---
 
-# 6. Notes
+#### 6. Notes
 
 - Only **one** structural operator is executed per mutation event.
 - `max_neurons` and `max_connections` provide soft caps to prevent uncontrolled growth.
