@@ -188,54 +188,97 @@ modules:
 This table summarizes the structural mutation parameters available for **EvoNet modules** in EvoLib.
 They control how neurons and connections are added, removed, or initialized during evolution.
 
-| Parameter | Type | Default | Description |
-|------------|------|----------|-------------|
-| `max_new_connections` | int | 1 | Maximum number of new connections that can be created in a single structural mutation. |
-| `max_removed_connections` | int | 1 | Maximum number of existing connections that can be removed per mutation. |
-| `connection_scope` | str | `adjacent` | Defines which layers may connect: `adjacent` (only neighboring layers) or `crosslayer` (any-to-any). |
-| `connection_init` | str | `near_zero` | Defines how weights of new connections are initialized: `random`, `zero`, `near_zero`, or `none`. |
-| `connection_init_value` | float \| null | null | If set, overrides `connection_init` with a fixed numeric weight value. |
-| `keep_connected` | bool | true | Ensures neurons remain connected after structural mutation (avoids isolated nodes). |
-| `recurrent` | str | `none` | Enables optional recurrence: `none`, `direct`, `local`, or `all`. |
-| `max_nodes` | int | 0 | Upper limit for the total number of neurons in the network (`0` = unlimited). |
-| `max_edges` | int | 0 | Upper limit for the total number of connections (`0` = unlimited). |
+## 1. Overview
+
+Structural mutations are part of the `mutation.structural` block inside a module of type `evonet`.
+Four operator groups are available:
+
+- **Add Neuron**
+- **Remove Neuron**
+- **Add Connection**
+- **Remove Connection**
+
+Topology-level constraints (e.g., max number of neurons) are defined inside a separate `topology:` section.
 
 ---
 
-**Notes**
+# 2. Structural Mutation Operators
 
-- Structural mutations are triggered according to their probabilities in the `mutation.structural` block.
-- `connection_scope` and `connection_init` provide fine control over how new edges integrate into the topology.
-- Using `near_zero` for new connections can reduce disruption and stabilize early learning phases.
-- Growth limits (`max_nodes`, `max_edges`) are optional safety guards for open-ended topologies.
+## 2.1 Add Neuron
 
----
-
-## Mutation Settings
-
-Mutation can be specified per module. Parameters vary by strategy, but common fields are:
-
-| Parameter     | Type  | Default | Explanation                                                 |
-| ------------- | ----- | ------- | ----------------------------------------------------------- |
-| `strategy`    | str   | —       | Mutation strategy (e.g. `constant`, `adaptive_individual`). |
-| `probability` | float | 1.0     | Probability of mutating a given parameter.                  |
-| `strength`    | float | —       | Standard deviation / scale of the mutation.                 |
+| Field | Type | Default | Description |
+|-------|-------|----------|-------------|
+| `probability` | float | — | Probability of inserting a new neuron. |
+| `activations_allowed` | list[str] | `[tanh]` | Set of allowed activation functions for the new neuron. |
+| `init` | str | `random` | Defines how the neuron and its initial connections are initialized. |
+| `init_connection_ratio` | float | `0.3` | Proportion of possible edges that should be created when the neuron is inserted. |
 
 ---
 
-## Initializers
+## 2.2 Remove Neuron
 
-Initializers define how parameters are set at creation (before any evolution).
-Available initializers depend on the module type:
-
-* **Vectors**: `normal_vector`, `random_vector`, `zero_vector`, `fixed_vector`, `adaptive_vector`
-* **EvoNet**: `normal_evonet`
+| Field | Type | Default | Description |
+|-------|-------|----------|-------------|
+| `probability` | float | — | Probability of removing an existing non-input neuron. |
 
 ---
 
-## Putting It All Together
+## 2.3 Add Connection
 
-A complete configuration may combine several modules:
+| Field | Type | Default | Description |
+|-------|-------|----------|-------------|
+| `probability` | float | — | Probability of inserting a new connection. |
+| `max` | int | `1` | Maximum number of new connections created during one mutation event. |
+| `init` | str | `random` | Initialization method for the new connection's weight. |
+
+---
+
+## 2.4 Remove Connection
+
+| Field | Type | Default | Description |
+|-------|-------|----------|-------------|
+| `probability` | float | — | Probability of removing an existing connection. |
+| `max` | int | `1` | Maximum number of connections removed during one mutation event. |
+
+---
+
+# 3. Topology Constraints
+
+Topology-related parameters define global rules for allowed edges and network size.
+
+These values are defined inside:
+
+```yaml
+structural:
+  topology:
+    ...
+```
+
+| Field | Type | Default | Description |
+|-------|-------|----------|-------------|
+| `recurrent` | str | `none` | Controls recurrence: `none`, `direct`, `local`, or `all`. |
+| `connection_scope` | str | `adjacent` | Allowed layer connectivity: `adjacent` (neighbor layers only) or `crosslayer` (any-to-any). |
+| `max_neurons` | int \| null | `null` | Maximum number of non-input neurons (`null` = unlimited). |
+| `max_connections` | int \| null | `null` | Maximum number of edges (`null` = unlimited). |
+
+---
+
+# 4. EvoNet Initializer
+
+The EvoNet module uses:
+
+| Initializer         | Weights                            | Biases                           | Notes                                       |
+|---------------------|------------------------------------|----------------------------------|---------------------------------------------|
+| `normal_evonet`     | Normal(0, 0.5)                     | Normal(0, 0.5)                   | Default initializer for general use         |
+| `unconnected_evonet`| None                               | 0                                | For pure structural growth; empty topology  |
+| `random_evonet`     | Random                             | Uniform(bias_bounds)             | For broader stochastic exploration           |
+| `zero_evonet`       | 0                                  | 0                                | Deterministic baseline; debugging            |
+| `identity_evonet`   | Small random                       | Small random                     | Designed for stable recurrent memory         |
+
+
+---
+
+# 5. Full Example (Current Valid Syntax)
 
 ```yaml
 parent_pool_size: 20
@@ -268,18 +311,47 @@ modules:
     dim: [4, 6, 2]
     activation: [linear, tanh, tanh]
     initializer: normal_evonet
+
     mutation:
       strategy: constant
       probability: 1.0
       strength: 0.05
+
       activations:
         probability: 0.01
         allowed: [tanh, relu, sigmoid]
+
       structural:
-        add_neuron: 0.01
-        add_connection: 0.05
-        remove_connection: 0.02
-        recurrent: local
-        keep_connected: true
+
+        add_neuron:
+          probability: 0.015
+          activations_allowed: [tanh]
+          init: random
+          init_connection_ratio: 0.3
+
+        remove_neuron:
+          probability: 0.015
+
+        add_connection:
+          probability: 0.05
+          max: 3
+          init: random
+
+        remove_connection:
+          probability: 0.05
+          max: 3
+
+        topology:
+          recurrent: none
+          connection_scope: crosslayer
+          max_neurons: 25
+          max_connections: 50
 ```
 
+---
+
+# 6. Notes
+
+- Only **one** structural operator is executed per mutation event.
+- `max_neurons` and `max_connections` provide soft caps to prevent uncontrolled growth.
+- `connection_scope: crosslayer` allows long-range edges, enabling richer architectures but also increasing search space.

@@ -117,11 +117,29 @@ modules:
         allowed: [tanh, relu, sigmoid]
 
       structural:
-        add_neuron: 0.01
-        add_connection: 0.05
-        remove_connection: 0.02
-        recurrent: local  # none | direct | local | all
-        keep_connected: true
+        add_neuron:
+          probability: 0.015
+          init_connection_ratio: 0.5
+          activations_allowed: [tanh]
+          init: random
+
+        remove_neuron:
+          probability: 0.015
+
+        add_connection:
+          probability: 0.05
+          max: 3
+          init: random
+
+        remove_connection:
+          probability: 0.05
+          max: 3
+
+        topology:
+          recurrent: none
+          connection_scope: crosslayer
+          max_neurons: 25
+          max_connections: 50
 
 ```
 

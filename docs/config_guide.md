@@ -124,7 +124,7 @@ evolution:
 modules:
   brain:
     type: evonet
-    dim: [2, 0, 0, 1]       # minimal topology; hidden layers start empty
+    dim: [2, 0, 0, 1]       # hidden layers start empty
     activation: [linear, tanh, tanh, sigmoid]
     initializer: normal_evonet
     weight_bounds: [-5.0, 5.0]
@@ -132,30 +132,46 @@ modules:
 
     mutation:
       strategy: constant
+      probability: 1.0
       strength: 0.1
-      probability: 0.9
 
+      # Optional override for biases
       biases:
         strategy: constant
-        strength: 0.05
         probability: 0.8
+        strength: 0.05
 
+      # Optional activation mutation
+      activations:
+        probability: 0.01
+        allowed: [tanh, relu, sigmoid]
+
+      # Structural mutation
       structural:
-        add_neuron: 0.03
-        recurrent: "none"    # none | direct | local | all
-        remove_neuron: 0.01
-        add_connection: 0.05
-        remove_connection: 0.01
-        split_connection: 0.02
 
-        max_nodes: 3
-        max_edges: 20
+        add_neuron:
+          probability: 0.015
+          init_connection_ratio: 0.5
+          activations_allowed: [tanh]
+          init: random
 
-        max_new_connections: 2
-        max_removed_connections: 2
-        connection_scope: crosslayer   # adjacent | crosslayer
+        remove_neuron:
+          probability: 0.015
 
-```
+        add_connection:
+          probability: 0.05
+          max: 3
+          init: random
+
+        remove_connection:
+          probability: 0.05
+          max: 3
+
+        topology:
+          recurrent: none
+          connection_scope: crosslayer
+          max_neurons: 25
+          max_connections: 50```
 
 ---
 
