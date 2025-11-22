@@ -153,34 +153,6 @@ modules:
         probability: 0.01
         allowed: [tanh, relu, sigmoid, elu, linear, linear_max1]
 
-      structural:
-        # Structural mutation probabilities
-        add_neuron: 0.01
-        remove_neuron: 0.01
-        add_connection: 0.05
-        remove_connection: 0.02
-        split_connection: 0.00
-
-        # NEW: control how many edges are modified per mutation
-        max_new_connections: 1
-        max_removed_connections: 1
-
-        # NEW: restrict or extend feedforward connectivity
-        connection_scope: adjacent      # adjacent | crosslayer
-
-        # NEW: how new connections are initialized
-        connection_init: near_zero      # random | zero | near_zero | none
-        connection_init_value: null     # optional explicit weight value override
-
-        # Recurrent settings
-        recurrent: none                 # none | direct | local | all
-        keep_connected: true            # prevents isolated neurons
-
-        # Optional topological growth limits
-        max_nodes: 0                    # 0 = unlimited
-        max_edges: 0                    # 0 = unlimited
-
-
 ```
 
 ### EvoNet - Structural Mutation Parameters
