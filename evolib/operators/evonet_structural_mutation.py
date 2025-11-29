@@ -87,17 +87,23 @@ def mutate_structure(net: Nnet, cfg: StructuralMutationConfig) -> bool:
     # Add Neuron
     elif op == "add_neuron":
         addn_cfg = cfg.add_neuron
+        if cfg.topology.max_connections is not None:
+            max_connections = max(0, cfg.topology.max_connections - net.num_weights)
+        else:
+            max_connections = 2**63 - 1
+
         if addn_cfg is not None:
             if (
                 cfg.topology.max_neurons is None
                 or net.num_hidden < cfg.topology.max_neurons
             ):
                 if add_random_neuron(
-                    net,
-                    addn_cfg.activations_allowed,
-                    addn_cfg.init,
-                    cfg.topology.connection_scope,
-                    addn_cfg.init_connection_ratio,
+                    net=net,
+                    activations=addn_cfg.activations_allowed,
+                    connection_init=addn_cfg.init,
+                    connection_scope=cfg.topology.connection_scope,
+                    connection_density=addn_cfg.init_connection_ratio,
+                    max_connections=max_connections,
                 ):
                     structure_mutated = True
 
