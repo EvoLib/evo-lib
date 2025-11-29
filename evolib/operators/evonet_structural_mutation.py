@@ -2,7 +2,6 @@
 
 import numpy as np
 from evonet.core import Nnet
-from evonet.enums import NeuronRole
 from evonet.mutation import (
     add_random_connection,
     add_random_neuron,
@@ -91,7 +90,7 @@ def mutate_structure(net: Nnet, cfg: StructuralMutationConfig) -> bool:
         if addn_cfg is not None:
             if (
                 cfg.topology.max_neurons is None
-                or count_non_input_neurons(net) < cfg.topology.max_neurons
+                or net.num_hidden < cfg.topology.max_neurons
             ):
                 if add_random_neuron(
                     net,
@@ -109,8 +108,3 @@ def mutate_structure(net: Nnet, cfg: StructuralMutationConfig) -> bool:
             if remove_random_neuron(net):
                 structure_mutated = True
     return structure_mutated
-
-
-def count_non_input_neurons(net: Nnet) -> int:
-    """Return the number of neurons excluding input neurons."""
-    return len([n for n in net.get_all_neurons() if n.role != NeuronRole.INPUT])

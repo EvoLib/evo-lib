@@ -9,7 +9,6 @@ from evolib.config.base_component_config import (
 from evolib.config.schema import FullConfig
 from evolib.initializers.evonet_initializers import initializer_normal_evonet
 from evolib.operators.evonet_structural_mutation import (
-    count_non_input_neurons,
     mutate_structure,
 )
 from evolib.representation.evonet import EvoNet
@@ -121,7 +120,7 @@ def test_remove_neuron() -> None:
 
 def test_max_neurons_respected() -> None:
     evonet = make_minimal_evonet()
-    non_input_count = count_non_input_neurons(evonet.net)
+    non_input_count = evonet.net.num_hidden
 
     cfg = StructuralMutationConfig(
         add_neuron=AddNeuron(probability=1.0, init_connection_ratio=1.0),
@@ -132,7 +131,7 @@ def test_max_neurons_respected() -> None:
     )
 
     mutate_structure(evonet.net, cfg)
-    assert count_non_input_neurons(evonet.net) == non_input_count
+    assert evonet.net.num_hidden == non_input_count
 
 
 def test_max_connections_respected() -> None:
