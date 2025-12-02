@@ -77,6 +77,93 @@ evolution:
 
 ---
 
+# HELI — Hierarchical Evolution with Lineage Incubation
+
+This document describes the configuration parameters for **HELI** within an `evonet` module in EvoLib. HELI creates temporary subpopulations for structurally mutated individuals and evolves them locally before reintegration.
+
+---
+
+## Overview
+
+HELI is defined inside an EvoNet module, at the same level as the `mutation` block:
+
+```yaml
+modules:
+  brain:
+    type: evonet
+    ...
+    mutation:
+      ...
+    heli:
+      ...
+```
+
+HELI activates only when a **structural mutation** (add/remove neuron/connection) occurs. Each structural mutant spawns a temporary subpopulation that evolves for several generations using a fixed evolutionary strategy. After the local search finishes, one representative is returned to the main population.
+
+---
+
+## Parameters
+
+| Field                 | Type  | Default          | Description                                                                      |
+| --------------------- | ----- | ---------------- | -------------------------------------------------------------------------------- |
+| `generations`         | int   | —                | Number of local generations each structural mutant evolves.                      |
+| `offspring_per_seed`  | int   | —                | Number of offspring created per structural mutant in the HELI subpopulation.     |
+| `max_fraction`        | float | `1.0`            | Hard limit on number of active HELI subpopulations relative to main parent pool. |
+| `reduce_sigma_factor` | float | `1.0`            | Scaling factor applied to mutation strength during HELI evolution.               |
+| `drift_stop_above`    | float |  —               | Abort incubation if drift exceeds this value (seed too poor)                     |
+| `drift_stop_below`    | float |  —               | Abort incubation if drift goes below this value (seed already good)              |
+
+
+---
+
+## Example Configuration
+
+```yaml
+evolution:
+  strategy: mu_plus_lambda
+  heli:
+    # Number of local generations performed inside HELI
+    generations: 10
+
+    # Number of offspring per structural mutant
+    offspring_per_seed: 8
+
+    # Maximum ratio of active HELI subpopulations
+    max_fraction: 1.0
+
+    # Mutation strength reduction inside HELI (e.g., 0.5 = half the sigma)
+    reduce_sigma_factor: 0.5
+
+    # Abort incubation if drift exceeds this value (seed too poor).
+    drift_stop_above: 2.0
+    
+    # Abort incubation if drift goes below this value (seed already good).
+    drift_stop_below: -0.25
+
+```
+
+---
+
+## Notes
+
+* HELI is executed **only** when a structural mutation occurs.
+
+* HELI inherits the mutation configuration of the module, scaled by `reduce_sigma_factor`.
+
+* The evaluation cost introduced by HELI is proportional to:
+
+  [
+  \text{num_structural_mutations} × \text{generations} × \text{offspring_per_seed}
+  ]
+
+* `max_fraction` prevents the system from spawning too many HELI subpopulations at once.
+
+* HELI does not change mutation operators, selection, or fitness; it only changes **where** structural mutants are evaluated.
+
+
+
+---
+
 ## Modules
 
 Modules define the parameter representation(s) of each individual. Multiple modules can be combined.
