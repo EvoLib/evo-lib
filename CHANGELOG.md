@@ -1,4 +1,4 @@
-## EvoLib 0.2.0b3dev6 [unreleased]
+## EvoLib 0.2.0b3dev23 [unreleased]
 
 ### Added
 - **HELI (Hierarchical Evolution with Lineage Incubation):**
@@ -23,6 +23,7 @@
       max_fraction: 0.1
       reduce_sigma_factor: 0.5
    ```
+- Add heli_experiment_logger for structured HELI run logging
 - New evaluation statistics in `Pop`:
   - `fitness_evaluations_total`: cumulative fitness evaluations.
   - `heli_fitness_evaluations_total`: cumulative HELI evaluations.
