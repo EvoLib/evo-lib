@@ -1,4 +1,4 @@
-## EvoLib 0.2.0b3dev23 [unreleased]
+## EvoLib 0.2.0b3 (2025-12-02)
 
 ### Added
 - **HELI (Hierarchical Evolution with Lineage Incubation):**
