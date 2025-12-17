@@ -68,6 +68,8 @@ def _build_architecture(
             recurrent=recurrent_kinds if role != NeuronRole.INPUT else None,
             connection_scope=para.connection_scope,
             connection_density=para.connection_density,
+            dynamics_name=para.neuron_dynamics_name,
+            dynamics_params=para.neuron_dynamics_params,
         )
 
 

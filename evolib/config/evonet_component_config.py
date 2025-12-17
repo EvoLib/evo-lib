@@ -26,6 +26,7 @@ from pydantic_core import core_schema
 from evolib.config.base_component_config import (
     CrossoverConfig,
     EvoNetMutationConfig,
+    EvoNetNeuronDynamicsConfig,
     StructuralMutationConfig,
 )
 
@@ -100,6 +101,9 @@ class EvoNetComponentConfig(BaseModel):
     # Numeric bounds for values; used by initialization and mutation
     weight_bounds: Tuple[float, float] = (-1.0, 1.0)
     bias_bounds: Tuple[float, float] = (-0.5, 0.5)
+
+    # Neuron Dynamics
+    neuron_dynamics: Optional[EvoNetNeuronDynamicsConfig] = None
 
     # Evolutionary operators
     mutation: Optional[EvoNetMutationConfig] = None

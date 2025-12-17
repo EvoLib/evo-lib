@@ -73,6 +73,10 @@ class EvoNet(ParaBase):
         # Optional configuration for structural mutation
         self.structural_cfg: StructuralMutationConfig | None = None
 
+        # Neuron Dynamics
+        self.neuron_dynamics_name: str = "standard"
+        self.neuron_dynamics_params: dict[str, float] = {}
+
     def apply_config(self, cfg: ModuleConfig) -> None:
 
         if not isinstance(cfg, EvoNetComponentConfig):
@@ -111,6 +115,10 @@ class EvoNet(ParaBase):
 
         if cfg.mutation.structural is not None:
             self.structural_cfg = cfg.mutation.structural
+
+        if cfg.neuron_dynamics is not None:
+            self.neuron_dynamics_name = cfg.neuron_dynamics.name
+            self.neuron_dynamics_params = cfg.neuron_dynamics.params
 
         # Apply crossover config
         apply_crossover_config(evo_params, cfg.crossover)
