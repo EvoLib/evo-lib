@@ -481,6 +481,14 @@ class HeliConfig(BaseModel):
         Abort incubation if drift exceeds this value (seed too poor).
     drift_stop_below : float, optional
         Abort incubation if drift goes below this value (seed already good).
+
+    seed_selection : {"fitness", "random", "none"}
+        Strategy for selecting which eligible offspring enter incubation
+        when their number exceeds `max_fraction`.
+
+        - "fitness": select best individuals by fitness (efficient, selective)
+        - "random": random selection (biologically motivated resource limitation)
+        - "none": no reordering (use existing order; mainly for debugging)
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -515,6 +523,18 @@ class HeliConfig(BaseModel):
     drift_stop_below: Optional[float] = Field(
         default=None,
         description="Abort incubation if drift < threshold (already viable).",
+    )
+
+    seed_selection: Literal["none", "fitness", "random"] = Field(
+        "fitness",
+        description=(
+            "Strategy for selecting which eligible offspring enter HELI incubation "
+            "when their number exceeds `max_fraction`: "
+            "'fitness' selects the best individuals by fitness, "
+            "'random' selects uniformly at random (resource-limited, "
+            "biologically motivated), "
+            "'none' applies no reordering (use existing order; mainly for debugging)."
+        ),
     )
 
     @model_validator(mode="after")

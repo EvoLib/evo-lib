@@ -18,6 +18,7 @@ Workflow:
 
 from __future__ import annotations
 
+import random
 from copy import deepcopy
 from typing import TYPE_CHECKING, List
 
@@ -158,9 +159,23 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
 
     # 2: Limit number of incubated seeds
     max_seeds = max(1, round(len(offspring) * pop.heli_max_fraction))
+    seed_policy = getattr(heli_cfg, "seed_selection", "fitness")
+
     if len(struct_mutants) > max_seeds:
-        pop.evaluate_indivs(struct_mutants)
-        struct_mutants = sort_by_fitness(struct_mutants)
+        if seed_policy == "fitness":
+            pop.evaluate_indivs(struct_mutants)
+            struct_mutants = sort_by_fitness(struct_mutants)
+
+        elif seed_policy == "random":
+
+            random.shuffle(struct_mutants)
+
+        elif seed_policy == "none":
+            pass
+
+        else:
+            raise ValueError(f"Unknown HELI seed_selection: {seed_policy}")
+
     seeds = struct_mutants[:max_seeds]
 
     if len(seeds) < 1:

@@ -1,3 +1,11 @@
+## EvoLib 0.2.0b4[unreleased]
+
+### Added
+- HELI: Seed selection for incubation is now configurable via `seed_selection`
+  (fitness | random | none), allowing both efficiency-oriented and
+  biologically motivated policies.
+
+
 ## EvoLib 0.2.0b3 (2025-12-02)
 
 ### Added
