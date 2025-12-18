@@ -103,7 +103,7 @@ class EvoNetComponentConfig(BaseModel):
     bias_bounds: Tuple[float, float] = (-0.5, 0.5)
 
     # Neuron Dynamics
-    neuron_dynamics: Optional[EvoNetNeuronDynamicsConfig] = None
+    neuron_dynamics: Optional[list[EvoNetNeuronDynamicsConfig]] = None
 
     # Evolutionary operators
     mutation: Optional[EvoNetMutationConfig] = None
@@ -111,6 +111,22 @@ class EvoNetComponentConfig(BaseModel):
     structural: Optional[StructuralMutationConfig] = None
 
     # Validators
+
+    @field_validator("neuron_dynamics")
+    @classmethod
+    def validate_neuron_dynamics_length(
+        cls,
+        nd: Optional[list[EvoNetNeuronDynamicsConfig]],
+        info: core_schema.FieldValidationInfo,
+    ) -> Optional[list[EvoNetNeuronDynamicsConfig]]:
+        if nd is None:
+            return None
+
+        dim = info.data.get("dim")
+        if dim is not None and len(nd) != len(dim):
+            raise ValueError("Length of 'neuron_dynamics' must match 'dim'")
+
+        return nd
 
     @field_validator("dim")
     @classmethod

@@ -116,10 +116,6 @@ class EvoNet(ParaBase):
         if cfg.mutation.structural is not None:
             self.structural_cfg = cfg.mutation.structural
 
-        if cfg.neuron_dynamics is not None:
-            self.neuron_dynamics_name = cfg.neuron_dynamics.name
-            self.neuron_dynamics_params = cfg.neuron_dynamics.params
-
         # Apply crossover config
         apply_crossover_config(evo_params, cfg.crossover)
 

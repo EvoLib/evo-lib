@@ -58,6 +58,15 @@ def _build_architecture(
         else:
             role = NeuronRole.HIDDEN
 
+        # resolve dynamics per layer
+        if cfg.neuron_dynamics is None:
+            dynamics_name = "standard"
+            dynamics_params = {}
+        else:
+            dynamics_cfg = cfg.neuron_dynamics[layer_idx]
+            dynamics_name = dynamics_cfg.name
+            dynamics_params = dynamics_cfg.params or {}
+
         recurrent_kinds = resolve_recurrent_kinds(cfg.recurrent)
         para.net.add_neuron(
             count=num_neurons,
@@ -68,8 +77,8 @@ def _build_architecture(
             recurrent=recurrent_kinds if role != NeuronRole.INPUT else None,
             connection_scope=para.connection_scope,
             connection_density=para.connection_density,
-            dynamics_name=para.neuron_dynamics_name,
-            dynamics_params=para.neuron_dynamics_params,
+            dynamics_name=dynamics_name,
+            dynamics_params=dynamics_params,
         )
 
 
