@@ -110,6 +110,23 @@ land safely between the flags.
 
 ---
 
+### `05_bipedal_walker.py`
+
+Evolves a neural-network controller for the
+[BipedalWalker-v3](https://gymnasium.farama.org/environments/box2d/bipedal_walker/) environment.
+
+This is a continuous-control benchmark with a bipedal robot and a high-dimensional state space.
+
+* Fitness: negative cumulative reward (minimization), averaged across multiple episodes (variance reduction).
+* Observation space: continuous (24 floats).
+* Action space: continuous (4 floats).
+* Visualization: on improvements, the best individual is rendered and saved as an animated GIF in `05_frames/`.
+
+<p align="center">
+  <img src="./05_frames/05_bipedal_walker.gif" alt="BipedalWalker Evolution" width="512"/>
+</p>
+
+
 ## See Also
 
 * [`../07_evonet/`](../07_evonet) — evolvable neural networks for function approximation.  

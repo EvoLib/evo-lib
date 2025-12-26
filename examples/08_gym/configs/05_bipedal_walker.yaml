@@ -1,0 +1,24 @@
+parent_pool_size: 50
+offspring_pool_size: 250
+max_generations: 200
+num_elites: 5
+
+evolution:
+  strategy: mu_plus_lambda
+
+
+modules:
+  brain:
+    type: evonet
+    dim: [24, 8, 4]         # 24 inputs (state), 4 outputs (joint torques)
+    activation: [linear, tanh, linear]
+    recurrent: direct
+    initializer: normal_evonet
+    weight_bounds: [-1.0, 1.0]
+    bias_bounds: [-0.5, 0.5]
+      
+    mutation:
+      strategy: adaptive_individual
+      min_strength: 0.005
+      max_strength: 0.1
+      probability: 0.1
