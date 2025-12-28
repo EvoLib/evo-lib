@@ -24,7 +24,7 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 - **Parallel evaluation (optional)**: basic support for [Ray](https://www.ray.io/) to speed up fitness evaluations.  
 - **HELI (Hierarchical Evolution with Lineage Incubation)**  
   Runs short micro-evolutions ("incubations") for structure-mutated individuals, allowing new topologies to stabilize before rejoining the main population.  
-- **Type-checked**: PEP8 compliant, and consistent code style.  
+- **Type-checked**: static typing with mypy, PEP8-compliant and consistent code style.  
 
 
 > **EvoLib is currently in beta. The core API and configuration format are stable, but some features are still under development.**
@@ -117,7 +117,7 @@ modules:
         allowed: [tanh, relu, sigmoid]
 
       structural:
-          add_neuron:
+        add_neuron:
           probability: 0.015
           init_connection_ratio: 0.5
 [...]
