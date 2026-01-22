@@ -1,4 +1,3 @@
 # requirements-dev.txt
 -e git+https://github.com/EvoLib/evo-net.git@main#egg=evonet
-mypy
 types-PyYAML

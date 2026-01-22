@@ -23,14 +23,14 @@ jobs:
       - name: Install project and tools
         run: |
           pip install -r requirements-dev.txt
-          pip install .
+          pip install -e . --no-deps
           
           # Linter, Formatter, Typechecker, Testing Tools
           pip install \
             black=25.1.0 \
             isort \
             flake8 \
-            mypy \
+            mypy==1.16.1 \
             pytest \
             docformatter \
             types-PyYAML \
