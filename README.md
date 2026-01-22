@@ -42,7 +42,7 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 pip install evolib
 ```
 
-Requirements: Python 3.10+ and packages in `requirements.txt`.
+Requirements: Python 3.12+ and packages in `requirements.txt`.
 
 ---
 
