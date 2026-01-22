@@ -19,6 +19,7 @@ from pydantic import (
     ConfigDict,
     Field,
     field_validator,
+    model_validator,
     validator,
 )
 from pydantic_core import core_schema
@@ -29,6 +30,42 @@ from evolib.config.base_component_config import (
     EvoNetNeuronDynamicsConfig,
     StructuralMutationConfig,
 )
+
+
+class DelayConfig(BaseModel):
+    """Delay initialization for recurrent connections."""
+
+    initializer: Literal["static", "random"] = Field(
+        default="static",
+        description="Delay initializer for recurrent connections.",
+    )
+
+    value: Optional[int] = Field(
+        default=None,
+        ge=1,
+        description="Fixed delay value (required for initializer=static).",
+    )
+
+    bounds: Optional[Tuple[int, int]] = Field(
+        default=None,
+        description="Inclusive [min, max] delay bounds (required for "
+        "initializer=random).",
+    )
+
+    @model_validator(mode="after")
+    def _validate(self) -> "DelayConfig":
+        if self.initializer == "static":
+            if self.value is None:
+                raise ValueError("delay.value is required for initializer=static")
+        elif self.initializer == "random":
+            if self.bounds is None:
+                raise ValueError("delay.bounds is required for initializer=random")
+            lo, hi = self.bounds
+            if lo < 1 or hi < 1:
+                raise ValueError("delay bounds must be >= 1 (recurrent-only)")
+            if hi < lo:
+                raise ValueError("delay.bounds[1] must be >= delay.bounds[0]")
+        return self
 
 
 class EvoNetComponentConfig(BaseModel):
@@ -101,6 +138,9 @@ class EvoNetComponentConfig(BaseModel):
     # Numeric bounds for values; used by initialization and mutation
     weight_bounds: Tuple[float, float] = (-1.0, 1.0)
     bias_bounds: Tuple[float, float] = (-0.5, 0.5)
+
+    # Optional delay initialization for recurrent connections
+    delay: Optional[DelayConfig] = None
 
     # Neuron Dynamics
     neuron_dynamics: Optional[list[EvoNetNeuronDynamicsConfig]] = None

@@ -12,10 +12,33 @@ import numpy as np
 from evonet.activation import random_function_name
 from evonet.enums import ConnectionType, NeuronRole
 
-from evolib.config.evonet_component_config import EvoNetComponentConfig
+from evolib.config.evonet_component_config import DelayConfig, EvoNetComponentConfig
 from evolib.config.schema import FullConfig
 from evolib.interfaces.enum_helpers import resolve_recurrent_kinds
 from evolib.representation.evonet import EvoNet
+
+
+def _apply_delay_init(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
+    """Initialize delay on recurrent connections only."""
+
+    if cfg.delay is None:
+        return
+
+    delay_cfg: DelayConfig = cfg.delay
+
+    for c in para.net.get_all_connections():
+        if c.type is not ConnectionType.RECURRENT:
+            continue
+
+        if delay_cfg.initializer == "random" and delay_cfg.bounds is not None:
+            assert delay_cfg.bounds is not None
+            lo, hi = delay_cfg.bounds
+            d = int(np.random.randint(lo, hi + 1))
+        else:
+            assert delay_cfg.value is not None
+            d = int(delay_cfg.value)
+
+        c.set_delay(d)
 
 
 def _build_architecture(
@@ -121,6 +144,7 @@ def initializer_normal_evonet(config: FullConfig, module: str) -> EvoNet:
     para.apply_config(cfg)
 
     _build_architecture(para, cfg)
+    _apply_delay_init(para, cfg)
 
     # Initialize weights and biases with normal distribution
     weights = np.random.normal(loc=0.0, scale=0.5, size=para.net.num_weights)
@@ -148,6 +172,7 @@ def initializer_random_evonet(config: FullConfig, module: str) -> EvoNet:
     para.apply_config(cfg)
 
     _build_architecture(para, cfg, connection_init="random")
+    _apply_delay_init(para, cfg)
 
     bias_bounds = cfg.bias_bounds or (-0.5, 0.5)
     min_bias = bias_bounds[0]
@@ -175,6 +200,7 @@ def initializer_zero_evonet(config: FullConfig, module: str) -> EvoNet:
     para.apply_config(cfg)
 
     _build_architecture(para, cfg, connection_init="zero")
+    _apply_delay_init(para, cfg)
 
     para.net.set_biases(np.zeros(para.net.num_biases))
     return para
@@ -207,6 +233,7 @@ def initializer_identity_evonet(config: FullConfig, module: str) -> EvoNet:
     para.apply_config(cfg)
 
     _build_architecture(para, cfg)
+    _apply_delay_init(para, cfg)
 
     para.net.set_weights(np.zeros(para.net.num_weights))
     para.net.set_biases(np.zeros(para.net.num_biases))
