@@ -27,7 +27,7 @@ jobs:
           
           # Linter, Formatter, Typechecker, Testing Tools
           pip install \
-            black=25.1.0 \
+            black==25.1.0 \
             isort \
             flake8 \
             mypy==1.16.1 \
