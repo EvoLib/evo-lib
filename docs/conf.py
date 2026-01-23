@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath(".."))
 
 project = "EvoLib"
 author = "EvoLib"
-copyright = "2025, EvoLib"
+copyright = "2026, EvoLib"
 
 # --- Load version from pyproject.toml ---
 pyproject_file = pathlib.Path(__file__).parent.parent / "pyproject.toml"
