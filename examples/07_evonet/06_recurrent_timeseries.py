@@ -34,8 +34,8 @@ PRED_LEN = 10
 WARMUP_STEPS = max(PRED_LEN, 20)
 EVAL_RUNS = 10
 
-FRAME_FOLDER = "05_frames"
-CONFIG_FILE = "./configs/05_recurrent_timeseries.yaml"
+FRAME_FOLDER = "06_frames"
+CONFIG_FILE = "./configs/06_recurrent_timeseries.yaml"
 
 FULL_SEQ = generate_timeseries(SEQ_LEN + PRED_LEN, pattern=PATTERN, seed=1)
 CURRENT_SEQ = FULL_SEQ[:-PRED_LEN]
@@ -109,7 +109,7 @@ def eval_timeseries_fitness(indiv: Individual) -> None:
 
 
 def checkpoint(pop: Population) -> None:
-    save_checkpoint(pop, run_name="05_recurrent_timeseries")
+    save_checkpoint(pop, run_name="06_recurrent_timeseries")
 
 
 # Visualization + Checkpoint
@@ -154,7 +154,7 @@ def main() -> None:
     pop = resume_or_create(
         CONFIG_FILE,
         fitness_function=eval_timeseries_fitness,
-        run_name="05_recurrent_timeseries",
+        run_name="06_recurrent_timeseries",
     )
 
     pop.run(verbosity=0, on_generation_end=on_generation_end)

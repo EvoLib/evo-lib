@@ -1,0 +1,30 @@
+# Sample configuration for 01_evonet_sine_approximation.py
+
+random_seed: 1  # Global random seed for reproducibility.
+
+parent_pool_size: 20
+offspring_pool_size: 60
+max_generations: 50
+max_indiv_age: 0
+num_elites: 2
+
+evolution:
+  strategy: mu_comma_lambda
+
+modules:
+  nnet:
+    type: evonet
+    dim: [1, 1, 1]
+    activation: ["linear", "linear", "linear"]
+    initializer: normal_evonet
+    weight_bounds: [-1.0, 1.0]
+    recurrent: direct
+
+    delay:
+      initializer: static
+      value: 15
+
+    mutation:
+      strategy: constant
+      strength: 0.05
+      probability: 1.0

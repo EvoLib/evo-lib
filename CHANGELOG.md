@@ -1,6 +1,10 @@
 ## EvoLib 0.2.0b4[unreleased]
 
 ### Added
+- Added support for initializing connection delays on recurrent edges.
+  Delays are configured via `delay` block in the EvoNet module and are
+  applied during network initialization. Feed-forward connections are not
+  affected.
 - HELI: Seed selection for incubation is now configurable via `seed_selection`
   (fitness | random | none), allowing both efficiency-oriented and
   biologically motivated policies.
