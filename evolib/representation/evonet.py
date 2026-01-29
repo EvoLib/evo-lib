@@ -6,8 +6,9 @@ pipeline. Supports configuration, mutation, crossover, and conversion to/from ve
 form.
 """
 
+import copy
 import random as rng
-from typing import Any, Literal, Optional
+from typing import Any, Literal, Optional, Self
 
 import numpy as np
 from evonet.core import Nnet
@@ -76,6 +77,25 @@ class EvoNet(ParaBase):
         # Neuron Dynamics
         self.neuron_dynamics_name: str = "standard"
         self.neuron_dynamics_params: dict[str, float] = {}
+
+    def __deepcopy__(self, memo: dict[int, object]) -> Self:
+        """
+        Deepcopy EvoNet without copying temporal state (delay buffers).
+
+        Structural and parametric state is copied, execution state is reset.
+        """
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+
+        # deepcopy all attributes
+        for k, v in self.__dict__.items():
+            setattr(result, k, copy.deepcopy(v, memo))
+
+        # Ensure no temporal state (delay buffers, neuron states) leaks
+        result.net.reset(full=True)
+
+        return result
 
     def apply_config(self, cfg: ModuleConfig) -> None:
 

@@ -9,6 +9,12 @@
   (fitness | random | none), allowing both efficiency-oriented and
   biologically motivated policies.
 
+### Fixed
+- Fixed an issue where deepcopy of `EvoNet` copied temporal execution
+  state (e.g. delay buffers on recurrent connections), causing offspring
+  to inherit history from their parents. Temporal state is now cleared
+  after deepcopy to ensure deterministic evaluation
+
 
 ## EvoLib 0.2.0b3 (2025-12-02)
 
