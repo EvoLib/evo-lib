@@ -15,7 +15,10 @@ from evonet.core import Nnet
 from evonet.enums import NeuronRole
 from evonet.mutation import mutate_activations, mutate_bias, mutate_weight
 
-from evolib.config.base_component_config import StructuralMutationConfig
+from evolib.config.base_component_config import (
+    DelayMutationConfig,
+    StructuralMutationConfig,
+)
 from evolib.config.evonet_component_config import EvoNetComponentConfig
 from evolib.interfaces.enums import MutationStrategy
 from evolib.interfaces.types import ModuleConfig
@@ -78,6 +81,9 @@ class EvoNet(ParaBase):
         self.neuron_dynamics_name: str = "standard"
         self.neuron_dynamics_params: dict[str, float] = {}
 
+        # Delay
+        self.delay_mutation_cfg: DelayMutationConfig | None = None
+
     def __deepcopy__(self, memo: dict[int, object]) -> Self:
         """
         Deepcopy EvoNet without copying temporal state (delay buffers).
@@ -139,6 +145,9 @@ class EvoNet(ParaBase):
         # Apply crossover config
         apply_crossover_config(evo_params, cfg.crossover)
 
+        # Apply delay
+        self.delay_mutation_cfg = cfg.mutation.delay
+
     def calc(self, input_values: list[float]) -> list[float]:
         return self.net.calc(input_values)
 
@@ -188,6 +197,33 @@ class EvoNet(ParaBase):
             struct_mutated = mutate_structure(self.net, self.structural_cfg)
             self._has_structural_change = bool(struct_mutated)
             self.is_structural_mutant = bool(struct_mutated)
+
+        # Delay mutation (recurrent edges only)
+        if (
+            self.delay_mutation_cfg is not None
+            and self.delay_mutation_cfg.probability > 0.0
+        ):
+            cfg = self.delay_mutation_cfg
+            lo, hi = cfg.bounds
+
+            for connection in self.net.get_all_connections():
+                if connection.type.name != "RECURRENT":
+                    continue
+                if rng.random() >= cfg.probability:
+                    continue
+
+                if cfg.mode == "delta_step":
+                    sign = -1 if rng.random() < 0.5 else 1
+                    new_delay = int(connection.delay + sign * cfg.delta)
+                elif cfg.mode == "resample":
+                    # random.randint is inclusive on both ends
+                    new_delay = int(rng.randint(lo, hi))
+                else:
+                    raise ValueError(f"Unsupported delay mutation mode: {cfg.mode}")
+
+                # Clamp and apply (Connection.set_delay() normalizes <=0 -> 1)
+                new_delay = max(lo, min(hi, new_delay))
+                connection.set_delay(new_delay)
 
     def crossover_with(self, partner: ParaBase) -> None:
         """

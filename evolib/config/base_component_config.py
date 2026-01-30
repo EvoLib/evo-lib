@@ -162,6 +162,48 @@ class MutationConfig(BaseModel):
         return self
 
 
+class DelayMutationConfig(BaseModel):
+    """
+    Mutation config for recurrent connection delays (discrete time steps).
+
+    Semantics:
+        - Applied per recurrent connection with given probability.
+        - Delay is clamped to bounds (inclusive).
+        - Delay is always an int; Connection.set_delay() normalizes <=0 -> 1.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    probability: float = Field(
+        ..., description="Per-recurrent-edge mutation" "probability in [0,1]."
+    )
+    mode: Literal["delta_step", "resample"] = Field(
+        ..., description="Delay mutation operator."
+    )
+    delta: int = Field(
+        default=1,
+        ge=1,
+        description="Step size for delta (delay += ±delta). Ignored for resample.",
+    )
+    bounds: tuple[int, int] = Field(
+        ...,
+        description="Inclusive bounds (min_delay, max_delay)."
+        "Must satisfy 1 <= min <= max.",
+    )
+
+    @model_validator(mode="after")
+    def _validate(self) -> "DelayMutationConfig":
+        if not (0.0 <= self.probability <= 1.0):
+            raise ValueError("mutation.delay.probability must be in [0, 1].")
+
+        lo, hi = self.bounds
+        if lo < 1:
+            raise ValueError("mutation.delay.bounds[0] must be >= 1.")
+        if lo > hi:
+            raise ValueError("mutation.delay.bounds must satisfy min <= max.")
+        return self
+
+
 class AddNeuron(BaseModel):
     probability: float = Field(0.0, ge=0.0, le=1.0)
     init_connection_ratio: Optional[float] = Field(
@@ -384,6 +426,10 @@ class EvoNetMutationConfig(MutationConfig):
     )
     structural: Optional[StructuralMutationConfig] = Field(
         default=None, description="Optional override for structural mutation."
+    )
+    delay: Optional[DelayMutationConfig] = Field(
+        default=None,
+        description="Optional mutation config for recurrent connection delays.",
     )
 
     @model_validator(mode="after")
