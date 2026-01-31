@@ -139,7 +139,7 @@ Key aspects:
 
 ---
 
-### `07_recurrent_trading.py`
+### `08_recurrent_trading.py`
 
 Evolves a recurrent EvoNet to act as a **trading strategy**.  
 At each time step, the network sees only the **current input** (price at time *t*),
