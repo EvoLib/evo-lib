@@ -8,6 +8,7 @@ This module provides functions for visualizing:
 - Mutation probability and strength trends
 - Fitness comparison
 """
+
 from __future__ import annotations
 
 import os
@@ -577,16 +578,18 @@ def save_combined_net_plot(
 
 
 def plot_bit_prediction(
-    pred_values: list[int],
+    pred_values: list[float],
     true_bits: list[int],
     save_path: str,
     input_bits: list[int] | None = None,
     title: str = "Bit Prediction",
     show: bool = False,
     dpi: int = 150,
+    pred_name: str = "Prediction",
+    show_target_raster: bool = True,
 ) -> None:
     """
-    Visualize bit sequence prediction over time.
+    Visualize a bit-sequence task over time.
 
     This plot combines two views:
       - A raster plot (top) showing discrete input/target/predicted bits
@@ -597,11 +600,11 @@ def plot_bit_prediction(
     true_bits : list[int]
         Ground truth sequence of bits (0/1).
     pred_values : list[float]
-        Predicted values (will be shown as continuous in line plot,
-        and rounded to 0/1 in raster plot).
+        Model output values. Shown as continuous in the line plot and rounded
+        to 0/1 in the raster plot.
     input_bits : list[int], optional
-        Optional input sequence of bits (0/1). If given, it is shown
-        in the raster plot above target and prediction.
+        Optional input sequence of bits (0/1). If given, it is shown in the raster
+        plot above target and prediction.
     save_path : str
         File path to save the plot image.
     title : str, optional
@@ -610,61 +613,78 @@ def plot_bit_prediction(
         If True, show the plot window interactively. Default: False.
     dpi : int, optional
         Resolution for saving the figure.
+    pred_name : str, optional
+        Label used for the predicted/output series (e.g., "Prediction" or "Echo").
+    show_target_raster : bool, optional
+        If True, include the target bits in the raster plot.
 
     Notes
     -----
-    - This function is specialized for visualization of
-      bit prediction tasks. For general regression or function
-      approximation, use `plot_approximation`.
+    - For general regression/function approximation, use `plot_approximation`.
     """
     pred_round = np.rint(pred_values).astype(int)
 
-    # build raster data
-    rows = []
-    row_labels = []
+    # Build raster data
+    rows: list[np.ndarray] = []
+    row_labels: list[str] = []
+
     if input_bits is not None:
         rows.append(np.asarray(input_bits, dtype=int))
         row_labels.append("Input")
-    # if true_bits is not None:
-    #    rows.append(np.asarray(true_bits, dtype=int))
-    #    row_labels.append("Target")
-    rows.append(pred_round)
-    row_labels.append("Pred")
 
-    # encode to 4-class grid: (row, value)
+    if show_target_raster:
+        rows.append(np.asarray(true_bits, dtype=int))
+        row_labels.append("Target")
+
+    rows.append(pred_round)
+    row_labels.append(pred_name if pred_name != "Prediction" else "Pred")
+
     grid = np.vstack(rows)
 
-    # plotting
     fig, axes = plt.subplots(2, 1, figsize=(10, 6), constrained_layout=True)
 
-    # raster view
+    # Raster view
     axes[0].imshow(grid, aspect="auto", interpolation="nearest", cmap="Greys")
     axes[0].set_yticks(range(len(row_labels)))
     axes[0].set_yticklabels(row_labels)
     axes[0].set_xticks([])
     axes[0].set_title(title)
 
-    # line/scatter view
+    # Line/scatter view
     x = np.arange(len(true_bits))
-    axes[1].plot(x, true_bits, "ko", label="Target", markersize=4)
-    axes[1].plot(x, pred_values, "r-", label="Prediction", alpha=0.7)
+    axes[1].plot(
+        x,
+        true_bits,
+        color="black",
+        marker="o",
+        linestyle="None",
+        label="Target",
+        markersize=4,
+    )
+    axes[1].plot(
+        x,
+        pred_values,
+        color="red",
+        linestyle="-",
+        alpha=0.7,
+        label=pred_name,
+    )
     axes[1].set_xlim(0, len(true_bits))
-
     axes[1].set_ylim(-0.2, 1.2)
     axes[1].set_xlabel("Time step")
     axes[1].set_ylabel("Value")
     axes[1].legend(loc="upper right")
 
-    # add threshold line at 0.5
+    # Threshold line
     axes[1].axhline(0.5, color="gray", linestyle="--", linewidth=1, alpha=0.6)
 
-    # save/show
     if save_path:
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         plt.savefig(save_path, dpi=dpi)
 
     if show:
         plt.show()
+
     plt.close()
 
 
