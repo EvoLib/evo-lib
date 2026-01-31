@@ -63,7 +63,7 @@ def on_improvement(pop: Pop) -> None:
         np.arange(len(X)),
         Y_TRUE,
         np.array(y_pred),
-        f"04_frames/gen_{pop.generation_num:04d}.png",
+        f"05_frames/gen_{pop.generation_num:04d}.png",
         title="Structural Mutation on XOR",
     )
 
@@ -79,7 +79,7 @@ def on_end(pop: Pop) -> None:
 
 
 # Evolution setup
-pop = resume_or_create("configs/04_structural_xor.yaml", xor_fitness, "xor")
+pop = resume_or_create("configs/05_structural_xor.yaml", xor_fitness, "xor")
 
 # Evolution loop
 pop.run(on_improvement=on_improvement, on_end=on_end)

@@ -1,6 +1,9 @@
 ## EvoLib 0.2.0b4[unreleased]
 
 ### Added
+- Added delay mutation for EvoNet recurrent connections. Delays can now
+  be mutated via a configuration block supporting delta-step
+  and resampling modes with configurable bounds.
 - Added support for initializing connection delays on recurrent edges.
   Delays are configured via `delay` block in the EvoNet module and are
   applied during network initialization. Feed-forward connections are not
