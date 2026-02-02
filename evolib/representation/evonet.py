@@ -77,10 +77,6 @@ class EvoNet(ParaBase):
         # Optional configuration for structural mutation
         self.structural_cfg: StructuralMutationConfig | None = None
 
-        # Neuron Dynamics
-        self.neuron_dynamics_name: str = "standard"
-        self.neuron_dynamics_params: dict[str, float] = {}
-
         # Delay
         self.delay_mutation_cfg: DelayMutationConfig | None = None
 
