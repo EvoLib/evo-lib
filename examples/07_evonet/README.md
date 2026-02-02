@@ -90,9 +90,6 @@ Shows the **core effect of leaky neuron dynamics**: temporal smoothing under noi
 
 * Input: noisy binary signal `x[t] ∈ {0,1}` with slowly changing segments
 * Target: exponential moving average (EMA) of the input
-  \[
-  y[t] = \alpha \cdot x[t] + (1 - \alpha) \cdot y[t-1]
-  \]
 * Fitness: MSE after a short warm-up
 
 
@@ -105,6 +102,7 @@ Key aspects:
 <p align="center">
   <img src="./04_frames/04_leaky_temporal_smoothing.png" alt="Temporal Smoothing" width="512"/>
 </p>
+
 ---
 
 ### `05_image_approximation.py`
