@@ -38,8 +38,8 @@ WARMUP_STEPS = max(0, PRED_LEN)
 EVAL_RUNS = 10  # number of episodes for fitness
 PLOT_SEED = 1234  # fixed seed for reproducible plots
 
-FRAME_FOLDER = "07_frames"
-CONFIG_FILE = "./configs/07_recurrent_trading.yaml"
+FRAME_FOLDER = "09_frames"
+CONFIG_FILE = "./configs/09_recurrent_trading.yaml"
 
 # maps class index (0..4) --> trading position: short/flat/long
 CLASS_POS = [-1.0, -0.5, 0.0, 0.5, 1.0]
@@ -67,7 +67,7 @@ class EpisodeResult(NamedTuple):
 
 
 def checkpoint(pop: Population) -> None:
-    save_checkpoint(pop, run_name="07_recurrent_trading")
+    save_checkpoint(pop, run_name="09_recurrent_trading")
 
 
 # Label generation

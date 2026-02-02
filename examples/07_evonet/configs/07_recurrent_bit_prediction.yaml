@@ -1,3 +1,5 @@
+# Sample configuration for 07_recurrent_bit_prediction
+
 random_seed: 42
 
 parent_pool_size: 20

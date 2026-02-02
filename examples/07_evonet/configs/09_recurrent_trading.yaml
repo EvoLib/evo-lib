@@ -1,9 +1,11 @@
+# Sample configuration for 09_recurrent_trading.py
+
 #random_seed: 42
 
 parent_pool_size: 80
 offspring_pool_size: 400
-max_generations: 100
-num_elites: 8
+max_generations: 250
+num_elites: 2
 
 evolution:
   strategy: mu_plus_lambda
@@ -11,8 +13,8 @@ evolution:
 modules:
   brain:
     type: evonet
-    dim: [1, 8, 1]
-    activation: [linear, tanh, tanh]
+    dim: [1, 8, 5]
+    activation: [linear, tanh, softmax]
     recurrent: "all"
     initializer: identity_evonet
     weight_bounds: [-5.0, 5.0]

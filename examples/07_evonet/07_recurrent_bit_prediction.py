@@ -15,8 +15,8 @@ Key details:
 from evolib import Individual, Population, plot_bit_prediction
 from evolib.utils.benchmarks import lfsr_sequence
 
-FRAME_FOLDER = "06_frames"
-CONFIG_FILE = "configs/06_recurrent_bit_prediction.yaml"
+FRAME_FOLDER = "07_frames"
+CONFIG_FILE = "configs/07_recurrent_bit_prediction.yaml"
 
 SEQ_LENGTH = 31
 warmup_steps = SEQ_LENGTH
@@ -102,4 +102,4 @@ if __name__ == "__main__":
     pop.run(verbosity=0, on_generation_end=save_plot)
 
     best = pop.best()
-    best.para["brain"].net.plot("06_recurrent_bit_prediction", fillcolors_on=True)
+    best.para["brain"].net.plot("07_recurrent_bit_prediction", fillcolors_on=True)

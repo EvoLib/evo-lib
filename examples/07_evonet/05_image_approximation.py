@@ -77,7 +77,7 @@ def on_improvement(pop: Pop) -> None:
     assert best.fitness is not None
     pred_img = predict_image(best, coords, img_size)
     save_frame(
-        path=(f"./04_frames/gen_{pop.generation_num:04d}.png"),
+        path=(f"./05_frames/gen_{pop.generation_num:04d}.png"),
         target=target,
         pred=pred_img,
         gen=pop.generation_num,
@@ -91,7 +91,7 @@ target = make_target(size=img_size)
 coords = make_coords(img_size)
 
 pop = Pop(
-    config_path="configs/04_image_approximation.yaml", fitness_function=my_fitness
+    config_path="configs/05_image_approximation.yaml", fitness_function=my_fitness
 )
 
 pop.run(on_improvement=on_improvement)

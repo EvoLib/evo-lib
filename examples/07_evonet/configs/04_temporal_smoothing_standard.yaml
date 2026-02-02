@@ -1,0 +1,34 @@
+# Sample configuration for 04_temporal_smoothing_standard.yaml
+
+parent_pool_size: 30
+offspring_pool_size: 60
+max_generations: 80
+num_elites: 2
+random_seed: 1
+
+evolution:
+  strategy: mu_plus_lambda
+
+modules:
+  nnet:
+    type: evonet
+    dim: [1, 6, 1]
+    activation: [linear, tanh, sigmoid]
+    initializer: random_evonet
+
+    weight_bounds: [-2.0, 2.0]
+    bias_bounds: [-1.0, 1.0]
+
+    # All layers standard
+    neuron_dynamics:
+      - name: standard
+        params: {}
+      - name: standard
+        params: {}
+      - name: standard
+        params: {}
+
+    mutation:
+      strategy: constant
+      strength: 0.20
+      probability: 0.80

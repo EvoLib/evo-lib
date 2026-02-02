@@ -1,4 +1,4 @@
-# Sample configuration for 01_evonet_sine_approximation.py
+# Sample configuration for 05_evonet_sine_approximation.py
 
 parent_pool_size: 70
 offspring_pool_size: 420

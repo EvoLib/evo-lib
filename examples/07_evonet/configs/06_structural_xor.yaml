@@ -1,3 +1,5 @@
+# Sample configuration for 06_structural_xor.py
+
 parent_pool_size: 20
 offspring_pool_size: 40
 max_generations: 200
