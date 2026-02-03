@@ -1,22 +1,20 @@
 # Configuration Guide
 
-EvoLib experiments are defined via **YAML configuration files**.  
+EvoLib experiments are defined via **YAML configuration files**.
 This makes setups explicit, reproducible, and easy to adapt.
 
 Below you find three representative configurations:
 
-- **A minimal example** – the smallest viable run.  
-- **A full vector-based setup** – showing multiple modules, selection, and replacement.  
-- **A full EvoNet setup** – demonstrating weight and structural mutation.  
-
-Each snippet is commented inline for clarity.
+- **A minimal example** – the smallest viable run.
+- **A full vector-based setup** – showing multiple modules, selection, and replacement.
+- **A full EvoNet setup** – demonstrating weight, delay, and structural mutation.
 
 ---
 
 ## A) Minimal configuration
 
-This is the smallest possible (μ + λ) run.  
-It demonstrates the core building blocks: pools, a single vector module, and constant mutation.  
+This is the smallest possible (μ + λ) run.
+It demonstrates the core building blocks: pools, a single vector module, and constant mutation.
 A fitness function (e.g. `sphere`) must still be provided in practice.
 
 ```yaml
@@ -42,6 +40,22 @@ modules:
       probability: 1.0
 ```
 
+Minimal Python usage:
+
+```python
+from evolib import Pop
+import numpy as np
+
+def sphere(indiv) -> None:
+    # Example: sum of squares on a 2D vector module named "test-vector"
+    x = np.asarray(indiv.para["test-vector"].vector, dtype=float)
+    indiv.fitness = float(np.sum(x**2))
+
+pop = Pop(config_path="population.yaml", initialize=True)
+pop.set_fitness_function(sphere)
+pop.run(verbosity=1)
+```
+
 ---
 
 ## B) Maximum Vector configuration
@@ -49,7 +63,6 @@ modules:
 This example shows a more complete setup: tournament selection, steady-state replacement, stopping criteria, and two vector modules with different operator settings.
 
 ```yaml
-
 random_seed: 42             # reproducibility
 
 parent_pool_size: 40
@@ -97,16 +110,22 @@ modules:
       strategy: constant
       probability: 0.3
       operator: blx
-
 ```
 
 ---
 
 ## C) Maximum EvoNet configuration
 
-This configuration demonstrates EvoNet evolution: weight mutation, bias-specific overrides, and structural mutation.
-The `dim: [2, 0, 0, 1]` starts with minimal topology, letting structural mutation grow hidden nodes and edges.
-`max_nodes` and `max_edges` keep growth bounded.
+This configuration demonstrates EvoNet evolution: weight mutation, bias-specific overrides, activation mutation, delay mutation, and structural mutation.
+
+`dim: [2, 0, 0, 1]` starts with empty hidden layers, letting structural mutation grow nodes and edges.
+
+Topology constraints:
+- `max_neurons` and `max_connections` keep growth bounded (these are the current names; avoid older `max_nodes/max_edges`).
+
+Delay:
+- `delay:` initializes delays of recurrent connections at build time.
+- `mutation.delay:` mutates delays during evolution (recurrent connections only).
 
 ```yaml
 parent_pool_size: 20
@@ -130,6 +149,15 @@ modules:
     weight_bounds: [-5.0, 5.0]
     bias_bounds:   [-1.0, 1.0]
 
+    recurrent: direct   # REQUIRED for delay to have any effect
+
+    # NOTE: Delays only apply to recurrent connections.
+    # If `recurrent` is not enabled, this block has no effect.
+    delay:
+      initializer: random   # random | fixed
+      bounds: [1, 8]        # only for random
+      # value: 3            # only for fixed
+
     mutation:
       strategy: constant
       probability: 1.0
@@ -145,6 +173,13 @@ modules:
       activations:
         probability: 0.01
         allowed: [tanh, relu, sigmoid]
+
+      # Optional delay mutation (recurrent connections only)
+      delay:
+        probability: 0.05
+        bounds: [1, 16]
+        mode: delta_step     # delta_step | resample
+        delta: 1
 
       # Structural mutation
       structural:
@@ -171,13 +206,14 @@ modules:
           recurrent: none
           connection_scope: crosslayer
           max_neurons: 25
-          max_connections: 50```
+          max_connections: 50
+```
 
 ---
 
 ## D) Parallel Evaluation (optional)
 
-For expensive problems, EvoLib can evaluate individuals in parallel using [Ray](https://www.ray.io/).
+For expensive problems, EvoLib can evaluate individuals in parallel using Ray.
 
 ```yaml
 parallel:
