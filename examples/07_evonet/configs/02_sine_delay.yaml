@@ -17,7 +17,11 @@ modules:
     dim: [1, 1, 1]
     activation: ["linear", "linear", "linear"]
     initializer: normal_evonet
-    weight_bounds: [-1.0, 1.0]
+    
+    weights:
+      initializer: normal
+      bounds: [-1.0, 1.0]
+
     recurrent: direct
 
     delay:

@@ -29,7 +29,10 @@ def make_minimal_evonet() -> EvoNet:
                 "dim": [2, 3, 1],
                 "activation": ["linear", "tanh", "sigmoid"],
                 "initializer": "normal_evonet",
-                "weight_bounds": [-1.0, 1.0],
+                "weights": {
+                    "initializer": "normal",
+                    "bounds": [-1.0, 1.0],
+                },
                 "bias_bounds": [-0.5, 0.5],
                 "mutation": {
                     "strategy": "constant",

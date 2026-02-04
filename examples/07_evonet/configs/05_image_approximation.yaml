@@ -18,7 +18,10 @@ modules:
     dim: [2, 16, 8, 1]
     activation: ["linear", "tanh", "tanh", "sigmoid"]
     initializer: normal_evonet
-    weight_bounds: [-1.0, 1.0]
+
+    weights:
+      bounds: [-1.0, 1.0]
+
     mutation:
       strategy: adaptive_individual
       min_strength: 0.01

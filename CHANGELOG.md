@@ -12,6 +12,9 @@
   (fitness | random | none), allowing both efficiency-oriented and
   biologically motivated policies.
 
+### Changed
+- BREAKING: Removed `weight_bounds` from EvoNet config. Use `weights.bounds` instead.
+
 ### Fixed
 - Fixed an issue where deepcopy of `EvoNet` copied temporal execution
   state (e.g. delay buffers on recurrent connections), causing offspring

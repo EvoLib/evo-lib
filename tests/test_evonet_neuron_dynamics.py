@@ -42,7 +42,10 @@ def test_neuron_dynamics_applied_to_neurons() -> None:
                 "recurrent": "local",
                 "connection_scope": "adjacent",
                 "connection_density": 1.0,
-                "weight_bounds": [-1.0, 1.0],
+                "weights": {
+                    "initializer": "normal",
+                    "bounds": [-1.0, 1.0],
+                },
                 "bias_bounds": [-0.5, 0.5],
                 "neuron_dynamics": [
                     {"name": "standard", "params": {}},

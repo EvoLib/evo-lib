@@ -14,7 +14,10 @@ modules:
     activation: [tanh, tanh, linear]
     recurrent: none
     initializer: identity_evonet
-    weight_bounds: [-2.0, 2.0]
+
+    weights:
+      bounds: [-2.0, 2.0]
+
     bias_bounds: [-1.0, 1.0]
 
     mutation:

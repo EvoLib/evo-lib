@@ -110,7 +110,7 @@ class EvoNet(ParaBase):
         self.dim = cfg.dim
 
         # Bounds
-        self.weight_bounds = cfg.weight_bounds or (-1.0, 1.0)
+        self.weight_bounds = cfg.weights.bounds or (-1.0, 1.0)
         self.bias_bounds = cfg.bias_bounds or (-0.5, 0.5)
 
         self.connection_scope = cfg.connection_scope

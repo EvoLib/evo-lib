@@ -32,6 +32,16 @@ from evolib.config.base_component_config import (
 )
 
 
+class WeightsConfig(BaseModel):
+    """Configuration for connection weight initialization and bounds."""
+
+    initializer: Literal["normal", "uniform", "zero"] = "normal"
+    bounds: tuple[float, float] = Field(default=(-1.0, 1.0))
+    std: Optional[float] = (
+        None  # required if initializer == "normal" (optional for now)
+    )
+
+
 class DelayConfig(BaseModel):
     """Delay initialization for recurrent connections."""
 
@@ -83,7 +93,11 @@ class EvoNetComponentConfig(BaseModel):
             dim: [4, 6, 2]                       # input, hidden, output
             activation: [linear, relu, sigmoid]  # single activation or list per layer
             initializer: normal_evonet           # weight/bias initializer
-            weight_bounds: [-1.0, 1.0]
+
+            weights:
+              initializer: normal
+              bounds: [-1.0, 1.0]
+
             bias_bounds: [-0.5, 0.5]
             mutation:
               strategy: constant
@@ -136,7 +150,7 @@ class EvoNetComponentConfig(BaseModel):
     )
 
     # Numeric bounds for values; used by initialization and mutation
-    weight_bounds: Tuple[float, float] = (-1.0, 1.0)
+    weights: WeightsConfig = Field(default_factory=WeightsConfig)
     bias_bounds: Tuple[float, float] = (-0.5, 0.5)
 
     # Optional delay initialization for recurrent connections
@@ -178,13 +192,13 @@ class EvoNetComponentConfig(BaseModel):
             raise ValueError("All layer sizes in dim must be non-negative integers")
         return dim
 
-    @field_validator("weight_bounds", "bias_bounds")
+    @field_validator("bias_bounds")
     @classmethod
-    def check_bounds(cls, bounds: Tuple[float, float]) -> Tuple[float, float]:
-        """Validate that bounds are well-formed (min < max)."""
+    def check_bias_bounds(cls, bounds: Tuple[float, float]) -> Tuple[float, float]:
+        """Validate that bias_bounds are well-formed (min < max)."""
         low, high = bounds
         if low >= high:
-            raise ValueError("Bounds must be specified as (min, max) with min < max")
+            raise ValueError("bias_bounds must satisfy min < max")
         return bounds
 
     @field_validator("activation")

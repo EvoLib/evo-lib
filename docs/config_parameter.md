@@ -187,11 +187,18 @@ modules:
 | `dim`             | list[int]           | —       | Layer sizes, e.g. `[4, 0, 0, 2]`. Hidden layers can start empty (0) and grow through structural mutation. |
 | `activation`      | str \| list[str]    | —       | If list: activation per layer. If str: used for non-input layers; input layer is treated as linear. |
 | `initializer`     | str                 | —       | Network initialization method (e.g. `normal_evonet`, `unconnected_evonet`). |
-| `weight_bounds`   | list[float] \| null | null    | `[min_w, max_w]` hard clipping bounds for connection weights. |
+| `weights`         | dict                | —       | Weight init and bounds configuration (initializer, bounds, optional params). | 
 | `bias_bounds`     | list[float] \| null | null    | `[min_b, max_b]` hard clipping bounds for neuron biases. |
 | `neuron_dynamics` | list[dict] \| null  | null    | Optional per-layer neuron dynamics specification. Must match `len(dim)`. |
 | `mutation`        | dict \| null        | null    | Mutation settings for weights, biases, activations, delay, and structure. |
 | `crossover`       | dict \| null        | null    | Optional crossover settings (weight/bias level). |
+
+##### weights block
+|Parameter	 | Type	 | Default	 | Explanation |
+|------------|-------|-----------|-------------|
+|initializer | str   | "normal"	 | Weight initializer preset (normal, uniform, zero, …). |
+|bounds	     | list[float]	| [-1.0, 1.0]	| Hard clipping bounds [min_w, max_w]. |
+|std         | float | null	|null | Std-dev for normal (if used). |
 
 ---
 

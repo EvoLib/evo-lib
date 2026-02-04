@@ -146,7 +146,8 @@ modules:
     dim: [2, 0, 0, 1]       # hidden layers start empty
     activation: [linear, tanh, tanh, sigmoid]
     initializer: normal_evonet
-    weight_bounds: [-5.0, 5.0]
+    weights:
+      bounds: [-5.0, 5.0]
     bias_bounds:   [-1.0, 1.0]
 
     recurrent: direct   # REQUIRED for delay to have any effect
