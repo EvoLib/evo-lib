@@ -45,15 +45,15 @@ class WeightsConfig(BaseModel):
 class DelayConfig(BaseModel):
     """Delay initialization for recurrent connections."""
 
-    initializer: Literal["static", "random"] = Field(
-        default="static",
+    initializer: Literal["fixed", "random"] = Field(
+        default="fixed",
         description="Delay initializer for recurrent connections.",
     )
 
     value: Optional[int] = Field(
         default=None,
         ge=1,
-        description="Fixed delay value (required for initializer=static).",
+        description="Fixed delay value (required for initializer=fixed).",
     )
 
     bounds: Optional[Tuple[int, int]] = Field(
@@ -64,9 +64,9 @@ class DelayConfig(BaseModel):
 
     @model_validator(mode="after")
     def _validate(self) -> "DelayConfig":
-        if self.initializer == "static":
+        if self.initializer == "fixed":
             if self.value is None:
-                raise ValueError("delay.value is required for initializer=static")
+                raise ValueError("delay.value is required for initializer=fixed")
         elif self.initializer == "random":
             if self.bounds is None:
                 raise ValueError("delay.bounds is required for initializer=random")

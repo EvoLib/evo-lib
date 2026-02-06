@@ -25,7 +25,7 @@ modules:
     recurrent: direct
 
     delay:
-      initializer: static
+      initializer: fixed
       value: 15
 
     mutation:
