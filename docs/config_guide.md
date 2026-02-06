@@ -155,7 +155,7 @@ modules:
     # NOTE: Delays only apply to recurrent connections.
     # If `recurrent` is not enabled, this block has no effect.
     delay:
-      initializer: random   # random | fixed
+      initializer: uniform   # uniform | fixed
       bounds: [1, 8]        # only for random
       # value: 3            # only for fixed
 

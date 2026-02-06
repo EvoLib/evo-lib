@@ -268,7 +268,7 @@ modules:
     type: evonet
     ...
     delay:
-      initializer: random   # random | fixed
+      initializer: uniform  # uniform | fixed
       bounds: [1, 8]        # only for random
       # value: 3            # only for fixed
 ```
@@ -433,7 +433,7 @@ modules:
     initializer: normal_evonet
 
     delay:
-      initializer: random
+      initializer: uniform
       bounds: [1, 8]
 
     mutation:
