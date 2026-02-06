@@ -45,7 +45,7 @@ class WeightsConfig(BaseModel):
 class DelayConfig(BaseModel):
     """Delay initialization for recurrent connections."""
 
-    initializer: Literal["fixed", "random"] = Field(
+    initializer: Literal["fixed", "uniform"] = Field(
         default="fixed",
         description="Delay initializer for recurrent connections.",
     )
@@ -59,7 +59,7 @@ class DelayConfig(BaseModel):
     bounds: Optional[Tuple[int, int]] = Field(
         default=None,
         description="Inclusive [min, max] delay bounds (required for "
-        "initializer=random).",
+        "initializer=uniform).",
     )
 
     @model_validator(mode="after")
@@ -67,9 +67,9 @@ class DelayConfig(BaseModel):
         if self.initializer == "fixed":
             if self.value is None:
                 raise ValueError("delay.value is required for initializer=fixed")
-        elif self.initializer == "random":
+        elif self.initializer == "uniform":
             if self.bounds is None:
-                raise ValueError("delay.bounds is required for initializer=random")
+                raise ValueError("delay.bounds is required for initializer=uniform")
             lo, hi = self.bounds
             if lo < 1 or hi < 1:
                 raise ValueError("delay bounds must be >= 1 (recurrent-only)")

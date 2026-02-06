@@ -30,7 +30,7 @@ def _apply_delay_init(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
         if c.type is not ConnectionType.RECURRENT:
             continue
 
-        if delay_cfg.initializer == "random" and delay_cfg.bounds is not None:
+        if delay_cfg.initializer == "uniform" and delay_cfg.bounds is not None:
             assert delay_cfg.bounds is not None
             lo, hi = delay_cfg.bounds
             d = int(np.random.randint(lo, hi + 1))

@@ -24,7 +24,7 @@ modules:
     recurrent: direct
 
     delay:
-      initializer: random
+      initializer: uniform
       bounds: [1, 10]
 
     mutation:
