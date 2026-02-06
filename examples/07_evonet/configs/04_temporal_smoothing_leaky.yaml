@@ -19,7 +19,8 @@ modules:
     weights:
       bounds: [-2.0, 2.0]
 
-    bias_bounds: [-1.0, 1.0]
+    bias:
+      bounds: [-1.0, 1.0]
 
     # Hidden layer is leaky
     neuron_dynamics:

@@ -42,6 +42,16 @@ class WeightsConfig(BaseModel):
     )
 
 
+class BiasConfig(BaseModel):
+    """Configuration for Neuron-Bias nitialization and bounds."""
+
+    initializer: Literal["fixed", "normal", "uniform", "zero"] = "normal"
+    bounds: tuple[float, float] = Field(default=(-1.0, 1.0))
+    std: Optional[float] = (
+        None  # required if initializer == "normal" (optional for now)
+    )
+
+
 class DelayConfig(BaseModel):
     """Delay initialization for recurrent connections."""
 
@@ -98,7 +108,10 @@ class EvoNetComponentConfig(BaseModel):
               initializer: normal
               bounds: [-1.0, 1.0]
 
-            bias_bounds: [-0.5, 0.5]
+            bias:
+                initializer: uniform
+                bounds: [-0.5, 0.5]
+
             mutation:
               strategy: constant
               probability: 0.8
@@ -151,7 +164,7 @@ class EvoNetComponentConfig(BaseModel):
 
     # Numeric bounds for values; used by initialization and mutation
     weights: WeightsConfig = Field(default_factory=WeightsConfig)
-    bias_bounds: Tuple[float, float] = (-0.5, 0.5)
+    bias: BiasConfig = Field(default_factory=BiasConfig)
 
     # Optional delay initialization for recurrent connections
     delay: Optional[DelayConfig] = None
@@ -191,15 +204,6 @@ class EvoNetComponentConfig(BaseModel):
         if not all(isinstance(x, int) and x >= 0 for x in dim):
             raise ValueError("All layer sizes in dim must be non-negative integers")
         return dim
-
-    @field_validator("bias_bounds")
-    @classmethod
-    def check_bias_bounds(cls, bounds: Tuple[float, float]) -> Tuple[float, float]:
-        """Validate that bias_bounds are well-formed (min < max)."""
-        low, high = bounds
-        if low >= high:
-            raise ValueError("bias_bounds must satisfy min < max")
-        return bounds
 
     @field_validator("activation")
     @classmethod

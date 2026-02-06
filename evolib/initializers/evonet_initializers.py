@@ -174,7 +174,7 @@ def initializer_random_evonet(config: FullConfig, module: str) -> EvoNet:
     _build_architecture(para, cfg, connection_init="random")
     _apply_delay_init(para, cfg)
 
-    bias_bounds = cfg.bias_bounds or (-0.5, 0.5)
+    bias_bounds = cfg.bias.bounds or (-0.5, 0.5)
     min_bias = bias_bounds[0]
     max_bias = bias_bounds[1]
 

@@ -46,7 +46,9 @@ def test_neuron_dynamics_applied_to_neurons() -> None:
                     "initializer": "normal",
                     "bounds": [-1.0, 1.0],
                 },
-                "bias_bounds": [-0.5, 0.5],
+                "bias": {
+                    "bounds": [-0.5, 0.5],
+                },
                 "neuron_dynamics": [
                     {"name": "standard", "params": {}},
                     {"name": "leaky", "params": {"alpha": 0.25}},

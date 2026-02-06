@@ -14,6 +14,7 @@
 
 ### Changed
 - BREAKING: Removed `weight_bounds` from EvoNet config. Use `weights.bounds` instead.
+- BREAKING: Removed `bias_bounds` from EvoNet config. Use `bias.bounds` instead.
 
 ### Fixed
 - Fixed an issue where deepcopy of `EvoNet` copied temporal execution

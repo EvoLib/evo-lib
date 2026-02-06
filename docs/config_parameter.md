@@ -188,12 +188,19 @@ modules:
 | `activation`      | str \| list[str]    | —       | If list: activation per layer. If str: used for non-input layers; input layer is treated as linear. |
 | `initializer`     | str                 | —       | Network initialization method (e.g. `normal_evonet`, `unconnected_evonet`). |
 | `weights`         | dict                | —       | Weight init and bounds configuration (initializer, bounds, optional params). | 
-| `bias_bounds`     | list[float] \| null | null    | `[min_b, max_b]` hard clipping bounds for neuron biases. |
+| `bias`            | dict                | —       | Bias init and bounds configuration (initializer, bounds, optional params). | 
 | `neuron_dynamics` | list[dict] \| null  | null    | Optional per-layer neuron dynamics specification. Must match `len(dim)`. |
 | `mutation`        | dict \| null        | null    | Mutation settings for weights, biases, activations, delay, and structure. |
 | `crossover`       | dict \| null        | null    | Optional crossover settings (weight/bias level). |
 
 ##### weights block
+|Parameter	 | Type	 | Default	 | Explanation |
+|------------|-------|-----------|-------------|
+|initializer | str   | "normal"	 | Weight initializer preset (normal, uniform, zero, …). |
+|bounds	     | list[float]	| [-1.0, 1.0]	| Hard clipping bounds [min_w, max_w]. |
+|std         | float | null	|null | Std-dev for normal (if used). |
+
+##### bias block
 |Parameter	 | Type	 | Default	 | Explanation |
 |------------|-------|-----------|-------------|
 |initializer | str   | "normal"	 | Weight initializer preset (normal, uniform, zero, …). |
@@ -210,7 +217,7 @@ The EvoNet module uses:
 |---------------------|------------------------------------|----------------------------------|---------------------------------------------|
 | `normal_evonet`     | Normal(0, 0.5)                     | Normal(0, 0.5)                   | Default initializer for general use         |
 | `unconnected_evonet`| None                               | 0                                | For pure structural growth; empty topology  |
-| `random_evonet`     | Random                             | Uniform(bias_bounds)             | For broader stochastic exploration           |
+| `random_evonet`     | Random                             | Uniform(bias bounds)             | For broader stochastic exploration           |
 | `zero_evonet`       | 0                                  | 0                                | Deterministic baseline; debugging            |
 | `identity_evonet`   | Small random                       | Small random                     | Designed for stable recurrent memory         |
 

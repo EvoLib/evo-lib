@@ -33,7 +33,9 @@ def make_minimal_evonet() -> EvoNet:
                     "initializer": "normal",
                     "bounds": [-1.0, 1.0],
                 },
-                "bias_bounds": [-0.5, 0.5],
+                "bias": {
+                    "bounds": [-0.5, 0.5],
+                },
                 "mutation": {
                     "strategy": "constant",
                     "strength": 0.1,

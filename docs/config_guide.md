@@ -148,7 +148,8 @@ modules:
     initializer: normal_evonet
     weights:
       bounds: [-5.0, 5.0]
-    bias_bounds:   [-1.0, 1.0]
+    bias:
+        bounds: [-1.0, 1.0]
 
     recurrent: direct   # REQUIRED for delay to have any effect
 
