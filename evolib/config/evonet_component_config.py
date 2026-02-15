@@ -33,40 +33,64 @@ from evolib.config.base_component_config import (
 
 
 class WeightsConfig(BaseModel):
-    """Configuration for connection weight initialization and bounds."""
-
     initializer: Literal["normal", "uniform", "zero"] = "normal"
-    bounds: tuple[float, float] = Field(default=(-1.0, 1.0))
-    std: Optional[float] = (
-        None  # required if initializer == "normal" (optional for now)
-    )
+    bounds: Tuple[float, float] = Field(default=(-1.0, 1.0))
+    std: Optional[float] = None  # required if initializer == "normal"
 
     @field_validator("bounds")
     @classmethod
     def _validate_bounds(cls, b: Tuple[float, float]) -> Tuple[float, float]:
         lo, hi = b
         if lo >= hi:
-            raise ValueError("bounds must satisfy min < max")
+            raise ValueError("weights.bounds must satisfy min < max")
         return b
+
+    @model_validator(mode="after")
+    def _validate(self) -> "WeightsConfig":
+        if self.initializer == "normal":
+            if self.std is None or self.std <= 0:
+                raise ValueError(
+                    "weights.std must be set and " "> 0 for initializer=normal"
+                )
+        else:
+            if self.std is not None:
+                raise ValueError("weights.std is only allowed for initializer=normal")
+        return self
 
 
 class BiasConfig(BaseModel):
-    """Configuration for Neuron-Bias nitialization and bounds."""
-
     initializer: Literal["fixed", "normal", "uniform", "zero"] = "normal"
-    bounds: tuple[float, float] = Field(default=(-1.0, 1.0))
-    std: Optional[float] = (
-        None  # required if initializer == "normal" (optional for now)
-    )
-    value: Optional[float] = None  # only used if initializer == "fixed"
+    bounds: Tuple[float, float] = Field(default=(-0.5, 0.5))
+    std: Optional[float] = None  # required if initializer == "normal"
+    value: Optional[float] = None  # required if initializer == "fixed"
 
     @field_validator("bounds")
     @classmethod
     def _validate_bounds(cls, b: Tuple[float, float]) -> Tuple[float, float]:
         lo, hi = b
         if lo >= hi:
-            raise ValueError("bounds must satisfy min < max")
+            raise ValueError("bias.bounds must satisfy min < max")
         return b
+
+    @model_validator(mode="after")
+    def _validate(self) -> "BiasConfig":
+        if self.initializer == "fixed":
+            if self.value is None:
+                raise ValueError("bias.value is required for initializer=fixed")
+            if self.std is not None:
+                raise ValueError("bias.std is not allowed for initializer=fixed")
+        elif self.initializer == "normal":
+            if self.std is None or self.std <= 0:
+                raise ValueError("bias.std must be set and > 0 for initializer=normal")
+            if self.value is not None:
+                raise ValueError("bias.value is only allowed for initializer=fixed")
+        else:
+            # uniform / zero
+            if self.std is not None:
+                raise ValueError("bias.std is only allowed for initializer=normal")
+            if self.value is not None:
+                raise ValueError("bias.value is only allowed for initializer=fixed")
+        return self
 
 
 class DelayConfig(BaseModel):
