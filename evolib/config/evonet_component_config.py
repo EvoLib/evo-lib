@@ -41,6 +41,14 @@ class WeightsConfig(BaseModel):
         None  # required if initializer == "normal" (optional for now)
     )
 
+    @field_validator("bounds")
+    @classmethod
+    def _validate_bounds(cls, b: Tuple[float, float]) -> Tuple[float, float]:
+        lo, hi = b
+        if lo >= hi:
+            raise ValueError("bounds must satisfy min < max")
+        return b
+
 
 class BiasConfig(BaseModel):
     """Configuration for Neuron-Bias nitialization and bounds."""
@@ -50,6 +58,15 @@ class BiasConfig(BaseModel):
     std: Optional[float] = (
         None  # required if initializer == "normal" (optional for now)
     )
+    value: Optional[float] = None  # only used if initializer == "fixed"
+
+    @field_validator("bounds")
+    @classmethod
+    def _validate_bounds(cls, b: Tuple[float, float]) -> Tuple[float, float]:
+        lo, hi = b
+        if lo >= hi:
+            raise ValueError("bounds must satisfy min < max")
+        return b
 
 
 class DelayConfig(BaseModel):
@@ -109,8 +126,8 @@ class EvoNetComponentConfig(BaseModel):
               bounds: [-1.0, 1.0]
 
             bias:
-                initializer: uniform
-                bounds: [-0.5, 0.5]
+              initializer: uniform
+              bounds: [-0.5, 0.5]
 
             mutation:
               strategy: constant
