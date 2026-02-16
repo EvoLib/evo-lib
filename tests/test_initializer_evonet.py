@@ -16,6 +16,16 @@ def test_normal_initializer_evonet_builds_expected_structure() -> None:
                 "dim": [2, 3, 1],
                 "activation": "linear",
                 "initializer": "normal_evonet",
+                "weights": {
+                    "initializer": "normal",
+                    "std": 0.5,
+                    "bounds": [-1.0, 1.0],
+                },
+                "bias": {
+                    "initializer": "normal",
+                    "std": 0.1,
+                    "bounds": [-0.5, 0.5],
+                },
                 "mutation": {
                     "strategy": "constant",
                     "strength": 0.1,

@@ -17,6 +17,16 @@ def test_neuron_dynamics_config_length_matches_dim() -> None:
             dim=[1, 2, 1],
             activation=["linear", "tanh", "tanh"],
             initializer="zero_evonet",
+            weights={
+                "initializer": "normal",
+                "std": 0.5,
+                "bounds": [-1.0, 1.0],
+            },
+            bias={
+                "initializer": "normal",
+                "std": 0.1,
+                "bounds": [-0.5, 0.5],
+            },
             neuron_dynamics=[
                 {"name": "standard", "params": {}},
                 {"name": "standard", "params": {}},
@@ -44,9 +54,12 @@ def test_neuron_dynamics_applied_to_neurons() -> None:
                 "connection_density": 1.0,
                 "weights": {
                     "initializer": "normal",
+                    "std": 0.5,
                     "bounds": [-1.0, 1.0],
                 },
                 "bias": {
+                    "initializer": "normal",
+                    "std": 0.1,
                     "bounds": [-0.5, 0.5],
                 },
                 "neuron_dynamics": [

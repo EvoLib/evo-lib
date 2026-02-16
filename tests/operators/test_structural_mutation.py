@@ -31,9 +31,12 @@ def make_minimal_evonet() -> EvoNet:
                 "initializer": "normal_evonet",
                 "weights": {
                     "initializer": "normal",
+                    "std": 0.5,
                     "bounds": [-1.0, 1.0],
                 },
                 "bias": {
+                    "initializer": "normal",
+                    "std": 0.1,
                     "bounds": [-0.5, 0.5],
                 },
                 "mutation": {
