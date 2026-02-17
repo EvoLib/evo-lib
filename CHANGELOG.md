@@ -17,6 +17,12 @@
 - BREAKING: Removed `bias_bounds` from EvoNet config. Use `bias.bounds` instead.
 
 ### Fixed
+- EvoNet: Bias mutation now correctly respects probability:
+  0.0 (no unintended fallback to global probability).
+- EvoNet: Per-scope mutation.biases.strategy is now honored during parameter
+  updates (with global strategy as fallback).
+- Replaced unsafe or-based fallbacks with explicit None checks to correctly 
+  support valid zero values.
 - Fixed an issue where deepcopy of `EvoNet` copied temporal execution
   state (e.g. delay buffers on recurrent connections), causing offspring
   to inherit history from their parents. Temporal state is now cleared

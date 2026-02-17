@@ -156,7 +156,11 @@ class EvoNet(ParaBase):
             raise ValueError("mutation_strength must be set.")
 
         mutation_strength = self.evo_params.mutation_strength
-        mutation_probability = self.evo_params.mutation_probability or 1.0
+        mutation_probability = (
+            self.evo_params.mutation_probability
+            if self.evo_params.mutation_probability is not None
+            else 1.0
+        )
         low, high = self.weight_bounds or (-np.inf, np.inf)
 
         for connection in self.net.get_all_connections():
@@ -166,12 +170,18 @@ class EvoNet(ParaBase):
 
         # Biases (optional override)
         if self.bias_evo_params is not None:
-            bias_strength = self.bias_evo_params.mutation_strength or mutation_strength
-            bias_probability = (
-                self.bias_evo_params.mutation_probability or mutation_probability
-            )
+            if self.bias_evo_params.mutation_strength is not None:
+                bias_strength = self.bias_evo_params.mutation_strength
+            else:
+                bias_strength = mutation_strength
+
+            if self.bias_evo_params.mutation_probability is not None:
+                bias_probability = self.bias_evo_params.mutation_probability
+            else:
+                bias_probability = mutation_probability
         else:
-            bias_strength, bias_probability = mutation_strength, mutation_probability
+            bias_strength = mutation_strength
+            bias_probability = mutation_probability
 
         low, high = self.bias_bounds or (-np.inf, np.inf)
         for neuron in self.net.get_all_neurons():
@@ -344,7 +354,11 @@ class EvoNet(ParaBase):
         # If Bias-Override exists
         if self.bias_evo_params is not None:
             bep = self.bias_evo_params
-            if ep.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
+
+            # Use per-scope strategy if set; otherwise fall back to global.
+            bias_strategy = bep.mutation_strategy or ep.mutation_strategy
+
+            if bias_strategy == MutationStrategy.EXPONENTIAL_DECAY:
                 bep.mutation_strength = exponential_mutation_strength(
                     bep, generation, max_generations
                 )
@@ -352,10 +366,10 @@ class EvoNet(ParaBase):
                     bep, generation, max_generations
                 )
 
-            elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
+            elif bias_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
                 if diversity_ema is None:
                     raise ValueError(
-                        "diversity_ema must be provided for ADAPTIVE_GLOBAL (biases)"
+                        "diversity_ema must be provided for " "ADAPTIVE_GLOBAL (biases)"
                     )
                 if bep.mutation_strength is None or bep.mutation_probability is None:
                     raise ValueError(
@@ -369,8 +383,7 @@ class EvoNet(ParaBase):
                     bep.mutation_strength, diversity_ema, bep
                 )
 
-            elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
-                # Ensure tau is initialized
+            elif bias_strategy == MutationStrategy.ADAPTIVE_INDIVIDUAL:
                 if bep.tau is None or bep.tau == 0.0:
                     bep.tau = adapted_tau(len(self.get_vector()))
 
@@ -379,8 +392,8 @@ class EvoNet(ParaBase):
                     or bep.max_mutation_strength is None
                 ):
                     raise ValueError(
-                        "biases override requires min/max mutation_strength for "
-                        "ADAPTIVE_INDIVIDUAL."
+                        "biases override requires min/max mutation_strength "
+                        "for ADAPTIVE_INDIVIDUAL."
                     )
                 if self.bias_bounds is None:
                     raise ValueError("bias_bounds must be set for bias adaptation.")
@@ -389,7 +402,6 @@ class EvoNet(ParaBase):
                         bep.min_mutation_strength, bep.max_mutation_strength
                     )
 
-                # Perform adaptive update
                 bounds = (bep.min_mutation_strength, bep.max_mutation_strength)
                 bep.mutation_strength = adapt_mutation_strength(bep, bounds)
 
