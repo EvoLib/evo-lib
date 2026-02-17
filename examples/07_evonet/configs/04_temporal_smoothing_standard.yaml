@@ -17,9 +17,11 @@ modules:
     initializer: random_evonet
 
     weights:
+      initializer: uniform
       bounds: [-2.0, 2.0]
 
     bias:
+      initializer: uniform
       bounds: [-1.0, 1.0]
 
     # All layers standard

@@ -1,7 +1,7 @@
 # configs/08_cartpole.yaml
 parent_pool_size: 10
 offspring_pool_size: 20
-max_generations: 10
+max_generations: 20
 num_elites: 2
 
 evolution:

@@ -20,7 +20,12 @@ modules:
     initializer: normal_evonet
 
     weights:
-      bounds: [-1.0, 1.0]
+      initializer: normal
+      std: 0.5
+
+    bias:
+      initializer: normal
+      std: 0.5
 
     mutation:
       strategy: adaptive_individual

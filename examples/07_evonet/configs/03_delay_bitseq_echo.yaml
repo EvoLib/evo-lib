@@ -4,7 +4,7 @@ random_seed: 1
 
 parent_pool_size: 20
 offspring_pool_size: 60
-max_generations: 50
+max_generations: 100
 max_indiv_age: 0
 num_elites: 2
 
@@ -19,7 +19,14 @@ modules:
     initializer: normal_evonet
 
     weights:
+      initializer: normal
+      std: 0.5
       bounds: [-2.0, 2.0]
+
+    bias:
+      initializer: zero
+        #      std: 0.2
+        #bounds: [-0.0, 0.0]
 
     recurrent: direct
 
@@ -34,7 +41,12 @@ modules:
       probability: 1.0
 
       delay:
-        probability: 0.6
+        probability: 0.1
         mode: delta_step
         delta: 1
         bounds: [1, 10]
+      
+      biases:
+        strategy: constant
+        probability: 0.0
+        strength: 0.0

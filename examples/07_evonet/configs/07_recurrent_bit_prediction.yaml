@@ -16,17 +16,19 @@ modules:
     type: evonet
     dim: [1, 8, 1]
     activation: [linear, tanh, sigmoid]
-    recurrent: "local"  # Optionen: none | direct | local | all
+    recurrent: "local"
     initializer: zero_evonet
 
     weights:
+      initializer: zero
       bounds: [-5.0, 5.0]
 
     bias:
+      initializer: zero
       bounds: [-1.0, 1.0]
 
     mutation:
       strategy: adaptive_individual
-      min_strength: 0.01
-      max_strength: 0.1
+      min_strength: 0.005
+      max_strength: 0.2
       probability: 0.5

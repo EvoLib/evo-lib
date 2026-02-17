@@ -18,6 +18,74 @@ from evolib.interfaces.enum_helpers import resolve_recurrent_kinds
 from evolib.representation.evonet import EvoNet
 
 
+def _clip(x: np.ndarray, bounds: tuple[float, float]) -> np.ndarray:
+    lo, hi = bounds
+    return np.clip(x, lo, hi)
+
+
+def _apply_weights_init(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
+    weights_cfg = cfg.weights
+    size = para.net.num_weights
+
+    if weights_cfg.initializer is None:
+        return
+
+    elif weights_cfg.initializer == "zero":
+        weights = np.zeros(size, dtype=float)
+
+    elif weights_cfg.initializer == "uniform":
+        # uniform uses init_bounds if present, otherwise bounds
+        lo, hi = weights_cfg.init_bounds or weights_cfg.bounds
+        weights = np.random.uniform(lo, hi, size=size)
+
+    elif weights_cfg.initializer == "normal":
+        assert weights_cfg.std is not None
+        weights = np.random.normal(loc=0.0, scale=weights_cfg.std, size=size)
+
+        # clip ONLY if init_bounds explicitly provided
+        if weights_cfg.init_bounds is not None:
+            lo, hi = weights_cfg.init_bounds
+            weights = np.clip(weights, lo, hi)
+
+    else:
+        raise ValueError(f"Unknown weights initializer: {weights_cfg.initializer}")
+
+    para.net.set_weights(weights)
+
+
+def _apply_bias_init(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
+    bias_cfg = cfg.bias
+    size = para.net.num_biases
+
+    if bias_cfg.initializer is None:
+        return
+
+    elif bias_cfg.initializer == "zero":
+        bias = np.zeros(size, dtype=float)
+
+    elif bias_cfg.initializer == "fixed":
+        assert bias_cfg.value is not None
+        bias = np.full(size, float(bias_cfg.value), dtype=float)
+
+    elif bias_cfg.initializer == "uniform":
+        lo, hi = bias_cfg.init_bounds or bias_cfg.bounds
+        bias = np.random.uniform(lo, hi, size=size)
+
+    elif bias_cfg.initializer == "normal":
+        assert bias_cfg.std is not None
+        bias = np.random.normal(loc=0.0, scale=bias_cfg.std, size=size)
+
+        # clip only if init_bounds explicitly provided
+        if bias_cfg.init_bounds is not None:
+            lo, hi = bias_cfg.init_bounds
+            bias = np.clip(bias, lo, hi)
+
+    else:
+        raise ValueError(f"Unknown bias initializer: {bias_cfg.initializer}")
+
+    para.net.set_biases(bias)
+
+
 def _apply_delay_init(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
     """Initialize delay on recurrent connections only."""
 
@@ -26,19 +94,19 @@ def _apply_delay_init(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
 
     delay_cfg: DelayConfig = cfg.delay
 
-    for c in para.net.get_all_connections():
-        if c.type is not ConnectionType.RECURRENT:
+    for connection in para.net.get_all_connections():
+        if connection.type is not ConnectionType.RECURRENT:
             continue
 
         if delay_cfg.initializer == "uniform" and delay_cfg.bounds is not None:
             assert delay_cfg.bounds is not None
             lo, hi = delay_cfg.bounds
-            d = int(np.random.randint(lo, hi + 1))
+            delay = int(np.random.randint(lo, hi + 1))
         else:
             assert delay_cfg.value is not None
-            d = int(delay_cfg.value)
+            delay = int(delay_cfg.value)
 
-        c.set_delay(d)
+        connection.set_delay(delay)
 
 
 def _build_architecture(
@@ -121,80 +189,57 @@ def initializer_unconnected_evonet(config: FullConfig, module: str) -> EvoNet:
     para.apply_config(cfg)
 
     _build_architecture(para, cfg, connection_init="none")
-
-    # Initialize biases
-    para.net.set_biases(np.zeros(para.net.num_biases))
+    _apply_bias_init(para, cfg)
 
     return para
 
 
 def initializer_normal_evonet(config: FullConfig, module: str) -> EvoNet:
     """
-    Initializes an EvoNet with normally distributed weights.
+    Build a standard EvoNet architecture and initialize parameters according to the
+    explicit configuration blocks.
 
-    Args:
-        config (FullConfig): Full experiment configuration
-        module (str): Module name (e.g. "brain")
+    - Topology is created via `_build_architecture(...)`.
+    - Weights are initialized using `cfg.weights`.
+    - Biases are initialized using `cfg.bias`.
+    - Delay (if configured) is initialized using `cfg.delay`.
 
-    Returns:
-        EvoNet: Initialized EvoNet representation
+    No implicit parameter initialization is performed here.
+    All parameter distributions are controlled explicitly via the config.
     """
+
     para = EvoNet()
     cfg = config.modules[module].model_copy(deep=True)
     para.apply_config(cfg)
 
-    _build_architecture(para, cfg)
+    _build_architecture(para, cfg, connection_init="zero")
     _apply_delay_init(para, cfg)
-
-    # Initialize weights and biases with normal distribution
-    weights = np.random.normal(loc=0.0, scale=0.5, size=para.net.num_weights)
-    biases = np.random.normal(loc=0.0, scale=0.5, size=para.net.num_biases)
-
-    para.net.set_weights(weights)
-    para.net.set_biases(biases)
+    _apply_weights_init(para, cfg)
+    _apply_bias_init(para, cfg)
     return para
 
 
 def initializer_random_evonet(config: FullConfig, module: str) -> EvoNet:
     """
-    Initializes an EvoNet with uniformly random weights and biases within init_bounds
-    (fallback: weight_bounds, bias_bounds).
+    Backward-compatible alias for the standard EvoNet initializer. Will be removed.
 
-    Args:
-        config (FullConfig): Full experiment configuration
-        module (str): Module name
-
-    Returns:
-        EvoNet: Initialized EvoNet representation
+    Parameter initialization is controlled by `cfg.weights`, `cfg.bias`,
+    and `cfg.delay`.
     """
-    para = EvoNet()
-    cfg = config.modules[module].model_copy(deep=True)
-    para.apply_config(cfg)
-
-    _build_architecture(para, cfg, connection_init="random")
-    _apply_delay_init(para, cfg)
-
-    bias_bounds = cfg.bias.bounds or (-0.5, 0.5)
-    min_bias = bias_bounds[0]
-    max_bias = bias_bounds[1]
-
-    biases = np.random.uniform(min_bias, max_bias, size=para.net.num_biases)
-
-    para.net.set_biases(biases)
-    return para
+    return initializer_normal_evonet(config, module)
 
 
 def initializer_zero_evonet(config: FullConfig, module: str) -> EvoNet:
     """
-    Initializes an EvoNet with all weights and biases set to zero.
+    Build a standard EvoNet architecture and initialize all parameters to zero.
 
-    Args:
-        config (FullConfig): Full experiment configuration
-        module (str): Module name
+    - All connection weights are set to 0.
+    - All biases are set to 0.
+    - Delay initialization follows `cfg.delay` if applicable.
 
-    Returns:
-        EvoNet: Initialized EvoNet representation
+    This initializer ignores `cfg.weights` and `cfg.bias` distributions.
     """
+
     para = EvoNet()
     cfg = config.modules[module].model_copy(deep=True)
     para.apply_config(cfg)
@@ -202,27 +247,23 @@ def initializer_zero_evonet(config: FullConfig, module: str) -> EvoNet:
     _build_architecture(para, cfg, connection_init="zero")
     _apply_delay_init(para, cfg)
 
+    para.net.set_weights(np.zeros(para.net.num_weights))
     para.net.set_biases(np.zeros(para.net.num_biases))
+
     return para
 
 
 def initializer_identity_evonet(config: FullConfig, module: str) -> EvoNet:
     """
-    Initialize EvoNet with damped self-recurrence and zeroed weights elsewhere.
+    Build a feedforward EvoNet and initialize parameters with an identity-like
+    structure.
 
-    - All feedforward weights are near-zero
-    - Self-recurrent connections get weight ~0.8 (memory)
-    - Biases are randomized slightly to break symmetry
+    - Feedforward connections are created normally.
+    - Self-recurrent connections are added explicitly.
+    - Weights and biases are set to fixed values
+      to approximate identity behavior.
 
-    This initializer encourages stable internal state retention from the start,
-    making recurrent behavior immediately available to evolution.
-
-    Args:
-        config (FullConfig): Full experiment configuration
-        module (str): Name of the EvoNet module in the config
-
-    Returns:
-        EvoNet: Initialized network with identity-style dynamics
+    This preset intentionally overrides standard parameter initialization.
     """
 
     SELF_LOOP_WEIGHT = 0.8

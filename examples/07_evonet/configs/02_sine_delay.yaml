@@ -20,6 +20,12 @@ modules:
     
     weights:
       initializer: normal
+      std: 0.5
+      bounds: [-1.0, 1.0]
+
+    bias:
+      initializer: normal
+      std: 0.5
       bounds: [-1.0, 1.0]
 
     recurrent: direct

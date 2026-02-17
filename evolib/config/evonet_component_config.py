@@ -31,65 +31,111 @@ from evolib.config.base_component_config import (
     StructuralMutationConfig,
 )
 
+Bounds = Tuple[float, float]
+
 
 class WeightsConfig(BaseModel):
-    initializer: Literal["normal", "uniform", "zero"] = "normal"
-    bounds: Tuple[float, float] = Field(default=(-1.0, 1.0))
-    std: Optional[float] = None  # required if initializer == "normal"
-
-    @field_validator("bounds")
-    @classmethod
-    def _validate_bounds(cls, b: Tuple[float, float]) -> Tuple[float, float]:
-        lo, hi = b
-        if lo >= hi:
-            raise ValueError("weights.bounds must satisfy min < max")
-        return b
+    # None means: no parameter-level initialization requested (preset may initialize).
+    initializer: Optional[str] = None  # normal | uniform | zero | None
+    std: Optional[float] = None
+    bounds: Bounds = (-1.0, 1.0)  # mutation/search bounds
+    init_bounds: Optional[Bounds] = None  # init-time clipping bounds
 
     @model_validator(mode="after")
     def _validate(self) -> "WeightsConfig":
+        # Validate bounds
+        lo, hi = self.bounds
+        if lo >= hi:
+            raise ValueError("weights.bounds must satisfy lower < upper")
+
+        if self.init_bounds is not None:
+            ilo, ihi = self.init_bounds
+            if ilo >= ihi:
+                raise ValueError("weights.init_bounds must satisfy lower < upper")
+            if not (lo <= ilo and ihi <= hi):
+                raise ValueError("weights.init_bounds must lie within weights.bounds")
+
+        # Validate initializer-specific fields
+        if self.initializer is None:
+            # Preset-based initialization
+            if self.std is not None:
+                raise ValueError(
+                    "weights.std is not allowed when " "weights.initializer is not set"
+                )
+            return self
+
         if self.initializer == "normal":
             if self.std is None or self.std <= 0:
                 raise ValueError(
-                    "weights.std must be set and " "> 0 for initializer=normal"
+                    "weights.std must be set and > 0 for initializer=normal"
                 )
-        else:
+
+        elif self.initializer in ("uniform", "zero"):
             if self.std is not None:
                 raise ValueError("weights.std is only allowed for initializer=normal")
+
+        else:
+            raise ValueError(f"Unknown weights initializer: {self.initializer}")
+
         return self
 
 
 class BiasConfig(BaseModel):
-    initializer: Literal["fixed", "normal", "uniform", "zero"] = "normal"
-    bounds: Tuple[float, float] = Field(default=(-0.5, 0.5))
-    std: Optional[float] = None  # required if initializer == "normal"
-    value: Optional[float] = None  # required if initializer == "fixed"
-
-    @field_validator("bounds")
-    @classmethod
-    def _validate_bounds(cls, b: Tuple[float, float]) -> Tuple[float, float]:
-        lo, hi = b
-        if lo >= hi:
-            raise ValueError("bias.bounds must satisfy min < max")
-        return b
+    # None means: no parameter-level initialization requested (preset may initialize).
+    initializer: Optional[str] = None  # fixed | normal | uniform | zero | None
+    std: Optional[float] = None
+    value: Optional[float] = None
+    bounds: Bounds = (-0.5, 0.5)  # mutation/search bounds
+    init_bounds: Optional[Bounds] = None  # init-time clipping bounds (optional)
 
     @model_validator(mode="after")
     def _validate(self) -> "BiasConfig":
+        # Validate bounds
+        lo, hi = self.bounds
+        if lo >= hi:
+            raise ValueError("bias.bounds must satisfy lower < upper")
+
+        if self.init_bounds is not None:
+            ilo, ihi = self.init_bounds
+            if ilo >= ihi:
+                raise ValueError("bias.init_bounds must satisfy lower < upper")
+            if not (lo <= ilo and ihi <= hi):
+                raise ValueError("bias.init_bounds must lie within bias.bounds")
+
+        # Validate initializer-specific fields
+        if self.initializer is None:
+            # Preset-based initialization
+            if self.std is not None:
+                raise ValueError(
+                    "bias.std is not allowed when bias.initializer is not set"
+                )
+            if self.value is not None:
+                raise ValueError(
+                    "bias.value is not allowed when bias.initializer is not set"
+                )
+            return self
+
         if self.initializer == "fixed":
             if self.value is None:
                 raise ValueError("bias.value is required for initializer=fixed")
             if self.std is not None:
                 raise ValueError("bias.std is not allowed for initializer=fixed")
+
         elif self.initializer == "normal":
             if self.std is None or self.std <= 0:
                 raise ValueError("bias.std must be set and > 0 for initializer=normal")
             if self.value is not None:
                 raise ValueError("bias.value is only allowed for initializer=fixed")
-        else:
-            # uniform / zero
+
+        elif self.initializer in ("uniform", "zero"):
             if self.std is not None:
                 raise ValueError("bias.std is only allowed for initializer=normal")
             if self.value is not None:
                 raise ValueError("bias.value is only allowed for initializer=fixed")
+
+        else:
+            raise ValueError(f"Unknown bias initializer: {self.initializer}")
+
         return self
 
 
@@ -147,6 +193,7 @@ class EvoNetComponentConfig(BaseModel):
 
             weights:
               initializer: normal
+              std: 0.5
               bounds: [-1.0, 1.0]
 
             bias:
