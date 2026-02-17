@@ -15,6 +15,9 @@
 ### Changed
 - BREAKING: Removed `weight_bounds` from EvoNet config. Use `weights.bounds` instead.
 - BREAKING: Removed `bias_bounds` from EvoNet config. Use `bias.bounds` instead.
+- EvoNet now distinguishes between bounds (mutation/search bounds) and init_bounds (optional init-time clipping) for weights and bias.
+- normal initializer no longer clips to bounds unless init_bounds is explicitly set.
+
 
 ### Fixed
 - EvoNet: Bias mutation now correctly respects probability:
