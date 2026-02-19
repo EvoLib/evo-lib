@@ -138,44 +138,146 @@ evolution:
 ## Modules
 
 Modules define the parameter representation(s) of each individual. Multiple modules can be combined.
-
-### Common Fields
-
-| Parameter    | Type | Default | Explanation                                                 |
-|--------------|------|---------|-------------------------------------------------------------|
-| `type`       | str  | —       | Type of parameter representation (`vector`, `evonet`, ...). |
-| `initializer`| str  | —       | Initialization method for the module.                       |
-| `bounds`     | list | —       | Lower and upper limits for values (only for vectors).       |
+Depending on `structure`, the vector can represent a simple flat genome or a
+structured parameter layout (e.g. network-like interpretation).
 
 ---
 
 ### Vector Module
 
-| Parameter     | Type        | Default | Explanation                                                                  |
-|---------------|-------------|---------|------------------------------------------------------------------------------|
-| `dim`         | int         | —       | Dimensionality of the vector.                                                |
-| `initializer` | str         | —       | Initialization method (e.g. `normal_vector`, `random_vector`, `zero_vector`).|
-| `bounds`      | list        | —       | Hard bounds for values.                                                      |
-| `init_bounds` | list \| null | null    | Bounds used during initialization (fallback to `bounds` if omitted).        |
-| `values`      | list \| null | null    | Fixed values for `initializer: fixed_vector`.                               |
-| `mutation`    | dict \| null | null    | Mutation settings for the vector.                                           |
-| `crossover`   | dict \| null | null    | Crossover settings for the vector.                                          |
+The `vector` module defines an evolvable parameter vector.
 
-Example:
+| Parameter                        | Type                                              | Default        | Description |
+|----------------------------------|---------------------------------------------------|----------------|------------|
+| `type`                           | `"vector"`                                        | —              | Module type identifier. |
+| `dim`                            | `int \| list[int]`                                | —              | Vector length (`int`) or structured dimensions (`list[int]`). Must be > 0. |
+| `structure`                      | `"flat" \| "net"                                  | `"flat"`       | Structural interpretation of the vector. |
+| `initializer`                    | `str`                                             | —              | Initializer name from the registry (e.g. `random_vector`, `zero_vector`, `normal_vector`, `fixed_vector`). |
+| `bounds`                         | `tuple[float, float]`                             | `[-1.0, 1.0]`  | Hard clamp range applied after mutation. |
+| `init_bounds`                    | `tuple[float, float] \| null`                     | `null`         | Clamp applied only during initialization. Falls back to `bounds` if not set. |
+| `shape`                          | `tuple[int, ...] \| null`                         | `null`         | Optional explicit shape. If set, `dim = product(shape)`. Shape is retained as metadata. |
+| `values`                         | `list[float] \| null`                             | `null`         | Required for `initializer: fixed_vector`. If `dim` is omitted, it is inferred from `len(values)`. |
+| `activation`                     | `str \| null`                                     | `null`         | Only relevant if `structure: "net"`. |
+| `mean`                           | `float \| null`                                   | `0.0`          | Mean parameter for normal-based initializers (if used by initializer). |
+| `std`                            | `float \| null`                                   | `1.0`          | Standard deviation for normal-based initializers (if used by initializer). |
+| `mutation`                       | `dict`                                            | —              | **Required.** Mutation configuration (see below). |
+| `randomize_mutation_strengths`   | `bool \| null`                                    | `false`        | If true, per-parameter strengths are randomly initialized within min/max bounds (strategy-dependent). |
+| `tau`                            | `float \| null`                                   | `0.0`          | Scaling factor for self-adaptive mutation strategies. Interpretation is strategy-dependent. |
+| `crossover`                      | `dict \| null`                                    | `null`         | Optional crossover configuration. Semantics depend on operator. |
+
+
+## Mutation Configuration
+
+The `mutation` block must follow the `MutationConfig` schema.
+
+### Common Fields
+
+| Parameter       | Type     | Description |
+|-----------------|----------|-------------|
+| `strategy`      | `str`    | Mutation strategy (e.g. `constant`, `adaptive_individual`, `adaptive_global`). |
+| `probability`   | `float`  | Mutation probability.|
+| `strength`      | `float`  | Mutation strength.|
+
+---
+
+### Strategy: `constant`
+
+Uses a fixed mutation strength.
+
+Requires:
+- `probability`
+- `strength`
+
+```yaml
+mutation:
+  strategy: constant
+  probability: 1.0
+  strength: 0.05
+```
+
+### Strategy: `adaptive_individual`
+
+Self-adaptive mutation at the individual level.
+
+Requires:
+- `probability`
+- `min_strength`
+- `max_strength`
+
+```yaml
+mutation:
+  strategy: adaptive_individual
+  probability: 1.0
+  min_strength: 0.01
+  max_strength: 0.05
+```
+
+### Strategy: `adaptive_global`
+
+Global self-adaptive mutation strength shared across parameters.
+
+```yaml
+mutation:
+  strategy: adaptive_global
+  probability: 1.0
+  min_strength: 0.01
+  max_strength: 0.1
+```
+
+
+### Minimal Example:
 
 ```yaml
 modules:
   main:
     type: vector
     dim: 8
-    initializer: normal_vector
+    initializer: random_vector
     bounds: [-1.0, 1.0]
+
     mutation:
-      strategy: adaptive_individual
+      strategy: constant
       probability: 1.0
-      strength: 0.1
+      strength: 0.05
 ```
 
+### Fixed Vector Example
+```yaml
+modules:
+  main:
+    type: vector
+    initializer: fixed_vector
+    values: [0.0, 1.0, 0.5, -0.5]
+    bounds: [-1.0, 1.0]
+
+    mutation:
+      strategy: constant
+      probability: 1.0
+      strength: 0.01
+```
+If dim is omitted, it is inferred from values.
+
+### Advanced Example (Self-Adaptive)
+```yaml
+modules:
+  main:
+    type: vector
+    structure: flat
+    dim: 6
+    initializer: normal_vector
+    mean: 0.0
+    std: 0.2
+    bounds: [-1.0, 1.0]
+
+    mutation:
+      strategy: adaptive_individual
+      probability: 0.8
+      min_strength: 0.01
+      max_strength: 0.05
+
+    tau: 0.0
+    randomize_mutation_strengths: false
+```
 ---
 
 ### EvoNet Module
@@ -390,9 +492,9 @@ structural:
 
 | Field                | Type          | Default  | Description |
 |---------------------|---------------|----------|-------------|
-| `recurrent`          | str           | `none`   | Controls recurrence: `none`, `direct`, `lateral`/`local`, `indirect`, or `all` (implementation-dependent aliases may exist). |
+| `recurrent`          | str           | `none`   | Controls recurrence: `none`, `direct`, `local` or `all`. |
 | `connection_scope`   | str           | `adjacent` | Allowed layer connectivity: `adjacent` (neighbor layers only) or `crosslayer` (any-to-any). |
-| `connection_density` | float \| null | null     | Optional density control for created connections (if supported). |
+| `connection_density` | float         | 1.0     | Fraction of possible connections initialized at creation time. |
 | `max_neurons`        | int \| null   | null     | Maximum number of non-input neurons (`null` = unlimited). |
 | `max_connections`    | int \| null   | null     | Maximum number of edges (`null` = unlimited). |
 
@@ -432,6 +534,8 @@ modules:
       strategy: adaptive_individual
       probability: 1.0
       strength: 0.1
+      min_strength: 0.01
+      max_strength: 0.05
 
   brain:
     type: evonet

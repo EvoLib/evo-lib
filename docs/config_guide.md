@@ -147,9 +147,13 @@ modules:
     activation: [linear, tanh, tanh, sigmoid]
     initializer: normal_evonet
     weights:
+      initializer: normal
+      std: 0.5
       bounds: [-5.0, 5.0]
-    bias:
-        bounds: [-1.0, 1.0]
+    bias:      
+      initializer: normal
+      std: 0.5
+      bounds: [-1.0, 1.0]
 
     recurrent: direct   # REQUIRED for delay to have any effect
 
