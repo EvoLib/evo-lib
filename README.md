@@ -105,7 +105,6 @@ modules:
     type: evonet
     dim: [4, 6, 2]
     activation: [linear, tanh, tanh]
-    initializer: normal_evonet
     mutation:
       strategy: constant
       probability: 1.0

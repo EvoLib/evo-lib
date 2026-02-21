@@ -4,7 +4,7 @@ import pytest
 
 from evolib.config.evonet_component_config import EvoNetComponentConfig
 from evolib.config.schema import FullConfig
-from evolib.initializers.evonet_initializers import initializer_zero_evonet
+from evolib.initializers.evonet_initializers import initializer_default_evonet
 
 
 def test_neuron_dynamics_config_length_matches_dim() -> None:
@@ -16,7 +16,6 @@ def test_neuron_dynamics_config_length_matches_dim() -> None:
             type="evonet",
             dim=[1, 2, 1],
             activation=["linear", "tanh", "tanh"],
-            initializer="zero_evonet",
             weights={
                 "initializer": "normal",
                 "std": 0.5,
@@ -48,7 +47,7 @@ def test_neuron_dynamics_applied_to_neurons() -> None:
                 "type": "evonet",
                 "dim": [1, 3, 1],
                 "activation": ["linear", "tanh", "tanh"],
-                "initializer": "zero_evonet",
+                "initializer": "default_evonet",
                 "recurrent": "local",
                 "connection_scope": "adjacent",
                 "connection_density": 1.0,
@@ -82,7 +81,7 @@ def test_neuron_dynamics_applied_to_neurons() -> None:
         parallel=None,
     )
 
-    para = initializer_zero_evonet(cfg, "brain")
+    para = initializer_default_evonet(cfg, "brain")
 
     # Layer 0 (input): standard
     for n in para.net.layers[0].neurons:

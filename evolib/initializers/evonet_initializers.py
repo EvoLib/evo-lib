@@ -173,6 +173,28 @@ def _build_architecture(
         )
 
 
+def initializer_default_evonet(config: FullConfig, module: str) -> EvoNet:
+    """
+    Build a standard EvoNet architecture and initialize parameters according to the
+    explicit configuration blocks.
+
+    - Topology is created via `_build_architecture(...)`.
+    - Weights are initialized using `cfg.weights`.
+    - Biases are initialized using `cfg.bias`.
+    - Delay (if configured) is initialized using `cfg.delay`.
+    """
+
+    para = EvoNet()
+    cfg = config.modules[module].model_copy(deep=True)
+    para.apply_config(cfg)
+
+    _build_architecture(para, cfg, connection_init="zero")
+    _apply_delay_init(para, cfg)
+    _apply_weights_init(para, cfg)
+    _apply_bias_init(para, cfg)
+    return para
+
+
 def initializer_unconnected_evonet(config: FullConfig, module: str) -> EvoNet:
     """
     Initializes an EvoNet without connections.
@@ -190,65 +212,6 @@ def initializer_unconnected_evonet(config: FullConfig, module: str) -> EvoNet:
 
     _build_architecture(para, cfg, connection_init="none")
     _apply_bias_init(para, cfg)
-
-    return para
-
-
-def initializer_normal_evonet(config: FullConfig, module: str) -> EvoNet:
-    """
-    Build a standard EvoNet architecture and initialize parameters according to the
-    explicit configuration blocks.
-
-    - Topology is created via `_build_architecture(...)`.
-    - Weights are initialized using `cfg.weights`.
-    - Biases are initialized using `cfg.bias`.
-    - Delay (if configured) is initialized using `cfg.delay`.
-
-    No implicit parameter initialization is performed here.
-    All parameter distributions are controlled explicitly via the config.
-    """
-
-    para = EvoNet()
-    cfg = config.modules[module].model_copy(deep=True)
-    para.apply_config(cfg)
-
-    _build_architecture(para, cfg, connection_init="zero")
-    _apply_delay_init(para, cfg)
-    _apply_weights_init(para, cfg)
-    _apply_bias_init(para, cfg)
-    return para
-
-
-def initializer_random_evonet(config: FullConfig, module: str) -> EvoNet:
-    """
-    Backward-compatible alias for the standard EvoNet initializer. Will be removed.
-
-    Parameter initialization is controlled by `cfg.weights`, `cfg.bias`,
-    and `cfg.delay`.
-    """
-    return initializer_normal_evonet(config, module)
-
-
-def initializer_zero_evonet(config: FullConfig, module: str) -> EvoNet:
-    """
-    Build a standard EvoNet architecture and initialize all parameters to zero.
-
-    - All connection weights are set to 0.
-    - All biases are set to 0.
-    - Delay initialization follows `cfg.delay` if applicable.
-
-    This initializer ignores `cfg.weights` and `cfg.bias` distributions.
-    """
-
-    para = EvoNet()
-    cfg = config.modules[module].model_copy(deep=True)
-    para.apply_config(cfg)
-
-    _build_architecture(para, cfg, connection_init="zero")
-    _apply_delay_init(para, cfg)
-
-    para.net.set_weights(np.zeros(para.net.num_weights))
-    para.net.set_biases(np.zeros(para.net.num_biases))
 
     return para
 

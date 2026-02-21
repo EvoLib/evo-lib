@@ -189,7 +189,6 @@ class EvoNetComponentConfig(BaseModel):
             type: evonet
             dim: [4, 6, 2]                       # input, hidden, output
             activation: [linear, relu, sigmoid]  # single activation or list per layer
-            initializer: normal_evonet           # weight/bias initializer
 
             weights:
               initializer: normal
@@ -228,7 +227,9 @@ class EvoNetComponentConfig(BaseModel):
     recurrent: Optional[Literal["none", "direct", "local", "all"]] = "none"
 
     # Name of the initializer function (resolved via initializer registry)
-    initializer: str = Field(..., description="Name of the initializer to use")
+    initializer: str = Field(
+        default="default_evonet", description="Name of the initializer to use"
+    )
 
     # Connection topology for initialization
     connection_scope: Literal["adjacent", "crosslayer"] = Field(
@@ -266,6 +267,29 @@ class EvoNetComponentConfig(BaseModel):
     structural: Optional[StructuralMutationConfig] = None
 
     # Validators
+    @field_validator("initializer")
+    @classmethod
+    def validate_initializer(cls, name: str) -> str:
+        """
+        Validate that the initializer is one of the allowed topology presets.
+
+        Parameter initialization is handled exclusively via weights/bias/delay blocks.
+        """
+        allowed = {
+            "default_evonet",
+            "unconnected_evonet",
+            "identity_evonet",
+        }
+
+        if name not in allowed:
+            raise ValueError(
+                f"Unknown EvoNet initializer '{name}'. "
+                f"Allowed values: {sorted(allowed)}. "
+                "Parameter initialization is configured via "
+                "'weights', 'bias', and 'delay'."
+            )
+
+        return name
 
     @field_validator("neuron_dynamics")
     @classmethod

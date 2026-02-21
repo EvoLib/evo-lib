@@ -14,7 +14,6 @@ modules:
     type: evonet
     dim: [1, 6, 6, 1]
     activation: ["tanh", "tanh", "tanh", "tanh"]
-    initializer: normal_evonet
 
     weights:
       initializer: normal
