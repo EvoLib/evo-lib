@@ -17,11 +17,9 @@ from evolib.config.schema import FullConfig
 
 # EvoNet-based initializer
 from evolib.initializers.evonet_initializers import (
+    initializer_default_evonet,
     initializer_identity_evonet,
-    initializer_normal_evonet,
-    initializer_random_evonet,
     initializer_unconnected_evonet,
-    initializer_zero_evonet,
 )
 
 # NetVector-based initializer
@@ -50,9 +48,7 @@ INITIALIZER_REGISTRY: dict[str, InitializerFunction] = {
     "fixed_vector": initializer_fixed_vector,
     "adaptive_vector": initializer_adaptive_vector,
     "normal_net": initializer_normal_net,
-    "normal_evonet": initializer_normal_evonet,
-    "random_evonet": initializer_random_evonet,
-    "zero_evonet": initializer_zero_evonet,
+    "default_evonet": initializer_default_evonet,
     "identity_evonet": initializer_identity_evonet,
     "unconnected_evonet": initializer_unconnected_evonet,
 }

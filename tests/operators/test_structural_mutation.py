@@ -7,7 +7,7 @@ from evolib.config.base_component_config import (
     StructuralTopology,
 )
 from evolib.config.schema import FullConfig
-from evolib.initializers.evonet_initializers import initializer_normal_evonet
+from evolib.initializers.evonet_initializers import initializer_default_evonet
 from evolib.operators.evonet_structural_mutation import (
     mutate_structure,
 )
@@ -28,7 +28,6 @@ def make_minimal_evonet() -> EvoNet:
                 "type": "evonet",
                 "dim": [2, 3, 1],
                 "activation": ["linear", "tanh", "sigmoid"],
-                "initializer": "normal_evonet",
                 "weights": {
                     "initializer": "normal",
                     "std": 0.5,
@@ -48,7 +47,7 @@ def make_minimal_evonet() -> EvoNet:
         },
     }
     full_config = FullConfig.model_validate(config_dict)
-    return initializer_normal_evonet(full_config, module="brain")
+    return initializer_default_evonet(full_config, module="brain")
 
 
 def test_add_connection() -> None:

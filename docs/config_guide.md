@@ -145,7 +145,6 @@ modules:
     type: evonet
     dim: [2, 0, 0, 1]       # hidden layers start empty
     activation: [linear, tanh, tanh, sigmoid]
-    initializer: normal_evonet
     weights:
       initializer: normal
       std: 0.5
@@ -161,7 +160,7 @@ modules:
     # If `recurrent` is not enabled, this block has no effect.
     delay:
       initializer: uniform   # uniform | fixed
-      bounds: [1, 8]        # only for random
+      bounds: [1, 8]
       # value: 3            # only for fixed
 
     mutation:

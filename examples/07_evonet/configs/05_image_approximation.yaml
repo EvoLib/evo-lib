@@ -17,7 +17,6 @@ modules:
     type: evonet
     dim: [2, 16, 8, 1]
     activation: ["linear", "tanh", "tanh", "sigmoid"]
-    initializer: normal_evonet
 
     weights:
       initializer: normal

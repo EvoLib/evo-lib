@@ -288,7 +288,7 @@ modules:
 |-------------------|---------------------|---------|-------------|
 | `dim`             | list[int]           | —       | Layer sizes, e.g. `[4, 0, 0, 2]`. Hidden layers can start empty (0) and grow through structural mutation. |
 | `activation`      | str \| list[str]    | —       | If list: activation per layer. If str: used for non-input layers; input layer is treated as linear. |
-| `initializer`     | str                 | —       | Network initialization method (e.g. `normal_evonet`, `unconnected_evonet`). |
+| `initializer`     | str                 | default_evonet       | Topology preset (e.g. `default_evonet`, `unconnected_evonet`, `identity_evonet`). Parameter initialization is configured via `weights`, `bias`, and `delay`. |
 | `weights`         | dict                | —       | Weight init and bounds configuration (initializer, bounds, optional params). | 
 | `bias`            | dict                | —       | Bias init and bounds configuration (initializer, bounds, optional params). | 
 | `neuron_dynamics` | list[dict] \| null  | null    | Optional per-layer neuron dynamics specification. Must match `len(dim)`. |
@@ -299,30 +299,34 @@ modules:
 |Parameter	 | Type	 | Default	 | Explanation |
 |------------|-------|-----------|-------------|
 |initializer | str   | "normal"	 | Weight initializer preset (normal, uniform, zero, …). |
-|bounds	     | list[float]	| [-1.0, 1.0]	| Hard clipping bounds [min_w, max_w]. |
+|bounds	     | list[float]	| [-0.5, 0.5]	| Hard clipping bounds. |
 |std         | float | null	|null | Std-dev for normal (if used). |
 
 ##### bias block
 |Parameter	 | Type	 | Default	 | Explanation |
 |------------|-------|-----------|-------------|
-|initializer | str   | "normal"	 | Weight initializer preset (normal, uniform, zero, …). |
-|bounds	     | list[float]	| [-1.0, 1.0]	| Hard clipping bounds [min_w, max_w]. |
-|std         | float | null	|null | Std-dev for normal (if used). |
+|initializer | str   | "normal"	 | Bias initializer preset (normal, uniform, zero, …). |
+|bounds	     | list[float]	| [-1.0, 1.0]	| Hard clipping bounds. |
+|std         | float | null	| Std-dev for normal (if used). |
 
 ---
 
-#### EvoNet Initializer
+#### EvoNet Initializer (Topology Presets)
 
-The EvoNet module uses:
+`initializer` selects a **topology preset**.  
 
-| Initializer         | Weights                            | Biases                           | Notes                                       |
-|---------------------|------------------------------------|----------------------------------|---------------------------------------------|
-| `normal_evonet`     | Normal(0, 0.5)                     | Normal(0, 0.5)                   | Default initializer for general use         |
-| `unconnected_evonet`| None                               | 0                                | For pure structural growth; empty topology  |
-| `random_evonet`     | Random                             | Uniform(bias bounds)             | For broader stochastic exploration           |
-| `zero_evonet`       | 0                                  | 0                                | Deterministic baseline; debugging            |
-| `identity_evonet`   | Small random                       | Small random                     | Designed for stable recurrent memory         |
+Parameter initialization is configured via:
+- `weights`
+- `bias`
+- `delay` (recurrent connections only)
 
+Allowed presets:
+
+| Initializer            | Meaning (topology only) |
+|------------------------|-------------------------|
+| `default_evonet`       | Standard EvoNet topology preset (uses `connection_scope`, `connection_density`, and `recurrent`). |
+| `unconnected_evonet`   | Creates neurons/layers but starts with **no connections** (use structural mutation to grow). |
+| `identity_evonet`      | Special preset intended for stable recurrent memory (may override parameters internally; see notes below). |
 
 ---
 
@@ -348,7 +352,6 @@ modules:
     type: evonet
     dim: [1, 16, 1]
     activation: [linear, tanh, sigmoid]
-    initializer: normal_evonet
     neuron_dynamics:
       - name: standard
         params: {}
@@ -378,7 +381,7 @@ modules:
     ...
     delay:
       initializer: uniform  # uniform | fixed
-      bounds: [1, 8]        # only for random
+      bounds: [1, 8]
       # value: 3            # only for fixed
 ```
 

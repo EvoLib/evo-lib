@@ -16,7 +16,6 @@ modules:
     type: evonet
     dim: [1, 1, 1]
     activation: ["linear", "linear", "linear"]
-    initializer: normal_evonet
     
     weights:
       initializer: normal
