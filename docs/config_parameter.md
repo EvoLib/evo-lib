@@ -288,7 +288,7 @@ modules:
 |-------------------|---------------------|---------|-------------|
 | `dim`             | list[int]           | —       | Layer sizes, e.g. `[4, 0, 0, 2]`. Hidden layers can start empty (0) and grow through structural mutation. |
 | `activation`      | str \| list[str]    | —       | If list: activation per layer. If str: used for non-input layers; input layer is treated as linear. |
-| `initializer`     | str                 | default_evonet       | Topology preset (e.g. `default_evonet`, `unconnected_evonet`, `identity_evonet`). Parameter initialization is configured via `weights`, `bias`, and `delay`. |
+| `initializer`     | str                 | default | Topology preset (e.g. `default`, `unconnected`, `identity`). Parameter initialization is configured via `weights`, `bias`, and `delay`. |
 | `weights`         | dict                | —       | Weight init and bounds configuration (initializer, bounds, optional params). | 
 | `bias`            | dict                | —       | Bias init and bounds configuration (initializer, bounds, optional params). | 
 | `neuron_dynamics` | list[dict] \| null  | null    | Optional per-layer neuron dynamics specification. Must match `len(dim)`. |
@@ -324,7 +324,7 @@ Allowed presets:
 
 | Initializer            | Meaning (topology only) |
 |------------------------|-------------------------|
-| `default_evonet`       | Standard EvoNet topology preset (uses `connection_scope`, `connection_density`, and `recurrent`). |
+| `default`       | Standard EvoNet topology preset (uses `connection_scope`, `connection_density`, and `recurrent`). |
 | `unconnected_evonet`   | Creates neurons/layers but starts with **no connections** (use structural mutation to grow). |
 | `identity_evonet`      | Special preset intended for stable recurrent memory (may override parameters internally; see notes below). |
 

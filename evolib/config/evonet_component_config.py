@@ -30,6 +30,7 @@ from evolib.config.base_component_config import (
     EvoNetNeuronDynamicsConfig,
     StructuralMutationConfig,
 )
+from evolib.interfaces.enums import RepresentationType
 
 Bounds = Tuple[float, float]
 
@@ -208,7 +209,10 @@ class EvoNetComponentConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     # Module type is fixed to "evonet"
-    type: Literal["evonet"] = "evonet"
+    type: RepresentationType = Field(
+        default=RepresentationType.EVONET,
+        description='Fixed module discriminator; must be "evonet" for this schema.',
+    )
 
     # Layer structure: list of neuron counts per layer [input, hidden..., output]
     dim: list[int]
@@ -228,7 +232,7 @@ class EvoNetComponentConfig(BaseModel):
 
     # Name of the initializer function (resolved via initializer registry)
     initializer: str = Field(
-        default="default_evonet", description="Name of the initializer to use"
+        default="default", description="Name of the initializer to use"
     )
 
     # Connection topology for initialization
