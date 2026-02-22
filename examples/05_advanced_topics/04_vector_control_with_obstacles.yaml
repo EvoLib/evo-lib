@@ -14,7 +14,7 @@ evolution:
 modules:
   steps:
     type: vector
-    initializer: random_vector
+    initializer: uniform
     dim: 16  # NUM_STEPS * 2
     bounds: [-1.0, 1.0]
 

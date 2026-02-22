@@ -13,7 +13,7 @@ modules:
   controller:
     type: vector
     dim: 2
-    initializer: normal_vector
+    initializer: normal
     bounds: [-2.0, 2.0]
     mutation:
       strategy: constant
@@ -25,7 +25,7 @@ modules:
     structure: net
     dim: [1, 16, 8, 1]
     activation: tanh
-    initializer: normal_net
+    initializer: normal
     bounds: [-1.0, 1.0]
     mutation:
       strategy: exponential_decay

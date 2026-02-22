@@ -23,7 +23,7 @@ modules:
     type: vector
     dim: 10
     bounds: [0.0, 2.0]
-    initializer: random_vector
+    initializer: uniform
 
     mutation:
       strategy: constant

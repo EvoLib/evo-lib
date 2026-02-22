@@ -22,7 +22,7 @@ replacement:
 modules:
   test-vector:
     type: vector
-    initializer: random_vector
+    initializer: uniform
     dim: 10
     bounds: [-4.0, 4.0]
 

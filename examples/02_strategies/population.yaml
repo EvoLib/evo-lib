@@ -8,7 +8,7 @@ num_elites: 0
 modules:
   test-vector:
     type: vector
-    initializer: random_vector
+    initializer: uniform
     dim: 1
     bounds: [-1.0, 1.0]
 

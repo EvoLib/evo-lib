@@ -14,7 +14,7 @@ evolution:
 modules:
   poly:
     type: "vector"
-    initializer: adaptive_vector
+    initializer: adaptive
     dim: 8
     bounds: [-1.0, 1.0]
     init_bounds: [-1e-4, 1e-4]

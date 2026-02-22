@@ -20,7 +20,7 @@ def minimal_config_yaml(tmp_path: Path) -> Path:
             "main": {
                 "type": "vector",
                 "dim": 4,
-                "initializer": "zero_initializer",
+                "initializer": "zero",
                 "bounds": [-1.0, 1.0],
                 "mutation": {
                     "strategy": "constant",

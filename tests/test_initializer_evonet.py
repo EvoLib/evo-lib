@@ -1,5 +1,5 @@
 from evolib.config.schema import FullConfig
-from evolib.initializers.registry import get_initializer
+from evolib.initializers.registry import _resolve_evonet_initializer
 from evolib.representation.evonet import EvoNet
 
 
@@ -34,7 +34,7 @@ def test_default_initializer_evonet_builds_expected_structure() -> None:
         },
     )
 
-    init_fn = get_initializer("default_evonet")
+    init_fn = _resolve_evonet_initializer("default")
     para = init_fn(config, "brain")
     assert isinstance(para, EvoNet)
     net = para.net
