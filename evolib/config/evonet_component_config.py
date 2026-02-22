@@ -276,9 +276,9 @@ class EvoNetComponentConfig(BaseModel):
         Parameter initialization is handled exclusively via weights/bias/delay blocks.
         """
         allowed = {
-            "default_evonet",
-            "unconnected_evonet",
-            "identity_evonet",
+            "default",
+            "unconnected",
+            "identity",
         }
 
         if name not in allowed:

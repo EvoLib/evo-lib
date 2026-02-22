@@ -15,7 +15,7 @@ evolution:
 modules:
   test-vector:
     type: "vector"
-    initializer: fixed_vector
+    initializer: fixed
     values: [-2.0, 2.0, -1.5, 1.5]
     bounds: [-5.0, 5.0]
 

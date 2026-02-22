@@ -3,7 +3,7 @@ from typing import cast
 import numpy as np
 
 from evolib.config.schema import FullConfig
-from evolib.initializers.registry import get_initializer
+from evolib.initializers.registry import _resolve_vector_initializer
 from evolib.representation.netvector import NetVector
 from evolib.representation.vector import Vector
 
@@ -27,7 +27,7 @@ def test_normal_initializer_netvector_builds_expected_structure() -> None:
                 "structure": "net",
                 "dim": layer_dims,
                 "activation": activation,
-                "initializer": "normal_vector",
+                "initializer": "normal",
                 "bounds": (-1.0, 1.0),
                 "init_bounds": (-1.0, 1.0),
                 "mean": 0.0,
@@ -41,7 +41,7 @@ def test_normal_initializer_netvector_builds_expected_structure() -> None:
         },
     )
 
-    init_fn = get_initializer("normal_net")
+    init_fn = _resolve_vector_initializer("normal", structure="net")
     para = cast(Vector, init_fn(config, "brain"))
 
     # Check shape and size

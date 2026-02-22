@@ -1,31 +1,22 @@
 # SPDX-License-Identifier: MIT
-"""
-Provides access to registered parameter initializers based on their name and
-configuration.
+from __future__ import annotations
 
-This module dispatches initializer functions based on a string identifier
-(e.g. "normal_initializer") and the associated module name within FullConfig.
-
-Usage:
-    init_fn = get_initializer("ininitializer_normal_vector")
-    para = init_fn(config, module="brain")
-"""
-
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from evolib.config.schema import FullConfig
 
-# EvoNet-based initializer
+# EvoNet presets
 from evolib.initializers.evonet_initializers import (
     initializer_default_evonet,
     initializer_identity_evonet,
     initializer_unconnected_evonet,
 )
 
-# NetVector-based initializer
+# NetVector initializer (Vector with structure='net')
 from evolib.initializers.net_initializers import initializer_normal_net
 
-# Vector-based initializers
+# Vector initializers
 from evolib.initializers.vector_initializers import (
     initializer_adaptive_vector,
     initializer_fixed_vector,
@@ -33,53 +24,89 @@ from evolib.initializers.vector_initializers import (
     initializer_random_vector,
     initializer_zero_vector,
 )
+from evolib.interfaces.enums import RepresentationType
+from evolib.interfaces.types import ModuleConfig
 from evolib.representation.base import ParaBase
 from evolib.representation.composite import ParaComposite
 
-# Typalias for initializer function
 InitializerFunction = Callable[[FullConfig, str], ParaBase]
 
 
-# Registry of known initializer functions
-INITIALIZER_REGISTRY: dict[str, InitializerFunction] = {
-    "normal_vector": initializer_normal_vector,
-    "random_vector": initializer_random_vector,
-    "zero_vector": initializer_zero_vector,
-    "fixed_vector": initializer_fixed_vector,
-    "adaptive_vector": initializer_adaptive_vector,
-    "normal_net": initializer_normal_net,
-    "default_evonet": initializer_default_evonet,
-    "identity_evonet": initializer_identity_evonet,
-    "unconnected_evonet": initializer_unconnected_evonet,
-}
-
-
-def get_initializer(name: str) -> InitializerFunction:
+def _resolve_vector_initializer(name: str, *, structure: str) -> InitializerFunction:
     """
-    Returns the initializer function for the given name.
+    Resolve vector initializer by name and structure.
 
-    Args:
-        name (str): Identifier of the initializer (must match registry)
-
-    Returns:
-        Callable[[FullConfig, str], ParaBase]: Initializer function
-
-    Raises:
-        ValueError: If the name is not registered
+    Design:
+    - 'structure: net' uses the NetVector-compatible initializer for 'normal'
+    - all other cases use vector initializers
     """
-    if name not in INITIALIZER_REGISTRY:
-        raise ValueError(f"Unknown initializer: '{name}'")
+    name = str(name)
+    structure = str(structure or "flat")
 
-    return INITIALIZER_REGISTRY[name]
+    match name:
+        case "normal":
+            if structure == "net":
+                return initializer_normal_net
+            return initializer_normal_vector
+        case "uniform":
+            return initializer_random_vector
+        case "zero":
+            return initializer_zero_vector
+        case "fixed":
+            return initializer_fixed_vector
+        case "adaptive":
+            return initializer_adaptive_vector
+        case _:
+            raise ValueError(
+                f"Unknown vector initializer '{name}'. "
+                "Allowed: normal, uniform, zero, fixed, adaptive."
+            )
 
 
-def build_composite_initializer(config: FullConfig) -> Callable[[Any], ParaComposite]:
-    def initializer(_: Any) -> ParaComposite:
-        return ParaComposite(
-            {
-                name: get_initializer(config.modules[name].initializer)(config, name)
-                for name in config.modules
-            }
-        )
+def _resolve_evonet_initializer(name: str) -> InitializerFunction:
+    """Resolve EvoNet topology presets via initializer name."""
+    name = str(name)
 
-    return initializer
+    match name:
+        case "default":
+            return initializer_default_evonet
+        case "unconnected":
+            return initializer_unconnected_evonet
+        case "identity":
+            return initializer_identity_evonet
+        case _:
+            raise ValueError(
+                f"Unknown evonet initializer '{name}'. "
+                "Allowed: default, unconnected, identity."
+            )
+
+
+def resolve_initializer_fn(cfg: ModuleConfig) -> InitializerFunction:
+    """Resolve initializer function based on module type."""
+    mod_type = getattr(cfg, "type", None)
+    init_name = getattr(cfg, "initializer", None)
+    if init_name is None:
+        raise ValueError("module.initializer must be set")
+
+    match mod_type:
+        case RepresentationType.VECTOR:
+            structure = getattr(cfg, "structure", "flat") or "flat"
+            return _resolve_vector_initializer(str(init_name), structure=str(structure))
+        case RepresentationType.EVONET:
+            return _resolve_evonet_initializer(str(init_name))
+        case _:
+            raise ValueError(f"Unsupported module type: {mod_type!r}")
+
+
+def build_composite_initializer(config: FullConfig) -> Callable[[Any], ParaBase]:
+    """Build a composite initializer used by Pop to create Para instances for each
+    module."""
+
+    def _init(_: Any) -> ParaBase:
+        modules: dict[str, ParaBase] = {}
+        for module_name, module_cfg in config.modules.items():
+            fn = resolve_initializer_fn(module_cfg)
+            modules[module_name] = fn(config, module_name)
+        return ParaComposite(modules)
+
+    return _init

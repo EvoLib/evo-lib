@@ -152,7 +152,7 @@ The `vector` module defines an evolvable parameter vector.
 | `type`                           | `"vector"`                                        | —              | Module type identifier. |
 | `dim`                            | `int \| list[int]`                                | —              | Vector length (`int`) or structured dimensions (`list[int]`). Must be > 0. |
 | `structure`                      | `"flat" \| "net"                                  | `"flat"`       | Structural interpretation of the vector. |
-| `initializer`                    | `str`                                             | —              | Initializer name from the registry (e.g. `random_vector`, `zero_vector`, `normal_vector`, `fixed_vector`). |
+| `initializer`                    | `str`                                             | —              | Initializer name from the registry (e.g. `uniform`, `zero`, `normal`, `fixed`). |
 | `bounds`                         | `tuple[float, float]`                             | `[-1.0, 1.0]`  | Hard clamp range applied after mutation. |
 | `init_bounds`                    | `tuple[float, float] \| null`                     | `null`         | Clamp applied only during initialization. Falls back to `bounds` if not set. |
 | `shape`                          | `tuple[int, ...] \| null`                         | `null`         | Optional explicit shape. If set, `dim = product(shape)`. Shape is retained as metadata. |
@@ -232,7 +232,7 @@ modules:
   main:
     type: vector
     dim: 8
-    initializer: random_vector
+    initializer: uniform
     bounds: [-1.0, 1.0]
 
     mutation:

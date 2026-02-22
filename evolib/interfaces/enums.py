@@ -20,8 +20,7 @@ class Origin(Enum):
 
 class RepresentationType(Enum):
     VECTOR = "vector"
-    # NET = "net"
-    # HYBRID = "hybrid"
+    EVONET = "evonet"
 
 
 class EvolutionStrategy(Enum):

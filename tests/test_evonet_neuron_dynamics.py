@@ -47,7 +47,7 @@ def test_neuron_dynamics_applied_to_neurons() -> None:
                 "type": "evonet",
                 "dim": [1, 3, 1],
                 "activation": ["linear", "tanh", "tanh"],
-                "initializer": "default_evonet",
+                "initializer": "default",
                 "recurrent": "local",
                 "connection_scope": "adjacent",
                 "connection_density": 1.0,

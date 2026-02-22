@@ -15,7 +15,7 @@ modules:
   xs:
     type: vector
     dim: 6
-    initializer: random_vector
+    initializer: uniform
     bounds: [0.0, 6.283185307]   # [0, 2π]
     mutation:
       strategy: adaptive_individual
@@ -26,7 +26,7 @@ modules:
   ys:
     type: vector
     dim: 6
-    initializer: zero_vector
+    initializer: zero
     bounds: [-1.5, 1.5]
     mutation:
       strategy: constant

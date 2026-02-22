@@ -39,7 +39,7 @@ import numpy as np
 from evolib import Indiv, Pop, mse_loss, simple_quadratic
 from evolib.operators.crossover import crossover_offspring
 from evolib.operators.mutation import mutate_offspring
-from evolib.operators.replacement import replace_mu_lambda
+from evolib.operators.replacement import replace_mu_plus_lambda
 from evolib.operators.reproduction import generate_cloned_offspring
 
 np.random.seed(42)
@@ -95,7 +95,7 @@ pop.evaluate_indivs(offspring)
 print_indivs("5) Evaluate offspring: ", offspring)
 
 # Step 6) Replacement (μ from parents + offspring)
-replace_mu_lambda(pop, pop.indivs + offspring)
+replace_mu_plus_lambda(pop, pop.indivs + offspring)
 print_indivs("6) Replacement: ", pop.indivs)
 
 # Step 7) Stats / logging (increments generation)

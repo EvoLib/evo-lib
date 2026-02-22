@@ -16,7 +16,7 @@ modules:
     type: vector
     dim: 2
     bounds: [-32.0, 32.0]
-    initializer: random_vector
+    initializer: uniform
 
     mutation:
       strategy: constant

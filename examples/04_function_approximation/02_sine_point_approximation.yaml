@@ -14,7 +14,7 @@ evolution:
 modules:
   points:
     type: vector
-    initializer: random_vector
+    initializer: uniform
     dim: 16
     bounds: [-2.0, 2.0]
     init_bounds: [0.0, 0.0]

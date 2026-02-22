@@ -13,7 +13,7 @@ modules:
   controller:
     type: vector
     dim: 1
-    initializer: normal_vector
+    initializer: normal
     bounds: [-2.0, 2.0]
     mutation:
       strategy: constant
@@ -26,7 +26,7 @@ modules:
     type: vector
     structure: net
     dim: [1, 16, 16, 1]
-    initializer: normal_net
+    initializer: normal
     mutation:
       strategy: constant
       strength: 0.05

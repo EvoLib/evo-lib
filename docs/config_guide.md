@@ -30,7 +30,7 @@ evolution:
 modules:
   test-vector:              # logical module name
     type: vector
-    initializer: random_vector
+    initializer: uniform
     dim: 2
     bounds: [-1.0, 1.0]
 
@@ -89,7 +89,7 @@ modules:
   xs:
     type: vector
     dim: 6
-    initializer: random_vector
+    initializer: uniform
     bounds: [0.0, 6.283185307]   # [0, 2π]
     mutation:
       strategy: adaptive_individual

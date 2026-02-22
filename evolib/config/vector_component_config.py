@@ -1,7 +1,14 @@
 # SPDX-License-Identifier: MIT
 from typing import Any, Literal, Optional, Tuple, Union
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
 from evolib.config.base_component_config import CrossoverConfig, MutationConfig
 from evolib.interfaces.enums import RepresentationType
@@ -21,7 +28,7 @@ class VectorComponentConfig(BaseModel):
             type: vector
             structure: flat              # "flat" | "net"
             dim: 16                      # or a list for structured cases
-            initializer: random_vector   # name from the initializer registry
+            initializer: normal          # name from the initializer registry
             bounds: [-1.0, 1.0]
             mutation:
               strategy: constant
@@ -86,7 +93,7 @@ class VectorComponentConfig(BaseModel):
     values: Optional[list[float]] = Field(
         default=None,
         description=(
-            "Explicit values for 'fixed_vector' initializer. If 'dim' is absent it "
+            "Explicit values for 'fixed' initializer. If 'dim' is absent it "
             "will be inferred from the length of 'values'."
         ),
     )
@@ -101,8 +108,7 @@ class VectorComponentConfig(BaseModel):
     )
 
     # Evolution (mutation / crossover)
-    mutation: Optional[MutationConfig] = Field(
-        default=None,
+    mutation: MutationConfig = Field(
         description=(
             "Mutation configuration. By default, 'probability' is an element-wise rate "
             "(per gene) in [0,1]; operators may optionally treat it as an apply gate."
@@ -143,18 +149,16 @@ class VectorComponentConfig(BaseModel):
     @classmethod
     def set_dim_for_fixed_vector(cls, config: dict[str, Any]) -> dict[str, Any]:
         """
-        If using 'fixed_vector', ensure 'values' is provided and infer 'dim' if absent.
+        If using 'fixed', ensure 'values' is provided and infer 'dim' if absent.
 
         This keeps YAML concise and catches common mistakes early.
         """
         initializer = config.get("initializer")
         values = config.get("values")
 
-        if initializer == "fixed_vector":
+        if initializer == "fixed":
             if not values:
-                raise ValueError(
-                    "When using 'fixed_vector', 'values' must be provided."
-                )
+                raise ValueError("When using 'fixed', 'values' must be provided.")
             if "dim" not in config:
                 config["dim"] = len(values)
         return config
@@ -181,3 +185,30 @@ class VectorComponentConfig(BaseModel):
         else:
             raise TypeError("dim must be an int or list of ints")
         return dim
+
+    @field_validator("initializer")
+    @classmethod
+    def validate_initializer(cls, name: str, info: ValidationInfo) -> str:
+        """Validate allowed initializer names and provide clear errors for deprecated
+        names."""
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError("initializer must be a non-empty string")
+
+        name = name.strip()
+
+        allowed = {"normal", "uniform", "zero", "fixed", "adaptive"}
+        if name not in allowed:
+            raise ValueError(
+                f"Unknown initializer '{name}'. " f"Allowed: {sorted(allowed)}"
+            )
+
+        # structure-aware check (only if structure is available in the data)
+        data = info.data or {}
+        structure = data.get("structure") or "flat"
+        if structure == "net" and name != "normal":
+            raise ValueError(
+                "For structure='net', initializer must be 'normal' "
+                "(use initializer: normal and structure: net)."
+            )
+
+        return name
