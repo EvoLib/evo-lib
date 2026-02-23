@@ -48,14 +48,19 @@ def _calculate_rank_probabilities(
         raise ValueError("Population size must be at least 1.")
 
     if mode == "linear":
-        # Linear probability: p(i) = 2*(N - i) / (N*(N+1))
-        probabilities = (2 * (population_size - ranks)) / (
-            population_size * (population_size + 1)
-        )
+        # Monotonic decreasing with rank: best gets highest probability
+        weights = population_size - ranks
+        probabilities = weights / np.sum(weights)
+
     elif mode == "exponential":
-        # Exponential probability: p(i) = base^i / sum(base^j)
-        probabilities = np.power(exp_base, ranks)
-        probabilities = probabilities / np.sum(probabilities)
+        if exp_base <= 0:
+            raise ValueError("exp_base must be greater than 0")
+
+        # With exp_base > 1.0: best gets highest probability
+        # rank 0 -> exp_base^0 = 1, rank 1 -> exp_base^-1, ...
+        weights = np.power(exp_base, -ranks)
+        probabilities = weights / np.sum(weights)
+
     else:
         raise ValueError("Selection mode must be either 'linear' or 'exponential'.")
 
