@@ -120,12 +120,19 @@ This configuration demonstrates EvoNet evolution: weight mutation, bias-specific
 
 `dim: [2, 0, 0, 1]` starts with empty hidden layers, letting structural mutation grow nodes and edges.
 
+Connectivity:
+- `scope` controls which feedforward edges are allowed at initialization.
+- `density` controls how many of those allowed edges are actually created at init.
+- `recurrent` enables recurrent edge kinds (empty list means none).
+
 Topology constraints:
 - `max_neurons` and `max_connections` keep growth bounded (these are the current names; avoid older `max_nodes/max_edges`).
 
 Delay:
 - `delay:` initializes delays of recurrent connections at build time.
 - `mutation.delay:` mutates delays during evolution (recurrent connections only).
+
+
 
 ```yaml
 parent_pool_size: 20
@@ -145,16 +152,21 @@ modules:
     type: evonet
     dim: [2, 0, 0, 1]       # hidden layers start empty
     activation: [linear, tanh, tanh, sigmoid]
+
+    connectivity:
+      scope: crosslayer          # adjacent | crosslayer
+      density: 1.0               # (0, 1]
+      recurrent: [direct]        # [], [direct], [lateral], [indirect]
+    
     weights:
       initializer: normal
       std: 0.5
       bounds: [-5.0, 5.0]
+    
     bias:      
       initializer: normal
       std: 0.5
       bounds: [-1.0, 1.0]
-
-    recurrent: direct   # REQUIRED for delay to have any effect
 
     # NOTE: Delays only apply to recurrent connections.
     # If `recurrent` is not enabled, this block has no effect.

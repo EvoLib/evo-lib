@@ -15,6 +15,10 @@ modules:
     dim: [1, 6, 1]
     activation: [linear, tanh, sigmoid]
 
+    connectivity:
+      scope: adjacent
+      density: 1.0
+
     weights:
       initializer: uniform
       bounds: [-2.0, 2.0]

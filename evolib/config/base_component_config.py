@@ -8,10 +8,11 @@ should be configured, not *how* it is executed. Any runtime behavior belongs
 into the respective Para* representations and operator modules.
 """
 
-from typing import Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 from evonet.activation import ACTIVATIONS
-from pydantic import BaseModel, ConfigDict, Field, model_validator, validator
+from evonet.enums import RecurrentKind
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from evolib.interfaces.enums import (
     CrossoverOperator,
@@ -221,15 +222,21 @@ class AddNeuron(BaseModel):
         "neurons in hidden layers.",
     )
 
-    @validator("activations_allowed", each_item=True)
-    def validate_activation_name(cls, act_name: str) -> str:
+    @field_validator("activations_allowed")
+    @classmethod
+    def validate_activations_allowed(
+        cls, acts: Optional[list[str]]
+    ) -> Optional[list[str]]:
         """Ensure only valid activation function names are allowed."""
-        if act_name not in ACTIVATIONS:
-            raise ValueError(
-                f"Invalid activation function '{act_name}'. "
-                f"Valid options are: {list(ACTIVATIONS.keys())}"
-            )
-        return act_name
+        if acts is None:
+            return None
+        for a in acts:
+            if a not in ACTIVATIONS:
+                raise ValueError(
+                    f"Invalid activation function '{a}'. "
+                    f"Valid options are: {sorted(ACTIVATIONS.keys())}"
+                )
+        return acts
 
 
 class RemoveNeuron(BaseModel):
@@ -267,7 +274,12 @@ class StructuralTopology(BaseModel):
     mutation operators.
     """
 
-    recurrent: Optional[Literal["none", "direct", "local", "all"]] = "none"
+    recurrent: list[RecurrentKind] = Field(
+        default_factory=list,
+        description="Allowed recurrent edge kinds for structural "
+        "add_connection. Empty means none.",
+    )
+
     connection_scope: Optional[Literal["adjacent", "crosslayer"]] = "adjacent"
 
     max_neurons: Optional[int] = Field(
@@ -282,21 +294,34 @@ class StructuralTopology(BaseModel):
         ge=1,
     )
 
+    @field_validator("recurrent", mode="before")
+    @classmethod
+    def normalize_recurrent(cls, v: Any) -> list[RecurrentKind]:
+        """
+        Allow YAML convenience values like:
+            recurrent: none
+            recurrent: []
+        """
+        if v is None:
+            return []
+        if isinstance(v, str):
+            if v.lower() == "none":
+                return []
+            return [v]
+        return v
+
     @model_validator(mode="after")
     def _validate_topology(self) -> "StructuralTopology":
-        if self.recurrent not in {None, "none", "direct", "local", "all"}:
-            raise ValueError(f"Invalid recurrent value: {self.recurrent}")
-
         if self.connection_scope not in {None, "adjacent", "crosslayer"}:
             raise ValueError(f"Invalid connection_scope: {self.connection_scope}")
 
-        # Only positive limits allowed
         if self.max_connections is not None and self.max_connections <= 0:
             raise ValueError("max_connections must be > 0")
-
         if self.max_neurons is not None and self.max_neurons <= 0:
             raise ValueError("max_neurons must be > 0")
 
+        # ensure deterministic unique list
+        self.recurrent = sorted(set(self.recurrent), key=lambda x: x.value)
         return self
 
 

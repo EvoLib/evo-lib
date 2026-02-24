@@ -12,8 +12,12 @@ modules:
     type: evonet
     dim: [8, 16, 4]     # 4 obs, 2 actions
     activation: [linear, tanh, linear]
-    recurrent: none
-    initializer: identity_evonet
+    initializer: identity
+
+    connectivity:
+      recurrent: none
+      scope: adjacent
+      density: 1.0
 
     weights:
       bounds: [-2.0, 2.0]

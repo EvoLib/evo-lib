@@ -11,16 +11,16 @@ After parsing, raw dicts are converted into this strongly typed Pydantic model d
 config resolution.
 """
 
-from typing import Literal, Optional, Tuple, Union
+from typing import Any, Literal, Optional, Tuple, Union
 
 from evonet.activation import ACTIVATIONS
+from evonet.enums import RecurrentKind
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
     field_validator,
     model_validator,
-    validator,
 )
 from pydantic_core import core_schema
 
@@ -33,6 +33,55 @@ from evolib.config.base_component_config import (
 from evolib.interfaces.enums import RepresentationType
 
 Bounds = Tuple[float, float]
+
+
+class ConnectivityConfig(BaseModel):
+    """
+    EvoNet connectivity configuration.
+
+    recurrent:
+        Allowed recurrent edge kinds (DIRECT/LATERAL/INDIRECT).
+        If omitted, no recurrent edges are allowed.
+
+    scope:
+        adjacent  -> only adjacent-layer feedforward connections during init
+        crosslayer -> cross-layer feedforward connections during init
+
+    density:
+        Fraction of allowed feedforward edges to create at init (0 < density <= 1).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    recurrent: list[RecurrentKind] = Field(default_factory=list)
+
+    # Required: must be explicitly set in YAML
+    scope: Literal["adjacent", "crosslayer"]
+
+    # Required: must be explicitly set in YAML
+    density: float = Field(..., gt=0.0, le=1.0)
+
+    @field_validator("recurrent", mode="before")
+    @classmethod
+    def normalize_recurrent(cls, v: Any) -> list[RecurrentKind]:
+        """
+        Allow YAML convenience values like:
+            recurrent: none
+            recurrent: []
+        """
+        if v is None:
+            return []
+        if isinstance(v, str):
+            if v.lower() == "none":
+                return []
+            return [v]
+        return v
+
+    @model_validator(mode="after")
+    def _normalize(self) -> "ConnectivityConfig":
+        # deterministic, unique
+        self.recurrent = sorted(set(self.recurrent), key=lambda x: x.value)
+        return self
 
 
 class WeightsConfig(BaseModel):
@@ -227,33 +276,13 @@ class EvoNetComponentConfig(BaseModel):
         "neurons in hidden layers.",
     )
 
-    # Recurrent connections
-    recurrent: Optional[Literal["none", "direct", "local", "all"]] = "none"
-
     # Name of the initializer function (resolved via initializer registry)
     initializer: str = Field(
         default="default", description="Name of the initializer to use"
     )
 
-    # Connection topology for initialization
-    connection_scope: Literal["adjacent", "crosslayer"] = Field(
-        default="adjacent",
-        description=(
-            "Defines how layers are connected during initialization. "
-            "'adjacent' connects only consecutive layers, while 'crosslayer' "
-            "connects all earlier layers to all later layers."
-        ),
-    )
-
-    connection_density: float = Field(
-        default=1.0,
-        ge=0.0,
-        le=1.0,
-        description=(
-            "Fraction of possible connections actually created during initialization. "
-            "1.0 = fully connected, <1.0 = sparse."
-        ),
-    )
+    # Connectivity
+    connectivity: ConnectivityConfig
 
     # Numeric bounds for values; used by initialization and mutation
     weights: WeightsConfig = Field(default_factory=WeightsConfig)
@@ -335,45 +364,19 @@ class EvoNetComponentConfig(BaseModel):
             raise ValueError("Length of 'activation' list must match 'dim'")
         return act
 
-    @validator("activations_allowed", each_item=True)
-    def validate_activation_name(cls, act_name: str) -> str:
-        """Ensure only valid activation function names are allowed."""
-        if act_name not in ACTIVATIONS:
-            raise ValueError(
-                f"Invalid activation function '{act_name}'. "
-                f"Valid options are: {list(ACTIVATIONS.keys())}"
-            )
-        return act_name
-
-    @validator("recurrent")
-    def validate_recurrent(cls, recurrent: Optional[str]) -> str:
-        """Ensure recurrent preset is valid and normalized."""
-        if recurrent is None:
-            return "none"
-        allowed = {"none", "direct", "local", "all"}
-        if recurrent not in allowed:
-            raise ValueError(
-                f"Invalid recurrent preset '{recurrent}'. "
-                f"Valid options are: {sorted(allowed)}"
-            )
-        return recurrent
-
-    @field_validator("connection_scope")
+    @field_validator("activations_allowed")
     @classmethod
-    def validate_connection_scope(cls, scope: str) -> str:
-        """Ensure connection_scope is one of the supported options."""
-        allowed = {"adjacent", "crosslayer"}
-        if scope not in allowed:
-            raise ValueError(
-                f"Invalid connection_scope '{scope}'. "
-                f"Valid options are: {sorted(allowed)}"
-            )
-        return scope
+    def validate_activations_allowed(
+        cls, acts: Optional[list[str]]
+    ) -> Optional[list[str]]:
+        """Validate that all activation names are known."""
+        if acts is None:
+            return None
 
-    @field_validator("connection_density")
-    @classmethod
-    def validate_connection_density(cls, density: float) -> float:
-        """Ensure connection_density is within [0, 1]."""
-        if not (0.0 <= density <= 1.0):
-            raise ValueError(f"connection_density must be in [0, 1], got {density}.")
-        return density
+        for a in acts:
+            if a not in ACTIVATIONS:
+                raise ValueError(
+                    f"Invalid activation function '{a}'. "
+                    f"Valid options are: {sorted(ACTIVATIONS.keys())}"
+                )
+        return acts
