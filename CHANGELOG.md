@@ -1,6 +1,9 @@
 ## EvoLib 0.2.0b4[unreleased]
 
 ### Added
+- Introduced required connectivity block for evonet modules (explicit scope, density, recurrent 
+- Added structured weights configuration block for parameter initialization and bounds control.
+- Added structured bias configuration block with dedicated initializer and bounds handling.
 - Added delay mutation for EvoNet recurrent connections. Delays can now
   be mutated via a configuration block supporting delta-step
   and resampling modes with configurable bounds.
@@ -13,6 +16,7 @@
   biologically motivated policies.
 
 ### Changed
+- BREAKING: EvoNet topology initialization is now fully defined via connectivity instead of implicit or scattered fields.
 - BREAKING: Removed `weight_bounds` from EvoNet config. Use `weights.bounds` instead.
 - BREAKING: Removed `bias_bounds` from EvoNet config. Use `bias.bounds` instead.
 - EvoNet now distinguishes between bounds (mutation/search bounds) and init_bounds (optional init-time clipping) for weights and bias.
