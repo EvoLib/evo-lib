@@ -15,8 +15,12 @@ modules:
     type: evonet
     dim: [1, 8, 5]
     activation: [linear, tanh, softmax]
-    recurrent: "all"
-    initializer: identity_evonet
+    initializer: identity
+
+    connectivity:
+      recurrent: [direct, lateral, indirect]
+      scope: adjacent
+      density: 1.0
 
     weights:
       bounds: [-5.0, 5.0]

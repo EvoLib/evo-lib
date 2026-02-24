@@ -16,6 +16,11 @@ modules:
     type: evonet
     dim: [1, 1, 1]
     activation: ["linear", "linear", "linear"]
+
+    connectivity:
+      recurrent: [direct]
+      scope: adjacent
+      density: 1.0
     
     weights:
       initializer: normal
@@ -27,7 +32,6 @@ modules:
       std: 0.5
       bounds: [-1.0, 1.0]
 
-    recurrent: direct
 
     delay:
       initializer: fixed

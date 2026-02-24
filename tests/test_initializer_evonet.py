@@ -15,6 +15,10 @@ def test_default_initializer_evonet_builds_expected_structure() -> None:
                 "type": "evonet",
                 "dim": [2, 3, 1],
                 "activation": "linear",
+                "connectivity": {
+                    "scope": "adjacent",
+                    "density": 1.0,
+                },
                 "weights": {
                     "initializer": "normal",
                     "std": 0.5,

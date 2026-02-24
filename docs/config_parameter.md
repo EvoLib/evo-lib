@@ -289,11 +289,29 @@ modules:
 | `dim`             | list[int]           | —       | Layer sizes, e.g. `[4, 0, 0, 2]`. Hidden layers can start empty (0) and grow through structural mutation. |
 | `activation`      | str \| list[str]    | —       | If list: activation per layer. If str: used for non-input layers; input layer is treated as linear. |
 | `initializer`     | str                 | default | Topology preset (e.g. `default`, `unconnected`, `identity`). Parameter initialization is configured via `weights`, `bias`, and `delay`. |
+| `connectivity`    | `dict`                   | —       | **Required.** Defines feedforward scope/density and allowed recurrent kinds. |
 | `weights`         | dict                | —       | Weight init and bounds configuration (initializer, bounds, optional params). | 
 | `bias`            | dict                | —       | Bias init and bounds configuration (initializer, bounds, optional params). | 
 | `neuron_dynamics` | list[dict] \| null  | null    | Optional per-layer neuron dynamics specification. Must match `len(dim)`. |
 | `mutation`        | dict \| null        | null    | Mutation settings for weights, biases, activations, delay, and structure. |
 | `crossover`       | dict \| null        | null    | Optional crossover settings (weight/bias level). |
+
+#### Connectivity (`connectivity`)
+
+| Field       | Type                         | Default | Notes |
+|------------|------------------------------|---------|------|
+| `scope`    | `"adjacent" \| "crosslayer"` | —       | **Required.** Allowed feedforward edge scope at initialization. |
+| `density`  | `float`                      | —       | **Required.** Fraction of allowed feedforward edges created at init `(0,1]`. |
+| `recurrent`| `list[str]`                  | `[]`    | Allowed recurrent edge kinds. Empty list means none. |
+
+Example:
+
+```yaml
+connectivity:
+  scope: crosslayer
+  density: 0.5
+  recurrent: [direct]
+```
 
 ##### weights block
 |Parameter	 | Type	 | Default	 | Explanation |
@@ -325,8 +343,8 @@ Allowed presets:
 | Initializer            | Meaning (topology only) |
 |------------------------|-------------------------|
 | `default`       | Standard EvoNet topology preset (uses `connection_scope`, `connection_density`, and `recurrent`). |
-| `unconnected_evonet`   | Creates neurons/layers but starts with **no connections** (use structural mutation to grow). |
-| `identity_evonet`      | Special preset intended for stable recurrent memory (may override parameters internally; see notes below). |
+| `unconnected`   | Creates neurons/layers but starts with **no connections** (use structural mutation to grow). |
+| `identity`      | Special preset intended for stable recurrent memory (may override parameters internally; see notes below). |
 
 ---
 
@@ -493,13 +511,12 @@ structural:
 
 ### Topology constraints
 
-| Field                | Type          | Default  | Description |
-|---------------------|---------------|----------|-------------|
-| `recurrent`          | str           | `none`   | Controls recurrence: `none`, `direct`, `local` or `all`. |
-| `connection_scope`   | str           | `adjacent` | Allowed layer connectivity: `adjacent` (neighbor layers only) or `crosslayer` (any-to-any). |
-| `connection_density` | float         | 1.0     | Fraction of possible connections initialized at creation time. |
-| `max_neurons`        | int \| null   | null     | Maximum number of non-input neurons (`null` = unlimited). |
-| `max_connections`    | int \| null   | null     | Maximum number of edges (`null` = unlimited). |
+| Field              | Type                           | Default     | Description |
+|-------------------|--------------------------------|-------------|-------------|
+| `recurrent`        | `list[str]`                    | `[]`        | Allowed recurrent kinds for `add_connection`. Empty list means none. |
+| `connection_scope` | `"adjacent" \| "crosslayer" \| null` | `"adjacent"` | Constraint for structural add-neuron / add-connection edge placement. |
+| `max_neurons`      | `int \| null`                  | `null`      | Upper bound on total neurons allowed (implementation-defined counting). |
+| `max_connections`  | `int \| null`                  | `null`      | Upper bound on total connections allowed. |
 
 ---
 
@@ -544,7 +561,6 @@ modules:
     type: evonet
     dim: [4, 0, 0, 2]
     activation: [linear, tanh, tanh, tanh]
-    initializer: normal_evonet
 
     delay:
       initializer: uniform

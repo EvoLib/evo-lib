@@ -109,12 +109,14 @@ class EvoNet(ParaBase):
         # Define network architecture
         self.dim = cfg.dim
 
+        # Connectivity
+        self.connection_scope = cfg.connectivity.scope
+        self.connection_density = cfg.connectivity.density
+        self.recurrent_kinds = cfg.connectivity.recurrent
+
         # Bounds
         self.weight_bounds = cfg.weights.bounds or (-1.0, 1.0)
         self.bias_bounds = cfg.bias.bounds or (-0.5, 0.5)
-
-        self.connection_scope = cfg.connection_scope
-        self.connection_density = cfg.connection_density
 
         # Mutation
         if cfg.mutation is None:

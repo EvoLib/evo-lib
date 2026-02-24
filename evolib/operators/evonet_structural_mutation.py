@@ -10,7 +10,6 @@ from evonet.mutation import (
 )
 
 from evolib.config.base_component_config import StructuralMutationConfig
-from evolib.interfaces.enum_helpers import resolve_recurrent_kinds
 
 
 def mutate_structure(net: Nnet, cfg: StructuralMutationConfig) -> bool:
@@ -67,7 +66,7 @@ def mutate_structure(net: Nnet, cfg: StructuralMutationConfig) -> bool:
                 cfg.topology.max_connections is None
                 or len(net.get_all_connections()) < cfg.topology.max_connections
             ):
-                allowed_kinds = resolve_recurrent_kinds(cfg.topology.recurrent)
+                allowed_kinds = set(cfg.topology.recurrent)
                 for _ in range(np.random.randint(1, add_cfg.max + 1)):
                     if add_random_connection(
                         net,

@@ -16,7 +16,11 @@ modules:
     type: evonet
     dim: [1, 8, 1]
     activation: [linear, tanh, sigmoid]
-    recurrent: "local"
+
+    connectivity:
+      recurrent: [direct, lateral]
+      scope: adjacent
+      density: 1.0
 
     weights:
       initializer: zero

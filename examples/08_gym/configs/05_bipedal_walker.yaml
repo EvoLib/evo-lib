@@ -3,9 +3,9 @@ offspring_pool_size: 250
 max_generations: 200
 num_elites: 5
 
-parallel:
-  backend: ray
-  address: ray://10.17.5.10:10001
+#parallel:
+#  backend: ray
+#  address: ray://10.17.5.10:10001
 
 evolution:
   strategy: mu_plus_lambda
@@ -16,7 +16,12 @@ modules:
     type: evonet
     dim: [24, 8, 4]         # 24 inputs (state), 4 outputs (joint torques)
     activation: [linear, tanh, linear]
-    recurrent: direct
+
+    connectivity:
+      recurrent: [direct]
+      scope: adjacent
+      density: 1.0
+
 
     weights:
       initializer: normal

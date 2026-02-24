@@ -16,6 +16,10 @@ def test_neuron_dynamics_config_length_matches_dim() -> None:
             type="evonet",
             dim=[1, 2, 1],
             activation=["linear", "tanh", "tanh"],
+            connectivity={
+                "scope": "adjacent",
+                "density": 1.0,
+            },
             weights={
                 "initializer": "normal",
                 "std": 0.5,
@@ -48,9 +52,11 @@ def test_neuron_dynamics_applied_to_neurons() -> None:
                 "dim": [1, 3, 1],
                 "activation": ["linear", "tanh", "tanh"],
                 "initializer": "default",
-                "recurrent": "local",
-                "connection_scope": "adjacent",
-                "connection_density": 1.0,
+                "connectivity": {
+                    "recurrent": "lateral",
+                    "scope": "adjacent",
+                    "density": 1.0,
+                },
                 "weights": {
                     "initializer": "normal",
                     "std": 0.5,

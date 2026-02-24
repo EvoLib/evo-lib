@@ -14,7 +14,6 @@ from evonet.enums import ConnectionType, NeuronRole
 
 from evolib.config.evonet_component_config import DelayConfig, EvoNetComponentConfig
 from evolib.config.schema import FullConfig
-from evolib.interfaces.enum_helpers import resolve_recurrent_kinds
 from evolib.representation.evonet import EvoNet
 
 
@@ -158,14 +157,14 @@ def _build_architecture(
             dynamics_name = dynamics_cfg.name
             dynamics_params = dynamics_cfg.params or {}
 
-        recurrent_kinds = resolve_recurrent_kinds(cfg.recurrent)
+        allowed_kinds = set(cfg.connectivity.recurrent)
         para.net.add_neuron(
             count=num_neurons,
             activation=activation_name,
             role=role,
             connection_init=connection_init,
             bias=0.0,
-            recurrent=recurrent_kinds if role != NeuronRole.INPUT else None,
+            recurrent=allowed_kinds if role != NeuronRole.INPUT else None,
             connection_scope=para.connection_scope,
             connection_density=para.connection_density,
             dynamics_name=dynamics_name,

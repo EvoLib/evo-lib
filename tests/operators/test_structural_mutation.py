@@ -28,6 +28,10 @@ def make_minimal_evonet() -> EvoNet:
                 "type": "evonet",
                 "dim": [2, 3, 1],
                 "activation": ["linear", "tanh", "sigmoid"],
+                "connectivity": {
+                    "scope": "adjacent",
+                    "density": 1.0,
+                },
                 "weights": {
                     "initializer": "normal",
                     "std": 0.5,

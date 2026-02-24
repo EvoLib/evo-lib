@@ -79,7 +79,7 @@ def fitness_echo(indiv: Indiv) -> None:
     acc = correct / max(count, 1)
 
     indiv.extra_metrics = {"accuracy": acc, "mse": mse}
-    indiv.fitness = mse + (1.0 - acc) / 4.0
+    indiv.fitness = mse + (1.0 - acc) / 2.0
 
 
 def save_plot(pop: Pop) -> None:
