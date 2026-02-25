@@ -1,4 +1,4 @@
-## EvoLib 0.2.0b4[unreleased]
+## EvoLib 0.2.0
 
 ### Added
 - Introduced required connectivity block for evonet modules (explicit scope, density, recurrent 
