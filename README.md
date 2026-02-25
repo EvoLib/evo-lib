@@ -4,7 +4,7 @@
 [![Code Quality & Tests](https://github.com/EvoLib/evo-lib/actions/workflows/ci.yml/badge.svg)](https://github.com/EvoLib/evo-lib/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PyPI version](https://badge.fury.io/py/evolib.svg)](https://pypi.org/project/evolib/)
-[![Project Status: Beta](https://img.shields.io/badge/status-beta-blue.svg)](https://github.com/EvoLib/evo-lib)
+[![Project Status: Stable](https://img.shields.io/badge/status-stable-green.svg)](https://github.com/EvoLib/evo-lib)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/EvoLib/evolib/main/assets/evolib_256.png" alt="EvoLib Logo" width="256"/>
@@ -26,10 +26,8 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
   Runs short micro-evolutions ("incubations") for structure-mutated individuals, allowing new topologies to stabilize before rejoining the main population.  
 - **Type-checked**: static typing with mypy, PEP8-compliant and consistent code style.  
 
-
-> **EvoLib is currently in beta. The core API and configuration format are stable, but some features are still under development.**
-
 ---
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/05_advanced_topics/04_frames_vector_obstacles/04_vector_control_obstacles.gif" alt="Sample Plot" width="512"/>
 </p>
