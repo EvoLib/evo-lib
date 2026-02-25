@@ -40,11 +40,6 @@ class Indiv:
     #: None means the individual has not yet been evaluated.
     fitness: float | None
 
-    #: is_evaluated (bool): Flag indicating whether the individual's fitness
-    #: has been evaluated. False after initialization, True after the first
-    #: call to a fitness evaluation.
-    is_evaluated: bool
-
     #: age (int): Current age of the individual. 0 means "no limit".
     age: int
 
@@ -90,7 +85,6 @@ class Indiv:
         "id",
         "para",
         "fitness",
-        "is_evaluated",
         "age",
         "max_age",
         "origin",
@@ -109,7 +103,6 @@ class Indiv:
         self.id: str = str(uuid4())
         self.para = para if para is not None else ParaDummy()
         self.fitness = None
-        self.is_evaluated = False
         self.age = 0
         self.max_age = 0
         self.origin = Origin.PARENT
@@ -128,6 +121,11 @@ class Indiv:
         if self.fitness is None or other.fitness is None:
             raise ValueError("Comparison attempted with unevaluated individuals")
         return self.fitness < other.fitness
+
+    @property
+    def is_evaluated(self) -> bool:
+        """Return True if the individual has a valid fitness value."""
+        return self.fitness is not None
 
     def mutate(self) -> None:
         """
@@ -229,7 +227,6 @@ class Indiv:
             reset_id (bool): If True (default), assign a new unique ID to the copy.
             reset_fitness (bool): If True, set fitness to None in the copy.
             reset_age (bool): If True, set age to 0 in the copy.
-            reset_evaluation (bool): If True, set is_evaluated = False in the copy.
             reset_origin (bool): If True, set origin = Origin.OFFSPRING
 
         Returns:
@@ -243,8 +240,6 @@ class Indiv:
             new_indiv.fitness = None
         if reset_age:
             new_indiv.age = 0
-        if reset_evaluation:
-            new_indiv.is_evaluated = False
         if reset_origin:
             from evolib.interfaces.enums import Origin
 

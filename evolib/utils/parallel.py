@@ -76,7 +76,6 @@ def map_fitness(
             result = fitness_fn(indiv)
             if result is not None:
                 indiv.fitness = float(result)
-            indiv.is_evaluated = True
         return
 
     # Ray backend
@@ -87,7 +86,6 @@ def map_fitness(
         result = fitness_fn(indiv)
         if result is not None:
             indiv.fitness = float(result)
-        indiv.is_evaluated = True
         return indiv
 
     futures = [_eval_remote.remote(ind) for ind in indivs]
@@ -97,4 +95,3 @@ def map_fitness(
     for orig, res in zip(indivs, results):
         orig.fitness = res.fitness
         orig.extra_metrics = getattr(res, "extra_metrics", {})
-        orig.is_evaluated = True

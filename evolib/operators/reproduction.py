@@ -46,7 +46,6 @@ def generate_cloned_offspring(
             reset_id=True,
             reset_fitness=True,
             reset_age=True,
-            reset_evaluation=True,
             reset_origin=True,
         )
 
