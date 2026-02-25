@@ -103,6 +103,21 @@ modules:
     type: evonet
     dim: [4, 6, 2]
     activation: [linear, tanh, tanh]
+
+    connectivity:
+      recurrent: none
+      scope: adjacent
+      density: 1.0
+
+    weights:
+      initializer: random
+      bounds: [-1.0, 1.0]
+
+    bias:
+      initializer: normal
+      std: 0.1
+      bounds: [-0.5, 0.5]
+
     mutation:
       strategy: constant
       probability: 1.0
