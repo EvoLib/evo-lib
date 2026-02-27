@@ -1,10 +1,11 @@
+
 # EvoLib – A Modular Framework for Evolutionary Computation
 
 [![Docs Status](https://readthedocs.org/projects/evolib/badge/?version=latest)](https://evolib.readthedocs.io/en/latest/)
 [![Code Quality & Tests](https://github.com/EvoLib/evo-lib/actions/workflows/ci.yml/badge.svg)](https://github.com/EvoLib/evo-lib/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PyPI version](https://badge.fury.io/py/evolib.svg)](https://pypi.org/project/evolib/)
-[![Project Status: Beta](https://img.shields.io/badge/status-beta-blue.svg)](https://github.com/EvoLib/evo-lib)
+[![Project Status: Stable](https://img.shields.io/badge/status-stable-green.svg)](https://github.com/EvoLib/evo-lib)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/EvoLib/evolib/main/assets/evolib_256.png" alt="EvoLib Logo" width="256"/>
@@ -19,17 +20,15 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 - **Transparent design**: configuration via YAML, type-checked validation, and clear module boundaries.  
 - **Modularity**: mutation, selection, crossover, and parameter representations can be freely combined.  
 - **Educational value**: examples and a clean API make it practical for illustrating evolutionary concepts.  
-- **Neuroevolution support**: structural mutations (adding/removing neurons and connections) and evolvable networks via EvoNet.  
-- **Gymnasium integration**: run [Gymnasium](https://gymnasium.farama.org) benchmarks (e.g. CartPole, LunarLander) via a simple wrapper.  
+- **Neuroevolution support**: evolvable neural networks with explicit topology, recurrence, delays, and structural mutation (EvoNet).  
+- **Gymnasium integration**: run [Gymnasium](https://gymnasium.farama.org) benchmarks (e.g. CartPole, LunarLander) via a simple wrapper.
 - **Parallel evaluation (optional)**: basic support for [Ray](https://www.ray.io/) to speed up fitness evaluations.  
-- **HELI (Hierarchical Evolution with Lineage Incubation)**
+- **HELI (Hierarchical Evolution with Lineage Incubation)**  
   Runs short micro-evolutions ("incubations") for structure-mutated individuals, allowing new topologies to stabilize before rejoining the main population.  
-- **Type-checked**: PEP8 compliant, and consistent code style.  
-
-
-> **EvoLib is currently in beta. The core API and configuration format are stable, but some features are still under development.**
+- **Type-checked**: static typing with mypy, PEP8-compliant and consistent code style.  
 
 ---
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/05_advanced_topics/04_frames_vector_obstacles/04_vector_control_obstacles.gif" alt="Sample Plot" width="512"/>
 </p>
@@ -42,7 +41,7 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 pip install evolib
 ```
 
-Requirements: Python 3.10+ and packages in `requirements.txt`.
+Requirements: Python 3.12+ and packages in `requirements.txt`.
 
 ---
 
@@ -105,7 +104,21 @@ modules:
     type: evonet
     dim: [4, 6, 2]
     activation: [linear, tanh, tanh]
-    initializer: normal_evonet
+
+    connectivity:
+      recurrent: none
+      scope: adjacent
+      density: 1.0
+
+    weights:
+      initializer: random
+      bounds: [-1.0, 1.0]
+
+    bias:
+      initializer: normal
+      std: 0.1
+      bounds: [-0.5, 0.5]
+
     mutation:
       strategy: constant
       probability: 1.0
@@ -120,27 +133,7 @@ modules:
         add_neuron:
           probability: 0.015
           init_connection_ratio: 0.5
-          activations_allowed: [tanh]
-          init: random
-
-        remove_neuron:
-          probability: 0.015
-
-        add_connection:
-          probability: 0.05
-          max: 3
-          init: random
-
-        remove_connection:
-          probability: 0.05
-          max: 3
-
-        topology:
-          recurrent: none
-          connection_scope: crosslayer
-          max_neurons: 25
-          max_connections: 50
-
+[...]
 ```
 
 ---
@@ -148,6 +141,15 @@ modules:
 > ℹ️ Multiple parameter types (e.g. vector + evonet) can be combined in a single individual. Each component evolves independently, using its own configuration.
 
 ---
+
+### Archival Record (Zenodo)
+
+EvoLib is archived for long-term reproducibility on Zenodo.
+
+**DOI:** https://doi.org/10.5281/zenodo.18775372
+
+---
+
 
 ## Use Cases
 
@@ -190,7 +192,6 @@ gif = env.visualize(indiv, gen=10)    # render & save as GIF
 Early prototypes demonstrate how evolutionary algorithms can evolve both neural networks and sensor properties such as number, range, and orientation for agents in 2D worlds built with pygame. This illustrates how networks and sensors co-adapt to dynamic environments with collisions and feedback.
 
 ### Ant/Food Prototype
-
 In this video, agents use simple sensors to learn how to collect food while avoiding collisions with the environment.
 
 <p align="center">
@@ -198,7 +199,6 @@ In this video, agents use simple sensors to learn how to collect food while avoi
 </p>
 
 ### Flappy Bird–style Prototype
-
 Another prototype uses a **Flappy Bird–like 2D world**, where agents must pass through moving gaps.
 Both the **neural controller** and the **sensors** (number, length, angle) are evolved, allowing perception and action to adapt together.
 This illustrates how EvoLib can be applied to simple game-like environments, making the joint evolution of sensing and control directly observable.
@@ -238,13 +238,20 @@ For deeper exploration, see the [full examples directory](examples/)
 - [ ] Advanced Visualization
 - [ ] Game Environment Integration (pygame, PettingZoo - early prototypes)
 
+
+---
+
+### Acknowledgement
+
+Parts of the documentation, docstrings, and code refactoring were supported by ChatGPT (OpenAI) for language clarity and consistency.
+All conceptual design, experiments, and implementation decisions were made by the author.
+
 ---
 
 
 ## License
 
 MIT License – see [MIT License](https://github.com/EvoLib/evo-lib/tree/main/LICENSE).
-
 ---
 
 ```{toctree}

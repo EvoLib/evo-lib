@@ -151,7 +151,7 @@ Documentation for EvoLib is available at: 👉 https://evolib.readthedocs.io/en/
 
 EvoLib is archived for long-term reproducibility on Zenodo.
 
-**DOI:** https://doi.org/10.5281/zenodo.17793862
+**DOI:** https://doi.org/10.5281/zenodo.18775372
 
 ---
 
