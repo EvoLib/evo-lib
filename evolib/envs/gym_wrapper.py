@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Union, cast
+from typing import TYPE_CHECKING, Any, TypeAlias, cast
 
 try:
     import gymnasium as gym
@@ -22,6 +22,41 @@ import numpy as np
 
 if TYPE_CHECKING:
     from evolib import Individual
+
+RenderFrame: TypeAlias = np.ndarray
+
+
+def _reset_env(env: Any, seed: int | None = None) -> Any:
+    """Reset Gymnasium environment and return only the observation."""
+    obs, _info = env.reset(seed=seed)
+    return obs
+
+
+def _step_env(env: Any, action: Any) -> tuple[Any, float, bool, bool]:
+    """Run one Gymnasium step and normalize the return values."""
+    obs, reward, terminated, truncated, _info = env.step(action)
+    return obs, float(reward), bool(terminated), bool(truncated)
+
+
+def _render_env(env: Any) -> RenderFrame:
+    """
+    Render Gymnasium environment and normalize output to ndarray.
+
+    Gym may return:
+    - ndarray (rgb_array)
+    - list[ndarray]
+    - None (depending on render_mode)
+    """
+    frame = env.render()
+
+    if frame is None:
+        raise RuntimeError("env.render() returned None (render_mode not set?)")
+
+    if isinstance(frame, list):
+        # Gym sometimes returns a list of frames - take last
+        frame = frame[-1]
+
+    return frame
 
 
 class GymEnv:
@@ -148,7 +183,7 @@ class GymEnv:
             max_episode_steps=self.max_steps,
             **self.env_kwargs,
         )
-        obs, _ = env.reset(seed=seed)
+        obs = _reset_env(env, seed=seed)
 
         if self.deterministic_init:
             unwrapped = env.unwrapped
@@ -163,7 +198,6 @@ class GymEnv:
         net = indiv.para[module].net
         net.reset(full=True)  # Reset recurrent/internal state
 
-        RenderFrame = Union[np.ndarray, list[np.ndarray], None]
         frames: list[np.ndarray] = []
 
         for _ in range(self.max_steps):
@@ -181,9 +215,9 @@ class GymEnv:
             else:
                 action = np.array(action, dtype=np.float32)
 
-            obs, reward, terminated, truncated, _ = env.step(action)
+            obs, reward, terminated, truncated = _step_env(env, action)
 
-            frame: RenderFrame = env.render()
+            frame = _render_env(env)
             if isinstance(frame, np.ndarray):
                 frames.append(frame)
 
