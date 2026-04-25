@@ -240,8 +240,7 @@ For deeper exploration, see the [full examples directory](examples/)
 - [X] Topological Evolution (neurons, edges)
 - [X] Ray Support for Parallel Evaluation (early prototypes)
 - [X] OpenAI Gymnasium / Gym Wrapper
-- [ ] Advanced Visualization
-- [ ] Game Environment Integration (pygame, PettingZoo - early prototypes)
+- [ ] Game Environment Integration (pygame - early prototypes)
 
 
 ---
