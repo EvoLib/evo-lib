@@ -74,3 +74,4 @@ def save_indiv(indiv: Any, path: str | Path) -> str:
 
 def load_indiv(path: str | Path) -> Any:
     """Deserialize a single individual."""
+    return read_pickle(path)
