@@ -5,8 +5,6 @@
 The agent controls steering only. Forward motion is provided by the environment.
 """
 
-from __future__ import annotations
-
 import math
 import random
 from dataclasses import dataclass

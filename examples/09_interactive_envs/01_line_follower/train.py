@@ -12,7 +12,7 @@ SEED = 42
 
 
 class LineFollowerController:
-    """Interpret EvoNet output as steering with constant forward drive."""
+    """Interpret EvoNet output as steering."""
 
     def __init__(self, indiv: Indiv):
         self.net = indiv.para["brain"]
