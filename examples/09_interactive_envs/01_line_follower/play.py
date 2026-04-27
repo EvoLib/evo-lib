@@ -1,1 +1,108 @@
-# Mensch steuert
+# SPDX-License-Identifier: MIT
+"""Manual control for LineFollowerEnv (steering only)."""
+
+import sys
+
+import pygame
+from render import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, draw_env
+
+from evolib.evolib_envs.core.env import Action, Observation
+from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
+
+WORLD_WIDTH = 10.0
+WORLD_HEIGHT = 6.0
+MAX_STEPS = 1400
+SEED = 42
+
+
+class ManualController:
+    """
+    Manual steering controller.
+
+    Controls:
+    - LEFT: steer left
+    - RIGHT: steer right
+    """
+
+    def __init__(self, turn_strength: float = 1.0) -> None:
+        self.turn_strength = turn_strength
+        self.turn = 0.0
+
+    def update(self) -> None:
+        keys = pygame.key.get_pressed()
+
+        self.turn = 0.0
+
+        if keys[pygame.K_LEFT]:
+            self.turn += self.turn_strength
+
+        if keys[pygame.K_RIGHT]:
+            self.turn -= self.turn_strength
+
+        # clamp to [-1, 1]
+        self.turn = max(-1.0, min(1.0, self.turn))
+
+    def act(self, observation: Observation) -> Action:
+        return [self.turn]
+
+
+def main() -> None:
+    env = LineFollowerEnv(
+        width=WORLD_WIDTH,
+        height=WORLD_HEIGHT,
+        max_steps=MAX_STEPS,
+    )
+
+    controller = ManualController()
+
+    pygame.init()
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("LineFollower - Manual (Steering)")
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont(None, 24)
+
+    observation = env.reset(seed=SEED)
+    total_reward = 0.0
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+
+                if event.key == pygame.K_r:
+                    observation = env.reset(seed=SEED)
+                    total_reward = 0.0
+
+        controller.update()
+        action = controller.act(observation)
+
+        observation, reward, done, _ = env.step(action)
+        total_reward += reward
+
+        if done:
+            print(f"Reward: {total_reward:.2f}")
+            observation = env.reset(seed=SEED)
+            total_reward = 0.0
+
+        draw_env(
+            screen,
+            env,
+            total_reward,
+            font,
+            title="Manual LineFollower (Steering)",
+        )
+
+        pygame.display.flip()
+        clock.tick(FPS)
+
+    pygame.quit()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

@@ -7,18 +7,21 @@ from evolib.evolib_envs.core.evaluator import evaluate_episode
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
 
 CONFIG_FILE = "config.yaml"
-MAX_STEPS = 1400
+MAX_STEPS = 500
 SEED = 42
 
 
 class LineFollowerController:
-    """Interpret an EvoLib individual as a line-follower controller."""
+    """Interpret EvoNet output as steering with constant forward drive."""
 
-    def __init__(self, indiv: Indiv, brain_module: str = "brain") -> None:
-        self.net = indiv.para[brain_module]
+    def __init__(self, indiv: Indiv):
+        self.net = indiv.para["brain"]
 
     def act(self, observation: Observation) -> Action:
-        return self.net.calc(observation)
+        output = self.net.calc(observation)
+        turn = float(output[0])
+        turn = max(-1.0, min(1.0, turn))
+        return [turn]
 
 
 def eval_line_follower_fitness(indiv: Indiv) -> None:

@@ -2,7 +2,7 @@
 """
 2D LineFollower environment.
 
-The agent controls a differential-drive robot that should follow a line.
+The agent controls steering only. Forward motion is provided by the environment.
 """
 
 from __future__ import annotations
@@ -24,10 +24,10 @@ class SensorState:
 
 
 class LineFollowerEnv(Env):
-    """Minimal 2D line follower environment."""
+    """Minimal 2D line follower environment with steering-only actions."""
 
     observation_size = 2
-    action_size = 2
+    action_size = 1
 
     def __init__(
         self,
@@ -46,14 +46,15 @@ class LineFollowerEnv(Env):
         self.angle = 0.0
         self.step_count = 0
 
-        self.wheel_base = 0.5
-        self.max_speed = 0.08
+        self.base_speed = 0.045
+        self.turn_strength = 0.075
 
-        self.sensor_forward = 0.45
-        self.sensor_side = 0.22
+        self.sensor_forward = 0.55
+        self.sensor_side = 0.30
         self.sensor_range = 0.45
 
     def line_y(self, x: float) -> float:
+        """Return the target line y-position at world x."""
         return -self.height * 0.1 + math.sin(x * 1.5) * 0.8 + x * 0.2
 
     def reset(self, seed: int | None = None) -> Observation:
@@ -73,34 +74,21 @@ class LineFollowerEnv(Env):
     def step(self, action: Action) -> StepResult:
         """Advance the simulation by one step."""
 
-        left, right = action
+        turn = max(-1.0, min(1.0, float(action[0])))
 
-        left = max(-1.0, min(1.0, float(left)))
-        right = max(-1.0, min(1.0, float(right)))
-
-        left_speed = left * self.max_speed
-        right_speed = right * self.max_speed
-
-        speed = (left_speed + right_speed) * 0.5
-        angular_speed = (right_speed - left_speed) / self.wheel_base
-
-        self.angle += angular_speed
-        self.x += math.cos(self.angle) * speed
-        self.y += math.sin(self.angle) * speed
+        self.angle += turn * self.turn_strength
+        self.x += math.cos(self.angle) * self.base_speed
+        self.y += math.sin(self.angle) * self.base_speed
 
         self.step_count += 1
 
         observation = self._observe()
 
-        line_y = self.line_y(self.x)
-        line_error = abs(self.y - line_y)
+        line_error = abs(self.y - self.line_y(self.x))
         heading_error = abs(math.sin(self.angle))
 
         progress = self.x - self.previous_x
         self.previous_x = self.x
-
-        line_error = abs(self.y - self.line_y(self.x))
-        heading_error = abs(math.sin(self.angle))
 
         line_quality = max(0.0, 1.0 - line_error)
 
@@ -108,11 +96,11 @@ class LineFollowerEnv(Env):
         reward += progress * 20.0 * line_quality
         reward -= line_error * 3.0
         reward -= heading_error * 0.3
-        reward -= abs(right - left) * 0.05
+        reward -= abs(turn) * 0.03
 
         done = (
             self.step_count >= self.max_steps
-            or abs(self.y - self.line_y(self.x)) > 1.0
+            or line_error > 1.0
             or self.x > self.width * 0.5
         )
 
@@ -121,6 +109,8 @@ class LineFollowerEnv(Env):
             "y": self.y,
             "angle": self.angle,
             "line_error": line_error,
+            "heading_error": heading_error,
+            "turn": turn,
             "left_sensor": observation[0],
             "right_sensor": observation[1],
         }
@@ -165,6 +155,7 @@ class LineFollowerEnv(Env):
 
     def _line_sensor_value(self, sensor_x: float, sensor_y: float) -> float:
         """Return line intensity at a sensor position."""
+
         line_y = self.line_y(sensor_x)
         distance = abs(sensor_y - line_y)
 

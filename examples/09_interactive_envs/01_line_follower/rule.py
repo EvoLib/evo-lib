@@ -1,35 +1,86 @@
 # SPDX-License-Identifier: MIT
-"""Rule-based controller."""
+"""Run a simple rule-based steering controller on LineFollowerEnv."""
+
+from __future__ import annotations
+
+import sys
+
+import pygame
+from render import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, draw_env
 
 from evolib.evolib_envs.core.env import Action, Observation
-from evolib.evolib_envs.core.evaluator import evaluate_episode
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
+
+WORLD_WIDTH = 10.0
+WORLD_HEIGHT = 6.0
+MAX_STEPS = 1400
+SEED = 42
 
 
 class RuleBasedLineFollowerController:
-    """Simple baseline controller for the line follower."""
+    """Simple rule-based steering controller using the two line sensors."""
+
+    def __init__(self, *, turn_strength: float = 1.0) -> None:
+        self.turn_strength = turn_strength
 
     def act(self, observation: Observation) -> Action:
         left_sensor, right_sensor = observation
 
         error = right_sensor - left_sensor
+        turn = error * self.turn_strength
+        turn = max(-1.0, min(1.0, turn))
 
-        base = 0.6
-        turn = 0.4
-
-        left = base - error * turn
-        right = base + error * turn
-
-        return [left, right]
+        return [turn]
 
 
 def main() -> None:
-    env = LineFollowerEnv()
+    env = LineFollowerEnv(
+        width=WORLD_WIDTH,
+        height=WORLD_HEIGHT,
+        max_steps=MAX_STEPS,
+    )
     controller = RuleBasedLineFollowerController()
 
-    fitness = evaluate_episode(env, controller, seed=42, max_steps=500)
+    observation = env.reset(seed=SEED)
+    total_reward = 0.0
 
-    print(f"Rule-based fitness: {fitness:.3f}")
+    pygame.init()
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("EvoLib Env - LineFollower Rule")
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont(None, 24)
+
+    running = True
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+
+                if event.key == pygame.K_r:
+                    observation = env.reset(seed=SEED)
+                    total_reward = 0.0
+
+        action = controller.act(observation)
+        observation, reward, done, _ = env.step(action)
+        total_reward += reward
+
+        if done:
+            print(f"Reward: {total_reward:.2f}")
+            observation = env.reset(seed=SEED)
+            total_reward = 0.0
+
+        draw_env(screen, env, total_reward, font, title="Rule-based LineFollower")
+
+        pygame.display.flip()
+        clock.tick(FPS)
+
+    pygame.quit()
+    sys.exit(0)
 
 
 if __name__ == "__main__":

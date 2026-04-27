@@ -13,7 +13,7 @@ modules:
   brain:
     type: evonet
 
-    dim: [2, 4, 2]
+    dim: [2, 1, 1]
     activation: [linear, tanh, tanh]
 
     initializer: default
@@ -35,4 +35,4 @@ modules:
     mutation:
       strategy: constant
       probability: 0.8
-      strength: 0.15
+      strength: 0.25
