@@ -1,0 +1,171 @@
+# SPDX-License-Identifier: MIT
+"""Reusable simulation objects for the pixel-based LineFollower environment."""
+
+import math
+from dataclasses import dataclass
+
+import pygame
+
+
+@dataclass(frozen=True)
+class SensorState:
+    """Pixel-space sensor state for rendering and debugging."""
+
+    x: float
+    y: float
+    value: float
+
+
+@dataclass(frozen=True)
+class LineSensor:
+    """
+    Relative sensor definition attached to a robot body.
+
+    The sensor is defined in robot-local coordinates:
+    - ``forward`` is the distance in driving direction.
+    - ``side`` is the lateral offset. Negative values are left, positive values right.
+    - ``radius`` is the circular contact area in pixels.
+    """
+
+    forward: float
+    side: float
+    radius: int
+
+    def build_mask(self) -> pygame.mask.Mask:
+        """Build a circular mask for pixel-perfect line contact checks."""
+
+        diameter = self.radius * 2 + 1
+        surface = pygame.Surface((diameter, diameter), pygame.SRCALPHA)
+        pygame.draw.circle(
+            surface,
+            (255, 255, 255, 255),
+            (self.radius, self.radius),
+            self.radius,
+        )
+        return pygame.mask.from_surface(surface)
+
+
+@dataclass
+class LineFollowerRobot:
+    """
+    Robot body and sensor geometry for the LineFollower environment.
+
+    This class owns robot movement and sensor contact logic.
+    """
+
+    x: float = 0.0
+    y: float = 0.0
+    angle: float = 0.0
+    base_speed: float = 4.5
+    turn_strength: float = 0.12
+    radius: int = 10
+    left_sensor: LineSensor = LineSensor(forward=45.0, side=-20.0, radius=7)
+    right_sensor: LineSensor = LineSensor(forward=45.0, side=20.0, radius=7)
+
+    def __post_init__(self) -> None:
+        self.left_sensor_mask = self.left_sensor.build_mask()
+        self.right_sensor_mask = self.right_sensor.build_mask()
+        self.body_mask = self._build_body_mask()
+
+    @property
+    def sensor_radius(self) -> int:
+        """Return the shared sensor radius used by the renderer."""
+
+        return self.left_sensor.radius
+
+    def reset(self, *, x: float, y: float, angle: float) -> None:
+        """Place the robot at a new pose."""
+
+        self.x = float(x)
+        self.y = float(y)
+        self.angle = float(angle)
+
+    def step(self, turn: float) -> None:
+        """Advance the robot using one clipped steering action."""
+
+        clipped_turn = max(-1.0, min(1.0, float(turn)))
+
+        self.angle += clipped_turn * self.turn_strength
+        self.x += math.cos(self.angle) * self.base_speed
+        self.y += math.sin(self.angle) * self.base_speed
+
+    def get_sensor_states(
+        self, line_mask: pygame.mask.Mask
+    ) -> tuple[SensorState, SensorState]:
+        """Return left and right sensor positions and binary line-contact values."""
+
+        left_x, left_y = self.sensor_position(self.left_sensor)
+        right_x, right_y = self.sensor_position(self.right_sensor)
+
+        left_value = self.sensor_touches_line(
+            sensor=self.left_sensor,
+            sensor_mask=self.left_sensor_mask,
+            line_mask=line_mask,
+            x=left_x,
+            y=left_y,
+        )
+        right_value = self.sensor_touches_line(
+            sensor=self.right_sensor,
+            sensor_mask=self.right_sensor_mask,
+            line_mask=line_mask,
+            x=right_x,
+            y=right_y,
+        )
+
+        return (
+            SensorState(left_x, left_y, left_value),
+            SensorState(right_x, right_y, right_value),
+        )
+
+    def sensor_position(self, sensor: LineSensor) -> tuple[float, float]:
+        """Return one sensor position in pixel coordinates."""
+
+        forward_x = math.cos(self.angle)
+        forward_y = math.sin(self.angle)
+
+        right_x = -math.sin(self.angle)
+        right_y = math.cos(self.angle)
+
+        sensor_x = self.x + forward_x * sensor.forward + right_x * sensor.side
+        sensor_y = self.y + forward_y * sensor.forward + right_y * sensor.side
+
+        return sensor_x, sensor_y
+
+    def touches_line(self, line_mask: pygame.mask.Mask) -> bool:
+        """Return True if the robot body overlaps the line mask."""
+
+        offset = (
+            int(round(self.x)) - self.radius,
+            int(round(self.y)) - self.radius,
+        )
+        return bool(line_mask.overlap(self.body_mask, offset))
+
+    @staticmethod
+    def sensor_touches_line(
+        *,
+        sensor: LineSensor,
+        sensor_mask: pygame.mask.Mask,
+        line_mask: pygame.mask.Mask,
+        x: float,
+        y: float,
+    ) -> float:
+        """Return 1.0 if the circular sensor overlaps the line mask, else 0.0."""
+
+        offset = (
+            int(round(x)) - sensor.radius,
+            int(round(y)) - sensor.radius,
+        )
+        return 1.0 if line_mask.overlap(sensor_mask, offset) else 0.0
+
+    def _build_body_mask(self) -> pygame.mask.Mask:
+        """Create a circular mask representing the robot body."""
+
+        diameter = self.radius * 2 + 1
+        surface = pygame.Surface((diameter, diameter), pygame.SRCALPHA)
+        pygame.draw.circle(
+            surface,
+            (255, 255, 255, 255),
+            (self.radius, self.radius),
+            self.radius,
+        )
+        return pygame.mask.from_surface(surface)

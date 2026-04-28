@@ -1,18 +1,21 @@
 # SPDX-License-Identifier: MIT
 """Run a simple rule-based steering controller on LineFollowerEnv."""
 
-from __future__ import annotations
-
 import sys
 
 import pygame
-from render import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, draw_env
 
 from evolib.evolib_envs.core.env import Action, Observation
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
+from evolib.evolib_envs.renderers.pygame_line_follower import (
+    FPS,
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+    draw_env,
+)
 
-WORLD_WIDTH = 10.0
-WORLD_HEIGHT = 6.0
+WORLD_WIDTH = SCREEN_WIDTH
+WORLD_HEIGHT = SCREEN_HEIGHT
 MAX_STEPS = 1400
 SEED = 42
 

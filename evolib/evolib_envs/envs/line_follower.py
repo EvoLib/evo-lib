@@ -1,28 +1,30 @@
 # SPDX-License-Identifier: MIT
 """
-2D LineFollower environment.
+Pixel-based 2D LineFollower environment.
 
-The agent controls steering only. Forward motion is provided by the environment.
+The environment uses Pygame-style pixel coordinates:
+- origin is at the top-left
+- x grows to the right
+- y grows downward
+
+The line is represented as a pygame Mask. Sensors are small circular masks and detect
+whether they overlap the line mask.
 """
 
 import math
 import random
-from dataclasses import dataclass
+
+import pygame
 
 from evolib.evolib_envs.core.env import Action, Env, Observation, StepResult
-
-
-@dataclass
-class SensorState:
-    """World-space sensor state for rendering and debugging."""
-
-    x: float
-    y: float
-    value: float
+from evolib.evolib_envs.envs.line_follower_objects import (
+    LineFollowerRobot,
+    SensorState,
+)
 
 
 class LineFollowerEnv(Env):
-    """Minimal 2D line follower environment with steering-only actions."""
+    """Minimal pixel-based line follower environment with steering-only actions."""
 
     observation_size = 2
     action_size = 1
@@ -30,30 +32,52 @@ class LineFollowerEnv(Env):
     def __init__(
         self,
         *,
-        width: float = 10.0,
-        height: float = 6.0,
+        width: int = 1000,
+        height: int = 600,
         max_steps: int = 1400,
+        line_complexity: float = 2.5,
     ) -> None:
-        self.width = width
-        self.height = height
+        self.width = int(width)
+        self.height = int(height)
         self.max_steps = max_steps
 
-        self.x = 0.0
         self.previous_x = 0.0
-        self.y = 0.0
-        self.angle = 0.0
         self.step_count = 0
+        self.missed_line_steps = 0
+        self.max_missed_line_steps = 35
 
-        self.base_speed = 0.045
-        self.turn_strength = 0.075
+        self.line_complexity = line_complexity
+        self.line_width = 6
+        self.line_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        self.line_mask = pygame.mask.Mask((self.width, self.height), fill=False)
+        self.line_points = self._build_line_points()
+        self._build_line_mask()
 
-        self.sensor_forward = 0.55
-        self.sensor_side = 0.30
-        self.sensor_range = 0.45
+        self.robot = LineFollowerRobot()
 
-    def line_y(self, x: float) -> float:
-        """Return the target line y-position at world x."""
-        return -self.height * 0.1 + math.sin(x * 1.5) * 0.8 + x * 0.2
+    @property
+    def x(self) -> float:
+        """Return robot x-position."""
+
+        return self.robot.x
+
+    @property
+    def y(self) -> float:
+        """Return robot y-position."""
+
+        return self.robot.y
+
+    @property
+    def angle(self) -> float:
+        """Return robot angle."""
+
+        return self.robot.angle
+
+    @property
+    def sensor_radius(self) -> int:
+        """Return the robot sensor radius."""
+
+        return self.robot.sensor_radius
 
     def reset(self, seed: int | None = None) -> Observation:
         """Reset the episode and return the initial observation."""
@@ -61,11 +85,16 @@ class LineFollowerEnv(Env):
         if seed is not None:
             random.seed(seed)
 
-        self.x = -self.width / 2.0
-        self.previous_x = self.x
-        self.y = self.line_y(self.x)
-        self.angle = random.uniform(-0.25, 0.25)
+        start_x, start_y = self.line_points[0]
+        self.previous_x = float(start_x)
         self.step_count = 0
+        self.missed_line_steps = 0
+
+        self.robot.reset(
+            x=float(start_x),
+            y=float(start_y),
+            angle=random.uniform(-0.20, 0.20),
+        )
 
         return self._observe()
 
@@ -74,84 +103,94 @@ class LineFollowerEnv(Env):
 
         turn = max(-1.0, min(1.0, float(action[0])))
 
-        self.angle += turn * self.turn_strength
-        self.x += math.cos(self.angle) * self.base_speed
-        self.y += math.sin(self.angle) * self.base_speed
-
+        self.robot.step(turn)
         self.step_count += 1
 
         observation = self._observe()
+        left_sensor = observation[0]
+        right_sensor = observation[1]
 
-        line_error = abs(self.y - self.line_y(self.x))
+        progress = max(0.0, self.robot.x - self.previous_x)
+        self.previous_x = self.robot.x
 
-        progress = self.x - self.previous_x
-        self.previous_x = self.x
-
-        line_quality = max(0.0, 1.0 - line_error)
+        robot_on_line = self.robot.touches_line(self.line_mask)
 
         reward = 0.0
-        reward += progress * 20.0 * line_quality
-        reward -= line_error * 3.0
-        reward -= abs(turn) * 0.03
+        if robot_on_line:
+            reward += progress * 0.25
+            self.missed_line_steps = 0
+        else:
+            reward -= 0.25
+            self.missed_line_steps += 1
 
         done = (
             self.step_count >= self.max_steps
-            or line_error > 1.0
-            or self.x > self.width * 0.5
+            or self.missed_line_steps >= self.max_missed_line_steps
+            or self.robot.x >= self.width - self.line_width
+            or self._is_out_of_bounds(self.robot.x, self.robot.y)
         )
 
         info = {
-            "x": self.x,
-            "y": self.y,
-            "angle": self.angle,
-            "line_error": line_error,
+            "x": self.robot.x,
+            "y": self.robot.y,
+            "angle": self.robot.angle,
             "turn": turn,
-            "left_sensor": observation[0],
-            "right_sensor": observation[1],
+            "left_sensor": left_sensor,
+            "right_sensor": right_sensor,
+            "missed_line_steps": self.missed_line_steps,
         }
 
         return observation, reward, done, info
 
     def get_sensor_states(self) -> tuple[SensorState, SensorState]:
-        """Return left and right sensor positions and values."""
+        """Return current sensor states using the environment line mask."""
 
-        left_x, left_y = self._sensor_position(side=-1.0)
-        right_x, right_y = self._sensor_position(side=1.0)
-
-        left_value = self._line_sensor_value(left_x, left_y)
-        right_value = self._line_sensor_value(right_x, right_y)
-
-        return (
-            SensorState(left_x, left_y, left_value),
-            SensorState(right_x, right_y, right_value),
-        )
+        return self.robot.get_sensor_states(self.line_mask)
 
     def _observe(self) -> Observation:
-        left_sensor, right_sensor = self.get_sensor_states()
-        return [left_sensor.value, right_sensor.value]
+        sensor_states = self.robot.get_sensor_states(self.line_mask)
+        return [sensor.value for sensor in sensor_states]
 
-    def _sensor_position(self, *, side: float) -> tuple[float, float]:
-        """Return one sensor position in world coordinates."""
+    def _is_out_of_bounds(self, x: float, y: float) -> bool:
+        """Return True if a point is outside the environment."""
 
-        forward_x = math.cos(self.angle)
-        forward_y = math.sin(self.angle)
+        return x < 0.0 or y < 0.0 or x >= self.width or y >= self.height
 
-        right_x = -math.sin(self.angle)
-        right_y = math.cos(self.angle)
+    def _build_line_points(self) -> list[tuple[int, int]]:
+        """Build a line with increasing curvature over x."""
 
-        sensor_x = (
-            self.x + forward_x * self.sensor_forward + right_x * self.sensor_side * side
+        points: list[tuple[int, int]] = []
+
+        center_y = self.height * 0.5
+        max_amplitude = self.height * 0.5
+
+        for x in range(0, self.width, 10):
+            progress = x / self.width
+
+            # amplitude grows over x (start flat, later stronger curves)
+            amplitude = max_amplitude * (progress**1.5)
+
+            # sinus curve
+            wave = math.sin(progress * 2 * math.pi * self.line_complexity)
+
+            # linear downward drift
+            drift = -self.height * 0.16 * progress
+
+            y = center_y + wave * amplitude + drift
+
+            points.append((x, int(y)))
+
+        return points
+
+    def _build_line_mask(self) -> None:
+        """Draw the line into a surface and build the collision mask from it."""
+
+        self.line_surface.fill((0, 0, 0, 0))
+        pygame.draw.lines(
+            self.line_surface,
+            (255, 255, 255, 255),
+            False,
+            self.line_points,
+            self.line_width,
         )
-        sensor_y = (
-            self.y + forward_y * self.sensor_forward + right_y * self.sensor_side * side
-        )
-
-        return sensor_x, sensor_y
-
-    def _line_sensor_value(self, sensor_x: float, sensor_y: float) -> float:
-        """Return line intensity at a sensor position."""
-
-        line_y = self.line_y(sensor_x)
-        distance = abs(sensor_y - line_y)
-
-        return max(0.0, 1.0 - distance / self.sensor_range)
+        self.line_mask = pygame.mask.from_surface(self.line_surface)

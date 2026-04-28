@@ -1,16 +1,20 @@
-# SPDX-License-Identifier: MIT
-"""Manual control for LineFollowerEnv (steering only)."""
+from __future__ import annotations
 
 import sys
 
 import pygame
-from render import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, draw_env
 
 from evolib.evolib_envs.core.env import Action, Observation
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
+from evolib.evolib_envs.renderers.pygame_line_follower import (
+    FPS,
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+    draw_env,
+)
 
-WORLD_WIDTH = 10.0
-WORLD_HEIGHT = 6.0
+WORLD_WIDTH = SCREEN_WIDTH
+WORLD_HEIGHT = SCREEN_HEIGHT
 MAX_STEPS = 1400
 SEED = 42
 
@@ -29,35 +33,38 @@ class ManualController:
         self.turn = 0.0
 
     def update(self) -> None:
-        keys = pygame.key.get_pressed()
+        """Read keyboard state and update steering value."""
 
+        keys = pygame.key.get_pressed()
         self.turn = 0.0
 
         if keys[pygame.K_LEFT]:
-            self.turn += self.turn_strength
-
-        if keys[pygame.K_RIGHT]:
             self.turn -= self.turn_strength
 
-        # clamp to [-1, 1]
+        if keys[pygame.K_RIGHT]:
+            self.turn += self.turn_strength
+
         self.turn = max(-1.0, min(1.0, self.turn))
 
-    def act(self, observation: Observation) -> Action:
+    def act(self, _observation: Observation) -> Action:
+        """Return the current steering action."""
+
         return [self.turn]
 
 
 def main() -> None:
+    """Run the manual LineFollower demo."""
+
     env = LineFollowerEnv(
         width=WORLD_WIDTH,
         height=WORLD_HEIGHT,
         max_steps=MAX_STEPS,
     )
-
     controller = ManualController()
 
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("LineFollower - Manual (Steering)")
+    pygame.display.set_caption("LineFollower - Manual")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 24)
 
@@ -94,7 +101,7 @@ def main() -> None:
             env,
             total_reward,
             font,
-            title="Manual LineFollower (Steering)",
+            title="Manual LineFollower",
         )
 
         pygame.display.flip()
