@@ -83,7 +83,6 @@ class LineFollowerEnv(Env):
         observation = self._observe()
 
         line_error = abs(self.y - self.line_y(self.x))
-        heading_error = abs(math.sin(self.angle))
 
         progress = self.x - self.previous_x
         self.previous_x = self.x
@@ -93,7 +92,6 @@ class LineFollowerEnv(Env):
         reward = 0.0
         reward += progress * 20.0 * line_quality
         reward -= line_error * 3.0
-        reward -= heading_error * 0.3
         reward -= abs(turn) * 0.03
 
         done = (
@@ -107,7 +105,6 @@ class LineFollowerEnv(Env):
             "y": self.y,
             "angle": self.angle,
             "line_error": line_error,
-            "heading_error": heading_error,
             "turn": turn,
             "left_sensor": observation[0],
             "right_sensor": observation[1],
