@@ -11,8 +11,9 @@ CONFIG_FILE = "config.yaml"
 args = parse_args()
 
 pop = Pop(config_path=CONFIG_FILE)
+seed = pop.config.random_seed
 
-line_task = LineFollowerTask(seed=pop.config.random_seed)
+line_task = LineFollowerTask(seed=seed)
 
 
 def eval_line_follower_fitness(indiv: Indiv) -> None:

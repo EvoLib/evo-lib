@@ -7,10 +7,13 @@ import pygame
 
 from evolib.evolib_envs.core.controller import Controller
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
+from evolib.evolib_envs.envs.line_follower_defaults import (
+    DEFAULT_HEIGHT,
+    DEFAULT_MAX_STEPS,
+    DEFAULT_WIDTH,
+)
 from evolib.evolib_envs.envs.line_follower_objects import LineFollowerRobot
 
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 600
 FPS = 60
 
 
@@ -106,7 +109,7 @@ class DebugRenderer:
 
     def __init__(self) -> None:
         pygame.init()
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((DEFAULT_WIDTH, DEFAULT_HEIGHT))
         pygame.display.set_caption("Training Debug")
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont(None, 24)
@@ -116,7 +119,7 @@ class DebugRenderer:
         env: LineFollowerEnv,
         controller: Controller,
         *,
-        steps: int,
+        steps: int = DEFAULT_MAX_STEPS,
         seed: int | None,
         title: str,
     ) -> None:

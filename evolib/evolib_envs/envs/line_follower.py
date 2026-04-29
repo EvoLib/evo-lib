@@ -17,6 +17,11 @@ import random
 import pygame
 
 from evolib.evolib_envs.core.env import Action, Env, Observation, StepResult
+from evolib.evolib_envs.envs.line_follower_defaults import (
+    DEFAULT_HEIGHT,
+    DEFAULT_MAX_STEPS,
+    DEFAULT_WIDTH,
+)
 from evolib.evolib_envs.envs.line_follower_objects import (
     LineFollowerRobot,
     SensorState,
@@ -32,9 +37,9 @@ class LineFollowerEnv(Env):
     def __init__(
         self,
         *,
-        width: int = 1000,
-        height: int = 600,
-        max_steps: int = 1400,
+        width: int = DEFAULT_WIDTH,
+        height: int = DEFAULT_HEIGHT,
+        max_steps: int = DEFAULT_MAX_STEPS,
         line_complexity: float = 2.5,
     ) -> None:
         self.width = int(width)

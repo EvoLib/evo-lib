@@ -7,17 +7,19 @@ import pygame
 
 from evolib.evolib_envs.core.env import Action, Observation
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
+from evolib.evolib_envs.envs.line_follower_defaults import (
+    DEFAULT_HEIGHT,
+    DEFAULT_MAX_STEPS,
+    DEFAULT_WIDTH,
+)
 from evolib.evolib_envs.renderers.pygame_line_follower import (
     FPS,
-    SCREEN_HEIGHT,
-    SCREEN_WIDTH,
     draw_env,
 )
 
-WORLD_WIDTH = SCREEN_WIDTH
-WORLD_HEIGHT = SCREEN_HEIGHT
-MAX_STEPS = 1400
-SEED = 42
+SCREEN_WIDTH = DEFAULT_WIDTH
+SCREEN_HEIGHT = DEFAULT_HEIGHT
+MAX_STEPS = DEFAULT_MAX_STEPS
 
 
 class RuleBasedLineFollowerController:
@@ -38,13 +40,13 @@ class RuleBasedLineFollowerController:
 
 def main() -> None:
     env = LineFollowerEnv(
-        width=WORLD_WIDTH,
-        height=WORLD_HEIGHT,
+        width=SCREEN_WIDTH,
+        height=SCREEN_HEIGHT,
         max_steps=MAX_STEPS,
     )
     controller = RuleBasedLineFollowerController()
 
-    observation = env.reset(seed=SEED)
+    observation = env.reset()
     total_reward = 0.0
 
     pygame.init()
@@ -65,7 +67,7 @@ def main() -> None:
                     running = False
 
                 if event.key == pygame.K_r:
-                    observation = env.reset(seed=SEED)
+                    observation = env.reset()
                     total_reward = 0.0
 
         action = controller.act(observation)
@@ -74,7 +76,7 @@ def main() -> None:
 
         if done:
             print(f"Reward: {total_reward:.2f}")
-            observation = env.reset(seed=SEED)
+            observation = env.reset()
             total_reward = 0.0
 
         draw_env(screen, env, total_reward, font, title="Rule-based LineFollower")
