@@ -8,13 +8,14 @@ import pygame
 from evolib.evolib_envs.core.controller import Controller
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
 from evolib.evolib_envs.envs.line_follower_defaults import (
+    DEFAULT_FPS,
     DEFAULT_HEIGHT,
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
 )
 from evolib.evolib_envs.envs.line_follower_objects import LineFollowerRobot
 
-FPS = 60
+FPS = DEFAULT_FPS
 
 
 def draw_robot(screen: pygame.Surface, robot: LineFollowerRobot) -> None:

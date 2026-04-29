@@ -8,18 +8,17 @@ import pygame
 from evolib.evolib_envs.core.env import Action, Observation
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
 from evolib.evolib_envs.envs.line_follower_defaults import (
+    DEFAULT_FPS,
     DEFAULT_HEIGHT,
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
 )
-from evolib.evolib_envs.renderers.pygame_line_follower import (
-    FPS,
-    draw_env,
-)
+from evolib.evolib_envs.renderers.pygame_line_follower import draw_env
 
 SCREEN_WIDTH = DEFAULT_WIDTH
 SCREEN_HEIGHT = DEFAULT_HEIGHT
 MAX_STEPS = DEFAULT_MAX_STEPS
+FPS = DEFAULT_FPS
 
 
 class RuleBasedLineFollowerController:
