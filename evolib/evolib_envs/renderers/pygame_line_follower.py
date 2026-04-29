@@ -8,14 +8,14 @@ import pygame
 from evolib.evolib_envs.core.controller import Controller
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
 from evolib.evolib_envs.envs.line_follower_defaults import (
+    DEFAULT_DEBUG_EVERY_N_GENERATIONS,
+    DEFAULT_DEBUG_MAX_STEPS,
     DEFAULT_FPS,
     DEFAULT_HEIGHT,
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
 )
 from evolib.evolib_envs.envs.line_follower_objects import LineFollowerRobot
-
-FPS = DEFAULT_FPS
 
 
 def draw_robot(screen: pygame.Surface, robot: LineFollowerRobot) -> None:
@@ -146,7 +146,7 @@ class DebugRenderer:
             draw_env(self.screen, env, total_reward, self.font, title=title)
 
             pygame.display.flip()
-            self.clock.tick(FPS)
+            self.clock.tick(DEFAULT_FPS)
 
             if done:
                 break
@@ -161,8 +161,8 @@ def run_debug_episode(
     *,
     enabled: bool,
     generation: int,
-    every: int = 5,
-    steps: int = 300,
+    every: int = DEFAULT_DEBUG_EVERY_N_GENERATIONS,
+    steps: int = DEFAULT_DEBUG_MAX_STEPS,
     seed: int | None = None,
     title: str = "Training Debug",
 ) -> None:
