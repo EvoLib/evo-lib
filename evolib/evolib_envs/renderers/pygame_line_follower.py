@@ -1,0 +1,184 @@
+# SPDX-License-Identifier: MIT
+"""Pygame rendering helpers for the LineFollower environment."""
+
+import math
+
+import pygame
+
+from evolib.evolib_envs.core.controller import Controller
+from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
+from evolib.evolib_envs.envs.line_follower_objects import LineFollowerRobot
+
+SCREEN_WIDTH = 1000
+SCREEN_HEIGHT = 600
+FPS = 60
+
+
+def draw_robot(screen: pygame.Surface, robot: LineFollowerRobot) -> None:
+    """Draw the robot body and heading direction."""
+
+    robot_x = int(round(robot.x))
+    robot_y = int(round(robot.y))
+
+    pygame.draw.circle(screen, (80, 180, 255), (robot_x, robot_y), robot.radius)
+
+    nose_x = int(round(robot.x + math.cos(robot.angle) * 45.0))
+    nose_y = int(round(robot.y + math.sin(robot.angle) * 45.0))
+
+    pygame.draw.line(
+        screen,
+        (255, 255, 255),
+        (robot_x, robot_y),
+        (nose_x, nose_y),
+        3,
+    )
+
+
+def draw_sensors(screen: pygame.Surface, env: LineFollowerEnv) -> None:
+    """Draw robot sensors and their current contact state."""
+
+    robot = env.robot
+    robot_pos = (int(round(robot.x)), int(round(robot.y)))
+
+    for sensor_state in robot.get_sensor_states(env.line_mask):
+        sensor_pos = (
+            int(round(sensor_state.x)),
+            int(round(sensor_state.y)),
+        )
+
+        color = pygame.Color("green")
+        if sensor_state.value != 0.0:
+            color = pygame.Color("red")
+
+        pygame.draw.line(screen, (100, 100, 100), robot_pos, sensor_pos, 1)
+        pygame.draw.circle(screen, color, sensor_pos, robot.sensor_radius)
+
+
+def draw_overlay(
+    screen: pygame.Surface,
+    env: LineFollowerEnv,
+    total_reward: float,
+    font: pygame.font.Font,
+    *,
+    title: str,
+) -> None:
+    """Draw textual debug information."""
+
+    left_sensor, right_sensor = env.get_sensor_states()
+
+    overlay_lines = [
+        title,
+        f"x={env.robot.x:.1f} y={env.robot.y:.1f} angle={env.robot.angle:.2f}",
+        f"left_sensor={left_sensor.value:.0f} right_sensor={right_sensor.value:.0f}",
+        f"missed_line_steps={env.missed_line_steps}",
+        f"reward={total_reward:.2f} step={env.step_count}",
+        "ESC: quit | R: reset",
+    ]
+
+    y_offset = 18
+
+    for line in overlay_lines:
+        text = font.render(line, True, (240, 240, 240))
+        screen.blit(text, (18, y_offset))
+        y_offset += 24
+
+
+def draw_env(
+    screen: pygame.Surface,
+    env: LineFollowerEnv,
+    total_reward: float,
+    font: pygame.font.Font,
+    *,
+    title: str = "LineFollower",
+) -> None:
+    """Draw the full LineFollower environment."""
+
+    screen.fill((20, 20, 20))
+    screen.blit(env.line_surface, (0, 0))
+
+    draw_robot(screen, env.robot)
+    draw_sensors(screen, env)
+    draw_overlay(screen, env, total_reward, font, title=title)
+
+
+class DebugRenderer:
+    """Persistent Pygame renderer for debug episodes."""
+
+    def __init__(self) -> None:
+        pygame.init()
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        pygame.display.set_caption("Training Debug")
+        self.clock = pygame.time.Clock()
+        self.font = pygame.font.SysFont(None, 24)
+
+    def run_episode(
+        self,
+        env: LineFollowerEnv,
+        controller: Controller,
+        *,
+        steps: int,
+        seed: int | None,
+        title: str,
+    ) -> None:
+        """Run one visual debug episode."""
+
+        obs = env.reset(seed=seed)
+        total_reward = 0.0
+
+        for step in range(steps):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        return
+
+            action = controller.act(obs)
+            obs, reward, done, _ = env.step(action)
+            total_reward += reward
+
+            draw_env(self.screen, env, total_reward, self.font, title=title)
+
+            pygame.display.flip()
+            self.clock.tick(FPS)
+
+            if done:
+                break
+
+
+_DEBUG_RENDERER: DebugRenderer | None = None
+
+
+def run_debug_episode(
+    env: LineFollowerEnv,
+    controller: Controller,
+    *,
+    enabled: bool,
+    generation: int,
+    every: int = 5,
+    steps: int = 300,
+    seed: int | None = None,
+    title: str = "Training Debug",
+) -> None:
+    """Run debug rendering periodically during training."""
+
+    global _DEBUG_RENDERER
+
+    if not enabled:
+        return
+
+    if generation % every != 0:
+        return
+
+    if _DEBUG_RENDERER is None:
+        _DEBUG_RENDERER = DebugRenderer()
+
+    _DEBUG_RENDERER.run_episode(
+        env,
+        controller,
+        steps=steps,
+        seed=seed,
+        title=title,
+    )

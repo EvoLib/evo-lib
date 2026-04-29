@@ -12,3 +12,11 @@ def add_debug_arg(parser: argparse.ArgumentParser) -> None:
         action="store_true",
         help="Show debug visualization during training.",
     )
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse standard arguments for environment examples."""
+
+    parser = argparse.ArgumentParser()
+    add_debug_arg(parser)
+    return parser.parse_args()
