@@ -69,12 +69,13 @@ def draw_overlay(
 ) -> None:
     """Draw textual debug information."""
 
-    left_sensor, right_sensor = env.get_sensor_states()
+    sensor_states = env.robot.get_sensor_states(env.line_mask)
+    values = " ".join(f"{s.value:.0f}" for s in sensor_states)
 
     lines = [
         title,
         f"x={env.robot.x:.1f} y={env.robot.y:.1f} angle={env.robot.angle:.2f}",
-        f"left_sensor={left_sensor.value:.0f} right_sensor={right_sensor.value:.0f}",
+        f"sensors=[{values}]",
         f"missed_line_steps={env.missed_line_steps}",
         f"reward={total_reward:.2f} step={env.step_count}",
         "ESC: quit | R: reset",

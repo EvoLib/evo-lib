@@ -59,19 +59,21 @@ class LineFollowerRobot:
     base_speed: float = 4.5
     turn_strength: float = 0.12
     radius: int = 10
-    left_sensor: LineSensor = LineSensor(forward=45.0, side=-20.0, radius=7)
-    right_sensor: LineSensor = LineSensor(forward=45.0, side=20.0, radius=7)
+
+    sensors: tuple[LineSensor, ...] = (
+        LineSensor(forward=45.0, side=-20.0, radius=7),
+        LineSensor(forward=45.0, side=20.0, radius=7),
+    )
 
     def __post_init__(self) -> None:
-        self.left_sensor_mask = self.left_sensor.build_mask()
-        self.right_sensor_mask = self.right_sensor.build_mask()
+        self.sensor_masks = [sensor.build_mask() for sensor in self.sensors]
         self.body_mask = self._build_body_mask()
 
     @property
     def sensor_radius(self) -> int:
         """Return the shared sensor radius used by the renderer."""
 
-        return self.left_sensor.radius
+        return self.sensors[0].radius
 
     def reset(self, *, x: float, y: float, angle: float) -> None:
         """Place the robot at a new pose."""
@@ -89,33 +91,25 @@ class LineFollowerRobot:
         self.x += math.cos(self.angle) * self.base_speed
         self.y += math.sin(self.angle) * self.base_speed
 
-    def get_sensor_states(
-        self, line_mask: pygame.mask.Mask
-    ) -> tuple[SensorState, SensorState]:
-        """Return left and right sensor positions and binary line-contact values."""
+    def get_sensor_states(self, line_mask: pygame.mask.Mask) -> list[SensorState]:
+        """Return all sensor positions and binary line-contact values."""
 
-        left_x, left_y = self.sensor_position(self.left_sensor)
-        right_x, right_y = self.sensor_position(self.right_sensor)
+        states: list[SensorState] = []
 
-        left_value = self.sensor_touches_line(
-            sensor=self.left_sensor,
-            sensor_mask=self.left_sensor_mask,
-            line_mask=line_mask,
-            x=left_x,
-            y=left_y,
-        )
-        right_value = self.sensor_touches_line(
-            sensor=self.right_sensor,
-            sensor_mask=self.right_sensor_mask,
-            line_mask=line_mask,
-            x=right_x,
-            y=right_y,
-        )
+        for sensor, mask in zip(self.sensors, self.sensor_masks):
+            x, y = self.sensor_position(sensor)
 
-        return (
-            SensorState(left_x, left_y, left_value),
-            SensorState(right_x, right_y, right_value),
-        )
+            value = self.sensor_touches_line(
+                sensor=sensor,
+                sensor_mask=mask,
+                line_mask=line_mask,
+                x=x,
+                y=y,
+            )
+
+            states.append(SensorState(x, y, value))
+
+        return states
 
     def sensor_position(self, sensor: LineSensor) -> tuple[float, float]:
         """Return one sensor position in pixel coordinates."""

@@ -147,7 +147,7 @@ class LineFollowerEnv(Env):
 
         return observation, reward, done, info
 
-    def get_sensor_states(self) -> tuple[SensorState, SensorState]:
+    def get_sensor_states(self) -> list[SensorState]:
         """Return current sensor states using the environment line mask."""
 
         return self.robot.get_sensor_states(self.line_mask)
