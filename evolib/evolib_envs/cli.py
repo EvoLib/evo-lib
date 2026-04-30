@@ -20,3 +20,23 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     add_debug_arg(parser)
     return parser.parse_args()
+
+
+def add_jumper_difficulty_arg(parser: argparse.ArgumentParser) -> None:
+    """Add the common Jumper difficulty argument."""
+
+    parser.add_argument(
+        "--difficulty",
+        choices=["easy", "medium", "hard"],
+        default="medium",
+        help="Jumper difficulty preset.",
+    )
+
+
+def parse_jumper_args() -> argparse.Namespace:
+    """Parse common arguments for Jumper example scripts."""
+
+    parser = argparse.ArgumentParser()
+    add_debug_arg(parser)
+    add_jumper_difficulty_arg(parser)
+    return parser.parse_args()
