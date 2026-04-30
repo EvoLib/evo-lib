@@ -1,7 +1,3 @@
-from __future__ import annotations
-
-import sys
-
 import pygame
 
 from evolib.evolib_envs.core.env import Action, Observation
@@ -12,9 +8,7 @@ from evolib.evolib_envs.envs.line_follower_defaults import (
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
 )
-from evolib.evolib_envs.renderers.pygame_line_follower import (
-    draw_env,
-)
+from evolib.evolib_envs.renderers.pygame_line_follower import draw_env
 
 SCREEN_WIDTH = DEFAULT_WIDTH
 SCREEN_HEIGHT = DEFAULT_HEIGHT
@@ -111,7 +105,6 @@ def main() -> None:
         clock.tick(FPS)
 
     pygame.quit()
-    sys.exit(0)
 
 
 if __name__ == "__main__":

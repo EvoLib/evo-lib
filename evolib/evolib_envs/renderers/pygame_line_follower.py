@@ -16,6 +16,7 @@ from evolib.evolib_envs.envs.line_follower_defaults import (
     DEFAULT_WIDTH,
 )
 from evolib.evolib_envs.envs.line_follower_objects import LineFollowerRobot
+from evolib.evolib_envs.renderers.pygame_common import draw_text_overlay
 
 
 def draw_robot(screen: pygame.Surface, robot: LineFollowerRobot) -> None:
@@ -70,7 +71,7 @@ def draw_overlay(
 
     left_sensor, right_sensor = env.get_sensor_states()
 
-    overlay_lines = [
+    lines = [
         title,
         f"x={env.robot.x:.1f} y={env.robot.y:.1f} angle={env.robot.angle:.2f}",
         f"left_sensor={left_sensor.value:.0f} right_sensor={right_sensor.value:.0f}",
@@ -79,12 +80,7 @@ def draw_overlay(
         "ESC: quit | R: reset",
     ]
 
-    y_offset = 18
-
-    for line in overlay_lines:
-        text = font.render(line, True, (240, 240, 240))
-        screen.blit(text, (18, y_offset))
-        y_offset += 24
+    draw_text_overlay(screen, font, lines)
 
 
 def draw_env(
