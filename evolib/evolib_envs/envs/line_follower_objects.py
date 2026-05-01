@@ -6,30 +6,12 @@ from dataclasses import dataclass
 
 import pygame
 
-
-@dataclass(frozen=True)
-class SensorState:
-    """Pixel-space sensor state for rendering and debugging."""
-
-    x: float
-    y: float
-    value: float
+from evolib.evolib_envs.core.sensors import SensorPoint, SensorPointState
 
 
 @dataclass(frozen=True)
-class LineSensor:
-    """
-    Relative sensor definition attached to a robot body.
-
-    The sensor is defined in robot-local coordinates:
-    - ``forward`` is the distance in driving direction.
-    - ``side`` is the lateral offset. Negative values are left, positive values right.
-    - ``radius`` is the circular contact area in pixels.
-    """
-
-    forward: float
-    side: float
-    radius: int
+class LineSensor(SensorPoint):
+    """LineFollower sensor with a circular pygame collision mask."""
 
     def build_mask(self) -> pygame.mask.Mask:
         """Build a circular mask for pixel-perfect line contact checks."""
@@ -91,10 +73,10 @@ class LineFollowerRobot:
         self.x += math.cos(self.angle) * self.base_speed
         self.y += math.sin(self.angle) * self.base_speed
 
-    def get_sensor_states(self, line_mask: pygame.mask.Mask) -> list[SensorState]:
+    def get_sensor_states(self, line_mask: pygame.mask.Mask) -> list[SensorPointState]:
         """Return all sensor positions and binary line-contact values."""
 
-        states: list[SensorState] = []
+        states: list[SensorPointState] = []
 
         for sensor, mask in zip(self.sensors, self.sensor_masks):
             x, y = self.sensor_position(sensor)
@@ -107,7 +89,14 @@ class LineFollowerRobot:
                 y=y,
             )
 
-            states.append(SensorState(x, y, value))
+            states.append(
+                SensorPointState(
+                    value=value,
+                    x=x,
+                    y=y,
+                    radius=sensor.radius,
+                )
+            )
 
         return states
 
