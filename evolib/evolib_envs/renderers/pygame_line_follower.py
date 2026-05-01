@@ -15,12 +15,13 @@ from evolib.evolib_envs.envs.line_follower_defaults import (
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
 )
-from evolib.evolib_envs.envs.line_follower_objects import LineFollowerRobot
 from evolib.evolib_envs.renderers.pygame_common import draw_text_overlay
 
 
-def draw_robot(screen: pygame.Surface, robot: LineFollowerRobot) -> None:
+def draw_robot(screen: pygame.Surface, env: LineFollowerEnv) -> None:
     """Draw the robot body and heading direction."""
+
+    robot = env.robot
 
     robot_x = int(round(robot.x))
     robot_y = int(round(robot.y))
@@ -45,7 +46,7 @@ def draw_sensors(screen: pygame.Surface, env: LineFollowerEnv) -> None:
     robot = env.robot
     robot_pos = (int(round(robot.x)), int(round(robot.y)))
 
-    for sensor_state in robot.get_sensor_states(env.line_mask):
+    for sensor_state in env.get_sensor_states():
         sensor_pos = (
             int(round(sensor_state.x)),
             int(round(sensor_state.y)),
@@ -69,7 +70,7 @@ def draw_overlay(
 ) -> None:
     """Draw textual debug information."""
 
-    sensor_states = env.robot.get_sensor_states(env.line_mask)
+    sensor_states = env.get_sensor_states()
     values = " ".join(f"{s.value:.0f}" for s in sensor_states)
 
     lines = [
@@ -97,7 +98,7 @@ def draw_env(
     screen.fill((20, 20, 20))
     screen.blit(env.line_surface, (0, 0))
 
-    draw_robot(screen, env.robot)
+    draw_robot(screen, env)
     draw_sensors(screen, env)
     draw_overlay(screen, env, total_reward, font, title=title)
 

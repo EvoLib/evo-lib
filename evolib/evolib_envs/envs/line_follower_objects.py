@@ -73,7 +73,7 @@ class LineFollowerRobot:
         self.x += math.cos(self.angle) * self.base_speed
         self.y += math.sin(self.angle) * self.base_speed
 
-    def get_sensor_states(self, line_mask: pygame.mask.Mask) -> list[SensorPointState]:
+    def _get_sensor_states(self, line_mask: pygame.mask.Mask) -> list[SensorPointState]:
         """Return all sensor positions and binary line-contact values."""
 
         states: list[SensorPointState] = []

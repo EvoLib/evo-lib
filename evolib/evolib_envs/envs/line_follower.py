@@ -150,10 +150,10 @@ class LineFollowerEnv(Env):
     def get_sensor_states(self) -> list[SensorPointState]:
         """Return current sensor states using the environment line mask."""
 
-        return self.robot.get_sensor_states(self.line_mask)
+        return self.robot._get_sensor_states(self.line_mask)
 
     def _observe(self) -> Observation:
-        sensor_states = self.robot.get_sensor_states(self.line_mask)
+        sensor_states = self.robot._get_sensor_states(self.line_mask)
         return [sensor.value for sensor in sensor_states]
 
     def _is_out_of_bounds(self, x: float, y: float) -> bool:
