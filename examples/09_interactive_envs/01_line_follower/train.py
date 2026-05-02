@@ -2,18 +2,30 @@
 """Train an EvoLib population on the LineFollower task."""
 
 from evolib import Indiv, Pop, save_best_indiv
-from evolib.evolib_envs.cli import parse_args
+from evolib.evolib_envs.cli import parse_linefollower_args
 from evolib.evolib_envs.envs.line_follower_task import LineFollowerTask
 
-RUN_NAME = "line_follower"
-CONFIG_FILE = "config.yaml"
+CONFIG_BY_DIFFICULTY = {
+    "easy": "config_easy.yaml",
+    "medium": "config_medium.yaml",
+    "hard": "config_hard.yaml",
+}
 
-args = parse_args()
+BEST_BY_DIFFICULTY = {
+    "easy": "best_linefollower_easy.pkl",
+    "medium": "best_linefollower_medium.pkl",
+    "hard": "best_linefollower_hard.pkl",
+}
 
-pop = Pop(config_path=CONFIG_FILE)
+args = parse_linefollower_args()
+
+config_path = CONFIG_BY_DIFFICULTY[args.difficulty]
+best_path = BEST_BY_DIFFICULTY[args.difficulty]
+
+pop = Pop(config_path=config_path)
 seed = pop.config.random_seed
 
-line_task = LineFollowerTask(seed=seed)
+line_task = LineFollowerTask(seed=seed, difficulty=args.difficulty)
 
 
 def eval_line_follower_fitness(indiv: Indiv) -> None:
@@ -37,4 +49,6 @@ def on_generation_end(pop: Pop) -> None:
 
 pop.set_fitness_function(eval_line_follower_fitness)
 pop.run(on_generation_end=on_generation_end)
-save_best_indiv(pop, run_name=RUN_NAME)
+
+save_best_indiv(pop, run_name=best_path)
+print(f"Saved best individual to: {best_path}")

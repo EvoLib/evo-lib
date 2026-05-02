@@ -22,6 +22,17 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def add_linefollower_difficulty_arg(parser: argparse.ArgumentParser) -> None:
+    """Add the common LineFollower difficulty argument."""
+
+    parser.add_argument(
+        "--difficulty",
+        choices=["easy", "medium", "hard"],
+        default="medium",
+        help="LineFollower difficulty preset.",
+    )
+
+
 def add_jumper_difficulty_arg(parser: argparse.ArgumentParser) -> None:
     """Add the common Jumper difficulty argument."""
 
@@ -31,6 +42,15 @@ def add_jumper_difficulty_arg(parser: argparse.ArgumentParser) -> None:
         default="medium",
         help="Jumper difficulty preset.",
     )
+
+
+def parse_linefollower_args() -> argparse.Namespace:
+    """Parse common arguments for Jumper example scripts."""
+
+    parser = argparse.ArgumentParser()
+    add_debug_arg(parser)
+    add_linefollower_difficulty_arg(parser)
+    return parser.parse_args()
 
 
 def parse_jumper_args() -> argparse.Namespace:

@@ -26,6 +26,9 @@ from evolib.evolib_envs.envs.line_follower_objects import (
     LineFollowerRobot,
     SensorPointState,
 )
+from evolib.evolib_envs.envs.line_follower_settings import (
+    get_line_follower_settings,
+)
 
 
 class LineFollowerEnv(Env):
@@ -40,8 +43,10 @@ class LineFollowerEnv(Env):
         width: int = DEFAULT_WIDTH,
         height: int = DEFAULT_HEIGHT,
         max_steps: int = DEFAULT_MAX_STEPS,
-        line_complexity: float = 2.5,
+        difficulty: str = "medium",
     ) -> None:
+        self.settings = get_line_follower_settings(difficulty)
+
         self.width = int(width)
         self.height = int(height)
         self.max_steps = max_steps
@@ -49,16 +54,19 @@ class LineFollowerEnv(Env):
         self.previous_x = 0.0
         self.step_count = 0
         self.missed_line_steps = 0
-        self.max_missed_line_steps = 35
+        self.max_missed_line_steps = self.settings.max_missed_line_steps
 
-        self.line_complexity = line_complexity
+        self.line_complexity = self.settings.line_complexity
         self.line_width = 6
         self.line_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.line_mask = pygame.mask.Mask((self.width, self.height), fill=False)
         self.line_points = self._build_line_points()
         self._build_line_mask()
 
-        self.robot = LineFollowerRobot()
+        self.robot = LineFollowerRobot(
+            base_speed=self.settings.base_speed,
+            turn_strength=self.settings.turn_strength,
+        )
 
     @property
     def x(self) -> float:
@@ -143,6 +151,7 @@ class LineFollowerEnv(Env):
             "left_sensor": left_sensor,
             "right_sensor": right_sensor,
             "missed_line_steps": self.missed_line_steps,
+            "difficulty": self.settings.difficulty.value,
         }
 
         return observation, reward, done, info

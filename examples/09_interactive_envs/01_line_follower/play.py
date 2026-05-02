@@ -1,5 +1,6 @@
 import pygame
 
+from evolib.evolib_envs.cli import parse_linefollower_args
 from evolib.evolib_envs.core.env import Action, Observation
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
 from evolib.evolib_envs.envs.line_follower_defaults import (
@@ -14,6 +15,10 @@ SCREEN_WIDTH = DEFAULT_WIDTH
 SCREEN_HEIGHT = DEFAULT_HEIGHT
 MAX_STEPS = DEFAULT_MAX_STEPS
 FPS = DEFAULT_FPS
+
+
+args = parse_linefollower_args()
+difficulty = args.difficulty
 
 
 class ManualController:
@@ -56,6 +61,7 @@ def main() -> None:
         width=SCREEN_WIDTH,
         height=SCREEN_HEIGHT,
         max_steps=MAX_STEPS,
+        difficulty=difficulty,
     )
     controller = ManualController()
 

@@ -14,6 +14,7 @@ from evolib.evolib_envs.envs.line_follower_defaults import (
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
 )
+from evolib.evolib_envs.envs.line_follower_settings import LineFollowerDifficulty
 from evolib.evolib_envs.renderers.pygame_line_follower import run_debug_episode
 
 
@@ -48,12 +49,14 @@ class LineFollowerTask:
         max_steps: int = DEFAULT_MAX_STEPS,
         seed: int | None = None,
         module: str = "brain",
+        difficulty: str | LineFollowerDifficulty = LineFollowerDifficulty.MEDIUM,
     ) -> None:
         self.width = width
         self.height = height
         self.max_steps = max_steps
         self.seed = seed
         self.module = module
+        self.difficulty = difficulty
 
     def make_env(self) -> LineFollowerEnv:
         """Create a fresh LineFollower environment instance."""
@@ -62,6 +65,7 @@ class LineFollowerTask:
             width=self.width,
             height=self.height,
             max_steps=self.max_steps,
+            difficulty=self.difficulty,
         )
 
     def make_controller(self, indiv: Indiv) -> LineFollowerController:
