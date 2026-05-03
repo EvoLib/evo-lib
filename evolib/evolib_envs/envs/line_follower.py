@@ -57,7 +57,7 @@ class LineFollowerEnv(Env):
         self.max_missed_line_steps = self.settings.max_missed_line_steps
 
         self.line_complexity = self.settings.line_complexity
-        self.line_width = 6
+        self.line_width = self.settings.line_width
         self.line_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.line_mask = pygame.mask.Mask((self.width, self.height), fill=False)
         self.line_points = self._build_line_points()
