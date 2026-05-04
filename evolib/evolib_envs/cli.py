@@ -2,6 +2,7 @@
 """Small shared CLI helpers for EvoLib environment examples."""
 
 import argparse
+from pathlib import Path
 
 
 def add_debug_arg(parser: argparse.ArgumentParser) -> None:
@@ -59,4 +60,19 @@ def parse_jumper_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     add_debug_arg(parser)
     add_jumper_difficulty_arg(parser)
+    return parser.parse_args()
+
+
+def parse_checkpoint_args(
+    *,
+    description: str = "Watch a trained environment checkpoint.",
+) -> argparse.Namespace:
+    """Parse CLI arguments for checkpoint-based scripts."""
+
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument(
+        "checkpoint",
+        type=Path,
+        help="Path to a trained checkpoint file.",
+    )
     return parser.parse_args()

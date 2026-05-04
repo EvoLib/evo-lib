@@ -1,28 +1,22 @@
 # SPDX-License-Identifier: MIT
 """Train an EvoLib population on the LineFollower task."""
 
-from evolib import Indiv, Pop, save_best_indiv
+from evolib import Indiv, Pop
 from evolib.evolib_envs.cli import parse_linefollower_args
+from evolib.evolib_envs.core.checkpoint import EnvCheckpoint, EnvSpec, save_checkpoint
+from evolib.evolib_envs.core.difficulty import (
+    difficulty_checkpoint_path,
+    difficulty_config_path,
+)
 from evolib.evolib_envs.envs.line_follower_task import LineFollowerTask
 
-CONFIG_BY_DIFFICULTY = {
-    "easy": "config_easy.yaml",
-    "medium": "config_medium.yaml",
-    "hard": "config_hard.yaml",
-}
-
-BEST_BY_DIFFICULTY = {
-    "easy": "best_linefollower_easy.pkl",
-    "medium": "best_linefollower_medium.pkl",
-    "hard": "best_linefollower_hard.pkl",
-}
+ENV_NAME = "linefollower"
 
 args = parse_linefollower_args()
+config_path = difficulty_config_path(args.difficulty)
+checkpoint_path = difficulty_checkpoint_path(ENV_NAME, args.difficulty)
 
-config_path = CONFIG_BY_DIFFICULTY[args.difficulty]
-best_path = BEST_BY_DIFFICULTY[args.difficulty]
-
-pop = Pop(config_path=config_path)
+pop = Pop(config_path=str(config_path))
 seed = pop.config.random_seed
 
 line_task = LineFollowerTask(seed=seed, difficulty=args.difficulty)
@@ -50,5 +44,15 @@ def on_generation_end(pop: Pop) -> None:
 pop.set_fitness_function(eval_line_follower_fitness)
 pop.run(on_generation_end=on_generation_end)
 
-save_best_indiv(pop, run_name=best_path)
-print(f"Saved best individual to: {best_path}")
+best_indiv = pop.best(sort=True)
+checkpoint = EnvCheckpoint(
+    indiv=best_indiv,
+    env=EnvSpec(
+        name=ENV_NAME,
+        difficulty=args.difficulty,
+    ),
+    seed=seed,
+)
+
+save_checkpoint(checkpoint_path, checkpoint)
+print(f"Saved checkpoint to: {checkpoint_path}")

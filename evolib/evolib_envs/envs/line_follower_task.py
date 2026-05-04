@@ -4,6 +4,7 @@
 from typing import Any
 
 from evolib import Indiv
+from evolib.evolib_envs.core.checkpoint import EnvCheckpoint
 from evolib.evolib_envs.core.env import Action, Observation
 from evolib.evolib_envs.core.evaluator import evaluate_episode
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
@@ -15,6 +16,7 @@ from evolib.evolib_envs.envs.line_follower_defaults import (
     DEFAULT_WIDTH,
 )
 from evolib.evolib_envs.envs.line_follower_settings import LineFollowerDifficulty
+from evolib.evolib_envs.envs.task_registry import register_task_loader
 from evolib.evolib_envs.renderers.pygame_line_follower import run_debug_episode
 
 
@@ -109,3 +111,24 @@ class LineFollowerTask:
             seed=self.seed,
             title=display_title,
         )
+
+
+def load_line_follower_task(checkpoint: EnvCheckpoint) -> LineFollowerTask:
+    """Create a LineFollower task from checkpoint metadata."""
+
+    env = checkpoint.env
+
+    return LineFollowerTask(
+        seed=checkpoint.seed,
+        difficulty=env.difficulty or LineFollowerDifficulty.MEDIUM,
+        **env.params,
+    )
+
+
+def register_line_follower_task() -> None:
+    """Register the LineFollower task loader."""
+
+    register_task_loader("linefollower", load_line_follower_task)
+
+
+register_task_loader("linefollower", load_line_follower_task)
