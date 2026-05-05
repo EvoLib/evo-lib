@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-"""Helper for evaluating and visualizing LineFollower agents."""
+"""Helper for evaluating and visualizing Jumper agents."""
 
 from typing import Any
 
@@ -7,41 +7,38 @@ from evolib import Indiv
 from evolib.evolib_envs.core.checkpoint import EnvCheckpoint
 from evolib.evolib_envs.core.env import Action, Observation
 from evolib.evolib_envs.core.evaluator import evaluate_episode
-from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
-from evolib.evolib_envs.envs.line_follower_defaults import (
+from evolib.evolib_envs.envs.jumper import JumperEnv
+from evolib.evolib_envs.envs.jumper_defaults import (
     DEFAULT_DEBUG_EVERY_N_GENERATIONS,
     DEFAULT_DEBUG_MAX_STEPS,
     DEFAULT_HEIGHT,
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
 )
-from evolib.evolib_envs.envs.line_follower_settings import LineFollowerDifficulty
+from evolib.evolib_envs.envs.jumper_settings import JumperDifficulty
 from evolib.evolib_envs.envs.task_registry import register_task_loader
-from evolib.evolib_envs.renderers.pygame_line_follower import run_debug_episode
+from evolib.evolib_envs.renderers.pygame_jumper import run_debug_episode
 
 
-class LineFollowerController:
-    """Map an EvoLib individual to LineFollower steering actions."""
+class JumperController:
+    """Map an EvoLib individual to Jumper jump actions."""
 
     def __init__(self, indiv: Indiv, *, module: str = "brain") -> None:
         self.net: Any = indiv.para[module]
 
     def act(self, observation: Observation) -> Action:
-        """Return a clipped steering action in [-1, 1]."""
+        """Return a clipped jump action in [0, 1]."""
 
         output = self.net.calc(observation)
-        turn = float(output[0])
-        turn = max(-1.0, min(1.0, turn))
-        return [turn]
+        jump_signal = float(output[0])
+        jump_signal = max(0.0, min(1.0, jump_signal))
+        jump_force = float(output[1])
+        jump_force = max(0.0, min(1.0, jump_force))
+        return [jump_signal, jump_force]
 
 
-class LineFollowerTask:
-    """
-    Evaluate and visualize individuals on the LineFollower environment.
-
-    This class is intentionally specific to LineFollower. It keeps example code close to
-    the GymEnv style while hiding controller wiring and rendering details.
-    """
+class JumperTask:
+    """Evaluate and visualize individuals on the Jumper environment."""
 
     def __init__(
         self,
@@ -51,7 +48,7 @@ class LineFollowerTask:
         max_steps: int = DEFAULT_MAX_STEPS,
         seed: int | None = None,
         module: str = "brain",
-        difficulty: str | LineFollowerDifficulty = LineFollowerDifficulty.MEDIUM,
+        difficulty: str | JumperDifficulty = JumperDifficulty.MEDIUM,
     ) -> None:
         self.width = width
         self.height = height
@@ -60,20 +57,20 @@ class LineFollowerTask:
         self.module = module
         self.difficulty = difficulty
 
-    def make_env(self) -> LineFollowerEnv:
-        """Create a fresh LineFollower environment instance."""
+    def make_env(self) -> JumperEnv:
+        """Create a fresh Jumper environment instance."""
 
-        return LineFollowerEnv(
+        return JumperEnv(
             width=self.width,
             height=self.height,
             max_steps=self.max_steps,
             difficulty=self.difficulty,
         )
 
-    def make_controller(self, indiv: Indiv) -> LineFollowerController:
-        """Create the default LineFollower controller for one individual."""
+    def make_controller(self, indiv: Indiv) -> JumperController:
+        """Create the default Jumper controller for one individual."""
 
-        return LineFollowerController(indiv, module=self.module)
+        return JumperController(indiv, module=self.module)
 
     def evaluate(self, indiv: Indiv) -> float:
         """Evaluate one individual and return the accumulated reward."""
@@ -99,7 +96,7 @@ class LineFollowerTask:
     ) -> None:
         """Render one debug episode for an individual."""
 
-        display_title = title or f"Training Debug - Gen {generation}"
+        display_title = title or f"Jumper Training Debug - Gen {generation}"
 
         run_debug_episode(
             self.make_env(),
@@ -113,19 +110,19 @@ class LineFollowerTask:
         )
 
 
-def load_line_follower_task(checkpoint: EnvCheckpoint) -> LineFollowerTask:
-    """Create a LineFollower task from checkpoint metadata."""
+def load_jumper_task(checkpoint: EnvCheckpoint) -> JumperTask:
+    """Create a Jumper task from checkpoint metadata."""
 
     env = checkpoint.env
 
-    return LineFollowerTask(
+    return JumperTask(
         seed=checkpoint.seed,
-        difficulty=env.difficulty or LineFollowerDifficulty.MEDIUM,
+        difficulty=env.difficulty or JumperDifficulty.MEDIUM,
         **env.params,
     )
 
 
-def register_line_follower_task() -> None:
-    """Register the LineFollower task loader."""
+def register_jumper_task() -> None:
+    """Register the Jumper task loader."""
 
-    register_task_loader("linefollower", load_line_follower_task)
+    register_task_loader("jumper", load_jumper_task)

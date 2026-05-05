@@ -1,10 +1,13 @@
 random_seed: 42
 
-parent_pool_size: 40
-offspring_pool_size: 200
-max_generations: 50
+parent_pool_size: 10
+offspring_pool_size: 20
+max_generations: 25
 max_indiv_age: 0
 num_elites: 0
+
+stopping:
+  target_fitness: 5.0
 
 evolution:
   strategy: mu_plus_lambda
@@ -13,8 +16,8 @@ modules:
   brain:
     type: evonet
 
-    dim: [2, 6, 1]
-    activation: [linear, tanh, tanh]
+    dim: [5, 5, 2]
+    activation: [linear, tanh, sigmoid]
 
     initializer: default
 
@@ -26,7 +29,7 @@ modules:
     weights:
       initializer: normal
       std: 0.5
-      bounds: [-2.0, 2.0]
+      bounds: [-1.0, 1.0]
 
     bias:
       initializer: zero
@@ -34,5 +37,5 @@ modules:
 
     mutation:
       strategy: constant
-      probability: 0.8
-      strength: 0.25
+      probability: 1.0
+      strength: 0.15
