@@ -1,11 +1,6 @@
-# SPDX-License-Identifier: MIT
-"""Run a simple rule-based controller on JumperEnv."""
-
-import sys
-
 import pygame
 
-from evolib.evolib_envs.cli import parse_jumper_args
+from evolib.evolib_envs.cli import parse_env_args
 from evolib.evolib_envs.core.env import Action, Observation
 from evolib.evolib_envs.envs.jumper import JumperEnv
 from evolib.evolib_envs.envs.jumper_defaults import (
@@ -21,30 +16,35 @@ SCREEN_HEIGHT = DEFAULT_HEIGHT
 MAX_STEPS = DEFAULT_MAX_STEPS
 FPS = DEFAULT_FPS
 
-args = parse_jumper_args()
+args = parse_env_args(description="Play a Jumper agent.")
 difficulty = args.difficulty
 
 
-class RuleBasedJumperController:
-    """Jump when the obstacle is close and the player is on the ground."""
+class ManualJumperController:
+    """
+    Manual jump controller.
 
-    def __init__(
-        self, *, jump_distance_min: float = 0.10, jump_distance_max: float = 0.22
-    ) -> None:
-        self.jump_distance_min = jump_distance_min
-        self.jump_distance_max = jump_distance_max
+    Controls:
+    - SPACE: jump
+    """
 
-    def act(self, observation: Observation) -> Action:
-        normalized_distance = observation[0]
+    def __init__(self) -> None:
+        self.jump = 0.0
 
-        should_jump = (
-            self.jump_distance_min <= normalized_distance <= self.jump_distance_max
-        )
-        return [1.0, 0.75 if should_jump else 0.0, 0.0]
+    def update(self) -> None:
+        """Read keyboard state and update jump value."""
+
+        keys = pygame.key.get_pressed()
+        self.jump = 1.0 if keys[pygame.K_SPACE] else 0.0
+
+    def act(self, _observation: Observation) -> Action:
+        """Return the current jump action."""
+
+        return [self.jump, 0.75]
 
 
 def main() -> None:
-    """Run the rule-based Jumper demo."""
+    """Run the manual Jumper demo."""
 
     env = JumperEnv(
         width=SCREEN_WIDTH,
@@ -52,16 +52,17 @@ def main() -> None:
         max_steps=MAX_STEPS,
         difficulty=difficulty,
     )
-    controller = RuleBasedJumperController()
 
-    observation = env.reset()
-    total_reward = 0.0
+    controller = ManualJumperController()
 
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("EvoLib Env - Jumper Rule")
+    pygame.display.set_caption("Jumper - Manual")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 24)
+
+    observation = env.reset()
+    total_reward = 0.0
 
     running = True
     while running:
@@ -77,7 +78,9 @@ def main() -> None:
                     observation = env.reset()
                     total_reward = 0.0
 
+        controller.update()
         action = controller.act(observation)
+
         observation, reward, done, _ = env.step(action)
         total_reward += reward
 
@@ -86,12 +89,11 @@ def main() -> None:
             observation = env.reset()
             total_reward = 0.0
 
-        draw_env(screen, env, total_reward, font, title="Rule-based Jumper")
+        draw_env(screen, env, total_reward, font, title="Manual Jumper")
         pygame.display.flip()
         clock.tick(FPS)
 
     pygame.quit()
-    sys.exit(0)
 
 
 if __name__ == "__main__":

@@ -3,6 +3,9 @@
 
 import argparse
 from pathlib import Path
+from typing import Sequence
+
+DEFAULT_DIFFICULTIES: tuple[str, ...] = ("easy", "medium", "hard")
 
 
 def add_debug_arg(parser: argparse.ArgumentParser) -> None:
@@ -15,51 +18,45 @@ def add_debug_arg(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def parse_args() -> argparse.Namespace:
-    """Parse standard arguments for environment examples."""
-
-    parser = argparse.ArgumentParser()
-    add_debug_arg(parser)
-    return parser.parse_args()
-
-
-def add_linefollower_difficulty_arg(parser: argparse.ArgumentParser) -> None:
-    """Add the common LineFollower difficulty argument."""
+def add_difficulty_arg(
+    parser: argparse.ArgumentParser,
+    *,
+    choices: Sequence[str] = DEFAULT_DIFFICULTIES,
+    default: str = "medium",
+    help_text: str = "Environment difficulty preset.",
+) -> None:
+    """Add a generic difficulty argument."""
 
     parser.add_argument(
         "--difficulty",
-        choices=["easy", "medium", "hard"],
-        default="medium",
-        help="LineFollower difficulty preset.",
+        choices=choices,
+        default=default,
+        help=help_text,
     )
 
 
-def add_jumper_difficulty_arg(parser: argparse.ArgumentParser) -> None:
-    """Add the common Jumper difficulty argument."""
+def parse_env_args(
+    *,
+    description: str | None = None,
+    with_debug: bool = True,
+    with_difficulty: bool = True,
+    difficulty_choices: Sequence[str] = DEFAULT_DIFFICULTIES,
+    default_difficulty: str = "medium",
+) -> argparse.Namespace:
+    """Parse common arguments for environment example scripts."""
 
-    parser.add_argument(
-        "--difficulty",
-        choices=["easy", "medium", "hard"],
-        default="medium",
-        help="Jumper difficulty preset.",
-    )
+    parser = argparse.ArgumentParser(description=description)
 
+    if with_debug:
+        add_debug_arg(parser)
 
-def parse_linefollower_args() -> argparse.Namespace:
-    """Parse common arguments for Line Follower example scripts."""
+    if with_difficulty:
+        add_difficulty_arg(
+            parser,
+            choices=difficulty_choices,
+            default=default_difficulty,
+        )
 
-    parser = argparse.ArgumentParser()
-    add_debug_arg(parser)
-    add_linefollower_difficulty_arg(parser)
-    return parser.parse_args()
-
-
-def parse_jumper_args() -> argparse.Namespace:
-    """Parse common arguments for Jumper example scripts."""
-
-    parser = argparse.ArgumentParser()
-    add_debug_arg(parser)
-    add_jumper_difficulty_arg(parser)
     return parser.parse_args()
 
 

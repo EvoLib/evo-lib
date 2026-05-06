@@ -1,6 +1,6 @@
 import pygame
 
-from evolib.evolib_envs.cli import parse_linefollower_args
+from evolib.evolib_envs.cli import parse_env_args
 from evolib.evolib_envs.core.env import Action, Observation
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
 from evolib.evolib_envs.envs.line_follower_defaults import (
@@ -17,7 +17,7 @@ MAX_STEPS = DEFAULT_MAX_STEPS
 FPS = DEFAULT_FPS
 
 
-args = parse_linefollower_args()
+args = parse_env_args(description="Play a Line Follower agent.")
 difficulty = args.difficulty
 
 

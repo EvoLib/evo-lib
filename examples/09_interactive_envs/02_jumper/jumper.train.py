@@ -1,31 +1,31 @@
 # SPDX-License-Identifier: MIT
-"""Train an EvoLib population on the LineFollower task."""
+"""Train an EvoLib population on the Jumper task."""
 
 from evolib import Indiv, Pop
-from evolib.evolib_envs.cli import parse_linefollower_args
+from evolib.evolib_envs.cli import parse_env_args
 from evolib.evolib_envs.core.checkpoint import EnvCheckpoint, EnvSpec, save_checkpoint
 from evolib.evolib_envs.core.difficulty import (
     difficulty_checkpoint_path,
     difficulty_config_path,
 )
-from evolib.evolib_envs.envs.line_follower_task import LineFollowerTask
+from evolib.evolib_envs.envs.jumper_task import JumperTask
 
-ENV_NAME = "linefollower"
+ENV_NAME = "jumper"
 
-args = parse_linefollower_args()
+args = parse_env_args(description="Train a Jumper agent.")
 config_path = difficulty_config_path(args.difficulty)
 checkpoint_path = difficulty_checkpoint_path(ENV_NAME, args.difficulty)
 
 pop = Pop(config_path=str(config_path))
 seed = pop.config.random_seed
 
-line_task = LineFollowerTask(seed=seed, difficulty=args.difficulty)
+jumper_task = JumperTask(seed=seed, difficulty=args.difficulty)
 
 
-def eval_line_follower_fitness(indiv: Indiv) -> None:
-    """Evaluate one individual on one LineFollower episode."""
+def eval_jumper_fitness(indiv: Indiv) -> None:
+    """Evaluate one individual on one Jumper episode."""
 
-    reward = line_task.evaluate(indiv)
+    reward = jumper_task.evaluate(indiv)
     indiv.fitness = -reward
 
 
@@ -35,13 +35,13 @@ def on_generation_end(pop: Pop) -> None:
     if not args.debug:
         return
 
-    line_task.visualize(
+    jumper_task.visualize(
         pop.best(sort=True),
         generation=pop.generation_num,
     )
 
 
-pop.set_fitness_function(eval_line_follower_fitness)
+pop.set_fitness_function(eval_jumper_fitness)
 pop.run(on_generation_end=on_generation_end)
 
 best_indiv = pop.best(sort=True)

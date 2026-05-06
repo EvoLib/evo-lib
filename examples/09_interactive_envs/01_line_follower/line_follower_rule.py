@@ -1,70 +1,67 @@
+# SPDX-License-Identifier: MIT
+"""Run a simple rule-based steering controller on LineFollowerEnv."""
+
+import sys
+
 import pygame
 
-from evolib.evolib_envs.cli import parse_jumper_args
+from evolib.evolib_envs.cli import parse_env_args
 from evolib.evolib_envs.core.env import Action, Observation
-from evolib.evolib_envs.envs.jumper import JumperEnv
-from evolib.evolib_envs.envs.jumper_defaults import (
+from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
+from evolib.evolib_envs.envs.line_follower_defaults import (
     DEFAULT_FPS,
     DEFAULT_HEIGHT,
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
 )
-from evolib.evolib_envs.renderers.pygame_jumper import draw_env
+from evolib.evolib_envs.renderers.pygame_line_follower import draw_env
 
 SCREEN_WIDTH = DEFAULT_WIDTH
 SCREEN_HEIGHT = DEFAULT_HEIGHT
 MAX_STEPS = DEFAULT_MAX_STEPS
 FPS = DEFAULT_FPS
 
-args = parse_jumper_args()
+
+args = parse_env_args(description="Run a Line Follower agent.")
 difficulty = args.difficulty
 
 
-class ManualJumperController:
-    """
-    Manual jump controller.
+class RuleBasedLineFollowerController:
+    """Simple rule-based steering controller using the two line sensors."""
 
-    Controls:
-    - SPACE: jump
-    """
+    def __init__(self, *, turn_strength: float = 1.0) -> None:
+        self.turn_strength = turn_strength
 
-    def __init__(self) -> None:
-        self.jump = 0.0
+    def act(self, observation: Observation) -> Action:
+        left_sensor, right_sensor = observation
 
-    def update(self) -> None:
-        """Read keyboard state and update jump value."""
+        error = right_sensor - left_sensor
+        turn = error * self.turn_strength
+        turn = max(-1.0, min(1.0, turn))
 
-        keys = pygame.key.get_pressed()
-        self.jump = 1.0 if keys[pygame.K_SPACE] else 0.0
-
-    def act(self, _observation: Observation) -> Action:
-        """Return the current jump action."""
-
-        return [self.jump, 0.75]
+        return [turn]
 
 
 def main() -> None:
-    """Run the manual Jumper demo."""
-
-    env = JumperEnv(
+    env = LineFollowerEnv(
         width=SCREEN_WIDTH,
         height=SCREEN_HEIGHT,
         max_steps=MAX_STEPS,
         difficulty=difficulty,
     )
-
-    controller = ManualJumperController()
-
-    pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Jumper - Manual")
-    clock = pygame.time.Clock()
-    font = pygame.font.SysFont(None, 24)
+    controller = RuleBasedLineFollowerController()
 
     observation = env.reset()
     total_reward = 0.0
 
+    pygame.init()
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("EvoLib Env - LineFollower Rule")
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont(None, 24)
+
     running = True
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -78,9 +75,7 @@ def main() -> None:
                     observation = env.reset()
                     total_reward = 0.0
 
-        controller.update()
         action = controller.act(observation)
-
         observation, reward, done, _ = env.step(action)
         total_reward += reward
 
@@ -89,11 +84,13 @@ def main() -> None:
             observation = env.reset()
             total_reward = 0.0
 
-        draw_env(screen, env, total_reward, font, title="Manual Jumper")
+        draw_env(screen, env, total_reward, font, title="Rule-based LineFollower")
+
         pygame.display.flip()
         clock.tick(FPS)
 
     pygame.quit()
+    sys.exit(0)
 
 
 if __name__ == "__main__":
