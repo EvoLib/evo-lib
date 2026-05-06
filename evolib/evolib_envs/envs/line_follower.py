@@ -66,6 +66,8 @@ class LineFollowerEnv(Env):
             turn_strength=self.settings.turn_strength,
         )
 
+        self._rng = random.Random()
+
     @property
     def x(self) -> float:
         """Return robot x-position."""
@@ -94,7 +96,7 @@ class LineFollowerEnv(Env):
         """Reset the episode and return the initial observation."""
 
         if seed is not None:
-            random.seed(seed)
+            self._rng.seed(seed)
 
         start_x, start_y = self.line_points[0]
         self.previous_x = float(start_x)
@@ -104,7 +106,7 @@ class LineFollowerEnv(Env):
         self.robot.reset(
             x=float(start_x),
             y=float(start_y),
-            angle=random.uniform(-0.20, 0.20),
+            angle=self._rng.uniform(-0.20, 0.20),
         )
 
         return self._observe()
