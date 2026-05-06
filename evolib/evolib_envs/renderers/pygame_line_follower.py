@@ -11,9 +11,7 @@ from evolib.evolib_envs.envs.line_follower_defaults import (
     DEFAULT_DEBUG_EVERY_N_GENERATIONS,
     DEFAULT_DEBUG_MAX_STEPS,
     DEFAULT_FPS,
-    DEFAULT_HEIGHT,
     DEFAULT_MAX_STEPS,
-    DEFAULT_WIDTH,
 )
 from evolib.evolib_envs.renderers.pygame_common import draw_text_overlay
 
@@ -108,7 +106,7 @@ class DebugRenderer:
 
     def __init__(self, *, width: int, height: int) -> None:
         pygame.init()
-        self.screen = pygame.display.set_mode((DEFAULT_WIDTH, DEFAULT_HEIGHT))
+        self.screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption("Training Debug")
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont(None, 24)
