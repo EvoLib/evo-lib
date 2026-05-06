@@ -41,8 +41,8 @@ LINE_FOLLOWER_SETTINGS: dict[LineFollowerDifficulty, LineFollowerSettings] = {
     LineFollowerDifficulty.EASY: LineFollowerSettings(
         difficulty=LineFollowerDifficulty.EASY,
         line_complexity=1.2,  # nearly straight
-        line_width=10,  # wide line → easy detection
-        base_speed=3.5,  # slower → easier control
+        line_width=10,  # wide line -> easy detection
+        base_speed=3.5,  # slower -> easier control
         turn_strength=0.10,
         max_missed_line_steps=60,  # forgiving
     ),

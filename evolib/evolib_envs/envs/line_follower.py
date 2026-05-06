@@ -17,15 +17,13 @@ import random
 import pygame
 
 from evolib.evolib_envs.core.env import Action, Env, Observation, StepResult
+from evolib.evolib_envs.core.sensors import SensorPointState
 from evolib.evolib_envs.envs.line_follower_defaults import (
     DEFAULT_HEIGHT,
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
 )
-from evolib.evolib_envs.envs.line_follower_objects import (
-    LineFollowerRobot,
-    SensorPointState,
-)
+from evolib.evolib_envs.envs.line_follower_objects import LineFollowerRobot
 from evolib.evolib_envs.envs.line_follower_settings import (
     get_line_follower_settings,
 )

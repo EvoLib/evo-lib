@@ -106,7 +106,7 @@ def draw_env(
 class DebugRenderer:
     """Persistent Pygame renderer for debug episodes."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, width: int, height: int) -> None:
         pygame.init()
         self.screen = pygame.display.set_mode((DEFAULT_WIDTH, DEFAULT_HEIGHT))
         pygame.display.set_caption("Training Debug")
@@ -175,7 +175,7 @@ def run_debug_episode(
         return
 
     if _DEBUG_RENDERER is None:
-        _DEBUG_RENDERER = DebugRenderer()
+        _DEBUG_RENDERER = DebugRenderer(width=env.width, height=env.height)
 
     _DEBUG_RENDERER.run_episode(
         env,

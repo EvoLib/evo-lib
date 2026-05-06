@@ -6,9 +6,11 @@ The task is intentionally simple:
 - The player remains at a fixed x-position.
 - Obstacles move from right to left.
 - The controller decides when to jump.
+- Timing-based control without introducing complex physics.
 
-This environment is designed as a second small EvoLib-Env example after
-LineFollower. It tests timing-based control without introducing complex physics.
+Collisions intentionally do not terminate the episode.
+Continuous penalties provide a denser evolutionary feedback signal
+and significantly improve learning stability for small populations.
 """
 
 import random

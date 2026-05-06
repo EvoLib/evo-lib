@@ -46,7 +46,7 @@ def add_jumper_difficulty_arg(parser: argparse.ArgumentParser) -> None:
 
 
 def parse_linefollower_args() -> argparse.Namespace:
-    """Parse common arguments for Jumper example scripts."""
+    """Parse common arguments for Line Follower example scripts."""
 
     parser = argparse.ArgumentParser()
     add_debug_arg(parser)
