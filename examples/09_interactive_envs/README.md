@@ -1,82 +1,317 @@
 # Interactive Environments (EvoLib)
 
-This module provides **interactive, visual environments** for EvoLib.
+Interactive Environments provide small, visual, and reproducible learning environments
+for EvoLib.
 
-The goal is to make evolutionary algorithms and neural networks
-**intuitive and observable**.
+The goal is not to build high-performance game environments, the goal is to make:
+
+- evolutionary algorithms
+- neural networks
+- controller behavior
+- emergent strategies
+
+observable and understandable.
+
+These environments are designed primarily for:
+
+- experimentation
+- demonstrations
+- step-by-step learning
 
 ---
 
-## Concept
+# Design Goals
 
-These environments focus on:
+The project focuses on:
 
-- visual feedback
-- step-by-step understanding
-- interactive exploration
-
-Each environment follows the same pattern:
-
-    play --> rule --> train --> watch
+- small and understandable environments
+- immediate visual feedback
+- short iteration cycles
+- deterministic and reproducible runs
+- clean separation between simulation and rendering
+- reusable evaluation pipelines
 
 ---
 
-## Learning Pipeline
+# Learning Pipeline
 
-### 1. Play (Manual Control)
+Every environment follows the same learning pipeline:
 
-- user controls the agent
-- builds intuition
+```text
+play -> rule -> train -> watch
+```
 
-### 2. Rule-Based Solution
+This progression is consistent across all examples.
 
-- simple heuristic controller
-- shows that the problem is solvable
+---
 
-### 3. Train (Evolution)
+## 1. play.py
 
-- EvoLib evolves a neural network
-- behavior improves over generations
+The user controls the agent manually.
 
-### 4. Watch
+Goal:
 
-- visualize the best individual
+- understand the environment
+- understand controls
+- develop intuition for the task
+
+---
+
+## 2. rule.py
+
+A simple rule-based controller solves the task heuristically.
+
+Goal:
+
+- demonstrate that the task is solvable
+- provide a baseline behavior
+- show the observation/action relationship
+
+---
+
+## 3. train.py
+
+EvoLib evolves a neural network controller.
+
+Goal:
+
+- observe learning progress
+- inspect evolutionary improvement
+- experiment with parameters and mutation behavior
+
+Training is usually headless for performance reasons.
+
+Optional debug visualization can be enabled during training.
+
+---
+
+## 4. watch.py
+
+Loads a saved checkpoint and visualizes the best evolved individual.
+
+Goal:
+
 - observe emergent behavior
+- compare evolved strategies
+- inspect training results
 
 ---
 
-## Architecture
+# Core Architecture
 
-Core interfaces:
+The environments are separated into reusable components.
 
+---
+
+## Env
+
+The environment contains the simulation logic.
+
+```python
 class Env:
     def reset(self, seed=None): ...
     def step(self, action): ...
+```
 
+Responsibilities:
+
+- simulation state
+- observations
+- rewards
+- episode termination
+
+The environment itself is renderer-independent.
+
+---
+
+## Controller
+
+Controllers map observations to actions.
+
+```python
 class Controller:
     def act(self, observation): ...
+```
 
-Evaluation:
+Typical controller types:
 
-reward = evaluate_episode(env, controller)
-
----
-
-
-## Environments
-
-| Example | Description |
-|--------|------------|
-| 01_line_follower | follow a line using two sensors |
+- manual controllers
+- rule-based controllers
+- EvoNet controllers
 
 ---
 
-## Requirements
+## Task
+
+Tasks connect EvoLib individuals with environments.
+
+Responsibilities:
+
+- evaluate individuals
+- run episodes
+- compute fitness
+- provide visualization helpers
+
+Tasks are the primary integration layer between EvoLib and the environments.
+
+---
+
+## Renderer
+
+Renderers visualize environment state using Pygame.
+
+Responsibilities:
+
+- drawing
+- overlays
+- sensor visualization
+- debug output
+
+Rendering is separated from simulation.
+
+This allows:
+
+- headless training
+- reproducible evaluation
+- parallel execution
+
+---
+
+## Checkpoints
+
+Training results are stored as checkpoints.
+
+Typical checkpoint contents:
+
+- evolved individual
+- environment name
+- difficulty
+- random seed
+
+This allows:
+
+- reproducible demonstrations
+- loading trained controllers
+- separating training from visualization
+
+---
+
+# Difficulty System
+
+Environments can provide multiple difficulty levels:
+
+- easy
+- medium
+- hard
+
+Difficulty affects environment parameters while keeping the same observation
+and action interfaces.
+
+This allows progressive learning without changing the surrounding code.
+
+---
+
+# Debug Visualization
+
+Training can optionally visualize the current best individual.
+
+Typical use cases:
+
+- debugging reward functions
+- inspecting controller behavior
+- observing learning progress
+
+Example:
+
+```bash
+python jumper_train.py --debug
+```
+
+---
+
+# GIF Export
+
+Some environments support GIF export during training.
+
+This is useful for:
+
+- comparing generations
+- documentation
+- regression inspection
+
+Example output:
+
+```text
+frames/gen_025.gif
+```
+
+---
+
+# Current Environments
+
+| Environment | Focus |
+|---|---|
+| LineFollower | steering and sensor feedback |
+| Jumper | timing and event-based decisions |
+
+---
+
+# Didactic Philosophy
+
+The environments intentionally avoid unnecessary complexity.
+
+The focus is on:
+
+- understanding behavior
+- understanding observations
+- understanding rewards
+- understanding evolution
+
+Small environments are easier to reason about and easier to modify.
+
+This makes them suitable for:
+
+- classrooms
+- workshops
+- self-study
+- algorithm experiments
+
+---
+
+# Planned Environments
+
+Future environments:
+
+- FlappyBird
+- Pong
+- LunarLander
+- Spaceship
+- Predator-Prey
+- Colony
+- Multi-agent environments
+
+---
+
+# Technical Direction
+
+Planned future improvements include:
+
+- BatchEnv integration
+- parallel evaluation
+- Ray-based scaling
+- improved logging and tracking
+
+---
+
+# Requirements
+
+Minimum requirements:
 
 - Python 3.10+
 - pygame
 
-Install:
+Install pygame:
 
-    pip install pygame
-
+```bash
+pip install pygame
+```
