@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: MIT
 """Run a simple rule-based controller on JumperEnv."""
 
-import sys
-
 import pygame
 
 from evolib.evolib_envs.cli import parse_env_args
+from evolib.evolib_envs.core.controller import CallbackController
 from evolib.evolib_envs.core.env import Action, Observation
 from evolib.evolib_envs.envs.jumper import JumperEnv
 from evolib.evolib_envs.envs.jumper_defaults import (
@@ -25,22 +24,17 @@ args = parse_env_args(description="Run a Jumper agent.")
 difficulty = args.difficulty
 
 
-class RuleBasedJumperController:
-    """Jump when the obstacle is close and the player is on the ground."""
+def jumper_rule(observation: Observation) -> Action:
+    """Return a jump action based on normalized obstacle distance."""
 
-    def __init__(
-        self, *, jump_distance_min: float = 0.10, jump_distance_max: float = 0.22
-    ) -> None:
-        self.jump_distance_min = jump_distance_min
-        self.jump_distance_max = jump_distance_max
+    normalized_distance = observation[0]
 
-    def act(self, observation: Observation) -> Action:
-        normalized_distance = observation[0]
+    should_jump = 0.10 <= normalized_distance <= 0.22
 
-        should_jump = (
-            self.jump_distance_min <= normalized_distance <= self.jump_distance_max
-        )
-        return [1.0, 0.75 if should_jump else 0.0, 0.0]
+    if should_jump:
+        return [1.0, 0.75]
+
+    return [0.0, 0.0]
 
 
 def main() -> None:
@@ -52,7 +46,8 @@ def main() -> None:
         max_steps=MAX_STEPS,
         difficulty=difficulty,
     )
-    controller = RuleBasedJumperController()
+
+    controller = CallbackController(jumper_rule)
 
     observation = env.reset()
     total_reward = 0.0
@@ -91,7 +86,6 @@ def main() -> None:
         clock.tick(FPS)
 
     pygame.quit()
-    sys.exit(0)
 
 
 if __name__ == "__main__":

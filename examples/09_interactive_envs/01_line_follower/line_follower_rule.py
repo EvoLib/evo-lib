@@ -6,6 +6,7 @@ import sys
 import pygame
 
 from evolib.evolib_envs.cli import parse_env_args
+from evolib.evolib_envs.core.controller import CallbackController
 from evolib.evolib_envs.core.env import Action, Observation
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
 from evolib.evolib_envs.envs.line_follower_defaults import (
@@ -26,20 +27,14 @@ args = parse_env_args(description="Run a Line Follower agent.")
 difficulty = args.difficulty
 
 
-class RuleBasedLineFollowerController:
-    """Simple rule-based steering controller using the two line sensors."""
+def linefollower_rule(observation: Observation) -> Action:
+    left_sensor, right_sensor = observation
 
-    def __init__(self, *, turn_strength: float = 1.0) -> None:
-        self.turn_strength = turn_strength
+    error = right_sensor - left_sensor
+    turn = error
+    turn = max(-1.0, min(1.0, turn))
 
-    def act(self, observation: Observation) -> Action:
-        left_sensor, right_sensor = observation
-
-        error = right_sensor - left_sensor
-        turn = error * self.turn_strength
-        turn = max(-1.0, min(1.0, turn))
-
-        return [turn]
+    return [turn]
 
 
 def main() -> None:
@@ -49,7 +44,8 @@ def main() -> None:
         max_steps=MAX_STEPS,
         difficulty=difficulty,
     )
-    controller = RuleBasedLineFollowerController()
+
+    controller = CallbackController(linefollower_rule)
 
     observation = env.reset()
     total_reward = 0.0
