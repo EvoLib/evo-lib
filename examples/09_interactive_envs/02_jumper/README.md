@@ -20,6 +20,12 @@ README in `examples/09_interactive_envs/`.
 
 ---
 
+<p align="center">
+  <img src="https://github.com/EvoLib/evo-lib/blob/feature/envs-pygame/examples/09_interactive_envs/02_jumper/frames/jumper.gif?raw=true" alt="Sample Plot" width="512"/>
+</p>
+
+---
+
 # Goal
 
 The player should avoid obstacles by jumping at the right time.
@@ -206,8 +212,6 @@ a working policy looks like.
 
 ---
 
-# Didactic Value
-
 Jumper introduces concepts that are not visible in pure steering tasks:
 
 - timing
@@ -219,10 +223,3 @@ Jumper introduces concepts that are not visible in pure steering tasks:
 
 Compared with LineFollower, this task is less about continuous correction and
 more about choosing the right moment for an action.
-
-This makes it useful before introducing more complex environments such as:
-
-- FlappyBird
-- LunarLander
-- Pong
-- multi-agent simulations
