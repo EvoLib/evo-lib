@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 """Helper for evaluating and visualizing Jumper agents."""
 
+from pathlib import Path
 from typing import Any
 
 from evolib import Indiv
@@ -11,6 +12,7 @@ from evolib.evolib_envs.envs.jumper import JumperEnv
 from evolib.evolib_envs.envs.jumper_defaults import (
     DEFAULT_DEBUG_EVERY_N_GENERATIONS,
     DEFAULT_DEBUG_MAX_STEPS,
+    DEFAULT_FPS,
     DEFAULT_HEIGHT,
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
@@ -93,12 +95,15 @@ class JumperTask:
         every: int = DEFAULT_DEBUG_EVERY_N_GENERATIONS,
         steps: int = DEFAULT_DEBUG_MAX_STEPS,
         title: str | None = None,
-    ) -> None:
+        filename: str | Path | None = None,
+        gif_fps: int = DEFAULT_FPS,
+        frame_skip: int = 1,
+    ) -> Path | None:
         """Render one debug episode for an individual."""
 
         display_title = title or f"Jumper Training Debug - Gen {generation}"
 
-        run_debug_episode(
+        return run_debug_episode(
             self.make_env(),
             self.make_controller(indiv),
             enabled=True,
@@ -107,6 +112,9 @@ class JumperTask:
             steps=steps,
             seed=self.seed,
             title=display_title,
+            filename=filename,
+            gif_fps=gif_fps,
+            frame_skip=frame_skip,
         )
 
 

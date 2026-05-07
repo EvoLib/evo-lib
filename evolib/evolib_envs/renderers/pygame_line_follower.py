@@ -2,6 +2,7 @@
 """Pygame rendering helpers for the LineFollower environment."""
 
 import math
+from pathlib import Path
 
 import pygame
 
@@ -13,7 +14,7 @@ from evolib.evolib_envs.envs.line_follower_defaults import (
     DEFAULT_FPS,
     DEFAULT_MAX_STEPS,
 )
-from evolib.evolib_envs.renderers.pygame_common import draw_text_overlay
+from evolib.evolib_envs.renderers.pygame_common import GifRecorder, draw_text_overlay
 
 
 def draw_robot(screen: pygame.Surface, env: LineFollowerEnv) -> None:
@@ -119,21 +120,25 @@ class DebugRenderer:
         steps: int = DEFAULT_MAX_STEPS,
         seed: int | None,
         title: str,
-    ) -> None:
+        filename: str | Path | None = None,
+        gif_fps: int = DEFAULT_FPS,
+        frame_skip: int = 1,
+    ) -> Path | None:
         """Run one visual debug episode."""
 
         obs = env.reset(seed=seed)
         total_reward = 0.0
+        gif_recorder = GifRecorder(filename, fps=gif_fps, frame_skip=frame_skip)
 
         for step in range(steps):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    return
+                    return gif_recorder.save()
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        return
+                        return gif_recorder.save()
 
             action = controller.act(obs)
             obs, reward, done, _ = env.step(action)
@@ -141,11 +146,14 @@ class DebugRenderer:
 
             draw_env(self.screen, env, total_reward, self.font, title=title)
 
+            gif_recorder.capture(self.screen, step=step)
             pygame.display.flip()
             self.clock.tick(DEFAULT_FPS)
 
             if done:
                 break
+
+        return gif_recorder.save()
 
 
 _DEBUG_RENDERER: DebugRenderer | None = None
@@ -161,24 +169,30 @@ def run_debug_episode(
     steps: int = DEFAULT_DEBUG_MAX_STEPS,
     seed: int | None = None,
     title: str = "Training Debug",
-) -> None:
+    filename: str | Path | None = None,
+    gif_fps: int = DEFAULT_FPS,
+    frame_skip: int = 1,
+) -> Path | None:
     """Run debug rendering periodically during training."""
 
     global _DEBUG_RENDERER
 
     if not enabled:
-        return
+        return None
 
     if generation % every != 0:
-        return
+        return None
 
     if _DEBUG_RENDERER is None:
         _DEBUG_RENDERER = DebugRenderer(width=env.width, height=env.height)
 
-    _DEBUG_RENDERER.run_episode(
+    return _DEBUG_RENDERER.run_episode(
         env,
         controller,
         steps=steps,
         seed=seed,
         title=title,
+        filename=filename,
+        gif_fps=gif_fps,
+        frame_skip=frame_skip,
     )

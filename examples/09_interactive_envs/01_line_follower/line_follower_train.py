@@ -11,6 +11,7 @@ from evolib.evolib_envs.core.difficulty import (
 from evolib.evolib_envs.envs.line_follower_task import LineFollowerTask
 
 ENV_NAME = "linefollower"
+FRAME_FOLDER = "frames"
 
 args = parse_env_args(description="Train a Line Follower agent.")
 config_path = difficulty_config_path(args.difficulty)
@@ -38,6 +39,9 @@ def on_generation_end(pop: Pop) -> None:
     line_task.visualize(
         pop.best(sort=True),
         generation=pop.generation_num,
+        filename=f"{FRAME_FOLDER}/gen_{pop.generation_num:03d}.gif",
+        frame_skip=2,
+        gif_fps=30,
     )
 
 
