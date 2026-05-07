@@ -18,6 +18,12 @@ README in `examples/09_interactive_envs/`.
 
 ---
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_interactive_envs/01_line_follower/frames/linefollower.gif" alt="Sample Plot" width="512"/>
+</p>
+
+---
+
 # Goal
 
 The robot should stay close to the line while continuously moving forward.
@@ -193,29 +199,3 @@ After several generations, useful controllers should learn to:
 - perform smooth corrections
 - recover from small deviations
 
----
-
-# Didactic Value
-
-This environment is intentionally minimal.
-
-It introduces:
-
-- sensor-based control
-- continuous actions
-- feedback loops
-- reward-driven optimization
-- evolutionary learning
-
-Compared with later environments, LineFollower is:
-
-- easier to debug
-- easier to visualize
-- easier to understand mathematically
-
-This makes it a good first environment before more complex tasks such as:
-
-- Jumper
-- FlappyBird
-- LunarLander
-- multi-agent simulations
