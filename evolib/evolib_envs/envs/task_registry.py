@@ -2,19 +2,9 @@
 """Registry for recreating environment tasks from checkpoints."""
 
 from collections.abc import Callable
-from pathlib import Path
-from typing import Any, Protocol
 
 from evolib.evolib_envs.core.checkpoint import EnvCheckpoint
-
-
-class Task(Protocol):
-    """Minimal protocol for environment tasks."""
-
-    def visualize(self, *args: Any, **kwargs: Any) -> Path | None:
-        """Visualize an evaluated individual."""
-        ...
-
+from evolib.evolib_envs.core.task import Task
 
 TaskLoader = Callable[[EnvCheckpoint], Task]
 

@@ -7,7 +7,7 @@ from typing import Any
 from evolib import Indiv
 from evolib.evolib_envs.core.checkpoint import EnvCheckpoint
 from evolib.evolib_envs.core.env import Action, Observation
-from evolib.evolib_envs.core.evaluator import evaluate_episode
+from evolib.evolib_envs.core.task import BaseTask
 from evolib.evolib_envs.envs.jumper import JumperEnv
 from evolib.evolib_envs.envs.jumper_defaults import (
     DEFAULT_DEBUG_EVERY_N_GENERATIONS,
@@ -39,7 +39,7 @@ class JumperController:
         return [jump_signal, jump_force]
 
 
-class JumperTask:
+class JumperTask(BaseTask[JumperEnv, JumperController]):
     """Evaluate and visualize individuals on the Jumper environment."""
 
     def __init__(
@@ -52,12 +52,14 @@ class JumperTask:
         module: str = "brain",
         difficulty: str | JumperDifficulty = JumperDifficulty.MEDIUM,
     ) -> None:
-        self.width = width
-        self.height = height
-        self.max_steps = max_steps
-        self.seed = seed
-        self.module = module
-        self.difficulty = difficulty
+        super().__init__(
+            width=width,
+            height=height,
+            max_steps=max_steps,
+            seed=seed,
+            module=module,
+            difficulty=difficulty,
+        )
 
     def make_env(self) -> JumperEnv:
         """Create a fresh Jumper environment instance."""
@@ -73,19 +75,6 @@ class JumperTask:
         """Create the default Jumper controller for one individual."""
 
         return JumperController(indiv, module=self.module)
-
-    def evaluate(self, indiv: Indiv) -> float:
-        """Evaluate one individual and return the accumulated reward."""
-
-        env = self.make_env()
-        controller = self.make_controller(indiv)
-
-        return evaluate_episode(
-            env,
-            controller,
-            seed=self.seed,
-            max_steps=self.max_steps,
-        )
 
     def visualize(
         self,

@@ -7,7 +7,7 @@ from typing import Any
 from evolib import Indiv
 from evolib.evolib_envs.core.checkpoint import EnvCheckpoint
 from evolib.evolib_envs.core.env import Action, Observation
-from evolib.evolib_envs.core.evaluator import evaluate_episode
+from evolib.evolib_envs.core.task import BaseTask
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
 from evolib.evolib_envs.envs.line_follower_defaults import (
     DEFAULT_DEBUG_EVERY_N_GENERATIONS,
@@ -37,13 +37,8 @@ class LineFollowerController:
         return [turn]
 
 
-class LineFollowerTask:
-    """
-    Evaluate and visualize individuals on the LineFollower environment.
-
-    This class is intentionally specific to LineFollower. It keeps example code close to
-    the GymEnv style while hiding controller wiring and rendering details.
-    """
+class LineFollowerTask(BaseTask[LineFollowerEnv, LineFollowerController]):
+    """Evaluate and visualize individuals on the LineFollower environment."""
 
     def __init__(
         self,
@@ -55,12 +50,14 @@ class LineFollowerTask:
         module: str = "brain",
         difficulty: str | LineFollowerDifficulty = LineFollowerDifficulty.MEDIUM,
     ) -> None:
-        self.width = width
-        self.height = height
-        self.max_steps = max_steps
-        self.seed = seed
-        self.module = module
-        self.difficulty = difficulty
+        super().__init__(
+            width=width,
+            height=height,
+            max_steps=max_steps,
+            seed=seed,
+            module=module,
+            difficulty=difficulty,
+        )
 
     def make_env(self) -> LineFollowerEnv:
         """Create a fresh LineFollower environment instance."""
@@ -76,19 +73,6 @@ class LineFollowerTask:
         """Create the default LineFollower controller for one individual."""
 
         return LineFollowerController(indiv, module=self.module)
-
-    def evaluate(self, indiv: Indiv) -> float:
-        """Evaluate one individual and return the accumulated reward."""
-
-        env = self.make_env()
-        controller = self.make_controller(indiv)
-
-        return evaluate_episode(
-            env,
-            controller,
-            seed=self.seed,
-            max_steps=self.max_steps,
-        )
 
     def visualize(
         self,
