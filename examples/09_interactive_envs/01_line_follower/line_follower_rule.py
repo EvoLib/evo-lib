@@ -4,18 +4,17 @@
 import sys
 
 import pygame
-
-from evolib.evolib_envs.cli import parse_env_args
-from evolib.evolib_envs.core.controller import CallbackController
-from evolib.evolib_envs.core.env import Action, Observation
-from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
-from evolib.evolib_envs.envs.line_follower_defaults import (
+from evoenv.cli import parse_env_args
+from evoenv.core.controller import CallbackController
+from evoenv.core.env import Action, Observation
+from evoenv.envs.line_follower import LineFollowerEnv
+from evoenv.envs.line_follower_defaults import (
     DEFAULT_FPS,
     DEFAULT_HEIGHT,
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
 )
-from evolib.evolib_envs.renderers.pygame_line_follower import draw_env
+from evoenv.renderers.pygame_line_follower import draw_env
 
 SCREEN_WIDTH = DEFAULT_WIDTH
 SCREEN_HEIGHT = DEFAULT_HEIGHT

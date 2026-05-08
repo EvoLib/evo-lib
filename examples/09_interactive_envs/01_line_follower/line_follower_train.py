@@ -1,14 +1,15 @@
 # SPDX-License-Identifier: MIT
 """Train an EvoLib population on the LineFollower task."""
 
-from evolib import Indiv, Pop
-from evolib.evolib_envs.cli import parse_env_args
-from evolib.evolib_envs.core.checkpoint import EnvCheckpoint, EnvSpec, save_checkpoint
-from evolib.evolib_envs.core.difficulty import (
+from evoenv.cli import parse_env_args
+from evoenv.core.checkpoint import EnvCheckpoint, EnvSpec, save_checkpoint
+from evoenv.core.difficulty import (
     difficulty_checkpoint_path,
     difficulty_config_path,
 )
-from evolib.evolib_envs.envs.line_follower_task import LineFollowerTask
+from evoenv.envs.line_follower_task import LineFollowerTask
+
+from evolib import Indiv, Pop
 
 ENV_NAME = "linefollower"
 FRAME_FOLDER = "frames"

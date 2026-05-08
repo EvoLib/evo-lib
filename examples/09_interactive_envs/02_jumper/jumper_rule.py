@@ -2,18 +2,17 @@
 """Run a simple rule-based controller on JumperEnv."""
 
 import pygame
-
-from evolib.evolib_envs.cli import parse_env_args
-from evolib.evolib_envs.core.controller import CallbackController
-from evolib.evolib_envs.core.env import Action, Observation
-from evolib.evolib_envs.envs.jumper import JumperEnv
-from evolib.evolib_envs.envs.jumper_defaults import (
+from evoenv.cli import parse_env_args
+from evoenv.core.controller import CallbackController
+from evoenv.core.env import Action, Observation
+from evoenv.envs.jumper import JumperEnv
+from evoenv.envs.jumper_defaults import (
     DEFAULT_FPS,
     DEFAULT_HEIGHT,
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
 )
-from evolib.evolib_envs.renderers.pygame_jumper import draw_env
+from evoenv.renderers.pygame_jumper import draw_env
 
 SCREEN_WIDTH = DEFAULT_WIDTH
 SCREEN_HEIGHT = DEFAULT_HEIGHT

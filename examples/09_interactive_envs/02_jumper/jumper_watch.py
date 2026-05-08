@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: MIT
 """Watch a trained environment checkpoint with Pygame visualization."""
 
-from evolib.evolib_envs.cli import parse_checkpoint_args
-from evolib.evolib_envs.core.checkpoint import load_checkpoint
-from evolib.evolib_envs.core.task_registry import load_task
-from evolib.evolib_envs.envs import register_builtin_tasks
+from evoenv.cli import parse_checkpoint_args
+from evoenv.core.checkpoint import load_checkpoint
+from evoenv.core.task_registry import load_task
+from evoenv.envs import register_builtin_tasks
 
 register_builtin_tasks()
 
