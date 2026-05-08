@@ -3,8 +3,8 @@
 
 from evolib.evolib_envs.cli import parse_checkpoint_args
 from evolib.evolib_envs.core.checkpoint import load_checkpoint
+from evolib.evolib_envs.core.task_registry import load_task
 from evolib.evolib_envs.envs import register_builtin_tasks
-from evolib.evolib_envs.envs.task_registry import load_task
 
 register_builtin_tasks()
 

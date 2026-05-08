@@ -8,6 +8,7 @@ from evolib import Indiv
 from evolib.evolib_envs.core.checkpoint import EnvCheckpoint
 from evolib.evolib_envs.core.env import Action, Observation
 from evolib.evolib_envs.core.task import BaseTask
+from evolib.evolib_envs.core.task_registry import register_task_loader
 from evolib.evolib_envs.envs.jumper import JumperEnv
 from evolib.evolib_envs.envs.jumper_defaults import (
     DEFAULT_DEBUG_EVERY_N_GENERATIONS,
@@ -18,7 +19,6 @@ from evolib.evolib_envs.envs.jumper_defaults import (
     DEFAULT_WIDTH,
 )
 from evolib.evolib_envs.envs.jumper_settings import JumperDifficulty
-from evolib.evolib_envs.envs.task_registry import register_task_loader
 from evolib.evolib_envs.renderers.pygame_jumper import run_debug_episode
 
 

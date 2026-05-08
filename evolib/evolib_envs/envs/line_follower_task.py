@@ -8,6 +8,7 @@ from evolib import Indiv
 from evolib.evolib_envs.core.checkpoint import EnvCheckpoint
 from evolib.evolib_envs.core.env import Action, Observation
 from evolib.evolib_envs.core.task import BaseTask
+from evolib.evolib_envs.core.task_registry import register_task_loader
 from evolib.evolib_envs.envs.line_follower import LineFollowerEnv
 from evolib.evolib_envs.envs.line_follower_defaults import (
     DEFAULT_DEBUG_EVERY_N_GENERATIONS,
@@ -18,7 +19,6 @@ from evolib.evolib_envs.envs.line_follower_defaults import (
     DEFAULT_WIDTH,
 )
 from evolib.evolib_envs.envs.line_follower_settings import LineFollowerDifficulty
-from evolib.evolib_envs.envs.task_registry import register_task_loader
 from evolib.evolib_envs.renderers.pygame_line_follower import run_debug_episode
 
 
