@@ -1,0 +1,41 @@
+random_seed: 42
+
+parent_pool_size: 10
+offspring_pool_size: 20
+max_generations: 25
+max_indiv_age: 0
+num_elites: 0
+
+stopping:
+  target_fitness: 5.0
+
+evolution:
+  strategy: mu_plus_lambda
+
+modules:
+  brain:
+    type: evonet
+
+    dim: [2, 2, 2]
+    activation: [linear, tanh, sigmoid]
+
+    initializer: default
+
+    connectivity:
+      scope: crosslayer
+      density: 1.0
+      recurrent: none
+
+    weights:
+      initializer: normal
+      std: 0.5
+      bounds: [-1.0, 1.0]
+
+    bias:
+      initializer: zero
+      bounds: [-1.0, 1.0]
+
+    mutation:
+      strategy: constant
+      probability: 1.0
+      strength: 0.15

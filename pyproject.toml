@@ -30,15 +30,21 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
   "Intended Audience :: Education"
 ]
-
 [project.optional-dependencies]
 dev = [
-    "mypy",
+    "black==25.1.0",
+    "isort==6.0.1",
+    "flake8==7.3.0",
+    "mypy==1.16.1",
+    "pytest==8.4.1",
+    "pytest-cov==5.0.0",
+    "docformatter==1.7.5",
     "types-PyYAML",
-    "ray",
+    "matplotlib",
     "gymnasium",
     "imageio",
-    "Box2D"
+    "ray",
+    "Box2D",
 ]
 docs = [
   "sphinx",
@@ -46,13 +52,18 @@ docs = [
   "myst-parser",
 ]
 test = [
-  "pytest>=8",
-  "pytest-cov>=5",
+    "pytest==8.4.1",
+    "pytest-cov==5.0.0",
 ]
+evoenv = [
+    "pygame>=2.5",
+    "pillow>=10.0",
+]
+
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["evolib*"]
+include = ["evolib*", "evoenv*"]
 
 [tool.setuptools.package-data]
 "evolib" = ["py.typed"]
