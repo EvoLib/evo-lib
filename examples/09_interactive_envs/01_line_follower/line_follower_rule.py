@@ -26,7 +26,7 @@ args = parse_env_args(description="Run a Line Follower agent.")
 difficulty = args.difficulty
 
 
-def linefollower_rule(observation: Observation) -> Action:
+def line_follower_rule(observation: Observation) -> Action:
     left_sensor, right_sensor = observation
 
     error = right_sensor - left_sensor
@@ -44,7 +44,7 @@ def main() -> None:
         difficulty=difficulty,
     )
 
-    controller = CallbackController(linefollower_rule)
+    controller = CallbackController(line_follower_rule)
 
     observation = env.reset()
     total_reward = 0.0

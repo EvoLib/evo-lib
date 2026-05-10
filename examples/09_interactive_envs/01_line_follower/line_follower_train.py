@@ -3,15 +3,12 @@
 
 from evoenv.cli import parse_env_args
 from evoenv.core.checkpoint import EnvCheckpoint, EnvSpec, save_checkpoint
-from evoenv.core.difficulty import (
-    difficulty_checkpoint_path,
-    difficulty_config_path,
-)
+from evoenv.core.difficulty import difficulty_checkpoint_path, difficulty_config_path
 from evoenv.envs.line_follower_task import LineFollowerTask
 
 from evolib import Indiv, Pop
 
-ENV_NAME = "linefollower"
+ENV_NAME = "line_follower"
 FRAME_FOLDER = "frames"
 
 args = parse_env_args(description="Train a Line Follower agent.")

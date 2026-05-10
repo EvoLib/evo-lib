@@ -22,11 +22,7 @@ from evoenv.envs.jumper_defaults import (
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
 )
-from evoenv.envs.jumper_objects import (
-    JumperObstacle,
-    JumperPlayer,
-    JumperSensor,
-)
+from evoenv.envs.jumper_objects import JumperObstacle, JumperPlayer, JumperSensor
 from evoenv.envs.jumper_settings import (
     JumperDifficulty,
     JumperSettings,
@@ -90,8 +86,8 @@ class JumperEnv(Env):
         reward = 0.00
         done = False
 
-        jump_signal = action[0]
-        jump_force = action[1]
+        jump_signal = max(0.0, min(1.0, float(action[0])))
+        jump_force = max(0.0, min(1.0, float(action[1])))
 
         can_jump = self.player.is_on_ground or self.settings.allow_air_jump
 

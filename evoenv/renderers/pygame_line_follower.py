@@ -77,7 +77,7 @@ def draw_overlay(
         f"sensors=[{values}]",
         f"missed_line_steps={env.missed_line_steps}",
         f"reward={total_reward:.2f} step={env.step_count}",
-        "ESC: quit | R: reset",
+        "ESC: quit",
     ]
 
     draw_text_overlay(screen, font, lines)

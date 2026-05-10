@@ -49,6 +49,11 @@ test = [
   "pytest>=8",
   "pytest-cov>=5",
 ]
+evoenv = [
+    "pygame>=2.5",
+    "pillow>=10.0",
+]
+
 
 [tool.setuptools.packages.find]
 where = ["."]

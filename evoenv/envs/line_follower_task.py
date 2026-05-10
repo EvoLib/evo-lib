@@ -121,4 +121,4 @@ def load_line_follower_task(checkpoint: EnvCheckpoint) -> LineFollowerTask:
 def register_line_follower_task() -> None:
     """Register the LineFollower task loader."""
 
-    register_task_loader("linefollower", load_line_follower_task)
+    register_task_loader("line_follower", load_line_follower_task)

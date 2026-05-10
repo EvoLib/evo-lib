@@ -6,10 +6,7 @@ from pathlib import Path
 import pygame
 from evoenv.core.controller import Controller
 from evoenv.envs.jumper import JumperEnv
-from evoenv.envs.jumper_defaults import (
-    DEFAULT_FPS,
-    DEFAULT_MAX_STEPS,
-)
+from evoenv.envs.jumper_defaults import DEFAULT_FPS, DEFAULT_MAX_STEPS
 from evoenv.renderers.pygame_common import GifRecorder, draw_text_overlay
 
 FPS = DEFAULT_FPS
@@ -63,8 +60,8 @@ def draw_env(
         title,
         f"reward={total_reward:.2f} step={env.step_count}",
         f"distance={env.obstacle.x - env.player.x:.1f} passed={env.passed_obstacles}",
-        f"col={env.collision}",
-        "ESC: quit | R: reset",
+        f"collision={env.collision}",
+        "ESC: quit",
     ]
 
     draw_text_overlay(screen, font, lines)
