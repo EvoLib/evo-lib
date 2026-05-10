@@ -19,29 +19,13 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install docformatter
-        run: pip install "docformatter==1.7.5"
-
-      - name: Install project and tools
+      - name: Install project and dev tools
         run: |
-          pip install -r requirements-dev.txt
-          pip install -e . --no-deps
-          
-          # Linter, Formatter, Typechecker, Testing Tools
-          pip install \
-            black==25.1.0 \
-            isort \
-            flake8 \
-            mypy==1.16.1 \
-            pytest \
-            docformatter==1.7.8 \
-            types-PyYAML \
-            matplotlib \
-            gymnasium \
-            imageio
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,test]"
 
       - name: Run black
-        run: black --check evolib/ tests/
+        run: black --check evolib tests
 
       - name: Run isort
         run: |
@@ -50,18 +34,13 @@ jobs:
           echo "::endgroup::"
 
       - name: Run flake8
-        run: flake8 evolib/ tests/
-
-      - name: Install package + test deps
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .[test]
+        run: flake8 evolib tests
 
       - name: Run mypy
-        run: mypy evolib/
+        run: mypy evolib
 
       - name: Run pytest
-        run: pytest tests/
+        run: pytest tests
 
       - name: Run docformatter
         run: docformatter --check --recursive evolib tests
