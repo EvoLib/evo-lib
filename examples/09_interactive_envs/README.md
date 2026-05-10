@@ -120,7 +120,7 @@ Responsibilities:
 - rewards
 - episode termination
 
-The environment itself is renderer-independent.
+The environments support headless evaluation without requiring active rendering.
 
 ---
 
@@ -168,12 +168,7 @@ Responsibilities:
 - debug output
 
 Rendering is separated from simulation.
-
-This allows:
-
-- headless training
-- reproducible evaluation
-- parallel execution
+This separation simplifies future support for parallel evaluation.
 
 ---
 
@@ -269,26 +264,18 @@ The focus is on:
 
 Small environments are easier to reason about and easier to modify.
 
-This makes them suitable for:
-
-- classrooms
-- workshops
-- self-study
-- algorithm experiments
+This makes the environments easier to understand, modify, and experiment with.
 
 ---
 
 # Planned Environments
 
-Future environments:
-
-- FlappyBird
-- Pong
-- LunarLander
-- Spaceship
-- Predator-Prey
-- Colony
-- Multi-agent environments
+| Environment | Core concept |
+|---|---|
+| ObstacleAvoider | evolvable perception and sensor layouts |
+| Collector | exploration and reward shaping |
+| MemoryTask | recurrent memory and temporal behavior |
+| PredatorPrey | co-evolution and emergent dynamics |
 
 ---
 
@@ -307,7 +294,7 @@ Planned future improvements include:
 
 Minimum requirements:
 
-- Python 3.10+
+- Python 3.12+
 - pygame
 
 Install pygame:
