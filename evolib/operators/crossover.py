@@ -175,7 +175,6 @@ def crossover_intermediate(
     Raises:
         ValueError: If parent vectors have different lengths.
     """
-
     parent1 = np.array(parent1)
     parent2 = np.array(parent2)
 
@@ -207,7 +206,6 @@ def crossover_offspring(pop: "Pop", offspring: list["Indiv"]) -> None:
         - Individuals are paired (0,1), (2,3), ...
         - This method does not return; offspring are modified in place.
     """
-
     if not offspring:
         return
 

@@ -211,7 +211,6 @@ class Pop:
 
         Useful for inspecting parameter module dimensions, shapes, or bounds
         """
-
         if not self.indivs:
             raise RuntimeError("No individuals initialized.")
         return self.indivs[0]
@@ -487,7 +486,6 @@ class Pop:
         Args:
             new_indiv (Indiv): The individual to be added.
         """
-
         if new_indiv is None:
             new_indiv = Indiv()
 
@@ -500,7 +498,6 @@ class Pop:
         Args:
             indiv (Indiv): The individual to be removed.
         """
-
         if not isinstance(indiv, Indiv):
             raise TypeError("Only an object of type 'Indiv' can be removed.")
         if indiv not in self.indivs:
@@ -515,7 +512,6 @@ class Pop:
         Returns:
             np.ndarray: Array of fitness values (ignores None).
         """
-
         values = [i.fitness for i in self.indivs]
         return np.array(
             values if include_none else [v for v in values if v is not None]
@@ -547,7 +543,6 @@ class Pop:
                          If False, return first individual as-is.
                          Default: True.
         """
-
         if not self.indivs:
             raise ValueError("Population is empty; cannot return best individual.")
 
@@ -564,7 +559,6 @@ class Pop:
         Returns:
             int: Number of individuals removed.
         """
-
         if self.max_indiv_age <= 0:
             return 0
 
@@ -605,7 +599,6 @@ class Pop:
         Raises:
             ValueError: If the population is empty.
         """
-
         if not self.indivs:
             raise ValueError("Population contains no individuals (indivs is empty)")
 
@@ -620,7 +613,6 @@ class Pop:
         Raises:
             ValueError: If no individuals have a valid fitness value.
         """
-
         self.generation_num += 1
 
         fitnesses = self.get_fitness_array()
@@ -678,7 +670,6 @@ class Pop:
         Returns:
             float: Diversity score.
         """
-
         fitnesses = self.get_fitness_array()
         return compute_fitness_diversity(fitnesses.tolist(), method=method)
 
@@ -737,7 +728,6 @@ class Pop:
               assigned at initialization, ensuring selection acts on stable values.
             - Offspring are updated once per generation, prior to mutation.
         """
-
         for indiv in indivs:
             assert indiv.para is not None
             indiv.para.update_mutation_parameters(
@@ -915,9 +905,9 @@ class Pop:
 
             current_fitness = self.best().fitness
 
-            assert current_fitness is not None, (
-                "Strategy must evaluate " "fitness each generation"
-            )
+            assert (
+                current_fitness is not None
+            ), "Strategy must evaluate fitness each generation"
 
             if minimize:
                 has_improved = (best_fitness - current_fitness) > min_delta
@@ -986,7 +976,6 @@ class Pop:
         Returns:
             list[Indiv]: Selected parents (deep copies).
         """
-
         if self.selection_fn is None:
             raise ValueError("Selection Strategy must be defined")
 

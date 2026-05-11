@@ -199,7 +199,7 @@ class VectorComponentConfig(BaseModel):
         allowed = {"normal", "uniform", "zero", "fixed", "adaptive"}
         if name not in allowed:
             raise ValueError(
-                f"Unknown initializer '{name}'. " f"Allowed: {sorted(allowed)}"
+                f"Unknown initializer '{name}'. Allowed: {sorted(allowed)}"
             )
 
         # structure-aware check (only if structure is available in the data)

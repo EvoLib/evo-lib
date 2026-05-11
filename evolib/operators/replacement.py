@@ -113,7 +113,6 @@ def replace_mu_comma_lambda(
         offspring: Newly generated and evaluated offspring.
         fitness_maximization: Whether fitness is to be maximized.
     """
-
     if not offspring:
         raise ValueError("Offspring list must not be empty.")
     if pop.num_elites < 0:

@@ -41,10 +41,9 @@ class HeliExperimentLogger:
         """
         Collects and logs HELI-relevant metrics for one generation.
 
-        generation (int): Current generation number.
-        indivs (list[Indiv]): Population individuals Expected to have `.para.net`
+        generation (int): Current generation number. indivs (list[Indiv]): Population
+        individuals Expected to have `.para.net`
         """
-
         heli_gen = pop.heli_fitness_evaluations_gen
         base_gen = pop.parent_pool_size + pop.offspring_pool_size
         overhead_pct_gen = (heli_gen / base_gen * 100.0) if base_gen > 0 else 0.0

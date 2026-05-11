@@ -69,7 +69,6 @@ def map_fitness(
         num_cpus: Number of CPUs for Ray (optional).
         address: Ray cluster address (optional).
     """
-
     if backend != "ray":
         # Sequential fallback
         for indiv in indivs:

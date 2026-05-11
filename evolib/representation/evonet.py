@@ -239,7 +239,6 @@ class EvoNet(ParaBase):
 
         Structural crossover is not supported.
         """
-
         if not isinstance(partner, EvoNet):
             return
 
@@ -310,11 +309,11 @@ class EvoNet(ParaBase):
         elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
             if diversity_ema is None:
                 raise ValueError(
-                    "diversity_ema must be provided" "for ADAPTIVE_GLOBAL strategy"
+                    "diversity_ema must be provided for ADAPTIVE_GLOBAL strategy"
                 )
             if ep.mutation_strength is None:
                 raise ValueError(
-                    "mutation_strength must be provided" "for ADAPTIVE_GLOBAL strategy"
+                    "mutation_strength must be provided for ADAPTIVE_GLOBAL strategy"
                 )
             if ep.mutation_probability is None:
                 raise ValueError(
@@ -371,7 +370,7 @@ class EvoNet(ParaBase):
             elif bias_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
                 if diversity_ema is None:
                     raise ValueError(
-                        "diversity_ema must be provided for " "ADAPTIVE_GLOBAL (biases)"
+                        "diversity_ema must be provided for ADAPTIVE_GLOBAL (biases)"
                     )
                 if bep.mutation_strength is None or bep.mutation_probability is None:
                     raise ValueError(

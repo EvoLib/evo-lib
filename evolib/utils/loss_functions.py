@@ -27,7 +27,6 @@ def mse_loss(
     Returns:
         float: Mean squared error as a scalar value.
     """
-
     # Konvertiere Eingaben zu NumPy-Arrays
     pred = np.asarray(predicted)
     exp = np.asarray(expected)

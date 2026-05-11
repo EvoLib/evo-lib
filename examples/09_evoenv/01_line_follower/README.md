@@ -19,7 +19,7 @@ README in `examples/09_interactive_envs/`.
 ---
 
 <p align="center">
-  <img src="https://github.com/EvoLib/evo-lib/blob/feature/envs-pygame/examples/09_interactive_envs/01_line_follower/frames/linefollower.gif?raw=true" alt="Sample Plot" width="512"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/01_line_follower/frames/linefollower.gif" alt="Sample Plot" width="512"/>
 </p>
 
 ---

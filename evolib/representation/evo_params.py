@@ -3,8 +3,8 @@
 EvoControlParams is a simple container class that holds runtime mutation and crossover
 parameters used in evolutionary strategies.
 
-It is representation-agnostic and does not perform any updates or behavior.
-All update logic is handled externally by `evo_param_update.py`.
+It is representation-agnostic and does not perform any updates or behavior. All update
+logic is handled externally by `evo_param_update.py`.
 """
 
 import numpy as np

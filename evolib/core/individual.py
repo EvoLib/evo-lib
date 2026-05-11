@@ -131,11 +131,10 @@ class Indiv:
         """
         Apply mutation to this individual.
 
-        Delegates the mutation process to the underlying parameter object `para`.
-        This ensures that mutation behavior is defined polymorphically in the
-        specific `ParaBase` subclass (e.g. `Vector`, `ParaNet`, ...).
+        Delegates the mutation process to the underlying parameter object `para`. This
+        ensures that mutation behavior is defined polymorphically in the specific
+        `ParaBase` subclass (e.g. `Vector`, `ParaNet`, ...).
         """
-
         if self.para is not None and hasattr(self.para, "mutate"):
             self.para.mutate()
 
@@ -147,9 +146,9 @@ class Indiv:
         """
         Apply crossover to this individual.
 
-        Delegates the crossover process to the underlying parameter object `para`.
-        This ensures that crossover behavior is defined polymorphically in the
-        specific `ParaBase` subclass (e.g. `Vector`, `ParaNet`, ...).
+        Delegates the crossover process to the underlying parameter object `para`. This
+        ensures that crossover behavior is defined polymorphically in the specific
+        `ParaBase` subclass (e.g. `Vector`, `ParaNet`, ...).
         """
         if self.para is not None and hasattr(self.para, "crossover"):
             self.para.crossover()

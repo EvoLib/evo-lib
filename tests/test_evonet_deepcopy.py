@@ -2,8 +2,8 @@
 """
 Tests for EvoNet deepcopy behavior.
 
-Goal: Ensure temporal execution state (delay buffers, neuron state) does not leak
-into offspring when EvoNet is deep-copied.
+Goal: Ensure temporal execution state (delay buffers, neuron state) does not leak into
+offspring when EvoNet is deep-copied.
 """
 
 from __future__ import annotations

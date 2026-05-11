@@ -16,8 +16,10 @@ from evolib.representation.vector import Vector
 
 def initializer_normal_vector(config: FullConfig, module: str) -> Vector:
     """
-    Initializes a Vector using a normal distribution. init_bounds act as a hard clamp
-    for initializer outputs; if omitted, bounds are used as fallback.
+    Initializes a Vector using a normal distribution.
+
+    init_bounds act as a hard clamp for initializer outputs; if omitted,
+    bounds are used as fallback.
 
     Args:
         config (FullConfig): Full config object containing all module definitions
@@ -135,7 +137,7 @@ def initializer_adaptive_vector(config: FullConfig, module: str) -> Vector:
         or para.evo_params.max_mutation_strength is None
     ):
         raise ValueError(
-            f"min/max mutation strength must be defined in " f"module '{module}'"
+            f"min/max mutation strength must be defined in module '{module}'"
         )
 
     size = int(para.dim)

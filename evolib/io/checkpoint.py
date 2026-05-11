@@ -10,7 +10,6 @@ This module provides standardized support for:
 All files are stored in the 'checkpoints/' directory by default.
 """
 
-
 from pathlib import Path
 from typing import Any, Optional, cast
 
@@ -113,7 +112,6 @@ def resume_or_create(
     Returns:
     Pop: A ready-to-run population.
     """
-
     pop = resume_from_checkpoint(
         run_name=run_name, fitness_function=fitness_function, silent_fail=True
     )
@@ -139,7 +137,6 @@ def save_best_indiv(pop: Pop, *, run_name: str = "default") -> None:
         pop (Pop): Population from which to extract and save the best individual.
         run_name (str): Optional name to identify the saved individual.
     """
-
     best = pop.best()
     path = _best_indiv_path(run_name)
     save_indiv(best, path)
@@ -158,7 +155,6 @@ def load_best_indiv(run_name: str = "default") -> Indiv:
     Raises:
         FileNotFoundError: If the corresponding file does not exist.
     """
-
     path = _best_indiv_path(run_name)
     if not path.exists():
         raise FileNotFoundError(f"Best-indiv file '{path}' not found.")

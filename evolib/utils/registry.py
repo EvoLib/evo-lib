@@ -64,5 +64,5 @@ def load_strategy(category: str, name: str) -> Callable:
 
     except ImportError as e:
         raise ImportError(
-            f"Konnte Modul '{module_path}' nicht " "importieren: {str(e)}"
+            f"Konnte Modul '{module_path}' nicht importieren: {str(e)}"
         ) from e

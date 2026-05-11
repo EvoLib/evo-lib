@@ -14,8 +14,9 @@ def generate_timeseries(
     seed: int | None = None,
 ) -> np.ndarray:
     """
-    Generate synthetic time series data for evolution or forecasting. Uses local RNG to
-    avoid modifying global numpy random state.
+    Generate synthetic time series data for evolution or forecasting.
+
+    Uses local RNG to avoid modifying global numpy random state.
 
     Args:
         length (int): Number of time steps.
@@ -30,7 +31,6 @@ def generate_timeseries(
     Returns:
         np.ndarray: The generated time series.
     """
-
     if pattern not in {"default", "trend_switch", "parabolic", "zigzag", "shock"}:
         raise ValueError(f"Unknown pattern: {pattern}")
 

@@ -87,7 +87,6 @@ def _apply_bias_init(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
 
 def _apply_delay_init(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
     """Initialize delay on recurrent connections only."""
-
     if cfg.delay is None:
         return
 
@@ -182,7 +181,6 @@ def initializer_default_evonet(config: FullConfig, module: str) -> EvoNet:
     - Biases are initialized using `cfg.bias`.
     - Delay (if configured) is initialized using `cfg.delay`.
     """
-
     para = EvoNet()
     cfg = config.modules[module].model_copy(deep=True)
     para.apply_config(cfg)
@@ -227,7 +225,6 @@ def initializer_identity_evonet(config: FullConfig, module: str) -> EvoNet:
 
     This preset intentionally overrides standard parameter initialization.
     """
-
     SELF_LOOP_WEIGHT = 0.8
     ALPHA = 0.01
 

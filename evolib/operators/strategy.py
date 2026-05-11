@@ -40,7 +40,6 @@ from evolib.operators.reproduction import generate_cloned_offspring
 def evolve_mu_plus_lambda(pop: "Pop") -> None:
     """Elites and selected parents generate offspring, then mu best individuals are
     selected from parents + offspring."""
-
     if pop.fitness_function is None:
         raise ValueError("No fitness function set in population.")
     if not pop.indivs:
@@ -100,7 +99,6 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
     If `num_elites > 0`, top elite parents are preserved and their fitness is re-
     evaluated before offspring generation.
     """
-
     if pop.fitness_function is None:
         raise ValueError(
             "No fitness function set in population."

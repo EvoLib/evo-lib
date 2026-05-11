@@ -54,7 +54,6 @@ class Vector(ParaBase):
             cfg: A VectorComponentConfig defining dimension, structure,
                  initialization, and mutation/crossover strategies.
         """
-
         if not isinstance(cfg, VectorComponentConfig):
             raise TypeError("Expected VectorComponentConfig")
 
@@ -167,7 +166,7 @@ class Vector(ParaBase):
 
         if self.evo_params.mutation_strength is not None:
             parts.append(
-                f"Global mutation_strength=" f"{self.evo_params.mutation_strength:.4f}"
+                f"Global mutation_strength={self.evo_params.mutation_strength:.4f}"
             )
 
         if self.evo_params.crossover_probability is not None:
@@ -228,7 +227,6 @@ class Vector(ParaBase):
             diversity_ema: Exponential moving average of population diversity
                            (required for adaptive-global strategies).
         """
-
         ep = self.evo_params
         """Update mutation parameters based on strategy and generation."""
         if ep.mutation_strategy == MutationStrategy.EXPONENTIAL_DECAY:
@@ -243,7 +241,7 @@ class Vector(ParaBase):
         elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
             if diversity_ema is None:
                 raise ValueError(
-                    "diversity_ema must be provided" "for ADAPTIVE_GLOBAL strategy"
+                    "diversity_ema must be provided for ADAPTIVE_GLOBAL strategy"
                 )
             if ep.mutation_strength is None:
                 raise ValueError(
@@ -270,7 +268,7 @@ class Vector(ParaBase):
 
             if ep.min_mutation_strength is None or ep.max_mutation_strength is None:
                 raise ValueError(
-                    "min_mutation_strength and max_mutation_strength" "must be defined."
+                    "min_mutation_strength and max_mutation_strength must be defined."
                 )
             if self.bounds is None:
                 raise ValueError("bounds must be set")
@@ -291,7 +289,7 @@ class Vector(ParaBase):
             # Ensure mutation_strength is initialized
             if ep.min_mutation_strength is None or ep.max_mutation_strength is None:
                 raise ValueError(
-                    "min_mutation_strength and max_mutation_strength" "must be defined."
+                    "min_mutation_strength and max_mutation_strength must be defined."
                 )
 
             if self.bounds is None:

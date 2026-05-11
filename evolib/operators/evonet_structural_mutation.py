@@ -21,7 +21,6 @@ def mutate_structure(net: Nnet, cfg: StructuralMutationConfig) -> bool:
     bool
         True if a significant topological mutation occurred.
     """
-
     structure_mutated = False
 
     # Collect all eligible mutation types (based on probability)

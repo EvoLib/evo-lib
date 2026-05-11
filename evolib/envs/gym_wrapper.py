@@ -176,7 +176,6 @@ class GymEnv:
         Returns:
             Path to saved GIF.
         """
-
         env = gym.make(
             self.env_name,
             render_mode="rgb_array",

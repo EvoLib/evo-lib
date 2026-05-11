@@ -51,7 +51,6 @@ def evaluate_heli_drift(
     drift : float | None
         Drift value if evaluated; None if HELI config not found.
     """
-
     heli_cfg = getattr(pop.config.evolution, "heli", None)
     if heli_cfg is None:
         if pop.heli_verbosity >= 2:
@@ -126,7 +125,6 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
     - Only the best individual from each incubation subpopulation is returned.
     - Mutation strength can be damped by `reduce_sigma_factor`.
     """
-
     from evolib.core.population import Pop
     from evolib.operators.strategy import evolve_mu_plus_lambda
 

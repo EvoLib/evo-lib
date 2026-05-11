@@ -3,9 +3,9 @@
 Shared configuration blocks for mutation and crossover used across multiple
 ComponentConfig classes (e.g. VectorComponentConfig, EvoNetComponentConfig).
 
-The classes here are intentionally small and reusable: they describe *what*
-should be configured, not *how* it is executed. Any runtime behavior belongs
-into the respective Para* representations and operator modules.
+The classes here are intentionally small and reusable: they describe *what* should be
+configured, not *how* it is executed. Any runtime behavior belongs into the respective
+Para* representations and operator modules.
 """
 
 from typing import Any, Literal, Optional, Union
@@ -176,7 +176,7 @@ class DelayMutationConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     probability: float = Field(
-        ..., description="Per-recurrent-edge mutation" "probability in [0,1]."
+        ..., description="Per-recurrent-edge mutation probability in [0,1]."
     )
     mode: Literal["delta_step", "resample"] = Field(
         ..., description="Delay mutation operator."
@@ -361,7 +361,7 @@ class StructuralMutationConfig(BaseModel):
                 ratio = self.add_neuron.init_connection_ratio
                 if not (0.0 <= ratio <= 1.0):
                     raise ValueError(
-                        f"init_connection_ratio must be " f"in [0, 1], got {ratio}"
+                        f"init_connection_ratio must be in [0, 1], got {ratio}"
                     )
 
         if self.remove_neuron is not None:

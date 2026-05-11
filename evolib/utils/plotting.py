@@ -75,7 +75,6 @@ def plot_history(
         with_std (bool): If True, plot standard deviation shading when available.
         figsize (tuple): Size of the figure (width, height).
     """
-
     # Normalize input to list
     if isinstance(histories, Pop):
         histories = [histories]
@@ -146,7 +145,6 @@ def plot_fitness(
     save_path: Optional[str] = None,
 ) -> None:
     """Wrapper to plot best, mean, and median fitness with optional std band."""
-
     df = _as_history_df(history)
 
     plot_history(
@@ -170,7 +168,6 @@ def plot_diversity(
     save_path: Optional[str] = None,
 ) -> None:
     """Wrapper to plot diversity over generations."""
-
     df = _as_history_df(history)
 
     if "diversity" not in df.columns:
@@ -198,7 +195,6 @@ def plot_mutation_trends(
     save_path: Optional[str] = None,
 ) -> None:
     """Wrapper to plot mutation and/or strength trends over time."""
-
     df = _as_history_df(history)
 
     metrics = []
@@ -345,7 +341,7 @@ def plot_approximation(
     y_pred = np.asarray(y_pred, dtype=float).ravel()
     if y_true.shape != y_pred.shape:
         raise ValueError(
-            f"Shape mismatch: y_true {y_true.shape} " f"vs y_pred {y_pred.shape}"
+            f"Shape mismatch: y_true {y_true.shape} vs y_pred {y_pred.shape}"
         )
 
     if x_vals is None:
@@ -354,7 +350,7 @@ def plot_approximation(
         x_vals = np.asarray(x_vals, dtype=float).ravel()
         if x_vals.shape[0] != y_true.shape[0]:
             raise ValueError(
-                f"Length mismatch: x_vals {x_vals.shape[0]} " f"vs y {y_true.shape[0]}"
+                f"Length mismatch: x_vals {x_vals.shape[0]} vs y {y_true.shape[0]}"
             )
 
     if fitness is not None:
@@ -407,7 +403,7 @@ def plot_approximation(
         sy = np.asarray(sy, dtype=float).ravel()
         if sx.shape != sy.shape:
             raise ValueError(
-                f"Support points shape mismatch: x {sx.shape} " f"vs y {sy.shape}"
+                f"Support points shape mismatch: x {sx.shape} vs y {sy.shape}"
             )
         ax.scatter(
             sx, sy, label=support_label, s=support_size, marker=support_marker, zorder=3
@@ -539,7 +535,6 @@ def save_combined_net_plot(
     show_grid : bool, optional
         Toggle grid in the approximation subplot.
     """
-
     # ensure folder exists
     folder = os.path.dirname(path)
     if folder:

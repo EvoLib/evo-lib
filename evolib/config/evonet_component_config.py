@@ -110,7 +110,7 @@ class WeightsConfig(BaseModel):
             # Preset-based initialization
             if self.std is not None:
                 raise ValueError(
-                    "weights.std is not allowed when " "weights.initializer is not set"
+                    "weights.std is not allowed when weights.initializer is not set"
                 )
             return self
 

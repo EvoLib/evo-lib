@@ -18,6 +18,7 @@ Example:
     net = NetVector(dim=[1, 8, 1], activation="tanh")
     y = net.forward(x, para.vector)
 """
+
 from typing import Callable
 
 import numpy as np
@@ -50,8 +51,9 @@ class NetVector:
 
     def forward(self, x: np.ndarray, vector: np.ndarray) -> np.ndarray:
         """
-        Evaluates the network on input x using the flat parameter vector. Activation is
-        applied after all but the last layer.
+        Evaluates the network on input x using the flat parameter vector.
+
+        Activation is applied after all but the last layer.
 
         Args:
             x (np.ndarray): Input vector (shape: [input_dim] or [batch, input_dim])

@@ -94,7 +94,6 @@ def selection_tournament(
         ValueError: If parameters are invalid (e.g., negative num_parents,
                    invalid tournament_size, or empty population).
     """
-
     # Input validation
     if not pop.indivs:
         raise ValueError("Population is empty")
@@ -244,7 +243,6 @@ def selection_random(pop: "Pop", remove_selected: bool = False) -> List[Indiv]:
     return:
         List of selected individuals (offspring).
     """
-
     # Input validation
     # if tournament_size <= 0 or tournament_size > len(pop.indivs):
     #    raise ValueError(f"Tournament size must be between 1 and {len(pop.indivs)}")
@@ -406,7 +404,6 @@ def selection_truncation(
     Returns:
         List[Any]: Selected individuals (copies).
     """
-
     if not pop.indivs:
         raise ValueError("Population is empty")
     if num_parents > len(pop.indivs):

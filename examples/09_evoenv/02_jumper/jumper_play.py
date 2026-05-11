@@ -32,19 +32,16 @@ class ManualJumperController:
 
     def update(self) -> None:
         """Read keyboard state and update jump value."""
-
         keys = pygame.key.get_pressed()
         self.jump = 1.0 if keys[pygame.K_SPACE] else 0.0
 
     def act(self, _observation: Observation) -> Action:
         """Return the current jump action."""
-
         return [self.jump, 0.75]
 
 
 def main() -> None:
     """Run the manual Jumper demo."""
-
     env = JumperEnv(
         width=SCREEN_WIDTH,
         height=SCREEN_HEIGHT,

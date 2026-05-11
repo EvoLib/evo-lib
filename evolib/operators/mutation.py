@@ -41,7 +41,6 @@ def mutate_offspring(
         pop (Pop): The population object containing mutation configuration.
         offspring (List[Indiv]): List of individuals to mutate.
     """
-
     for indiv in offspring:
         indiv.mutate()
 
@@ -60,7 +59,6 @@ def _adapted_mutation_strength_core(
     Returns:
         Updated and clipped mutation strength(s), matching the shape of `current`.
     """
-
     if isinstance(current, (float, int)):
         eps = np.random.normal()
     else:
@@ -75,7 +73,6 @@ def adapt_mutation_strength(
     params: EvoControlParams, bounds: tuple[float, float]
 ) -> float:
     """Returns the updated scalar mutation strength using log-normal self-adaptation."""
-
     if params.mutation_strength is None:
         raise ValueError("mutation_strength must not be None")
 
@@ -93,7 +90,6 @@ def adapt_mutation_strengths(
     params: EvoControlParams, bounds: tuple[float, float]
 ) -> np.ndarray:
     """Applies log-normal self-adaptation to per-parameter mutation strengths."""
-
     if params.mutation_strengths is None:
         raise ValueError("mutation_strength must not be None")
 
@@ -119,7 +115,6 @@ def adapt_mutation_probability(params: EvoControlParams) -> float:
     Returns:
         float: The updated mutation probability.
     """
-
     if params.tau is None:
         raise ValueError("tau must not be None for adaptive mutation strength")
 
@@ -142,7 +137,6 @@ def adapt_crossover_probability(params: EvoControlParams) -> float:
     Returns:
         float: The updated crossover probability.
     """
-
     if params.tau is None:
         raise ValueError("tau must not be None for adaptive mutation strength")
 
@@ -197,7 +191,6 @@ def adapt_mutation_strength_by_diversity(
     Increases or decreases the value depending on whether diversity falls below or above
     configured thresholds in the control parameters.
     """
-
     if params.min_diversity_threshold is None:
         raise ValueError("min_diversity_threshold must not be None")
     if params.max_diversity_threshold is None:
@@ -232,7 +225,6 @@ def adapt_mutation_probability_by_diversity(
     Increases or decreases the value depending on whether diversity falls below or above
     configured thresholds in the control parameters.
     """
-
     if params.min_diversity_threshold is None:
         raise ValueError("min_diversity_threshold must not be None")
     if params.max_diversity_threshold is None:
@@ -267,7 +259,6 @@ def adapt_crossover_probability_by_diversity(
     Increases or decreases the value depending on whether diversity falls below or above
     configured thresholds in the control parameters.
     """
-
     if params.min_diversity_threshold is None:
         raise ValueError("min_diversity_threshold must not be None")
     if params.max_diversity_threshold is None:
@@ -322,7 +313,6 @@ def exponential_mutation_strength(
     ctrl: EvoControlParams, gen: int, max_gen: int
 ) -> float | None:
     """Calculates exponentially decaying mutation strength over generations."""
-
     if ctrl.min_mutation_strength is None:
         raise ValueError("min_mutation_strength must not be None")
 
@@ -341,7 +331,6 @@ def exponential_mutation_probability(
     ctrl: EvoControlParams, gen: int, max_gen: int
 ) -> float | None:
     """Calculates exponentially decaying mutation probability over generations."""
-
     if ctrl.min_mutation_probability is None:
         raise ValueError("min_mutation_probability must not be None")
 
@@ -360,7 +349,6 @@ def exponential_crossover_probability(
     ctrl: EvoControlParams, gen: int, max_gen: int
 ) -> float | None:
     """Calculates exponentially decaying crossover probability over generations."""
-
     if ctrl.min_crossover_probability is None:
         raise ValueError("min_crossover_probability must not be None")
 

@@ -21,7 +21,6 @@ def backup_module_state(module: Any) -> Dict[str, Any]:
     dict     Contains deep copies of evo_params, structural_cfg, and
     activation_probability.
     """
-
     return {
         "evo_params": deepcopy(getattr(module, "evo_params", None)),
         "structural_cfg": deepcopy(getattr(module, "structural_cfg", None)),
