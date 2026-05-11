@@ -5,7 +5,7 @@ This example demonstrates how a controller learns to jump over moving obstacles.
 Compared with LineFollower, Jumper introduces a different kind of control problem:
 the agent must make a discrete timing decision instead of continuously steering.
 
-The environment is intentionally small, visual, and easy to reason about.
+The environment is intentionally small, easy to visualize, and easy to reason about.
 
 It is designed as an introduction to:
 
@@ -16,7 +16,7 @@ It is designed as an introduction to:
 - evolutionary controller optimization
 
 For a general overview of the interactive environment system, see the main
-README in `examples/09_interactive_envs/`.
+README in `examples/09_evoenv/`.
 
 ---
 
@@ -36,7 +36,7 @@ The task is solved well when the controller:
 - avoids jumping too early
 - avoids unnecessary jumps
 - uses the ground state correctly
-- survives for many simulation steps
+- remaining collision-free for many simulation steps
 
 ---
 
@@ -69,7 +69,7 @@ The controller returns two values:
 | Index | Value | Meaning |
 |---:|---|---|
 | 0 | `jump_signal` | Jump if value is high enough |
-| 1 | `jump_strength` | Jump strength or jump intensity |
+| 1 | `jump_strength` | Controls jump strength |
 
 A typical rule-based action is:
 
@@ -91,7 +91,6 @@ for no jump.
 
 The reward function encourages:
 
-- surviving longer
 - avoiding collisions
 - jumping at useful times
 - avoiding unnecessary behavior
@@ -208,7 +207,7 @@ After several generations, useful controllers should learn to:
 - survive longer episodes
 
 The rule-based controller is intentionally simple and strong enough to show what
-a working policy looks like.
+a effective controller behavior looks like.
 
 ---
 

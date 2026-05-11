@@ -11,7 +11,7 @@ It is designed as an introduction to:
 - actions
 - rewards
 - controller behavior
-- evolutionary learning
+- evolutionary optimization
 
 For a general overview of the interactive environment system, see the main
 README in `examples/09_interactive_envs/`.
@@ -28,11 +28,11 @@ README in `examples/09_interactive_envs/`.
 
 The robot should stay close to the line while continuously moving forward.
 
-The task is solved well when the robot:
+A successful controller should:
 
 - corrects steering smoothly
 - avoids losing the track
-- survives for many simulation steps
+- remains on the for many simulation steps
 
 ---
 
@@ -66,7 +66,7 @@ The controller returns one steering value:
 |---:|---|---|
 | 0 | `turn` | Steering value in range `[-1.0, 1.0]` |
 
-Typical interpretation:
+Typical behavior:
 
 | Value | Meaning |
 |---|---|
@@ -160,7 +160,7 @@ python line_follower_train.py --debug
 Watch the best saved individual:
 
 ```bash
-python watch.py
+python line_follower_watch.py
 ```
 
 ---
@@ -175,7 +175,7 @@ This is useful for:
 - debugging reward shaping
 - observing learning progress
 
-Training also allowes GIF animation export.
+Training also allows GIF animation export.
 
 Example output:
 
@@ -193,7 +193,7 @@ At the beginning of training, evolved controllers often:
 - oversteer
 - lose the line quickly
 
-After several generations, useful controllers should learn to:
+After several generations, successful controllers typically:
 
 - keep the line centered
 - perform smooth corrections

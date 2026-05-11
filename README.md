@@ -92,7 +92,7 @@ modules:
   controller:
     type: vector
     dim: 8
-    initializer: normal_vector
+    initializer: normal
     bounds: [-1.0, 1.0]
     mutation:
       strategy: adaptive_individual

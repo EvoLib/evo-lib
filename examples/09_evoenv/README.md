@@ -8,7 +8,7 @@ The goal is not to build high-performance game environments, the goal is to make
 - evolutionary algorithms
 - neural networks
 - controller behavior
-- emergent strategies
+- adaptive behavior
 
 observable and understandable.
 
@@ -16,7 +16,7 @@ These environments are designed primarily for:
 
 - experimentation
 - demonstrations
-- step-by-step learning
+- understanding evolutionary controller behavior
 
 ---
 
@@ -27,7 +27,7 @@ The project focuses on:
 - small and understandable environments
 - immediate visual feedback
 - short iteration cycles
-- deterministic and reproducible runs
+- reproducible evaluation
 - clean separation between simulation and rendering
 - reusable evaluation pipelines
 
@@ -79,7 +79,7 @@ Goal:
 - inspect evolutionary improvement
 - experiment with parameters and mutation behavior
 
-Training is usually headless for performance reasons.
+Training is typically performed headless for performance reasons.
 
 Optional debug visualization can be enabled during training.
 
@@ -257,10 +257,10 @@ The environments intentionally avoid unnecessary complexity.
 
 The focus is on:
 
-- understanding behavior
-- understanding observations
-- understanding rewards
-- understanding evolution
+- behavior
+- observations
+- rewards
+- evolution
 
 Small environments are easier to reason about and easier to modify.
 
