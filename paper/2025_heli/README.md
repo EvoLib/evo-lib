@@ -6,7 +6,7 @@ This directory contains the preprint for:
 
 Archived on Zenodo:
 
-DOI: 10.5281/zenodo.18045147
+DOI: [10.5281/zenodo.18045147](https://doi.org/10.5281/zenodo.18045147)
 
 ---
 
