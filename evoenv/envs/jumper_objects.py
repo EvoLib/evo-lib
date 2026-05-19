@@ -3,6 +3,7 @@
 
 from dataclasses import dataclass
 
+import pygame
 from evoenv.envs.jumper_defaults import DEFAULT_GROUND_Y
 
 
@@ -21,26 +22,30 @@ class JumperPlayer:
 
     def reset(self, *, ground_y: float) -> None:
         """Place the player on the ground and clear vertical velocity."""
-
         self.ground_y = float(ground_y)
         self.y = float(ground_y)
         self.velocity_y = 0.0
 
     @property
+    def rect(self) -> pygame.Rect:
+        """Return the player collision rectangle."""
+        rect = pygame.Rect(0, 0, self.width, self.height)
+        rect.centerx = int(round(self.x))
+        rect.bottom = int(round(self.y))
+        return rect
+
+    @property
     def is_on_ground(self) -> bool:
         """Return True if the player is currently standing on the ground."""
-
         return self.velocity_y == 0.0 and self.y >= self.ground_y
 
     def jump(self, force: float = 1.0) -> None:
         """Apply a jump impulse."""
-
         force = max(0.0, min(1.0, force))
         self.velocity_y = -self.max_jump_velocity * force
 
     def step(self, *, ground_y: float) -> None:
         """Advance vertical physics by one simulation step."""
-
         self.ground_y = float(ground_y)
         self.y += self.velocity_y
         self.velocity_y += self.gravity
@@ -62,8 +67,15 @@ class JumperObstacle:
 
     def step(self) -> None:
         """Move the obstacle from right to left."""
-
         self.x -= self.speed
+
+    @property
+    def rect(self) -> pygame.Rect:
+        """Return the obstacle collision rectangle."""
+        rect = pygame.Rect(0, 0, self.width, self.height)
+        rect.centerx = int(round(self.x))
+        rect.bottom = int(round(self.y))
+        return rect
 
 
 @dataclass
@@ -76,7 +88,6 @@ class JumperSensor:
         self, player_x: float, ground_y: float, player_height: float
     ) -> tuple[tuple[float, float], tuple[float, float]]:
         """Return sensor line in world coordinates."""
-
         y = ground_y - player_height / 2
         start = (player_x, y)
         end = (player_x + self.range, y)

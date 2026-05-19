@@ -68,7 +68,6 @@ class JumperEnv(Env):
 
     def reset(self, seed: int | None = None) -> Observation:
         """Reset the episode and return the initial observation."""
-
         if seed is not None:
             self._rng.seed(seed)
 
@@ -82,7 +81,6 @@ class JumperEnv(Env):
 
     def step(self, action: Action) -> StepResult:
         """Advance the environment by one step."""
-
         reward = 0.00
         done = False
 
@@ -130,7 +128,6 @@ class JumperEnv(Env):
 
     def _observe(self) -> Observation:
         """Return normalized observation values."""
-
         distance = self.obstacle.x - self.player.x
         obstacle_visible = 1.0 if 0.0 <= distance <= self.settings.sensor_range else 0.0
 
@@ -174,7 +171,6 @@ class JumperEnv(Env):
 
     def _reset_obstacle(self, *, initial: bool) -> None:
         """Place the obstacle to the right of the screen."""
-
         base_x = self.width + (260 if initial else 80)
         jitter = self._rng.randint(0, 240)
 
@@ -199,25 +195,8 @@ class JumperEnv(Env):
 
     def _obstacle_passed(self) -> bool:
         """Return True if the obstacle has moved behind the player."""
-
         return self.obstacle.x + self.obstacle.width < self.player.x
 
     def _has_collision(self) -> bool:
         """Return True if player and obstacle rectangles overlap."""
-
-        player_left = self.player.x - self.player.width / 2
-        player_right = self.player.x + self.player.width / 2
-        player_top = self.player.y - self.player.height
-        player_bottom = self.player.y
-
-        obstacle_left = self.obstacle.x - self.obstacle.width / 2
-        obstacle_right = self.obstacle.x + self.obstacle.width / 2
-        obstacle_top = self.obstacle.y - self.obstacle.height
-        obstacle_bottom = self.obstacle.y
-
-        horizontal_overlap = (
-            player_left < obstacle_right and player_right > obstacle_left
-        )
-        vertical_overlap = player_top < obstacle_bottom and player_bottom > obstacle_top
-
-        return horizontal_overlap and vertical_overlap
+        return self.player.rect.colliderect(self.obstacle.rect)

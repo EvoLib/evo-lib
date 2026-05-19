@@ -21,26 +21,14 @@ def draw_env(
     title: str = "Jumper",
 ) -> None:
     """Draw the full Jumper environment."""
-
     screen.fill((20, 20, 20))
 
     pygame.draw.line(
-        screen,
-        (180, 180, 180),
-        (0, env.ground_y),
-        (env.width, env.ground_y),
-        3,
+        screen, (180, 180, 180), (0, env.ground_y), (env.width, env.ground_y), 3
     )
 
-    player_rect = pygame.Rect(0, 0, env.player.width, env.player.height)
-    player_rect.centerx = int(round(env.player.x))
-    player_rect.bottom = int(round(env.player.y))
-    pygame.draw.rect(screen, (80, 180, 255), player_rect)
-
-    obstacle_rect = pygame.Rect(0, 0, env.obstacle.width, env.obstacle.height)
-    obstacle_rect.centerx = int(round(env.obstacle.x))
-    obstacle_rect.bottom = int(round(env.obstacle.y))
-    pygame.draw.rect(screen, (255, 120, 80), obstacle_rect)
+    pygame.draw.rect(screen, (80, 180, 255), env.player.rect)
+    pygame.draw.rect(screen, (255, 120, 80), env.obstacle.rect)
 
     start, end = env.sensor.get_line(
         env.player.x,
@@ -90,7 +78,6 @@ class DebugRenderer:
         frame_skip: int = 1,
     ) -> Path | None:
         """Run one visual debug episode."""
-
         obs = env.reset(seed=seed)
         total_reward = 0.0
         gif_recorder = GifRecorder(filename, fps=gif_fps, frame_skip=frame_skip)
@@ -137,7 +124,6 @@ def run_debug_episode(
     frame_skip: int = 1,
 ) -> Path | None:
     """Run debug rendering periodically during training."""
-
     global _DEBUG_RENDERER
 
     if not enabled:
