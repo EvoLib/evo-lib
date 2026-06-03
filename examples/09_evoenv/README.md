@@ -1,6 +1,6 @@
-# Interactive Environments (EvoLib)
+# EvoEnv
 
-Interactive Environments provide small, visual, and reproducible learning environments
+EvoEnv provide small, visual, and reproducible learning environments
 for EvoLib.
 
 The goal is not to build high-performance game environments, the goal is to make:
