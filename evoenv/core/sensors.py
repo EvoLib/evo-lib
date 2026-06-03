@@ -12,7 +12,7 @@ class Pose2D:
     """
     Position and heading of an object in 2D space.
 
-    The heading is stored in radians. A heading of 0 points upward by default.
+    The heading is stored in radians. A heading of 0 points upward.
     """
 
     x: float
@@ -28,6 +28,15 @@ class SensorState:
 
 
 @dataclass(frozen=True)
+class SensorPointState(SensorState):
+    """State of a point-shaped sensor in world coordinates."""
+
+    x: float
+    y: float
+    radius: int
+
+
+@dataclass(frozen=True)
 class SensorLineState(SensorState):
     """State of a line-shaped sensor in world coordinates."""
 
@@ -35,6 +44,42 @@ class SensorLineState(SensorState):
     start_y: float
     end_x: float
     end_y: float
+
+
+@dataclass(frozen=True)
+class PointSensor:
+    """
+    A circular point sensor defined relative to an object pose.
+
+    Args:
+        forward: Distance along the object's forward direction.
+        side: Distance along the object's right-hand direction.
+        radius: Sensor radius in world units.
+    """
+
+    forward: float
+    side: float
+    radius: int
+
+    def get_state(
+        self,
+        pose: Pose2D,
+        *,
+        value: float = 0.0,
+    ) -> SensorPointState:
+        """Return the visible sensor point in world coordinates."""
+        forward_x = math.sin(pose.heading)
+        forward_y = -math.cos(pose.heading)
+
+        right_x = math.cos(pose.heading)
+        right_y = math.sin(pose.heading)
+
+        return SensorPointState(
+            value=value,
+            x=pose.x + forward_x * self.forward + right_x * self.side,
+            y=pose.y + forward_y * self.forward + right_y * self.side,
+            radius=int(self.radius),
+        )
 
 
 @dataclass(frozen=True)

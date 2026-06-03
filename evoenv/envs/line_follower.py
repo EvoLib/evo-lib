@@ -22,10 +22,14 @@ from evoenv.envs.line_follower_defaults import (
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
 )
-from evoenv.envs.line_follower_objects import LineFollowerRobot
-from evoenv.envs.line_follower_settings import (
-    get_line_follower_settings,
+from evoenv.envs.line_follower_objects import (
+    DEFAULT_LINE_SENSORS,
+    LineFollowerRobot,
+    LineSensor,
 )
+from evoenv.envs.line_follower_settings import get_line_follower_settings
+
+SensorLayout = tuple[LineSensor, ...]
 
 
 class LineFollowerEnv(Env):
@@ -41,12 +45,13 @@ class LineFollowerEnv(Env):
         height: int = DEFAULT_HEIGHT,
         max_steps: int = DEFAULT_MAX_STEPS,
         difficulty: str = "medium",
+        sensors: SensorLayout | None = None,
     ) -> None:
         self.settings = get_line_follower_settings(difficulty)
 
         self.width = int(width)
         self.height = int(height)
-        self.max_steps = max_steps
+        self.max_steps = int(max_steps)
 
         self.previous_x = 0.0
         self.step_count = 0
@@ -63,37 +68,34 @@ class LineFollowerEnv(Env):
         self.robot = LineFollowerRobot(
             base_speed=self.settings.base_speed,
             turn_strength=self.settings.turn_strength,
+            sensors=sensors or DEFAULT_LINE_SENSORS,
         )
+        self.observation_size = len(self.robot.sensors)
 
         self._rng = random.Random()
 
     @property
     def x(self) -> float:
         """Return robot x-position."""
-
         return self.robot.x
 
     @property
     def y(self) -> float:
         """Return robot y-position."""
-
         return self.robot.y
 
     @property
     def angle(self) -> float:
         """Return robot angle."""
-
         return self.robot.angle
 
     @property
     def sensor_radius(self) -> int:
         """Return the robot sensor radius."""
-
         return self.robot.sensor_radius
 
     def reset(self, seed: int | None = None) -> Observation:
         """Reset the episode and return the initial observation."""
-
         if seed is not None:
             self._rng.seed(seed)
 
@@ -112,15 +114,14 @@ class LineFollowerEnv(Env):
 
     def step(self, action: Action) -> StepResult:
         """Advance the simulation by one step."""
-
         turn = max(-1.0, min(1.0, float(action[0])))
 
         self.robot.step(turn)
         self.step_count += 1
 
         observation = self._observe()
-        left_sensor = observation[0]
-        right_sensor = observation[1]
+        left_sensor = observation[0] if len(observation) >= 1 else 0.0
+        right_sensor = observation[1] if len(observation) >= 2 else 0.0
 
         progress = max(0.0, self.robot.x - self.previous_x)
         self.previous_x = self.robot.x
@@ -157,21 +158,19 @@ class LineFollowerEnv(Env):
 
     def get_sensor_states(self) -> list[SensorPointState]:
         """Return current sensor states using the environment line mask."""
-
-        return self.robot._get_sensor_states(self.line_mask)
+        return self.robot.get_sensor_states(self.line_mask)
 
     def _observe(self) -> Observation:
-        sensor_states = self.robot._get_sensor_states(self.line_mask)
+        """Return fixed-size sensor values for the controller."""
+        sensor_states = self.get_sensor_states()
         return [sensor.value for sensor in sensor_states]
 
     def _is_out_of_bounds(self, x: float, y: float) -> bool:
         """Return True if a point is outside the environment."""
-
         return x < 0.0 or y < 0.0 or x >= self.width or y >= self.height
 
     def _build_line_points(self) -> list[tuple[int, int]]:
         """Build a line with increasing curvature over x."""
-
         points: list[tuple[int, int]] = []
 
         center_y = self.height * 0.5
@@ -180,13 +179,13 @@ class LineFollowerEnv(Env):
         for x in range(0, self.width, 10):
             progress = x / self.width
 
-            # amplitude grows over x (start flat, later stronger curves)
+            # Amplitude grows over x: start flat, then increase curvature.
             amplitude = max_amplitude * (progress**1.5)
 
-            # sinus curve
+            # Sinusoidal curve.
             wave = math.sin(progress * 2 * math.pi * self.line_complexity)
 
-            # linear downward drift
+            # Linear upward drift.
             drift = -self.height * 0.16 * progress
 
             y = center_y + wave * amplitude + drift
@@ -197,7 +196,6 @@ class LineFollowerEnv(Env):
 
     def _build_line_mask(self) -> None:
         """Draw the line into a surface and build the collision mask from it."""
-
         self.line_surface.fill((0, 0, 0, 0))
         pygame.draw.lines(
             self.line_surface,
