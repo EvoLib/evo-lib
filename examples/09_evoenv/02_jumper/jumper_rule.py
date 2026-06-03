@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-"""Run a simple rule-based controller on JumperEnv."""
+"""Run a simple sensor-based rule controller on JumperEnv."""
 
 import pygame
 from evoenv.cli import parse_env_args
@@ -24,10 +24,11 @@ difficulty = args.difficulty
 
 
 def jumper_rule(observation: Observation) -> Action:
-    """Return a jump action based on normalized obstacle distance."""
-    normalized_distance = observation[0]
+    """Jump when the forward sensor reports a nearby obstacle."""
+    obstacle_proximity = observation[0]
+    on_ground = observation[2] >= 0.5
 
-    should_jump = 0.10 <= normalized_distance <= 0.22
+    should_jump = on_ground and obstacle_proximity > 0.85
 
     if should_jump:
         return [1.0, 0.75]
@@ -43,7 +44,6 @@ def main() -> None:
         max_steps=MAX_STEPS,
         difficulty=difficulty,
     )
-
     controller = CallbackController(jumper_rule)
 
     observation = env.reset()
@@ -70,7 +70,7 @@ def main() -> None:
                     total_reward = 0.0
 
         action = controller.act(observation)
-        observation, reward, done, _ = env.step(action)
+        observation, reward, done, _info = env.step(action)
         total_reward += reward
 
         if done:
@@ -78,7 +78,7 @@ def main() -> None:
             observation = env.reset()
             total_reward = 0.0
 
-        draw_env(screen, env, total_reward, font, title="Rule-based Jumper")
+        draw_env(screen, env, total_reward, font, title="Sensor-rule Jumper")
         pygame.display.flip()
         clock.tick(FPS)
 

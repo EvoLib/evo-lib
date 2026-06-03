@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-"""Watch a trained environment checkpoint with Pygame visualization."""
+"""Watch a trained Jumper checkpoint with Pygame visualization."""
 
 from evoenv.cli import parse_checkpoint_args
 from evoenv.core.checkpoint import load_checkpoint

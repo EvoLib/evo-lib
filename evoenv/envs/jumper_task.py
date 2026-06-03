@@ -5,10 +5,11 @@ from pathlib import Path
 from typing import Any
 
 from evoenv.core.checkpoint import EnvCheckpoint
+from evoenv.core.difficulty import Difficulty
 from evoenv.core.env import Action, Observation
 from evoenv.core.task import BaseTask
 from evoenv.core.task_registry import register_task_loader
-from evoenv.envs.jumper import JumperEnv
+from evoenv.envs.jumper import JumperEnv, SensorLayout
 from evoenv.envs.jumper_defaults import (
     DEFAULT_DEBUG_EVERY_N_GENERATIONS,
     DEFAULT_DEBUG_MAX_STEPS,
@@ -17,7 +18,6 @@ from evoenv.envs.jumper_defaults import (
     DEFAULT_MAX_STEPS,
     DEFAULT_WIDTH,
 )
-from evoenv.envs.jumper_settings import JumperDifficulty
 from evoenv.renderers.pygame_jumper import run_debug_episode
 
 from evolib import Indiv
@@ -30,13 +30,14 @@ class JumperController:
         self.net: Any = indiv.para[module]
 
     def act(self, observation: Observation) -> Action:
-        """Return a clipped jump action in [0, 1]."""
-
+        """Return clipped jump action values in [0, 1]."""
         output = self.net.calc(observation)
-        jump_signal = float(output[0])
-        jump_signal = max(0.0, min(1.0, jump_signal))
-        jump_force = float(output[1])
-        jump_force = max(0.0, min(1.0, jump_force))
+
+        jump_signal = max(0.0, min(1.0, float(output[0])))
+        jump_force = 0.75
+        if len(output) >= 2:
+            jump_force = max(0.0, min(1.0, float(output[1])))
+
         return [jump_signal, jump_force]
 
 
@@ -51,7 +52,8 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
         max_steps: int = DEFAULT_MAX_STEPS,
         seed: int | None = None,
         module: str = "brain",
-        difficulty: str | JumperDifficulty = JumperDifficulty.MEDIUM,
+        difficulty: str | Difficulty = Difficulty.MEDIUM,
+        sensors: SensorLayout | None = None,
     ) -> None:
         super().__init__(
             width=width,
@@ -61,20 +63,20 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
             module=module,
             difficulty=difficulty,
         )
+        self.sensors = sensors
 
     def make_env(self) -> JumperEnv:
         """Create a fresh Jumper environment instance."""
-
         return JumperEnv(
             width=self.width,
             height=self.height,
             max_steps=self.max_steps,
-            difficulty=self.difficulty,
+            difficulty=str(self.difficulty),
+            sensors=self.sensors,
         )
 
     def make_controller(self, indiv: Indiv) -> JumperController:
         """Create the default Jumper controller for one individual."""
-
         return JumperController(indiv, module=self.module)
 
     def visualize(
@@ -90,7 +92,6 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
         frame_skip: int = 1,
     ) -> Path | None:
         """Render one debug episode for an individual."""
-
         display_title = title or f"Jumper Training Debug - Gen {generation}"
 
         return run_debug_episode(
@@ -110,17 +111,15 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
 
 def load_jumper_task(checkpoint: EnvCheckpoint) -> JumperTask:
     """Create a Jumper task from checkpoint metadata."""
-
     env = checkpoint.env
 
     return JumperTask(
         seed=checkpoint.seed,
-        difficulty=env.difficulty or JumperDifficulty.MEDIUM,
+        difficulty=env.difficulty or Difficulty.MEDIUM,
         **env.params,
     )
 
 
 def register_jumper_task() -> None:
     """Register the Jumper task loader."""
-
     register_task_loader("jumper", load_jumper_task)

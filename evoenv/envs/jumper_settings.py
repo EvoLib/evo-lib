@@ -2,74 +2,80 @@
 """Difficulty presets for the Jumper environment."""
 
 from dataclasses import dataclass
-from enum import StrEnum
 
-
-class JumperDifficulty(StrEnum):
-    """Supported Jumper difficulty presets."""
-
-    EASY = "easy"
-    MEDIUM = "medium"
-    HARD = "hard"
+from evoenv.core.difficulty import Difficulty
 
 
 @dataclass(frozen=True)
 class JumperSettings:
     """Configuration bundle for one Jumper difficulty preset."""
 
-    difficulty: JumperDifficulty
-    observation_size: int
-    sensor_range: float
-    variable_obstacle_height: bool
-    variable_obstacle_width: bool
-    allow_air_jump: bool
-    min_obstacle_height: int
-    max_obstacle_height: int
-    min_obstacle_width: int
-    max_obstacle_width: int
+    difficulty: Difficulty
+
+    # Player physics
+    gravity: float
+    jump_velocity: float
+
+    # Obstacle dynamics
+    obstacle_speed: float
+    obstacle_width: int
+    obstacle_height: int
+    min_spawn_gap: int
+    max_spawn_gap: int
+
+    # Reward / termination shaping
+    terminate_on_collision: bool
+    collision_penalty: float
+    pass_reward: float
+    alive_reward: float
 
 
-JUMPER_SETTINGS: dict[JumperDifficulty, JumperSettings] = {
-    JumperDifficulty.EASY: JumperSettings(
-        difficulty=JumperDifficulty.EASY,
-        observation_size=2,
-        sensor_range=220.0,
-        variable_obstacle_height=False,
-        variable_obstacle_width=False,
-        allow_air_jump=False,
-        min_obstacle_height=42,
-        max_obstacle_height=42,
-        min_obstacle_width=32,
-        max_obstacle_width=32,
+JUMPER_SETTINGS: dict[Difficulty, JumperSettings] = {
+    Difficulty.EASY: JumperSettings(
+        difficulty=Difficulty.EASY,
+        gravity=0.62,
+        jump_velocity=12.0,
+        obstacle_speed=4.0,
+        obstacle_width=34,
+        obstacle_height=38,
+        min_spawn_gap=300,
+        max_spawn_gap=430,
+        terminate_on_collision=False,
+        collision_penalty=10.0,
+        pass_reward=3.0,
+        alive_reward=0.015,
     ),
-    JumperDifficulty.MEDIUM: JumperSettings(
-        difficulty=JumperDifficulty.MEDIUM,
-        observation_size=3,
-        sensor_range=220.0,
-        variable_obstacle_height=True,
-        variable_obstacle_width=False,
-        allow_air_jump=False,
-        min_obstacle_height=24,
-        max_obstacle_height=64,
-        min_obstacle_width=32,
-        max_obstacle_width=32,
+    Difficulty.MEDIUM: JumperSettings(
+        difficulty=Difficulty.MEDIUM,
+        gravity=0.70,
+        jump_velocity=12.5,
+        obstacle_speed=5.2,
+        obstacle_width=38,
+        obstacle_height=44,
+        min_spawn_gap=250,
+        max_spawn_gap=380,
+        terminate_on_collision=False,
+        collision_penalty=10.0,
+        pass_reward=3.0,
+        alive_reward=0.015,
     ),
-    JumperDifficulty.HARD: JumperSettings(
-        difficulty=JumperDifficulty.HARD,
-        observation_size=5,
-        sensor_range=220.0,
-        variable_obstacle_height=True,
-        variable_obstacle_width=True,
-        allow_air_jump=True,
-        min_obstacle_height=24,
-        max_obstacle_height=72,
-        min_obstacle_width=24,
-        max_obstacle_width=56,
+    Difficulty.HARD: JumperSettings(
+        difficulty=Difficulty.HARD,
+        gravity=0.78,
+        jump_velocity=13.0,
+        obstacle_speed=6.4,
+        obstacle_width=44,
+        obstacle_height=52,
+        min_spawn_gap=210,
+        max_spawn_gap=330,
+        terminate_on_collision=False,
+        collision_penalty=10.0,
+        pass_reward=3.0,
+        alive_reward=0.015,
     ),
 }
 
 
-def get_jumper_settings(difficulty: str | JumperDifficulty) -> JumperSettings:
+def get_jumper_settings(difficulty: str | Difficulty) -> JumperSettings:
     """Return Jumper settings for a difficulty name."""
-
-    return JUMPER_SETTINGS[JumperDifficulty(difficulty)]
+    return JUMPER_SETTINGS[Difficulty(difficulty)]

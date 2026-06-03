@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+"""Play the Jumper environment manually."""
+
 import pygame
 from evoenv.cli import parse_env_args
 from evoenv.core.env import Action, Observation
@@ -48,7 +51,6 @@ def main() -> None:
         max_steps=MAX_STEPS,
         difficulty=difficulty,
     )
-
     controller = ManualJumperController()
 
     pygame.init()
@@ -77,7 +79,7 @@ def main() -> None:
         controller.update()
         action = controller.act(observation)
 
-        observation, reward, done, _ = env.step(action)
+        observation, reward, done, _info = env.step(action)
         total_reward += reward
 
         if done:
