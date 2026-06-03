@@ -1,21 +1,44 @@
 # SPDX-License-Identifier: MIT
 """Helpers for difficulty-based example file names."""
 
+from enum import StrEnum
 from pathlib import Path
 
 
-def difficulty_config_path(difficulty: str, *, directory: str | Path = ".") -> Path:
-    """Return the config path for a difficulty preset."""
+class Difficulty(StrEnum):
+    """Shared difficulty presets for EvoEnv examples."""
 
-    return Path(directory) / f"config_{difficulty}.yaml"
+    EASY = "easy"
+    MEDIUM = "medium"
+    HARD = "hard"
+
+
+def difficulty_config_path(
+    difficulty: str | Difficulty,
+    *,
+    directory: str | Path = ".",
+) -> Path:
+    """Return the EvoLib config path for a difficulty preset."""
+    name = Difficulty(difficulty).value
+    return Path(directory) / f"config_{name}.yaml"
 
 
 def difficulty_checkpoint_path(
     env_name: str,
-    difficulty: str,
+    difficulty: str | Difficulty,
     *,
     directory: str | Path = ".",
 ) -> Path:
     """Return the checkpoint path for an environment difficulty preset."""
+    name = Difficulty(difficulty).value
+    return Path(directory) / f"{env_name}_{name}.pkl"
 
-    return Path(directory) / f"{env_name}_{difficulty}.pkl"
+
+def difficulty_task_path(
+    difficulty: str | Difficulty,
+    *,
+    directory: str | Path = ".",
+) -> Path:
+    """Return the task config path for a difficulty preset."""
+    name = Difficulty(difficulty).value
+    return Path(directory) / f"task_{name}.yaml"
