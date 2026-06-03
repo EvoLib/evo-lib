@@ -176,9 +176,9 @@ Typical changes between difficulties:
 Examples:
 
 ```bash
-python play.py --difficulty easy
-python play.py --difficulty medium
-python play.py --difficulty hard
+python gap_navigator_play.py --difficulty easy
+python gap_navigator_play.py --difficulty medium
+python gap_navigator_play.py --difficulty hard
 ```
 
 ---
@@ -187,10 +187,10 @@ python play.py --difficulty hard
 
 | File | Purpose |
 |---|---|
-| `play.py` | Manual control with left/right keys or A/D |
-| `rule.py` | Simple sensor-based baseline controller |
-| `train.py` | Evolves sensors and an EvoNet controller |
-| `watch.py` | Loads and visualizes a trained checkpoint |
+| `gap_navigator_play.py` | Manual control with left/right keys or A/D |
+| `gap_navigator_rule.py` | Simple sensor-based baseline controller |
+| `gap_navigator_train.py` | Evolves sensors and an EvoNet controller |
+| `gap_navigator_watch.py` | Loads and visualizes a trained checkpoint |
 | `config_easy.yaml` | EvoLib training config for the easy preset |
 | `config_medium.yaml` | EvoLib training config for the medium preset |
 | `config_hard.yaml` | EvoLib training config for the hard preset |
@@ -216,38 +216,38 @@ Package-side support files:
 Manual control:
 
 ```bash
-python play.py
+python gap_navigator_play.py
 ```
 
 Rule-based controller:
 
 ```bash
-python rule.py
+python gap_navigator_rule.py
 ```
 
 Train evolved sensors and an evolved controller:
 
 ```bash
-python train.py
+python gap_navigator_train.py
 ```
 
 Train with debug visualization:
 
 ```bash
-python train.py --debug
+python gap_navigator_train.py --debug
 ```
 
 Watch the best saved individual:
 
 ```bash
-python watch.py gap_navigator_medium.pkl
+python gap_navigator_watch.py gap_navigator_medium.pkl
 ```
 
 Use a specific difficulty:
 
 ```bash
-python train.py --difficulty hard
-python watch.py gap_navigator_hard.pkl
+python gap_navigator_train.py --difficulty hard
+python gap_navigator_watch.py gap_navigator_hard.pkl
 ```
 
 ---
