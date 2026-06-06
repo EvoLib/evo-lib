@@ -1,18 +1,19 @@
-# 02_jumper – Sensor-Based Jump Timing
+# 02_jumper – Sensor-Based Jump Timing and Strength Control
 
 This example demonstrates how an evolved controller can learn to jump over
 moving obstacles.
 
-Compared with LineFollower, Jumper introduces a simple timing problem: the
-controller must trigger a jump before the obstacle reaches the player, because
-the jump trajectory unfolds over several simulation frames.
+Compared with LineFollower, Jumper introduces timing decisions and multi-frame
+movement effects: the controller must trigger a jump before the obstacle reaches
+the player, because the resulting jump trajectory unfolds over several simulation
+frames.
 
-It is designed as a small example for:
+This example focuses on:
 
 - sensor-based jump timing
 - action thresholds
 - jump strength control
-- collision penalties
+- collision and jump-strength costs
 
 For a general overview of the interactive environment system, see the main
 README in `examples/09_evoenv/`.
@@ -28,17 +29,17 @@ README in `examples/09_evoenv/`.
 ## Goal
 
 The player should avoid incoming obstacles by jumping at the right time and with
-enough jump strength.
+sufficient jump strength.
 
 The task is solved well when the controller:
 
 - reacts when the obstacle sensor becomes active
 - jumps before the obstacle reaches the player
-- uses more jump strength for higher obstacles
+- uses higher jump strength for higher obstacles
 - avoids unnecessarily strong jumps
 - reduces collision frames over the episode
 
-The controller has to learn two decisions:
+Jumper is not a pure binary timing task. The controller has to learn:
 
 ```text
 When should the player jump?
@@ -53,15 +54,14 @@ The environment returns two values.
 
 | Index | Value | Meaning |
 |---:|---|---|
-| 0 | `sensor_value` | Generic ray-sensor value in `[0.0, 1.0]`. Usually `0.0` means inactive or no obstacle hit; values close to `1.0` mean a nearby hit. |
+| 0 | `sensor_value` | Generic ray-sensor value in `[0.0, 1.0]`. Usually `0.0` means inactive or no obstacle hit; values close to `1.0` mean a strong nearby hit. |
 | 1 | `normalized_obstacle_height` | Height of the nearest obstacle in front of the player, normalized to `[0.0, 1.0]` using the configured obstacle height range. |
 
-Typical observations:
+Typical interpretation:
 
 | Observation Pattern | Meaning |
 |---|---|
-| `sensor_value == 0.0` | no obstacle is currently hit by the sensor ray |
-| `sensor_value` increasing | an obstacle is closer along the sensor ray |
+| `sensor_value == 0.0` | no obstacle is currently detected |
 | `sensor_value` close to `1.0` | obstacle is very close |
 | `normalized_obstacle_height` close to `0.0` | low obstacle |
 | `normalized_obstacle_height` close to `1.0` | high obstacle |
@@ -79,7 +79,7 @@ The controller returns two values.
 | 0 | `jump_signal` | Jump trigger. Values greater than `0.5` request a jump. |
 | 1 | `jump_strength` | Jump impulse strength in `[0.0, 1.0]`. |
 
-A typical jump action is:
+A typical rule-based jump action is:
 
 ```python
 [1.0, 0.75]
@@ -123,7 +123,9 @@ The sigmoid output layer is useful because both action values are interpreted in
 
 ## Reward
 
-The default reward is cost-focused. The controller is penalized for:
+The default reward is cost-focused.
+
+The controller is penalized for:
 
 - colliding with obstacles
 - using jump strength when a jump is actually triggered
@@ -150,9 +152,8 @@ if did_jump:
     reward -= jump_strength * jump_strength_penalty
 ```
 
-This makes the task primarily about minimizing collision frames and unnecessary
-jump strength. EvoLib minimizes fitness, so training converts accumulated reward
-to fitness via:
+Training minimizes collision frames and unnecessary jump strength. EvoLib uses
+minimization, so training converts accumulated reward to fitness via:
 
 ```python
 indiv.fitness = -reward
@@ -245,13 +246,10 @@ python jumper_watch.py jumper.pkl
 
 ## Debug Visualization
 
-During debug training, the current best individual can be visualized. This is
-useful for checking:
+During debug training, the current best individual can be visualized.
 
-- whether the sensor activates at useful distances
-- whether the controller jumps too early or too late
-- whether jump strength is unnecessarily high
-- whether collisions are caused by timing or insufficient strength
+This is useful for checking jump timing, sensor activation, collision behavior,
+and excessive jump strength.
 
 Debug frames are written to the `frames/` directory by default.
 
@@ -286,21 +284,9 @@ At the beginning of training, evolved controllers often:
 - ignore the sensor
 - jump too early or too late
 - use excessive jump strength
-- collide repeatedly with obstacles
 
 After successful training, useful controllers should learn to:
 
-- wait while the obstacle sensor is inactive
-- jump when the obstacle reaches a useful sensor range
-- use more strength for higher obstacles
-- avoid maximum-strength jumps when lower strength is sufficient
-- reduce collision frames over the episode
-
----
-
-## Value
-
-Jumper extends the previous steering examples with a compact discrete-control
-task. The controller must decide when to trigger a jump and how much jump
-strength to use. This keeps the example small while introducing action
-thresholds, sensor-based timing, and simple reward costs.
+- jump when the sensor reaches a useful range
+- adapt jump strength to obstacle height
+- reduce collision frames and unnecessary jump strength
