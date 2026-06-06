@@ -1,27 +1,36 @@
 # SPDX-License-Identifier: MIT
 """Train an EvoLib population on the Jumper task."""
 
-from evoenv.cli import parse_env_args
+import argparse
+
 from evoenv.core.checkpoint import EnvCheckpoint, EnvSpec, save_checkpoint
-from evoenv.core.difficulty import (
-    difficulty_checkpoint_path,
-    difficulty_config_path,
-)
 from evoenv.envs.jumper_task import JumperTask
 
 from evolib import Indiv, Pop
 
 ENV_NAME = "jumper"
+CONFIG_PATH = "config.yaml"
+CHECKPOINT_PATH = "jumper.pkl"
 FRAME_FOLDER = "frames"
 
-args = parse_env_args(description="Train a Jumper agent.")
-config_path = difficulty_config_path(args.difficulty)
-checkpoint_path = difficulty_checkpoint_path(ENV_NAME, args.difficulty)
 
-pop = Pop(config_path=str(config_path))
+def parse_args() -> argparse.Namespace:
+    """Parse example-specific command line arguments."""
+    parser = argparse.ArgumentParser(description="Train a Jumper agent.")
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Render the current best individual during training.",
+    )
+    return parser.parse_args()
+
+
+args = parse_args()
+
+pop = Pop(config_path=CONFIG_PATH)
 seed = pop.config.random_seed
 
-jumper_task = JumperTask(seed=seed, difficulty=args.difficulty)
+jumper_task = JumperTask(seed=seed)
 
 
 def eval_jumper_fitness(indiv: Indiv) -> None:
@@ -50,12 +59,9 @@ pop.run(on_generation_end=on_generation_end)
 best_indiv = pop.best(sort=True)
 checkpoint = EnvCheckpoint(
     indiv=best_indiv,
-    env=EnvSpec(
-        name=ENV_NAME,
-        difficulty=args.difficulty,
-    ),
+    env=EnvSpec(name=ENV_NAME),
     seed=seed,
 )
 
-save_checkpoint(checkpoint_path, checkpoint)
-print(f"Saved checkpoint to: {checkpoint_path}")
+save_checkpoint(CHECKPOINT_PATH, checkpoint)
+print(f"Saved checkpoint to: {CHECKPOINT_PATH}")

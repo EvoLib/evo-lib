@@ -1,8 +1,7 @@
 # SPDX-License-Identifier: MIT
-"""Run a simple rule-based controller on JumperEnv."""
+"""Run a simple sensor-based rule controller on JumperEnv."""
 
 import pygame
-from evoenv.cli import parse_env_args
 from evoenv.core.controller import CallbackController
 from evoenv.core.env import Action, Observation
 from evoenv.envs.jumper import JumperEnv
@@ -19,18 +18,17 @@ SCREEN_HEIGHT = DEFAULT_HEIGHT
 MAX_STEPS = DEFAULT_MAX_STEPS
 FPS = DEFAULT_FPS
 
-args = parse_env_args(description="Run a Jumper agent.")
-difficulty = args.difficulty
-
 
 def jumper_rule(observation: Observation) -> Action:
-    """Return a jump action based on normalized obstacle distance."""
-    normalized_distance = observation[0]
+    """Jump when the sensor reports a close obstacle."""
+    sensor_value = observation[0]
+    normalized_obstacle_height = observation[1]
 
-    should_jump = 0.10 <= normalized_distance <= 0.22
+    should_jump = 0.58 <= sensor_value <= 0.92
+    jump_strength = 0.65 + 0.35 * normalized_obstacle_height
 
     if should_jump:
-        return [1.0, 0.75]
+        return [1.0, jump_strength]
 
     return [0.0, 0.0]
 
@@ -41,9 +39,7 @@ def main() -> None:
         width=SCREEN_WIDTH,
         height=SCREEN_HEIGHT,
         max_steps=MAX_STEPS,
-        difficulty=difficulty,
     )
-
     controller = CallbackController(jumper_rule)
 
     observation = env.reset()
@@ -51,7 +47,7 @@ def main() -> None:
 
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("EvoLib Env - Jumper Rule")
+    pygame.display.set_caption("EvoEnv - Jumper Rule")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 24)
 
@@ -70,7 +66,7 @@ def main() -> None:
                     total_reward = 0.0
 
         action = controller.act(observation)
-        observation, reward, done, _ = env.step(action)
+        observation, reward, done, _info = env.step(action)
         total_reward += reward
 
         if done:
@@ -78,7 +74,7 @@ def main() -> None:
             observation = env.reset()
             total_reward = 0.0
 
-        draw_env(screen, env, total_reward, font, title="Rule-based Jumper")
+        draw_env(screen, env, total_reward, font, title="Sensor-rule Jumper")
         pygame.display.flip()
         clock.tick(FPS)
 

@@ -1,38 +1,40 @@
 # SPDX-License-Identifier: MIT
-"""
-Minimal headless Jumper environment.
+"""Headless Jumper environment with one ray-based obstacle sensor."""
 
-The task is intentionally simple:
-- The player remains at a fixed x-position.
-- Obstacles move from right to left.
-- The controller decides when to jump.
-- Timing-based control without introducing complex physics.
-
-Collisions intentionally do not terminate the episode.
-Continuous penalties provide a denser evolutionary feedback signal
-and significantly improve learning stability for small populations.
-"""
-
+import math
 import random
+from collections.abc import Iterator
 
-from evoenv.core.env import Action, Env, Observation, StepResult
+import pygame
+from evoenv.core.env import Action, Env, InfoDict, Observation, StepResult
+from evoenv.core.sensors import Pose2D, RaySensor, SensorLineState
 from evoenv.envs.jumper_defaults import (
-    DEFAULT_GROUND_Y,
+    DEFAULT_GROUND_Y_OFFSET,
     DEFAULT_HEIGHT,
     DEFAULT_MAX_STEPS,
+    DEFAULT_PLAYER_X_OFFSET,
     DEFAULT_WIDTH,
 )
-from evoenv.envs.jumper_objects import JumperObstacle, JumperPlayer, JumperSensor
-from evoenv.envs.jumper_settings import (
-    JumperDifficulty,
-    JumperSettings,
-    get_jumper_settings,
-)
+from evoenv.envs.jumper_objects import JumperObstacle, JumperPlayer
+from evoenv.envs.jumper_settings import DEFAULT_JUMPER_SETTINGS, JumperSettings
 
 
 class JumperEnv(Env):
-    """Small timing-based jumping environment."""
+    """
+    Side-scrolling jump task with one obstacle sensor.
 
+    Observation:
+    - sensor_value: Generic ray sensor value in [0.0, 1.0]. A value of 0.0 means
+      inactive or no obstacle hit. A value close to 1.0 means a strong nearby hit.
+    - normalized_obstacle_height: Height of the nearest obstacle in front of the player,
+      normalized to [0.0, 1.0] using the configured height range.
+
+    Action:
+    - jump_signal: Jump trigger. Values greater than 0.5 request a jump.
+    - jump_strength: Jump impulse strength in [0.0, 1.0].
+    """
+
+    observation_size = 2
     action_size = 2
 
     def __init__(
@@ -40,31 +42,38 @@ class JumperEnv(Env):
         *,
         width: int = DEFAULT_WIDTH,
         height: int = DEFAULT_HEIGHT,
-        ground_y: int = DEFAULT_GROUND_Y,
         max_steps: int = DEFAULT_MAX_STEPS,
-        difficulty: str | JumperDifficulty = JumperDifficulty.MEDIUM,
+        settings: JumperSettings = DEFAULT_JUMPER_SETTINGS,
+        sensor: RaySensor | None = None,
     ) -> None:
-        self.settings: JumperSettings = get_jumper_settings(difficulty)
-
-        self.observation_size = self.settings.observation_size
-        self.action_size = 2
+        self.settings = settings
 
         self.width = int(width)
         self.height = int(height)
-        self.ground_y = int(ground_y)
         self.max_steps = int(max_steps)
+        self.ground_y = self.height - DEFAULT_GROUND_Y_OFFSET
+        self.player_x = float(DEFAULT_PLAYER_X_OFFSET)
 
-        self.player = JumperPlayer()
-        self.obstacle = JumperObstacle(
-            x=float(self.width + 200),
-            y=float(self.ground_y),
+        self.sensor = sensor or self.default_sensor()
+
+        self.player = JumperPlayer(
+            x=self.player_x,
+            ground_y=self.ground_y,
+            gravity=self.settings.gravity,
+            jump_velocity=self.settings.jump_velocity,
         )
+
+        self.obstacle_group = pygame.sprite.Group()
+
         self.step_count = 0
         self.passed_obstacles = 0
-        self.collision = 0
+        self.collision_count = 0
         self._rng = random.Random()
 
-        self.sensor = JumperSensor(range=self.settings.sensor_range)
+    @staticmethod
+    def default_sensor() -> RaySensor:
+        """Return the deterministic default Jumper sensor."""
+        return RaySensor(length=250.0, angle=math.pi / 2.0)
 
     def reset(self, seed: int | None = None) -> Observation:
         """Reset the episode and return the initial observation."""
@@ -73,130 +82,261 @@ class JumperEnv(Env):
 
         self.step_count = 0
         self.passed_obstacles = 0
-        self.collision = 0
-        self.player.reset(ground_y=self.ground_y)
-        self._reset_obstacle(initial=True)
+        self.collision_count = 0
+        self.obstacle_group.empty()
+
+        self.player.reset(x=self.player_x, ground_y=self.ground_y)
+        self._spawn_initial_obstacle()
 
         return self._observe()
 
     def step(self, action: Action) -> StepResult:
-        """Advance the environment by one step."""
-        reward = 0.00
-        done = False
-
+        """Advance the simulation by one step."""
         jump_signal = max(0.0, min(1.0, float(action[0])))
-        jump_force = max(0.0, min(1.0, float(action[1])))
+        jump_strength = max(0.0, min(1.0, float(action[1])))
 
-        can_jump = self.player.is_on_ground or self.settings.allow_air_jump
+        did_jump = self.player.step(
+            jump_signal=jump_signal,
+            jump_strength=jump_strength,
+        )
+        self.obstacle_group.update()
+        self._spawn_if_needed()
 
-        if jump_signal > 0.5 and can_jump:
-            self.player.jump(force=jump_force)
-            reward -= jump_force * 0.5
-
-        self.player.step(ground_y=self.ground_y)
-        self.obstacle.step()
         self.step_count += 1
 
-        # Collisions do not end the episode.
-        # Each overlapping frame is penalized to discourage clipping through obstacles.
-        if self._has_collision():
-            reward -= 5.0
-            self.collision += 1
+        passed_obstacle = self._mark_passed_obstacles()
+        has_collision = self._has_collision()
 
-        if self._obstacle_passed():
-            self.passed_obstacles += 1
-            self._reset_obstacle(initial=False)
+        if has_collision:
+            self.collision_count += 1
 
-        done = (
-            # self._has_collision()
-            self.step_count
-            >= self.max_steps
-            # or self.player.y <= 0
-        )
+        reward = self.settings.alive_reward
+        if passed_obstacle:
+            reward += self.settings.pass_reward
+        if has_collision:
+            reward -= self.settings.collision_penalty
+        if did_jump:
+            # reward -= jump_strength * self.settings.jump_strength_penalty
+            reward -= (jump_strength**2) * self.settings.jump_strength_penalty
 
-        info = {
-            "player_y": self.player.y,
-            "velocity_y": self.player.velocity_y,
-            "obstacle_x": self.obstacle.x,
-            "distance": self.obstacle.x - self.player.x,
+        done = self.step_count >= self.max_steps
+        if has_collision and self.settings.terminate_on_collision:
+            done = True
+
+        info: InfoDict = {
+            "x": self.player.x,
+            "y": self.player.y,
+            "jump_signal": jump_signal,
+            "jump_strength": jump_strength,
+            "player_height": self.player.normalized_height,
+            "on_ground": self.player.on_ground,
+            "sensor_value": self._sensor_value(),
+            "normalized_obstacle_height": self._normalized_nearest_obstacle_height(),
+            "nearest_obstacle_distance": self._nearest_obstacle_distance(),
             "passed_obstacles": self.passed_obstacles,
-            "jump_force": jump_force,
-            "collision": self.collision,
+            "passed_obstacle": passed_obstacle,
+            "collision": self.collision_count,
+            "has_collision": has_collision,
         }
 
         return self._observe(), reward, done, info
 
-    def _observe(self) -> Observation:
-        """Return normalized observation values."""
-        distance = self.obstacle.x - self.player.x
-        obstacle_visible = 1.0 if 0.0 <= distance <= self.settings.sensor_range else 0.0
-
-        normalized_distance = max(
-            0.0,
-            min(1.0, distance / self.settings.sensor_range),
-        )
-
-        normalized_obstacle_height = max(
-            0.0,
-            min(1.0, self.obstacle.height / self.settings.max_obstacle_height),
-        )
-
-        normalized_player_height = max(
-            0.0,
-            min(1.0, (self.ground_y - self.player.y) / self.ground_y),
-        )
-
-        normalized_obstacle_width = max(
-            0.0,
-            min(1.0, self.obstacle.width / self.settings.max_obstacle_width),
-        )
-
-        if self.settings.difficulty == JumperDifficulty.EASY:
-            return [normalized_distance, obstacle_visible]
-
-        if self.settings.difficulty == JumperDifficulty.MEDIUM:
-            return [
-                normalized_distance,
-                obstacle_visible,
-                normalized_obstacle_height,
-            ]
-
+    def get_sensor_states(self) -> list[SensorLineState]:
+        """Return current sensor state for rendering and debugging."""
+        value, hit_fraction = self._cast_sensor()
         return [
-            normalized_distance,
-            obstacle_visible,
-            normalized_obstacle_height,
-            normalized_player_height,
-            normalized_obstacle_width,
+            self.sensor.get_state(
+                self._sensor_pose(),
+                value=value,
+                hit_fraction=hit_fraction,
+            )
         ]
 
-    def _reset_obstacle(self, *, initial: bool) -> None:
-        """Place the obstacle to the right of the screen."""
-        base_x = self.width + (260 if initial else 80)
-        jitter = self._rng.randint(0, 240)
+    def _observe(self) -> Observation:
+        """Return the fixed two-value observation for the EvoNet controller."""
+        return [
+            self._sensor_value(),
+            self._normalized_nearest_obstacle_height(),
+        ]
 
-        self.obstacle.x = float(base_x + jitter)
-        self.obstacle.y = float(self.ground_y)
+    def _sensor_value(self) -> float:
+        """Return the generic proximity value of the default obstacle sensor."""
+        value, _hit_fraction = self._cast_sensor()
+        return value
 
-        if self.settings.variable_obstacle_height:
-            self.obstacle.height = self._rng.randint(
-                self.settings.min_obstacle_height,
-                self.settings.max_obstacle_height,
+    def _cast_sensor(self) -> tuple[float, float | None]:
+        """Cast the ray sensor and return sensor value plus hit fraction."""
+        state = self.sensor.get_state(self._sensor_pose(), value=0.0)
+        first_hit_fraction: float | None = None
+
+        for obstacle in self._iter_obstacles():
+            hit_fraction = self._ray_rect_hit_fraction(
+                start_x=state.start_x,
+                start_y=state.start_y,
+                end_x=state.end_x,
+                end_y=state.end_y,
+                rect=obstacle.rect,
             )
-        else:
-            self.obstacle.height = self.settings.max_obstacle_height
+            if hit_fraction is None:
+                continue
 
-        if self.settings.variable_obstacle_width:
-            self.obstacle.width = self._rng.randint(
-                self.settings.min_obstacle_width,
-                self.settings.max_obstacle_width,
+            if first_hit_fraction is None or hit_fraction < first_hit_fraction:
+                first_hit_fraction = hit_fraction
+
+        if first_hit_fraction is None:
+            return 0.0, None
+
+        return 1.0 - first_hit_fraction, first_hit_fraction
+
+    def _sensor_pose(self) -> Pose2D:
+        """Return the player-front pose used as the Jumper sensor origin."""
+        return Pose2D(
+            x=float(self.player.rect.right),
+            y=float(self.player.rect.centery),
+            heading=0.0,
+        )
+
+    def _spawn_initial_obstacle(self) -> None:
+        """Spawn the first obstacle with a slightly shorter initial gap."""
+        self._spawn_obstacle(
+            x=self.width
+            + self._rng.uniform(
+                self.settings.min_spawn_gap * 0.25,
+                self.settings.max_spawn_gap * 0.40,
             )
-        else:
-            self.obstacle.width = self.settings.max_obstacle_width
+        )
 
-    def _obstacle_passed(self) -> bool:
-        """Return True if the obstacle has moved behind the player."""
-        return self.obstacle.x + self.obstacle.width < self.player.x
+    def _spawn_if_needed(self) -> None:
+        """Spawn a new obstacle if the rightmost obstacle moved onto the screen."""
+        obstacles = list(self._iter_obstacles())
+        if not obstacles:
+            self._spawn_obstacle(
+                x=self.width
+                + self._rng.uniform(
+                    self.settings.min_spawn_gap,
+                    self.settings.max_spawn_gap,
+                )
+            )
+            return
+
+        rightmost_x = max(float(obstacle.rect.centerx) for obstacle in obstacles)
+        if rightmost_x < self.width:
+            self._spawn_obstacle(
+                x=self.width
+                + self._rng.uniform(
+                    self.settings.min_spawn_gap,
+                    self.settings.max_spawn_gap,
+                )
+            )
+
+    def _spawn_obstacle(self, *, x: float) -> None:
+        """Spawn one rectangular obstacle with variable height."""
+        obstacle_height = self._rng.randint(
+            self.settings.min_obstacle_height,
+            self.settings.max_obstacle_height,
+        )
+
+        self.obstacle_group.add(
+            JumperObstacle(
+                x=float(x),
+                ground_y=float(self.ground_y),
+                speed=self.settings.obstacle_speed,
+                width=self.settings.obstacle_width,
+                height=obstacle_height,
+            )
+        )
+
+    def _mark_passed_obstacles(self) -> bool:
+        """Mark passed obstacles and return True if at least one was newly passed."""
+        passed_obstacle = False
+        for obstacle in self._iter_obstacles():
+            if obstacle.counted:
+                continue
+
+            if obstacle.rect.right < self.player.rect.left:
+                obstacle.counted = True
+                self.passed_obstacles += 1
+                passed_obstacle = True
+
+        return passed_obstacle
 
     def _has_collision(self) -> bool:
-        """Return True if player and obstacle rectangles overlap."""
-        return self.player.rect.colliderect(self.obstacle.rect)
+        """Return True if the player overlaps any obstacle."""
+        return bool(
+            pygame.sprite.spritecollide(
+                self.player,
+                self.obstacle_group,
+                dokill=False,
+            )
+        )
+
+    def _nearest_obstacle(self) -> JumperObstacle | None:
+        """Return the nearest obstacle that is not fully behind the player."""
+        candidates = [
+            obstacle
+            for obstacle in self._iter_obstacles()
+            if obstacle.rect.right >= self.player.rect.left
+        ]
+
+        if not candidates:
+            return None
+
+        return min(
+            candidates,
+            key=lambda obstacle: max(
+                0.0, float(obstacle.rect.left - self.player.rect.right)
+            ),
+        )
+
+    def _normalized_nearest_obstacle_height(self) -> float:
+        """Return normalized height of the nearest obstacle in front of the player."""
+        obstacle = self._nearest_obstacle()
+        if obstacle is None:
+            return 0.0
+
+        min_height = float(self.settings.min_obstacle_height)
+        max_height = float(self.settings.max_obstacle_height)
+        height_range = max(1.0, max_height - min_height)
+
+        return max(0.0, min(1.0, (float(obstacle.height) - min_height) / height_range))
+
+    def _nearest_obstacle_distance(self) -> float:
+        """Return normalized distance to the closest obstacle in front of the player."""
+        obstacle = self._nearest_obstacle()
+        if obstacle is None:
+            return 1.0
+
+        distance = max(0.0, float(obstacle.rect.left - self.player.rect.right))
+        return min(1.0, distance / max(1.0, float(self.width)))
+
+    def _iter_obstacles(self) -> Iterator[JumperObstacle]:
+        """Yield active Jumper obstacles."""
+        for sprite in self.obstacle_group:
+            if isinstance(sprite, JumperObstacle):
+                yield sprite
+
+    @staticmethod
+    def _ray_rect_hit_fraction(
+        *,
+        start_x: float,
+        start_y: float,
+        end_x: float,
+        end_y: float,
+        rect: pygame.Rect,
+    ) -> float | None:
+        """Return first ray fraction intersecting one rectangle."""
+        ray_length = math.hypot(end_x - start_x, end_y - start_y)
+        if ray_length <= 0.0:
+            return None
+
+        start = (int(round(start_x)), int(round(start_y)))
+        end = (int(round(end_x)), int(round(end_y)))
+
+        clipped_line = rect.clipline(start, end)
+        if not clipped_line:
+            return None
+
+        hit_x, hit_y = clipped_line[0]
+        distance = math.hypot(float(hit_x) - start_x, float(hit_y) - start_y)
+
+        return max(0.0, min(1.0, distance / ray_length))

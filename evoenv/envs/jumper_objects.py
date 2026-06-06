@@ -1,94 +1,126 @@
 # SPDX-License-Identifier: MIT
-"""Reusable simulation objects for the pixel-based Jumper environment."""
+"""Reusable simulation objects for the Jumper environment."""
 
 from dataclasses import dataclass
 
 import pygame
-from evoenv.envs.jumper_defaults import DEFAULT_GROUND_Y
 
 
-@dataclass
-class JumperPlayer:
-    """Simple player body with vertical jump physics."""
+class JumperPlayer(pygame.sprite.Sprite):
+    """Player body with vertical jump physics."""
 
-    x: float = 160.0
-    y: float = float(DEFAULT_GROUND_Y)
-    width: int = 30
-    height: int = 42
-    velocity_y: float = 0.0
-    gravity: float = 0.75
-    max_jump_velocity: float = 15.0
-    ground_y: float = float(DEFAULT_GROUND_Y)
+    def __init__(
+        self,
+        *,
+        x: float,
+        ground_y: float,
+        gravity: float,
+        jump_velocity: float,
+        width: int = 30,
+        height: int = 42,
+        color: tuple[int, int, int] = (80, 180, 255),
+    ) -> None:
+        super().__init__()
 
-    def reset(self, *, ground_y: float) -> None:
-        """Place the player on the ground and clear vertical velocity."""
+        self.x = float(x)
         self.ground_y = float(ground_y)
-        self.y = float(ground_y)
+        self.gravity = float(gravity)
+        self.jump_velocity = float(jump_velocity)
         self.velocity_y = 0.0
 
-    @property
-    def rect(self) -> pygame.Rect:
-        """Return the player collision rectangle."""
-        rect = pygame.Rect(0, 0, self.width, self.height)
-        rect.centerx = int(round(self.x))
-        rect.bottom = int(round(self.y))
-        return rect
+        self.image = pygame.Surface((int(width), int(height)), pygame.SRCALPHA)
+        self.image.fill(color)
+        self.rect = self.image.get_rect()
+
+        self.y = self.ground_y - self.rect.height / 2.0
+        self._sync_rect()
 
     @property
-    def is_on_ground(self) -> bool:
-        """Return True if the player is currently standing on the ground."""
-        return self.velocity_y == 0.0 and self.y >= self.ground_y
+    def on_ground(self) -> bool:
+        """Return True if the player is standing on the ground."""
+        return self.rect.bottom >= int(round(self.ground_y)) and self.velocity_y >= 0.0
 
-    def jump(self, force: float = 1.0) -> None:
-        """Apply a jump impulse."""
-        force = max(0.0, min(1.0, force))
-        self.velocity_y = -self.max_jump_velocity * force
+    @property
+    def normalized_height(self) -> float:
+        """Return normalized jump height above the ground."""
+        height_above_ground = max(0.0, self.ground_y - float(self.rect.bottom))
+        return min(1.0, height_above_ground / max(1.0, self.ground_y))
 
-    def step(self, *, ground_y: float) -> None:
-        """Advance vertical physics by one simulation step."""
+    def reset(self, *, x: float, ground_y: float) -> None:
+        """Reset the player to the ground position."""
+        self.x = float(x)
         self.ground_y = float(ground_y)
-        self.y += self.velocity_y
-        self.velocity_y += self.gravity
+        self.y = self.ground_y - self.rect.height / 2.0
+        self.velocity_y = 0.0
+        self._sync_rect()
 
-        if self.y >= ground_y:
-            self.y = float(ground_y)
+    def step(self, *, jump_signal: float, jump_strength: float) -> bool:
+        """
+        Advance jump physics by one simulation step.
+
+        Returns:
+            True if a jump was triggered in this step.
+        """
+        clipped_signal = max(0.0, min(1.0, float(jump_signal)))
+        clipped_strength = max(0.0, min(1.0, float(jump_strength)))
+
+        did_jump = False
+
+        if self.on_ground and clipped_signal > 0.5 and clipped_strength > 0.0:
+            self.velocity_y = -self.jump_velocity * clipped_strength
+            did_jump = True
+
+        self.velocity_y += self.gravity
+        self.y += self.velocity_y
+
+        floor_y = self.ground_y - self.rect.height / 2.0
+        if self.y > floor_y:
+            self.y = floor_y
             self.velocity_y = 0.0
 
+        self._sync_rect()
 
-@dataclass
-class JumperObstacle:
-    """Moving obstacle in front of the player."""
+        return did_jump
+
+    def _sync_rect(self) -> None:
+        """Synchronize the pygame rectangle with the float position."""
+        self.rect.center = (int(round(self.x)), int(round(self.y)))
+
+
+@dataclass(eq=False)
+class JumperObstacle(pygame.sprite.Sprite):
+    """One rectangular obstacle moving from right to left."""
 
     x: float
-    y: float
-    width: int = 32
-    height: int = 42
-    speed: float = 6.0
+    ground_y: float
+    speed: float
+    width: int
+    height: int
+    color: tuple[int, int, int] = (255, 120, 80)
+    counted: bool = False
 
-    def step(self) -> None:
-        """Move the obstacle from right to left."""
+    def __post_init__(self) -> None:
+        super().__init__()
+
+        self.x = float(self.x)
+        self.ground_y = float(self.ground_y)
+        self.speed = float(self.speed)
+
+        self.image = pygame.Surface(
+            (int(self.width), int(self.height)), pygame.SRCALPHA
+        )
+        self.image.fill(self.color)
+        self.rect = self.image.get_rect()
+        self._sync_rect()
+
+    def update(self) -> None:
+        """Move the obstacle left by one simulation step."""
         self.x -= self.speed
+        self._sync_rect()
 
-    @property
-    def rect(self) -> pygame.Rect:
-        """Return the obstacle collision rectangle."""
-        rect = pygame.Rect(0, 0, self.width, self.height)
-        rect.centerx = int(round(self.x))
-        rect.bottom = int(round(self.y))
-        return rect
+        if self.rect.right < -80:
+            self.kill()
 
-
-@dataclass
-class JumperSensor:
-    """Forward-facing distance sensor."""
-
-    range: float
-
-    def get_line(
-        self, player_x: float, ground_y: float, player_height: float
-    ) -> tuple[tuple[float, float], tuple[float, float]]:
-        """Return sensor line in world coordinates."""
-        y = ground_y - player_height / 2
-        start = (player_x, y)
-        end = (player_x + self.range, y)
-        return start, end
+    def _sync_rect(self) -> None:
+        """Synchronize the pygame rectangle with the float position."""
+        self.rect.midbottom = (int(round(self.x)), int(round(self.ground_y)))

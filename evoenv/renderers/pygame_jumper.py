@@ -6,10 +6,18 @@ from pathlib import Path
 import pygame
 from evoenv.core.controller import Controller
 from evoenv.envs.jumper import JumperEnv
-from evoenv.envs.jumper_defaults import DEFAULT_FPS, DEFAULT_MAX_STEPS
+from evoenv.envs.jumper_defaults import DEFAULT_FPS
 from evoenv.renderers.pygame_common import GifRecorder, draw_text_overlay
 
 FPS = DEFAULT_FPS
+
+
+def _sensor_color(value: float) -> tuple[int, int, int]:
+    """Return a simple sensor color based on activation value."""
+    if value > 0.0:
+        return (255, 220, 80)
+
+    return (90, 90, 90)
 
 
 def draw_env(
@@ -24,31 +32,30 @@ def draw_env(
     screen.fill((20, 20, 20))
 
     pygame.draw.line(
-        screen, (180, 180, 180), (0, env.ground_y), (env.width, env.ground_y), 3
-    )
-
-    pygame.draw.rect(screen, (80, 180, 255), env.player.rect)
-    pygame.draw.rect(screen, (255, 120, 80), env.obstacle.rect)
-
-    start, end = env.sensor.get_line(
-        env.player.x,
-        env.player.y,
-        env.player.height,
-    )
-
-    pygame.draw.line(
         screen,
-        (120, 120, 120),
-        (int(start[0]), int(start[1])),
-        (int(end[0]), int(end[1])),
+        (90, 90, 90),
+        (0, int(round(env.ground_y))),
+        (env.width, int(round(env.ground_y))),
         2,
     )
+
+    env.obstacle_group.draw(screen)
+
+    for sensor in env.get_sensor_states():
+        pygame.draw.line(
+            screen,
+            _sensor_color(sensor.value),
+            (int(round(sensor.start_x)), int(round(sensor.start_y))),
+            (int(round(sensor.end_x)), int(round(sensor.end_y))),
+            2,
+        )
+
+    pygame.draw.rect(screen, (80, 180, 255), env.player.rect)
 
     lines = [
         title,
         f"reward={total_reward:.2f} step={env.step_count}",
-        f"distance={env.obstacle.x - env.player.x:.1f} passed={env.passed_obstacles}",
-        f"collision={env.collision}",
+        f"passed={env.passed_obstacles} collision={env.collision_count}",
         "ESC: quit",
     ]
 
@@ -70,7 +77,7 @@ class DebugRenderer:
         env: JumperEnv,
         controller: Controller,
         *,
-        steps: int = DEFAULT_MAX_STEPS,
+        steps: int,
         seed: int | None,
         title: str,
         filename: str | Path | None = None,
@@ -92,7 +99,7 @@ class DebugRenderer:
                     return gif_recorder.save()
 
             action = controller.act(obs)
-            obs, reward, done, _ = env.step(action)
+            obs, reward, done, _info = env.step(action)
             total_reward += reward
 
             draw_env(self.screen, env, total_reward, self.font, title=title)
