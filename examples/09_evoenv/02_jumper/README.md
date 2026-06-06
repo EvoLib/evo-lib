@@ -1,18 +1,20 @@
-# 02_jumper – Timing-Based Jumping Example
+# 02_jumper – Sensor-Based Jump Timing and Strength Control
 
-This example demonstrates how a controller learns to jump over moving obstacles.
+This example demonstrates how an evolved controller can learn to jump over
+moving obstacles.
 
-Compared with LineFollower, Jumper introduces a different kind of control problem:
-the agent must make a discrete timing decision instead of continuously steering.
-
-The environment is intentionally small, easy to visualize, and easy to reason about.
+Compared with LineFollower, Jumper introduces timing decisions and multi-frame
+movement effects: the controller must trigger a jump before the obstacle reaches
+the player, because the resulting jump trajectory unfolds over several simulation
+frames.
 
 It is designed as an introduction to:
 
-- event timing
-- delayed consequences
-- binary decisions
-- sparse failure conditions
+- sensor-based event timing
+- delayed action effects
+- action thresholds
+- action strength control
+- collision-based failure signals
 - evolutionary controller optimization
 
 For a general overview of the interactive environment system, see the main
@@ -21,114 +23,181 @@ README in `examples/09_evoenv/`.
 ---
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/02_jumper/frames/jumper.gif" alt="Sample Plot" width="512"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/02_jumper/frames/jumper.gif" alt="Jumper example animation" width="512"/>
 </p>
 
 ---
 
-# Goal
+## Goal
 
-The player should avoid obstacles by jumping at the right time.
+The player should avoid incoming obstacles by jumping at the right time and with
+sufficient jump strength.
 
 The task is solved well when the controller:
 
-- jumps shortly before an obstacle reaches the player
-- avoids jumping too early
-- avoids unnecessary jumps
-- uses the ground state correctly
-- remaining collision-free for many simulation steps
+- reacts when the obstacle sensor becomes active
+- jumps before the obstacle reaches the player
+- uses higher jump strength for higher obstacles
+- avoids unnecessarily strong jumps
+- minimizes collision frames over the episode
+
+Jumper is therefore not a pure binary timing task. The controller has to learn:
+
+```text
+When should the player jump?
+How strong should the jump be?
+```
 
 ---
 
-# Observation Space
+## Observation Space
 
-The environment returns three values:
+The environment returns two values.
 
 | Index | Value | Meaning |
 |---:|---|---|
-| 0 | `normalized_distance` | Distance from player to obstacle, normalized to `[0.0, 1.0]` |
-| 1 | `normalized_player_height` | Current jump height, normalized to `[0.0, 1.0]` |
-| 2 | `on_ground` | `1.0` if the player can jump, else `0.0` |
+| 0 | `sensor_value` | Generic ray-sensor value in `[0.0, 1.0]`. Usually `0.0` means inactive or no obstacle hit; values close to `1.0` mean a strong nearby hit. |
+| 1 | `normalized_obstacle_height` | Height of the nearest obstacle in front of the player, normalized to `[0.0, 1.0]` using the configured obstacle height range. |
 
 Typical observations:
 
 | Observation Pattern | Meaning |
 |---|---|
-| `normalized_distance` close to `1.0` | obstacle is far away |
-| `normalized_distance` close to `0.0` | obstacle is close |
-| `normalized_player_height > 0.0` | player is currently jumping |
-| `on_ground == 1.0` | player can start a jump |
-| `on_ground == 0.0` | player is airborne |
+| `sensor_value == 0.0` | no obstacle is currently hit by the sensor ray |
+| `sensor_value` increasing | an obstacle is closer along the sensor ray |
+| `sensor_value` close to `1.0` | obstacle is very close |
+| `normalized_obstacle_height` close to `0.0` | low obstacle |
+| `normalized_obstacle_height` close to `1.0` | high obstacle |
+
+The default EvoNet input dimension is therefore `2`.
 
 ---
 
-# Action Space
+## Action Space
 
-The controller returns two values:
+The controller returns two values.
 
 | Index | Value | Meaning |
 |---:|---|---|
-| 0 | `jump_signal` | Jump if value is high enough |
-| 1 | `jump_strength` | Controls jump strength |
+| 0 | `jump_signal` | Jump trigger. Values greater than `0.5` request a jump. |
+| 1 | `jump_strength` | Jump impulse strength in `[0.0, 1.0]`. |
 
-A typical rule-based action is:
+A typical rule-based jump action is:
 
 ```python
 [1.0, 0.75]
 ```
 
-for jumping, and:
+A no-jump action is:
 
 ```python
 [0.0, 0.0]
 ```
 
-for no jump.
+A jump is only triggered when the player is on the ground, `jump_signal > 0.5`,
+and `jump_strength > 0.0`.
 
 ---
 
-# Reward
+## Controller Network
 
-The reward function encourages:
+The default training config uses a small EvoNet controller:
 
-- avoiding collisions
-- jumping at useful times
-- avoiding unnecessary behavior
+```yaml
+modules:
+  brain:
+    type: evonet
+    dim: [2, 4, 2]
+    activation: [linear, tanh, sigmoid]
+```
 
-The episode usually ends when:
+This matches the environment interface:
 
-- the player collides with an obstacle
-- the maximum step count is reached
+| Layer | Size | Meaning |
+|---|---:|---|
+| input | 2 | `sensor_value`, `normalized_obstacle_height` |
+| hidden | 4 | small nonlinear controller layer |
+| output | 2 | `jump_signal`, `jump_strength` |
+
+The sigmoid output layer is useful because both action values are interpreted in
+`[0.0, 1.0]`.
 
 ---
 
-# Difficulty Levels
+## Reward
 
-The environment supports multiple difficulty levels.
+The default reward is cost-focused.
 
-Typical changes between difficulties:
+The controller is penalized for:
 
-- obstacle speed
-- obstacle spacing
-- episode length
-- timing tolerance
+- colliding with obstacles
+- using jump strength when a jump is actually triggered
 
-Examples:
+The default settings currently use:
 
-```bash
-python jumper_play.py --difficulty easy
-python jumper_play.py --difficulty medium
-python jumper_play.py --difficulty hard
+| Setting | Value | Meaning |
+|---|---:|---|
+| `collision_penalty` | `10.0` | penalty for each collision frame |
+| `jump_strength_penalty` | `45.0` | penalty multiplier for actual jump strength |
+| `pass_reward` | `0.0` | no explicit reward for passing an obstacle |
+| `alive_reward` | `0.0` | no passive survival reward |
+| `terminate_on_collision` | `False` | collisions are penalized but do not end the episode by default |
+
+The effective reward per step is conceptually:
+
+```text
+reward = 0
+
+if collision:
+    reward -= collision_penalty
+
+if did_jump:
+    reward -= jump_strength * jump_strength_penalty
+```
+
+This makes the task primarily a minimization of collisions and inefficient jump
+strength. EvoLib still minimizes fitness, so training converts accumulated reward
+to fitness via:
+
+```python
+indiv.fitness = -reward
 ```
 
 ---
 
-# Files
+## Default Environment Settings
+
+The current standard Jumper environment has no `easy`, `medium`, or `hard`
+difficulty presets.
+
+The default settings are:
+
+| Setting | Value |
+|---|---:|
+| `gravity` | `0.70` |
+| `jump_velocity` | `12.5` |
+| `obstacle_speed` | `5.0` |
+| `obstacle_width` | `35` |
+| `min_obstacle_height` | `25` |
+| `max_obstacle_height` | `95` |
+| `min_spawn_gap` | `250` |
+| `max_spawn_gap` | `380` |
+| `max_steps` | `1500` |
+| default sensor length | `250.0` |
+
+Obstacle heights vary between `min_obstacle_height` and `max_obstacle_height`.
+This keeps `normalized_obstacle_height` meaningful and gives the controller a
+reason to adapt jump strength.
+
+---
+
+## Files
 
 | File | Purpose |
 |---|---|
+| `config.yaml` | EvoLib training config for the Jumper controller |
 | `jumper_play.py` | Manual control with the space bar |
-| `jumper_rule.py` | Simple rule-based baseline controller |
+| `jumper_rule.py` | Simple sensor-based rule controller |
 | `jumper_train.py` | Evolves an EvoNet controller |
 | `jumper_watch.py` | Loads and visualizes a trained checkpoint |
 
@@ -136,14 +205,16 @@ Package-side support files:
 
 | File | Purpose |
 |---|---|
-| `evolib_envs/envs/jumper.py` | Headless environment logic |
-| `evolib_envs/envs/jumper_task.py` | EvoLib task integration |
-| `evolib_envs/envs/jumper_defaults.py` | Shared defaults |
-| `evolib_envs/renderers/pygame_jumper.py` | Pygame visualization |
+| `evoenv/envs/jumper.py` | Headless environment logic |
+| `evoenv/envs/jumper_objects.py` | Player and obstacle sprites |
+| `evoenv/envs/jumper_settings.py` | Standard Jumper settings |
+| `evoenv/envs/jumper_defaults.py` | Shared size and debug defaults |
+| `evoenv/envs/jumper_task.py` | EvoLib task integration |
+| `evoenv/renderers/pygame_jumper.py` | Pygame visualization |
 
 ---
 
-# Run
+## Run
 
 Manual control:
 
@@ -169,56 +240,82 @@ Train with debug visualization:
 python jumper_train.py --debug
 ```
 
-Watch the best saved individual:
+Watch the saved individual:
 
 ```bash
-python jumper_watch.py jumper_medium.pkl
+python jumper_watch.py jumper.pkl
 ```
 
 ---
 
-# Debug Visualization
+## Debug Visualization
 
 During debug training, the current best individual can be visualized.
 
 This is useful for:
 
 - inspecting jump timing
-- detecting reward problems
-- comparing evolved behavior with the rule-based baseline
-- observing whether the controller jumps too early or too late
+- checking whether the sensor activates at useful distances
+- detecting excessive jump strength
+- comparing evolved behavior with the rule-based controller
+- observing whether collisions are caused by timing or insufficient jump strength
+
+Debug frames are written to the `frames/` directory by default.
 
 ---
 
-# Expected Behavior
+## Rule-Based Baseline
+
+The rule controller uses the two observation values directly:
+
+```python
+sensor_value = observation[0]
+normalized_obstacle_height = observation[1]
+
+should_jump = 0.58 <= sensor_value <= 0.92
+jump_strength = 0.65 + 0.35 * normalized_obstacle_height
+```
+
+This baseline is intentionally simple. It demonstrates the intended control
+structure without being an optimized solution:
+
+```text
+sensor active enough -> jump
+higher obstacle      -> stronger jump
+```
+
+---
+
+## Expected Behavior
 
 At the beginning of training, evolved controllers often:
 
-- collide quickly
+- do not react to the sensor
+- jump too late
 - jump too early
-- jump continuously
-- ignore the ground state
+- use excessive jump strength
+- collide repeatedly with obstacles
 
-After several generations, useful controllers should learn to:
+After successful training, useful controllers should learn to:
 
-- wait while the obstacle is far away
-- jump only when the obstacle is close
-- avoid repeated useless jumps
-- survive longer episodes
-
-The rule-based controller is intentionally simple and strong enough to show what
-a effective controller behavior looks like.
+- wait while the obstacle sensor is inactive
+- jump when the obstacle reaches a useful sensor range
+- increase jump strength for higher obstacles
+- avoid maximum-strength jumps when lower strength is sufficient
+- reduce collision frames over the episode
 
 ---
 
+## Value
+
 Jumper introduces concepts that are not visible in pure steering tasks:
 
-- timing
+- event timing
 - delayed action effects
-- discrete decisions
-- failure by collision
 - action thresholds
-- observation-dependent control
+- action intensity control
+- sensor-based observations
+- reward shaping for efficient behavior
 
 Compared with LineFollower, this task is less about continuous correction and
-more about choosing the right moment for an action.
+more about selecting the right moment and intensity for a discrete action.
