@@ -1,20 +1,20 @@
-# 03_gap_navigator – Evolvable Sensor Navigation Example
+# 03_gap_navigator – Gap Steering with Evolvable Sensors
 
-This example demonstrates how a controller learns to steer through falling obstacle rows with free gaps.
+This example demonstrates how an evolved controller can steer through falling
+obstacle rows with free gaps.
 
-Compared with Jumper, GapNavigator introduces a more open continuous-control problem:
-the agent does not receive the gap position directly. Instead, it receives ray sensor values and must learn how to steer based on obstacle proximity.
+Compared with Jumper, GapNavigator uses continuous horizontal steering instead
+of a discrete jump action. The controller does not receive the gap position
+directly. It must steer based on ray sensor values and its own horizontal state.
 
-It is designed as an introduction to:
+This example focuses on:
 
 - continuous horizontal steering
-- evolved sensor layouts
-- proximity-based obstacle avoidance
-- reward shaping for navigation tasks
-- separating task state from rendered debug information
-- evolutionary controller optimization with multiple parameter modules
+- evolved ray sensor layouts
+- obstacle avoidance from proximity signals
+- comparing rule-based and evolved controllers
 
-For a general overview of the interactive environment system, see the main
+For a general overview of the Pygame-based EvoEnv examples, see the main
 README in `examples/09_evoenv/`.
 
 ---
@@ -25,22 +25,23 @@ README in `examples/09_evoenv/`.
 
 ---
 
-# Goal
+## Goal
 
-The player should move horizontally and pass through the gaps in falling obstacle rows.
+The player should move horizontally and pass through the gaps in falling
+obstacle rows.
 
 The task is solved well when the controller:
 
 - reacts to approaching obstacle blocks
-- moves toward free gaps early enough
+- moves toward open gaps early enough
 - avoids oversteering
 - avoids staying near the screen edges
 - passes many obstacle rows without collisions
-- uses a compact and useful sensor layout if sensor penalties are enabled
+- uses useful sensor geometry when sensor penalties are enabled
 
 ---
 
-# Task Structure
+## Task Structure
 
 GapNavigator uses two evolved parameter modules:
 
@@ -65,11 +66,13 @@ modules:
     dim: 12  # 6 lengths + 6 angles
 ```
 
-The task converts this vector into `RaySensor` objects. Very short sensors can be represented as zero-length inactive sensors, depending on `min_active_length`.
+The task converts this vector into `RaySensor` objects. Very short sensors can
+be represented as zero-length inactive sensors, depending on `min_active_length`.
+This keeps the observation size stable even when some sensor slots are inactive.
 
 ---
 
-# Observation Space
+## Observation Space
 
 The environment returns `max_sensors + 2` values.
 
@@ -81,62 +84,80 @@ With the default `max_sensors: 6`, the observation size is `8`.
 | `max_sensors` | `normalized_x` | Horizontal player position normalized to `[0.0, 1.0]` |
 | `max_sensors + 1` | `normalized_velocity_x` | Horizontal velocity normalized by player speed |
 
-Typical observations:
+Typical interpretation:
 
 | Observation Pattern | Meaning |
 |---|---|
 | sensor value close to `0.0` | no nearby obstacle hit on that ray |
-| sensor value close to `1.0` | obstacle hit very close to the player |
-| `normalized_x` close to `0.0` | player is near the left edge |
-| `normalized_x` close to `1.0` | player is near the right edge |
-| `normalized_velocity_x < 0.0` | player is moving left |
-| `normalized_velocity_x > 0.0` | player is moving right |
+| sensor value close to `1.0` | obstacle hit close to the player |
+| `normalized_x` close to `0.0` or `1.0` | player is near a screen edge |
+| `normalized_velocity_x < 0.0` / `> 0.0` | player moves left / right |
 
-The controller does not receive the gap center directly. This is intentional. The controller must infer useful steering behavior from sensor activations and self-state.
+The controller does not receive the gap center directly. This is intentional:
+the gap center is useful for reward calculation and debugging, but not part of
+the controller observation.
 
 ---
 
-# Action Space
+## Action Space
 
-The controller returns one value:
+The controller returns one value.
 
 | Index | Value | Meaning |
 |---:|---|---|
 | 0 | `steering` | Horizontal steering clipped to `[-1.0, 1.0]` |
 
-A typical action is:
+Typical actions:
 
 ```python
-[-1.0]
+[-1.0]  # full left
+[0.0]   # no horizontal movement
+[1.0]   # full right
 ```
-
-for full left steering,
-
-```python
-[1.0]
-```
-
-for full right steering, and:
-
-```python
-[0.0]
-```
-
-for no horizontal movement.
 
 ---
 
-# Reward
+## Controller and Sensor Config
+
+The medium training config uses one vector module for sensors and one EvoNet
+module for the controller:
+
+```yaml
+modules:
+  sensors:
+    type: vector
+    dim: 12
+
+  brain:
+    type: evonet
+    dim: [8, 12, 1]
+    activation: [linear, tanh, tanh]
+```
+
+This matches the default medium task setup:
+
+| Component | Size | Meaning |
+|---|---:|---|
+| sensor vector | 12 | 6 sensor lengths + 6 sensor angles |
+| EvoNet input | 8 | 6 sensor values + `normalized_x` + `normalized_velocity_x` |
+| EvoNet hidden | 12 | small nonlinear controller layer |
+| EvoNet output | 1 | steering action |
+
+---
+
+## Reward
+
+The environment itself returns `0.0` as step reward. The task computes the
+training reward from the environment `info` dictionary.
 
 The task-level reward encourages:
 
-- alignment with the next relevant gap
+- horizontal alignment with the next relevant gap
 - avoiding obstacle collisions
 - avoiding unnecessary movement
 - avoiding positions near screen edges
-- optionally passing rows directly when `terminate_on_collision` is enabled
 
-The default task configuration uses shaped feedback instead of only rewarding completed passes:
+The default medium task configuration uses shaped feedback:
 
 ```yaml
 reward:
@@ -147,6 +168,8 @@ reward:
   near_wall_penalty: 0.040
 ```
 
+`pass_reward` is only used when `terminate_on_collision` is enabled.
+
 The fitness function can additionally penalize sensor usage:
 
 ```yaml
@@ -156,34 +179,39 @@ fitness:
   sensor_length_scale: 500.0
 ```
 
-This makes the example useful for studying the trade-off between controller performance and sensor complexity.
+With these values, total sensor length is penalized, while the number of active
+sensors is not penalized. This allows simple experiments with the trade-off
+between task performance and sensor length.
 
 ---
 
-# Difficulty Levels
+## Difficulty Presets
 
-The environment supports multiple difficulty levels.
+GapNavigator uses difficulty-specific EvoLib and task configuration files.
 
-Typical changes between difficulties:
+| Difficulty | EvoLib config | Task config |
+|---|---|---|
+| easy | `config_easy.yaml` | `task_easy.yaml` |
+| medium | `config_medium.yaml` | `task_medium.yaml` |
+| hard | `config_hard.yaml` | `task_hard.yaml` |
+
+Typical changes between presets include:
 
 - obstacle row speed
 - obstacle row spacing
 - gap width
 - number of generations
 - network size
-- mutation strength
+- mutation parameters
+- reward or sensor penalty settings
 
-Examples:
-
-```bash
-python gap_navigator_play.py --difficulty easy
-python gap_navigator_play.py --difficulty medium
-python gap_navigator_play.py --difficulty hard
-```
+Difficulty presets should keep the observation and action interfaces stable.
+This makes it possible to change task parameters without changing the surrounding
+example code.
 
 ---
 
-# Files
+## Files
 
 | File | Purpose |
 |---|---|
@@ -203,7 +231,7 @@ Package-side support files:
 | File | Purpose |
 |---|---|
 | `evoenv/envs/gap_navigator.py` | Headless environment logic |
-| `evoenv/envs/gap_navigator_objects.py` | Player, obstacle row, and block sprite objects |
+| `evoenv/envs/gap_navigator_objects.py` | Player, gap row, and block sprite objects |
 | `evoenv/envs/gap_navigator_task.py` | EvoLib task integration, sensor decoding, reward calculation |
 | `evoenv/envs/gap_navigator_config.py` | Pydantic task configuration models |
 | `evoenv/envs/gap_navigator_defaults.py` | Shared defaults |
@@ -211,9 +239,9 @@ Package-side support files:
 
 ---
 
-# Run
+## Run
 
-Manual control:
+Manual control with the default difficulty:
 
 ```bash
 python gap_navigator_play.py
@@ -237,7 +265,7 @@ Train with debug visualization:
 python gap_navigator_train.py --debug
 ```
 
-Watch the best saved individual:
+Watch the saved medium individual:
 
 ```bash
 python gap_navigator_watch.py gap_navigator_medium.pkl
@@ -246,13 +274,14 @@ python gap_navigator_watch.py gap_navigator_medium.pkl
 Use a specific difficulty:
 
 ```bash
+python gap_navigator_play.py --difficulty easy
 python gap_navigator_train.py --difficulty hard
 python gap_navigator_watch.py gap_navigator_hard.pkl
 ```
 
 ---
 
-# Manual Controls
+## Manual Controls
 
 | Key | Action |
 |---|---|
@@ -263,9 +292,10 @@ python gap_navigator_watch.py gap_navigator_hard.pkl
 
 ---
 
-# Rule-Based Baseline
+## Rule-Based Baseline
 
 The rule-based controller uses only sensor activations and horizontal velocity.
+It does not receive the gap center.
 
 It compares obstacle pressure on the left and right sensor groups:
 
@@ -276,57 +306,45 @@ right_pressure = sum(sensor_values[midpoint:])
 steering = left_pressure - right_pressure
 ```
 
-This baseline is intentionally simple. It does not know the gap center. It only steers away from the side with stronger obstacle activation and damps horizontal velocity.
+The rule then damps horizontal velocity:
+
+```python
+steering -= velocity_x * 0.35
+```
+
+This baseline is intentionally simple. It is useful as a sanity check, but it is
+not meant to be an optimal policy.
 
 ---
 
-# Debug Visualization
+## Debug Visualization
 
-During debug training, the current best individual can be visualized and optionally written as a GIF.
+During debug training, the current best individual can be visualized and
+optionally written as a GIF.
 
-This is useful for:
+This is useful for checking sensor geometry, steering behavior, collisions, wall
+contact, and excessive oscillation.
 
-- inspecting evolved sensor length and angle patterns
-- detecting reward problems
-- checking whether collisions are caused by late steering or bad sensor geometry
-- comparing evolved behavior with the rule-based baseline
-- observing whether the agent exploits wall contact, oscillation, or oversteering
-
-Debug frames are written to the `frames/` directory by `train.py` when `--debug` is enabled.
+Debug frames are written to the `frames/` directory when `--debug` is enabled.
 
 ---
 
-# Expected Behavior
+## Expected Behavior
 
 At the beginning of training, evolved controllers often:
 
 - steer randomly
-- collide with the first few obstacle rows
-- oscillate horizontally
-- overuse long sensors
-- ignore useful sensor activations
-- get stuck near a wall
+- collide with early rows
+- oscillate or stay near a wall
+- use unnecessarily long sensors
 
-After several generations, useful controllers should learn to:
+After successful training, useful controllers should learn to:
 
 - react before obstacle rows reach the player
-- keep enough distance from solid blocks
 - steer toward open gaps
 - reduce unnecessary movement
-- survive longer episodes
-- use shorter or fewer sensors when sensor penalties make this advantageous
+- use shorter sensors when the length penalty makes this advantageous
 
-The rule-based controller is useful as a sanity check, but it is not meant to be an optimal policy.
-
----
-
-GapNavigator introduces concepts that are not visible in simpler timing tasks:
-
-- evolved perception
-- sensor geometry as part of the search space
-- continuous steering from sparse proximity signals
-- reward shaping for navigation
-- behavioral side effects of sensor penalties
-- separation between hidden task diagnostics and actual observations
-
-Compared with Jumper, this task is less about choosing the right moment for a discrete action and more about building a compact perception-control loop.
+GapNavigator is more complex than Jumper because both the controller and the ray
+sensor layout are evolved. The example should still stay small enough to inspect
+visually and modify by hand.
