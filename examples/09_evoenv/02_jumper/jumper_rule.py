@@ -4,18 +4,11 @@
 import pygame
 from evoenv.core.controller import CallbackController
 from evoenv.core.env import Action, Observation
-from evoenv.envs.jumper import JumperEnv
-from evoenv.envs.jumper_defaults import (
-    DEFAULT_FPS,
-    DEFAULT_HEIGHT,
-    DEFAULT_MAX_STEPS,
-    DEFAULT_WIDTH,
-)
+from evoenv.envs.jumper_defaults import DEFAULT_FPS
+from evoenv.envs.jumper_task import JumperTask
 from evoenv.renderers.pygame_jumper import draw_env
 
-SCREEN_WIDTH = DEFAULT_WIDTH
-SCREEN_HEIGHT = DEFAULT_HEIGHT
-MAX_STEPS = DEFAULT_MAX_STEPS
+TASK_CONFIG_PATH = "task.yaml"
 FPS = DEFAULT_FPS
 
 
@@ -24,8 +17,8 @@ def jumper_rule(observation: Observation) -> Action:
     sensor_value = observation[0]
     normalized_obstacle_height = observation[1]
 
-    should_jump = 0.58 <= sensor_value <= 0.92
-    jump_strength = 0.65 + 0.35 * normalized_obstacle_height
+    should_jump = sensor_value >= 0.75
+    jump_strength = 0.75 + 0.35 * normalized_obstacle_height
 
     if should_jump:
         return [1.0, jump_strength]
@@ -35,18 +28,15 @@ def jumper_rule(observation: Observation) -> Action:
 
 def main() -> None:
     """Run the rule-based Jumper demo."""
-    env = JumperEnv(
-        width=SCREEN_WIDTH,
-        height=SCREEN_HEIGHT,
-        max_steps=MAX_STEPS,
-    )
+    task = JumperTask.from_yaml(TASK_CONFIG_PATH)
+    env = task.make_env()
     controller = CallbackController(jumper_rule)
 
     observation = env.reset()
     total_reward = 0.0
 
     pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen = pygame.display.set_mode((env.width, env.height))
     pygame.display.set_caption("EvoEnv - Jumper Rule")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 24)

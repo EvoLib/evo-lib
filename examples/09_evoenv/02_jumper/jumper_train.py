@@ -10,12 +10,13 @@ from evolib import Indiv, Pop
 
 ENV_NAME = "jumper"
 CONFIG_PATH = "config.yaml"
+TASK_CONFIG_PATH = "task.yaml"
 CHECKPOINT_PATH = "jumper.pkl"
 FRAME_FOLDER = "frames"
 
 
 def parse_args() -> argparse.Namespace:
-    """Parse example-specific command line arguments."""
+    """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="Train a Jumper agent.")
     parser.add_argument(
         "--debug",
@@ -30,7 +31,7 @@ args = parse_args()
 pop = Pop(config_path=CONFIG_PATH)
 seed = pop.config.random_seed
 
-jumper_task = JumperTask(seed=seed)
+jumper_task = JumperTask.from_yaml(TASK_CONFIG_PATH, seed=seed)
 
 
 def eval_jumper_fitness(indiv: Indiv) -> None:
@@ -59,7 +60,12 @@ pop.run(on_generation_end=on_generation_end)
 best_indiv = pop.best(sort=True)
 checkpoint = EnvCheckpoint(
     indiv=best_indiv,
-    env=EnvSpec(name=ENV_NAME),
+    env=EnvSpec(
+        name=ENV_NAME,
+        params={
+            "task_config": jumper_task.task_config.to_yaml_dict(),
+        },
+    ),
     seed=seed,
 )
 

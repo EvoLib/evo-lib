@@ -15,8 +15,8 @@ This example focuses on:
 - jump strength control
 - collision and jump-strength costs
 
-For a general overview of the interactive environment system, see the main
-README in `examples/09_evoenv/`.
+For a general overview of the Pygame-based EvoEnv examples, see the main README
+in `examples/09_evoenv/`.
 
 ---
 
@@ -45,6 +45,22 @@ Jumper is not a pure binary timing task. The controller has to learn:
 When should the player jump?
 How strong should the jump be?
 ```
+
+---
+
+## Task Configuration
+
+Jumper uses a single task configuration file:
+
+```text
+task.yaml
+```
+
+This file contains the environment, reward, and sensor parameters. The EvoLib
+controller configuration remains in `config.yaml`.
+
+Jumper intentionally has no `easy`, `medium`, or `hard` difficulty presets. It is
+kept as one standard compact example.
 
 ---
 
@@ -130,15 +146,15 @@ The controller is penalized for:
 - colliding with obstacles
 - using jump strength when a jump is actually triggered
 
-The default settings currently use:
+The default `task.yaml` uses:
 
 | Setting | Value | Meaning |
 |---|---:|---|
 | `collision_penalty` | `10.0` | penalty for each collision frame |
-| `jump_strength_penalty` | `45.0` | penalty multiplier for actual jump strength |
+| `jump_strength_penalty` | `5.0` | penalty multiplier for actual jump strength |
 | `pass_reward` | `0.0` | no explicit reward for passing an obstacle |
 | `alive_reward` | `0.0` | no passive survival reward |
-| `terminate_on_collision` | `False` | collisions are penalized but do not end the episode by default |
+| `terminate_on_collision` | `false` | collisions are penalized but do not end the episode by default |
 
 The effective reward per step is conceptually:
 
@@ -149,7 +165,7 @@ if collision:
     reward -= collision_penalty
 
 if did_jump:
-    reward -= jump_strength * jump_strength_penalty
+    reward -= jump_strength**2 * jump_strength_penalty
 ```
 
 Training minimizes collision frames and unnecessary jump strength. EvoLib uses
@@ -161,25 +177,25 @@ indiv.fitness = -reward
 
 ---
 
-## Default Environment Settings
+## Default Task Settings
 
-The current standard Jumper environment has no `easy`, `medium`, or `hard`
-difficulty presets.
-
-The default settings are:
+The current standard `task.yaml` uses:
 
 | Setting | Value |
 |---|---:|
+| `width` | `800` |
+| `height` | `450` |
+| `max_steps` | `1500` |
 | `gravity` | `0.70` |
-| `jump_velocity` | `12.5` |
+| `jump_velocity` | `15.5` |
 | `obstacle_speed` | `5.0` |
 | `obstacle_width` | `35` |
 | `min_obstacle_height` | `25` |
-| `max_obstacle_height` | `95` |
+| `max_obstacle_height` | `150` |
 | `min_spawn_gap` | `250` |
 | `max_spawn_gap` | `380` |
-| `max_steps` | `1500` |
-| default sensor length | `250.0` |
+| sensor length | `250.0` |
+| sensor angle | `1.57079632679` |
 
 Obstacle heights vary between `min_obstacle_height` and `max_obstacle_height`.
 This keeps `normalized_obstacle_height` meaningful and gives the controller a
@@ -192,6 +208,7 @@ reason to adapt jump strength.
 | File | Purpose |
 |---|---|
 | `config.yaml` | EvoLib training config for the Jumper controller |
+| `task.yaml` | Jumper environment, reward, and sensor config |
 | `jumper_play.py` | Manual control with the space bar |
 | `jumper_rule.py` | Simple sensor-based rule controller |
 | `jumper_train.py` | Evolves an EvoNet controller |
@@ -203,7 +220,7 @@ Package-side support files:
 |---|---|
 | `evoenv/envs/jumper.py` | Headless environment logic |
 | `evoenv/envs/jumper_objects.py` | Player and obstacle sprites |
-| `evoenv/envs/jumper_settings.py` | Standard Jumper settings |
+| `evoenv/envs/jumper_config.py` | Pydantic task configuration models |
 | `evoenv/envs/jumper_defaults.py` | Shared size and debug defaults |
 | `evoenv/envs/jumper_task.py` | EvoLib task integration |
 | `evoenv/renderers/pygame_jumper.py` | Pygame visualization |

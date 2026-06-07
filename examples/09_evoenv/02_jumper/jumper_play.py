@@ -3,18 +3,11 @@
 
 import pygame
 from evoenv.core.env import Action, Observation
-from evoenv.envs.jumper import JumperEnv
-from evoenv.envs.jumper_defaults import (
-    DEFAULT_FPS,
-    DEFAULT_HEIGHT,
-    DEFAULT_MAX_STEPS,
-    DEFAULT_WIDTH,
-)
+from evoenv.envs.jumper_defaults import DEFAULT_FPS
+from evoenv.envs.jumper_task import JumperTask
 from evoenv.renderers.pygame_jumper import draw_env
 
-SCREEN_WIDTH = DEFAULT_WIDTH
-SCREEN_HEIGHT = DEFAULT_HEIGHT
-MAX_STEPS = DEFAULT_MAX_STEPS
+TASK_CONFIG_PATH = "task.yaml"
 FPS = DEFAULT_FPS
 
 
@@ -36,20 +29,17 @@ class ManualJumperController:
 
     def act(self, _observation: Observation) -> Action:
         """Return the current jump action."""
-        return [self.jump, 0.75]
+        return [self.jump, 1.0]
 
 
 def main() -> None:
     """Run the manual Jumper demo."""
-    env = JumperEnv(
-        width=SCREEN_WIDTH,
-        height=SCREEN_HEIGHT,
-        max_steps=MAX_STEPS,
-    )
+    task = JumperTask.from_yaml(TASK_CONFIG_PATH)
+    env = task.make_env()
     controller = ManualJumperController()
 
     pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen = pygame.display.set_mode((env.width, env.height))
     pygame.display.set_caption("Jumper - Manual")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 24)

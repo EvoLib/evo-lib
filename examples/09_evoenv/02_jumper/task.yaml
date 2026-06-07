@@ -1,0 +1,26 @@
+env:
+  width: 800
+  height: 450
+  max_steps: 1500
+
+  gravity: 0.70
+  jump_velocity: 15.5
+
+  obstacle_speed: 5.0
+  obstacle_width: 35
+  min_obstacle_height: 25
+  max_obstacle_height: 150
+  min_spawn_gap: 250
+  max_spawn_gap: 380
+
+  terminate_on_collision: false
+
+reward:
+  collision_penalty: 10.0
+  pass_reward: 0.0
+  alive_reward: 0.0
+  jump_strength_penalty: 5.0
+
+sensor:
+  length: 250.0
+  angle: 1.57

@@ -16,7 +16,6 @@ from evoenv.envs.jumper_defaults import (
     DEFAULT_WIDTH,
 )
 from evoenv.envs.jumper_objects import JumperObstacle, JumperPlayer
-from evoenv.envs.jumper_settings import DEFAULT_JUMPER_SETTINGS, JumperSettings
 
 
 class JumperEnv(Env):
@@ -43,24 +42,50 @@ class JumperEnv(Env):
         width: int = DEFAULT_WIDTH,
         height: int = DEFAULT_HEIGHT,
         max_steps: int = DEFAULT_MAX_STEPS,
-        settings: JumperSettings = DEFAULT_JUMPER_SETTINGS,
-        sensor: RaySensor | None = None,
+        gravity: float,
+        jump_velocity: float,
+        obstacle_speed: float,
+        obstacle_width: int,
+        min_obstacle_height: int,
+        max_obstacle_height: int,
+        min_spawn_gap: int,
+        max_spawn_gap: int,
+        terminate_on_collision: bool,
+        collision_penalty: float,
+        pass_reward: float,
+        alive_reward: float,
+        jump_strength_penalty: float,
+        sensor: RaySensor,
     ) -> None:
-        self.settings = settings
-
         self.width = int(width)
         self.height = int(height)
         self.max_steps = int(max_steps)
         self.ground_y = self.height - DEFAULT_GROUND_Y_OFFSET
         self.player_x = float(DEFAULT_PLAYER_X_OFFSET)
 
-        self.sensor = sensor or self.default_sensor()
+        self.gravity = float(gravity)
+        self.jump_velocity = float(jump_velocity)
+
+        self.obstacle_speed = float(obstacle_speed)
+        self.obstacle_width = int(obstacle_width)
+        self.min_obstacle_height = int(min_obstacle_height)
+        self.max_obstacle_height = int(max_obstacle_height)
+        self.min_spawn_gap = int(min_spawn_gap)
+        self.max_spawn_gap = int(max_spawn_gap)
+
+        self.terminate_on_collision = bool(terminate_on_collision)
+        self.collision_penalty = float(collision_penalty)
+        self.pass_reward = float(pass_reward)
+        self.alive_reward = float(alive_reward)
+        self.jump_strength_penalty = float(jump_strength_penalty)
+
+        self.sensor = sensor
 
         self.player = JumperPlayer(
             x=self.player_x,
             ground_y=self.ground_y,
-            gravity=self.settings.gravity,
-            jump_velocity=self.settings.jump_velocity,
+            gravity=self.gravity,
+            jump_velocity=self.jump_velocity,
         )
 
         self.obstacle_group = pygame.sprite.Group()
@@ -69,11 +94,6 @@ class JumperEnv(Env):
         self.passed_obstacles = 0
         self.collision_count = 0
         self._rng = random.Random()
-
-    @staticmethod
-    def default_sensor() -> RaySensor:
-        """Return the deterministic default Jumper sensor."""
-        return RaySensor(length=250.0, angle=math.pi / 2.0)
 
     def reset(self, seed: int | None = None) -> Observation:
         """Reset the episode and return the initial observation."""
@@ -110,17 +130,16 @@ class JumperEnv(Env):
         if has_collision:
             self.collision_count += 1
 
-        reward = self.settings.alive_reward
+        reward = self.alive_reward
         if passed_obstacle:
-            reward += self.settings.pass_reward
+            reward += self.pass_reward
         if has_collision:
-            reward -= self.settings.collision_penalty
+            reward -= self.collision_penalty
         if did_jump:
-            # reward -= jump_strength * self.settings.jump_strength_penalty
-            reward -= (jump_strength**2) * self.settings.jump_strength_penalty
+            reward -= (jump_strength**2) * self.jump_strength_penalty
 
         done = self.step_count >= self.max_steps
-        if has_collision and self.settings.terminate_on_collision:
+        if has_collision and self.terminate_on_collision:
             done = True
 
         info: InfoDict = {
@@ -160,7 +179,7 @@ class JumperEnv(Env):
         ]
 
     def _sensor_value(self) -> float:
-        """Return the generic proximity value of the default obstacle sensor."""
+        """Return the generic proximity value of the configured obstacle sensor."""
         value, _hit_fraction = self._cast_sensor()
         return value
 
@@ -201,8 +220,8 @@ class JumperEnv(Env):
         self._spawn_obstacle(
             x=self.width
             + self._rng.uniform(
-                self.settings.min_spawn_gap * 0.25,
-                self.settings.max_spawn_gap * 0.40,
+                self.min_spawn_gap * 0.25,
+                self.max_spawn_gap * 0.40,
             )
         )
 
@@ -213,8 +232,8 @@ class JumperEnv(Env):
             self._spawn_obstacle(
                 x=self.width
                 + self._rng.uniform(
-                    self.settings.min_spawn_gap,
-                    self.settings.max_spawn_gap,
+                    self.min_spawn_gap,
+                    self.max_spawn_gap,
                 )
             )
             return
@@ -224,24 +243,24 @@ class JumperEnv(Env):
             self._spawn_obstacle(
                 x=self.width
                 + self._rng.uniform(
-                    self.settings.min_spawn_gap,
-                    self.settings.max_spawn_gap,
+                    self.min_spawn_gap,
+                    self.max_spawn_gap,
                 )
             )
 
     def _spawn_obstacle(self, *, x: float) -> None:
         """Spawn one rectangular obstacle with variable height."""
         obstacle_height = self._rng.randint(
-            self.settings.min_obstacle_height,
-            self.settings.max_obstacle_height,
+            self.min_obstacle_height,
+            self.max_obstacle_height,
         )
 
         self.obstacle_group.add(
             JumperObstacle(
                 x=float(x),
                 ground_y=float(self.ground_y),
-                speed=self.settings.obstacle_speed,
-                width=self.settings.obstacle_width,
+                speed=self.obstacle_speed,
+                width=self.obstacle_width,
                 height=obstacle_height,
             )
         )
@@ -294,8 +313,8 @@ class JumperEnv(Env):
         if obstacle is None:
             return 0.0
 
-        min_height = float(self.settings.min_obstacle_height)
-        max_height = float(self.settings.max_obstacle_height)
+        min_height = float(self.min_obstacle_height)
+        max_height = float(self.max_obstacle_height)
         height_range = max(1.0, max_height - min_height)
 
         return max(0.0, min(1.0, (float(obstacle.height) - min_height) / height_range))
