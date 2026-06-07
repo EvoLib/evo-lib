@@ -13,7 +13,6 @@ from evoenv.envs.jumper import JumperEnv
 from evoenv.envs.jumper_config import JumperTaskConfig
 from evoenv.envs.jumper_defaults import (
     DEFAULT_DEBUG_EVERY_N_GENERATIONS,
-    DEFAULT_DEBUG_MAX_STEPS,
     DEFAULT_FPS,
 )
 from evoenv.renderers.pygame_jumper import run_debug_episode
@@ -114,7 +113,7 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
         *,
         generation: int,
         every: int = DEFAULT_DEBUG_EVERY_N_GENERATIONS,
-        steps: int = DEFAULT_DEBUG_MAX_STEPS,
+        steps: int | None = None,
         title: str | None = None,
         filename: str | Path | None = None,
         gif_fps: int = DEFAULT_FPS,
@@ -122,6 +121,7 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
     ) -> Path | None:
         """Render one debug episode for an individual."""
         display_title = title or f"Jumper Training Debug - Gen {generation}"
+        episode_steps = self.max_steps if steps is None else steps
 
         return run_debug_episode(
             self.make_env(),
@@ -129,7 +129,7 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
             enabled=True,
             generation=generation,
             every=every,
-            steps=steps,
+            steps=episode_steps,
             seed=self.seed,
             title=display_title,
             filename=filename,
@@ -141,14 +141,12 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
 def load_jumper_task(checkpoint: EnvCheckpoint) -> JumperTask:
     """Create a Jumper task from checkpoint metadata."""
     raw_task_config = checkpoint.env.params.get("task_config")
-    task_config = (
-        JumperTaskConfig.model_validate(raw_task_config)
-        if raw_task_config is not None
-        else JumperTaskConfig()
-    )
+
+    if raw_task_config is None:
+        raise ValueError("Jumper checkpoint does not contain task_config.")
 
     return JumperTask(
-        task_config=task_config,
+        task_config=JumperTaskConfig.model_validate(raw_task_config),
         seed=checkpoint.seed,
     )
 

@@ -10,10 +10,7 @@ from evoenv.core.env import Action, Env, InfoDict, Observation, StepResult
 from evoenv.core.sensors import Pose2D, RaySensor, SensorLineState
 from evoenv.envs.jumper_defaults import (
     DEFAULT_GROUND_Y_OFFSET,
-    DEFAULT_HEIGHT,
-    DEFAULT_MAX_STEPS,
     DEFAULT_PLAYER_X_OFFSET,
-    DEFAULT_WIDTH,
 )
 from evoenv.envs.jumper_objects import JumperObstacle, JumperPlayer
 
@@ -39,9 +36,9 @@ class JumperEnv(Env):
     def __init__(
         self,
         *,
-        width: int = DEFAULT_WIDTH,
-        height: int = DEFAULT_HEIGHT,
-        max_steps: int = DEFAULT_MAX_STEPS,
+        width: int,
+        height: int,
+        max_steps: int,
         gravity: float,
         jump_velocity: float,
         obstacle_speed: float,
