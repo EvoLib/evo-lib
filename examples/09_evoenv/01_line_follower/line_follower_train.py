@@ -3,7 +3,11 @@
 
 from evoenv.cli import parse_env_args
 from evoenv.core.checkpoint import EnvCheckpoint, EnvSpec, save_checkpoint
-from evoenv.core.difficulty import difficulty_checkpoint_path, difficulty_config_path
+from evoenv.core.difficulty import (
+    difficulty_checkpoint_path,
+    difficulty_config_path,
+    difficulty_task_path,
+)
 from evoenv.envs.line_follower_task import LineFollowerTask
 
 from evolib import Indiv, Pop
@@ -13,12 +17,17 @@ FRAME_FOLDER = "frames"
 
 args = parse_env_args(description="Train a Line Follower agent.")
 config_path = difficulty_config_path(args.difficulty)
+task_config_path = difficulty_task_path(args.difficulty)
 checkpoint_path = difficulty_checkpoint_path(ENV_NAME, args.difficulty)
 
 pop = Pop(config_path=str(config_path))
 seed = pop.config.random_seed
 
-line_task = LineFollowerTask(seed=seed, difficulty=args.difficulty)
+line_task = LineFollowerTask.from_yaml(
+    task_config_path,
+    seed=seed,
+    difficulty=args.difficulty,
+)
 
 
 def eval_line_follower_fitness(indiv: Indiv) -> None:
@@ -50,6 +59,9 @@ checkpoint = EnvCheckpoint(
     env=EnvSpec(
         name=ENV_NAME,
         difficulty=args.difficulty,
+        params={
+            "task_config": line_task.task_config.to_yaml_dict(),
+        },
     ),
     seed=seed,
 )

@@ -6,27 +6,23 @@ import sys
 import pygame
 from evoenv.cli import parse_env_args
 from evoenv.core.controller import CallbackController
+from evoenv.core.difficulty import difficulty_task_path
 from evoenv.core.env import Action, Observation
-from evoenv.envs.line_follower import LineFollowerEnv
-from evoenv.envs.line_follower_defaults import (
-    DEFAULT_FPS,
-    DEFAULT_HEIGHT,
-    DEFAULT_MAX_STEPS,
-    DEFAULT_WIDTH,
-)
+from evoenv.envs.line_follower_defaults import DEFAULT_FPS
+from evoenv.envs.line_follower_task import LineFollowerTask
 from evoenv.renderers.pygame_line_follower import draw_env
 
-SCREEN_WIDTH = DEFAULT_WIDTH
-SCREEN_HEIGHT = DEFAULT_HEIGHT
-MAX_STEPS = DEFAULT_MAX_STEPS
 FPS = DEFAULT_FPS
 
-
 args = parse_env_args(description="Run a Line Follower agent.")
-difficulty = args.difficulty
+task = LineFollowerTask.from_yaml(
+    difficulty_task_path(args.difficulty),
+    difficulty=args.difficulty,
+)
 
 
 def line_follower_rule(observation: Observation) -> Action:
+    """Steer toward the side whose sensor lost the line."""
     left_sensor, right_sensor = observation
 
     error = right_sensor - left_sensor
@@ -37,20 +33,15 @@ def line_follower_rule(observation: Observation) -> Action:
 
 
 def main() -> None:
-    env = LineFollowerEnv(
-        width=SCREEN_WIDTH,
-        height=SCREEN_HEIGHT,
-        max_steps=MAX_STEPS,
-        difficulty=difficulty,
-    )
-
+    """Run the rule-based LineFollower demo."""
+    env = task.make_env()
     controller = CallbackController(line_follower_rule)
 
     observation = env.reset()
     total_reward = 0.0
 
     pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen = pygame.display.set_mode((env.width, env.height))
     pygame.display.set_caption("EvoLib Env - LineFollower Rule")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 24)

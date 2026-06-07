@@ -1,44 +1,66 @@
 # 01_line_follower – Sensor-Based Steering Example
 
-This example demonstrates how a controller learns to steer a robot along a line
-using simple sensor feedback.
+This example demonstrates how an evolved controller can steer a robot along a
+line using simple binary sensor feedback.
 
-The environment is intentionally small and easy to understand.
+LineFollower is intentionally small. It introduces the basic EvoEnv control loop
+before the later examples add jump timing, evolved sensors, or more complex
+obstacle layouts.
 
-It is designed as an introduction to:
+This example focuses on:
 
-- observations
-- actions
-- rewards
-- controller behavior
-- evolutionary optimization
+- binary line sensors
+- steering actions
+- reward from line contact and forward progress
+- comparing rule-based and evolved controllers
+- optional difficulty presets with unchanged observations and actions
 
-For a general overview of the interactive environment system, see the main
-README in `examples/09_interactive_envs/`.
+For a general overview of the Pygame-based EvoEnv examples, see the main README
+in `examples/09_evoenv/`.
 
 ---
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/01_line_follower/frames/linefollower.gif" alt="Sample Plot" width="512"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/01_line_follower/frames/linefollower.gif" alt="LineFollower sample" width="512"/>
 </p>
 
 ---
 
-# Goal
+## Goal
 
 The robot should stay close to the line while continuously moving forward.
 
-A successful controller should:
+A useful controller should:
 
-- corrects steering smoothly
-- avoids losing the track
-- remains on the for many simulation steps
+- correct steering smoothly
+- avoid losing the track
+- recover from small deviations
+- remain on the line for many simulation steps
 
 ---
 
-# Observation Space
+## Task Configuration
 
-The environment returns two sensor values:
+LineFollower uses difficulty-specific task configuration files:
+
+| Difficulty | EvoLib config | Task config |
+|---|---|---|
+| easy | `config_easy.yaml` | `task_easy.yaml` |
+| medium | `config_medium.yaml` | `task_medium.yaml` |
+| hard | `config_hard.yaml` | `task_hard.yaml` |
+
+The EvoLib config controls the evolutionary setup, network size, and mutation
+parameters. The task config controls the environment and reward parameters.
+
+The observation and action spaces stay unchanged across all difficulty presets.
+This makes it possible to compare the same controller interface under different
+line shapes, speeds, and tolerances.
+
+---
+
+## Observation Space
+
+The environment returns two sensor values.
 
 | Index | Value | Meaning |
 |---:|---|---|
@@ -58,9 +80,9 @@ Typical observations:
 
 ---
 
-# Action Space
+## Action Space
 
-The controller returns one steering value:
+The controller returns one steering value.
 
 | Index | Value | Meaning |
 |---:|---|---|
@@ -76,30 +98,79 @@ Typical behavior:
 
 ---
 
-# Reward
+## Controller Network
 
-The reward function encourages:
+The easy and medium training configs use a very small EvoNet controller:
 
-- staying near the line
-- stable steering behavior
-- long survival time
+```yaml
+modules:
+  brain:
+    type: evonet
+    dim: [2, 1, 1]
+    activation: [linear, tanh, tanh]
+```
 
-The episode ends when:
+This matches the environment interface:
 
-- the robot loses the line for too long
-- the maximum step count is reached
+| Layer | Size | Meaning |
+|---|---:|---|
+| input | 2 | `left_sensor`, `right_sensor` |
+| hidden | 1 | minimal nonlinear controller layer |
+| output | 1 | steering action |
+
+The hard training config may use a larger controller and population. It should be
+understood as a matching training profile for the harder task preset, not as a
+change to the observation or action interface.
 
 ---
 
-# Difficulty Levels
+## Reward
 
-The environment supports multiple difficulty levels.
+The reward is computed directly by the environment.
+
+The default task configs use:
+
+```yaml
+reward:
+  progress_reward_scale: 0.25
+  missed_line_penalty: 0.25
+```
+
+The reward behavior is:
+
+```text
+if robot touches the line:
+    reward += forward_progress * progress_reward_scale
+else:
+    reward -= missed_line_penalty
+```
+
+The episode ends when:
+
+- the maximum step count is reached
+- the robot misses the line for too many consecutive steps
+- the robot reaches the end of the screen
+- the robot leaves the screen bounds
+
+EvoLib uses minimization, so training converts accumulated reward to fitness via:
+
+```python
+indiv.fitness = -reward
+```
+
+---
+
+## Difficulty Presets
+
+Difficulty presets change task parameters, not the controller interface.
 
 Typical changes between difficulties:
 
 - line curvature
 - line width
 - movement speed
+- steering strength
+- tolerated missed-line steps
 
 Examples:
 
@@ -111,10 +182,16 @@ python line_follower_play.py --difficulty hard
 
 ---
 
-# Files
+## Files
 
 | File | Purpose |
 |---|---|
+| `config_easy.yaml` | EvoLib training config for the easy preset |
+| `config_medium.yaml` | EvoLib training config for the medium preset |
+| `config_hard.yaml` | EvoLib training config for the hard preset |
+| `task_easy.yaml` | LineFollower task config for the easy preset |
+| `task_medium.yaml` | LineFollower task config for the medium preset |
+| `task_hard.yaml` | LineFollower task config for the hard preset |
 | `line_follower_play.py` | Manual steering with keyboard input |
 | `line_follower_rule.py` | Simple rule-based steering controller |
 | `line_follower_train.py` | Evolves an EvoNet controller |
@@ -124,14 +201,16 @@ Package-side support files:
 
 | File | Purpose |
 |---|---|
-| `evolib_envs/envs/line_follower.py` | Headless environment logic |
-| `evolib_envs/envs/line_follower_task.py` | EvoLib task integration |
-| `evolib_envs/envs/line_follower_defaults.py` | Shared defaults |
-| `evolib_envs/renderers/pygame_line_follower.py` | Pygame visualization |
+| `evoenv/envs/line_follower.py` | Headless environment logic |
+| `evoenv/envs/line_follower_config.py` | Pydantic task configuration models |
+| `evoenv/envs/line_follower_task.py` | EvoLib task integration |
+| `evoenv/envs/line_follower_objects.py` | Robot and sensor objects |
+| `evoenv/envs/line_follower_defaults.py` | Shared runtime defaults |
+| `evoenv/renderers/pygame_line_follower.py` | Pygame visualization |
 
 ---
 
-# Run
+## Run
 
 Manual control:
 
@@ -160,32 +239,55 @@ python line_follower_train.py --debug
 Watch the best saved individual:
 
 ```bash
-python line_follower_watch.py
+python line_follower_watch.py line_follower_medium.pkl
+```
+
+Use a specific difficulty:
+
+```bash
+python line_follower_train.py --difficulty hard
+python line_follower_watch.py line_follower_hard.pkl
 ```
 
 ---
 
-# Debug Visualization
+## Manual Controls
+
+| Key | Action |
+|---|---|
+| Left arrow | Steer left |
+| Right arrow | Steer right |
+| `R` | Reset episode |
+| `ESC` | Quit |
+
+---
+
+## Rule-Based Baseline
+
+The rule controller uses the two sensor values directly:
+
+```python
+left_sensor, right_sensor = observation
+turn = right_sensor - left_sensor
+```
+
+The rule steers toward the side whose sensor has lost the line. It is intended as
+a simple sanity check, not as an optimized controller.
+
+---
+
+## Debug Visualization
 
 During debug training, the current best individual can be visualized.
 
-This is useful for:
+This is useful for checking steering behavior, line contact, reward shaping, and
+whether the robot loses the line early.
 
-- inspecting steering behavior
-- debugging reward shaping
-- observing learning progress
-
-Training also allows GIF animation export.
-
-Example output:
-
-```text
-frames/gen_025.gif
-```
+Debug frames are written to the `frames/` directory when `--debug` is enabled.
 
 ---
 
-# Expected Behavior
+## Expected Behavior
 
 At the beginning of training, evolved controllers often:
 
@@ -193,9 +295,9 @@ At the beginning of training, evolved controllers often:
 - oversteer
 - lose the line quickly
 
-After several generations, successful controllers typically:
+After successful training, useful controllers should learn to:
 
-- keep the line centered
-- perform smooth corrections
-- recover from small deviations
-
+- keep the line centered between both sensors
+- correct small deviations
+- reduce line misses
+- progress farther along the line

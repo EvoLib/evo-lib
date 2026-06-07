@@ -17,17 +17,11 @@ import random
 import pygame
 from evoenv.core.env import Action, Env, Observation, StepResult
 from evoenv.core.sensors import SensorPointState
-from evoenv.envs.line_follower_defaults import (
-    DEFAULT_HEIGHT,
-    DEFAULT_MAX_STEPS,
-    DEFAULT_WIDTH,
-)
 from evoenv.envs.line_follower_objects import (
     DEFAULT_LINE_SENSORS,
     LineFollowerRobot,
     LineSensor,
 )
-from evoenv.envs.line_follower_settings import get_line_follower_settings
 
 SensorLayout = tuple[LineSensor, ...]
 
@@ -41,14 +35,18 @@ class LineFollowerEnv(Env):
     def __init__(
         self,
         *,
-        width: int = DEFAULT_WIDTH,
-        height: int = DEFAULT_HEIGHT,
-        max_steps: int = DEFAULT_MAX_STEPS,
-        difficulty: str = "medium",
+        width: int,
+        height: int,
+        max_steps: int,
+        line_complexity: float,
+        line_width: int,
+        base_speed: float,
+        turn_strength: float,
+        max_missed_line_steps: int,
+        progress_reward_scale: float,
+        missed_line_penalty: float,
         sensors: SensorLayout | None = None,
     ) -> None:
-        self.settings = get_line_follower_settings(difficulty)
-
         self.width = int(width)
         self.height = int(height)
         self.max_steps = int(max_steps)
@@ -56,18 +54,21 @@ class LineFollowerEnv(Env):
         self.previous_x = 0.0
         self.step_count = 0
         self.missed_line_steps = 0
-        self.max_missed_line_steps = self.settings.max_missed_line_steps
+        self.max_missed_line_steps = int(max_missed_line_steps)
 
-        self.line_complexity = self.settings.line_complexity
-        self.line_width = self.settings.line_width
+        self.line_complexity = float(line_complexity)
+        self.line_width = int(line_width)
+        self.progress_reward_scale = float(progress_reward_scale)
+        self.missed_line_penalty = float(missed_line_penalty)
+
         self.line_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.line_mask = pygame.mask.Mask((self.width, self.height), fill=False)
         self.line_points = self._build_line_points()
         self._build_line_mask()
 
         self.robot = LineFollowerRobot(
-            base_speed=self.settings.base_speed,
-            turn_strength=self.settings.turn_strength,
+            base_speed=float(base_speed),
+            turn_strength=float(turn_strength),
             sensors=sensors or DEFAULT_LINE_SENSORS,
         )
         self.observation_size = len(self.robot.sensors)
@@ -130,10 +131,10 @@ class LineFollowerEnv(Env):
 
         reward = 0.0
         if robot_on_line:
-            reward += progress * 0.25
+            reward += progress * self.progress_reward_scale
             self.missed_line_steps = 0
         else:
-            reward -= 0.25
+            reward -= self.missed_line_penalty
             self.missed_line_steps += 1
 
         done = (
@@ -151,7 +152,6 @@ class LineFollowerEnv(Env):
             "left_sensor": left_sensor,
             "right_sensor": right_sensor,
             "missed_line_steps": self.missed_line_steps,
-            "difficulty": self.settings.difficulty.value,
         }
 
         return observation, reward, done, info

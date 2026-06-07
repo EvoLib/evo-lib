@@ -9,11 +9,11 @@
 - Added pygame visualization and play scripts for selected EvoEnv tasks.
 
 ### Changed
-- Refactored Jumper to load task settings from `task.yaml`.
 - Simplified Jumper to one compact standard task instead of difficulty presets.
-- Moved Jumper physics, obstacle, reward, and sensor settings out of Python constants.
+- Moved physics, obstacle, reward, and sensor settings out of Python constants.
 - Refactored Gap Navigator obstacle handling around explicit row/block data.
 - Updated EvoEnv example READMEs and documentation positioning.
+- Moved environment and reward settings from hard-coded presets to difficulty-specific `task_*.yaml` files.
 
 ### Fixed
 - Fixed sensor-state handling in Gap Navigator.

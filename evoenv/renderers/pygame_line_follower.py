@@ -9,16 +9,13 @@ from evoenv.core.controller import Controller
 from evoenv.envs.line_follower import LineFollowerEnv
 from evoenv.envs.line_follower_defaults import (
     DEFAULT_DEBUG_EVERY_N_GENERATIONS,
-    DEFAULT_DEBUG_MAX_STEPS,
     DEFAULT_FPS,
-    DEFAULT_MAX_STEPS,
 )
 from evoenv.renderers.pygame_common import GifRecorder, draw_text_overlay
 
 
 def draw_robot(screen: pygame.Surface, env: LineFollowerEnv) -> None:
     """Draw the robot body and heading direction."""
-
     robot = env.robot
 
     robot_x = int(round(robot.x))
@@ -40,7 +37,6 @@ def draw_robot(screen: pygame.Surface, env: LineFollowerEnv) -> None:
 
 def draw_sensors(screen: pygame.Surface, env: LineFollowerEnv) -> None:
     """Draw robot sensors and their current contact state."""
-
     robot = env.robot
     robot_pos = (int(round(robot.x)), int(round(robot.y)))
 
@@ -67,7 +63,6 @@ def draw_overlay(
     title: str,
 ) -> None:
     """Draw textual debug information."""
-
     sensor_states = env.get_sensor_states()
     values = " ".join(f"{s.value:.0f}" for s in sensor_states)
 
@@ -92,7 +87,6 @@ def draw_env(
     title: str = "LineFollower",
 ) -> None:
     """Draw the full LineFollower environment."""
-
     screen.fill((20, 20, 20))
     screen.blit(env.line_surface, (0, 0))
 
@@ -116,7 +110,7 @@ class DebugRenderer:
         env: LineFollowerEnv,
         controller: Controller,
         *,
-        steps: int = DEFAULT_MAX_STEPS,
+        steps: int | None = None,
         seed: int | None,
         title: str,
         filename: str | Path | None = None,
@@ -124,12 +118,12 @@ class DebugRenderer:
         frame_skip: int = 1,
     ) -> Path | None:
         """Run one visual debug episode."""
-
+        episode_steps = env.max_steps if steps is None else steps
         obs = env.reset(seed=seed)
         total_reward = 0.0
         gif_recorder = GifRecorder(filename, fps=gif_fps, frame_skip=frame_skip)
 
-        for step in range(steps):
+        for step in range(episode_steps):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -165,7 +159,7 @@ def run_debug_episode(
     enabled: bool,
     generation: int,
     every: int = DEFAULT_DEBUG_EVERY_N_GENERATIONS,
-    steps: int = DEFAULT_DEBUG_MAX_STEPS,
+    steps: int | None = None,
     seed: int | None = None,
     title: str = "Training Debug",
     filename: str | Path | None = None,
@@ -173,7 +167,6 @@ def run_debug_episode(
     frame_skip: int = 1,
 ) -> Path | None:
     """Run debug rendering periodically during training."""
-
     global _DEBUG_RENDERER
 
     if not enabled:
