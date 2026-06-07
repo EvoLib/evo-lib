@@ -1,3 +1,30 @@
+## Unreleased
+
+### Added
+- Added `evoenv` as a lightweight environment layer for EvoLib examples.
+- Added EvoEnv example set for small sensor/action tasks.
+- Added custom environment examples: Line Follower, Jumper, and Gap Navigator.
+- Added YAML-based task configuration for EvoEnv examples.
+- Added Pydantic task config models for environment-specific settings.
+- Added pygame visualization and play scripts for selected EvoEnv tasks.
+
+### Changed
+- Refactored Jumper to load task settings from `task.yaml`.
+- Simplified Jumper to one compact standard task instead of difficulty presets.
+- Moved Jumper physics, obstacle, reward, and sensor settings out of Python constants.
+- Refactored Gap Navigator obstacle handling around explicit row/block data.
+- Updated EvoEnv example READMEs and documentation positioning.
+
+### Fixed
+- Fixed sensor-state handling in Gap Navigator.
+- Improved pygame-based collision handling in EvoEnv examples.
+- Fixed Jumper observation consistency after the config refactor.
+
+### Removed
+- Removed Jumper `easy`, `medium`, and `hard` presets.
+- Removed hard-coded `jumper_settings.py`.
+- Removed hard-coded `gap_navigator_settings.py`.
+
 ## EvoLib 0.2.0
 
 ### Added
