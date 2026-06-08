@@ -1,7 +1,9 @@
 # 03_gap_navigator – Gap Steering with Evolvable Sensors
 
-This example demonstrates how an evolved controller can steer through falling
-obstacle rows with free gaps.
+GapNavigator demonstrates the co-evolution of perception and control in a simple
+gap-steering task: a sensor module evolves ray lengths and angles, while an
+EvoNet controller evolves steering behavior based on the resulting sensor
+signals.
 
 Compared with Jumper, GapNavigator uses continuous horizontal steering instead
 of a discrete jump action. The controller does not receive the gap position

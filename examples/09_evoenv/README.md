@@ -242,6 +242,7 @@ frames/gen_025.gif
 |---|---|
 | LineFollower | steering and sensor feedback |
 | Jumper | jump timing and action strength |
+| Collector | co-evolution of perception and control |
 
 ---
 
@@ -265,7 +266,7 @@ adapt for experiments.
 
 | Environment | Core concept |
 |---|---|
-| Collector | exploration and reward shaping |
+| Collector | small 2D food-collection task |
 | MemoryTask | recurrent memory and temporal behavior |
 | PredatorPrey | co-evolution and interacting agents |
 
