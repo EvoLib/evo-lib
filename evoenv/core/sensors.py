@@ -108,7 +108,6 @@ class RaySensor:
         visible_length = self.length
 
         if hit_fraction is not None:
-            visible_length *= max(0.0, min(1.0, float(hit_fraction)))
             visible_length *= clamp01(hit_fraction)
 
         absolute_angle = pose.heading + self.angle
