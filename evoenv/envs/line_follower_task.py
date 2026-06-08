@@ -9,6 +9,7 @@ from evoenv.core.difficulty import Difficulty
 from evoenv.core.env import Action, Observation
 from evoenv.core.task import BaseTask
 from evoenv.core.task_registry import register_task_loader
+from evoenv.core.utils import clamp
 from evoenv.envs.line_follower import LineFollowerEnv
 from evoenv.envs.line_follower_config import LineFollowerTaskConfig
 from evoenv.envs.line_follower_defaults import (
@@ -29,8 +30,7 @@ class LineFollowerController:
     def act(self, observation: Observation) -> Action:
         """Return a clipped steering action in [-1, 1]."""
         output = self.net.calc(observation)
-        turn = float(output[0])
-        turn = max(-1.0, min(1.0, turn))
+        turn = clamp(output[0])
         return [turn]
 
 

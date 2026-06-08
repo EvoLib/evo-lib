@@ -17,6 +17,7 @@ import random
 import pygame
 from evoenv.core.env import Action, Env, Observation, StepResult
 from evoenv.core.sensors import SensorPointState
+from evoenv.core.utils import clamp
 from evoenv.envs.line_follower_objects import (
     DEFAULT_LINE_SENSORS,
     LineFollowerRobot,
@@ -115,7 +116,7 @@ class LineFollowerEnv(Env):
 
     def step(self, action: Action) -> StepResult:
         """Advance the simulation by one step."""
-        turn = max(-1.0, min(1.0, float(action[0])))
+        turn = clamp(action[0], -1, 0, 1.0)
 
         self.robot.step(turn)
         self.step_count += 1
