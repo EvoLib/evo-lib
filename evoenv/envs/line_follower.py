@@ -116,7 +116,7 @@ class LineFollowerEnv(Env):
 
     def step(self, action: Action) -> StepResult:
         """Advance the simulation by one step."""
-        turn = clamp(action[0], -1, 0, 1.0)
+        turn = clamp(action[0], -1.0, 1.0)
 
         self.robot.step(turn)
         self.step_count += 1
