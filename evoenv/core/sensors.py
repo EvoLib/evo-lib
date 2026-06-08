@@ -6,6 +6,8 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
+from .utils import clamp01
+
 
 @dataclass(frozen=True)
 class Pose2D:
@@ -107,6 +109,7 @@ class RaySensor:
 
         if hit_fraction is not None:
             visible_length *= max(0.0, min(1.0, float(hit_fraction)))
+            visible_length *= clamp01(hit_fraction)
 
         absolute_angle = pose.heading + self.angle
 
