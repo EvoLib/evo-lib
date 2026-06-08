@@ -8,6 +8,7 @@ from collections.abc import Iterator
 import pygame
 from evoenv.core.env import Action, Env, InfoDict, Observation, StepResult
 from evoenv.core.sensors import Pose2D, RaySensor, SensorLineState
+from evoenv.core.utils import clamp01
 from evoenv.envs.jumper_defaults import (
     DEFAULT_GROUND_Y_OFFSET,
     DEFAULT_PLAYER_X_OFFSET,
@@ -109,8 +110,8 @@ class JumperEnv(Env):
 
     def step(self, action: Action) -> StepResult:
         """Advance the simulation by one step."""
-        jump_signal = max(0.0, min(1.0, float(action[0])))
-        jump_strength = max(0.0, min(1.0, float(action[1])))
+        jump_signal = clamp01(action[0])
+        jump_strength = clamp01(action[1])
 
         did_jump = self.player.step(
             jump_signal=jump_signal,
@@ -314,7 +315,7 @@ class JumperEnv(Env):
         max_height = float(self.max_obstacle_height)
         height_range = max(1.0, max_height - min_height)
 
-        return max(0.0, min(1.0, (float(obstacle.height) - min_height) / height_range))
+        return clamp01((obstacle.height - min_height) / height_range)
 
     def _nearest_obstacle_distance(self) -> float:
         """Return normalized distance to the closest obstacle in front of the player."""
@@ -355,4 +356,4 @@ class JumperEnv(Env):
         hit_x, hit_y = clipped_line[0]
         distance = math.hypot(float(hit_x) - start_x, float(hit_y) - start_y)
 
-        return max(0.0, min(1.0, distance / ray_length))
+        return clamp01(distance / ray_length)

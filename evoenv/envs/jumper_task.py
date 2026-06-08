@@ -9,6 +9,7 @@ from evoenv.core.env import Action, Observation
 from evoenv.core.sensors import RaySensor
 from evoenv.core.task import BaseTask
 from evoenv.core.task_registry import register_task_loader
+from evoenv.core.utils import clamp01
 from evoenv.envs.jumper import JumperEnv
 from evoenv.envs.jumper_config import JumperTaskConfig
 from evoenv.envs.jumper_defaults import (
@@ -30,8 +31,8 @@ class JumperController:
         """Return clipped jump action values in [0, 1]."""
         output = self.net.calc(observation)
 
-        jump_signal = max(0.0, min(1.0, float(output[0])))
-        jump_strength = max(0.0, min(1.0, float(output[1])))
+        jump_signal = clamp01(output[0])
+        jump_strength = clamp01(output[1])
 
         return [jump_signal, jump_strength]
 
