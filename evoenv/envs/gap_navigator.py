@@ -8,6 +8,7 @@ from collections.abc import Iterator
 import pygame
 from evoenv.core.env import Action, Env, InfoDict, Observation, StepResult
 from evoenv.core.sensors import Pose2D, RaySensor, SensorLineState
+from evoenv.core.utils import clamp, clamp01
 from evoenv.envs.gap_navigator_objects import (
     AvoiderPlayer,
     GapRow,
@@ -120,10 +121,10 @@ class GapNavigatorEnv(Env):
 
     def step(self, action: Action) -> StepResult:
         """Advance the simulation by one step."""
-        steering = max(-1.0, min(1.0, float(action[0])))
+        clamped_steering = clamp(action[0], -1.0, 1.0)
 
         self.player.step(
-            steering,
+            clamped_steering,
             min_x=self.player.width / 2,
             max_x=self.width - self.player.width / 2,
         )
@@ -156,7 +157,7 @@ class GapNavigatorEnv(Env):
 
         info: InfoDict = {
             "x": self.player.x,
-            "steering": steering,
+            "steering": clamped_steering,
             "passed_rows": self.passed_rows,
             "collision": self.collision,
             "has_collision": has_collision,
@@ -352,4 +353,4 @@ class GapNavigatorEnv(Env):
         hit_x, hit_y = clipped_line[0]
         distance = math.hypot(float(hit_x) - start_x, float(hit_y) - start_y)
 
-        return max(0.0, min(1.0, distance / ray_length))
+        return clamp01(distance / ray_length)

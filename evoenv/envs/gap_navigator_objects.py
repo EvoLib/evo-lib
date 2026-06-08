@@ -4,6 +4,7 @@
 from dataclasses import dataclass
 
 import pygame
+from evoenv.core.utils import clamp
 
 
 class AvoiderPlayer(pygame.sprite.Sprite):
@@ -38,12 +39,12 @@ class AvoiderPlayer(pygame.sprite.Sprite):
 
     def step(self, steering: float, *, min_x: float, max_x: float) -> None:
         """Move horizontally using one clipped steering action."""
-        clipped = max(-1.0, min(1.0, float(steering)))
-        self.velocity_x = clipped * self.speed
+        clamped_steering = clamp(steering, -1.0, 1.0)
+        self.velocity_x = clamped_steering * self.speed
 
         previous_x = self.x
         self.x += self.velocity_x
-        self.x = max(min_x, min(max_x, self.x))
+        self.x = clamp(self.x, min_x, max_x)
 
         if self.x != previous_x + self.velocity_x:
             self.velocity_x = self.x - previous_x
