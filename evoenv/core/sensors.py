@@ -6,7 +6,8 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-from .utils import clamp01
+import pygame
+from evoenv.core.utils import clamp01
 
 
 @dataclass(frozen=True)
@@ -122,3 +123,29 @@ class RaySensor:
             end_x=pose.x + dx,
             end_y=pose.y + dy,
         )
+
+
+def ray_rect_hit_fraction(
+    *,
+    start_x: float,
+    start_y: float,
+    end_x: float,
+    end_y: float,
+    rect: pygame.Rect,
+) -> float | None:
+    """Return the first hit fraction of a ray against one rectangle."""
+    ray_length = math.hypot(end_x - start_x, end_y - start_y)
+    if ray_length <= 0.0:
+        return None
+
+    start = (int(round(start_x)), int(round(start_y)))
+    end = (int(round(end_x)), int(round(end_y)))
+
+    clipped_line = rect.clipline(start, end)
+    if not clipped_line:
+        return None
+
+    hit_x, hit_y = clipped_line[0]
+    hit_distance = math.hypot(float(hit_x) - start_x, float(hit_y) - start_y)
+
+    return clamp01(hit_distance / ray_length)

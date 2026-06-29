@@ -1,13 +1,17 @@
 # SPDX-License-Identifier: MIT
 """Headless Jumper environment with one ray-based obstacle sensor."""
 
-import math
 import random
 from collections.abc import Iterator
 
 import pygame
 from evoenv.core.env import Action, Env, InfoDict, Observation, StepResult
-from evoenv.core.sensors import Pose2D, RaySensor, SensorLineState
+from evoenv.core.sensors import (
+    Pose2D,
+    RaySensor,
+    SensorLineState,
+    ray_rect_hit_fraction,
+)
 from evoenv.core.utils import clamp01
 from evoenv.envs.jumper_defaults import (
     DEFAULT_GROUND_Y_OFFSET,
@@ -187,7 +191,7 @@ class JumperEnv(Env):
         first_hit_fraction: float | None = None
 
         for obstacle in self._iter_obstacles():
-            hit_fraction = self._ray_rect_hit_fraction(
+            hit_fraction = ray_rect_hit_fraction(
                 start_x=state.start_x,
                 start_y=state.start_y,
                 end_x=state.end_x,
@@ -331,29 +335,3 @@ class JumperEnv(Env):
         for sprite in self.obstacle_group:
             if isinstance(sprite, JumperObstacle):
                 yield sprite
-
-    @staticmethod
-    def _ray_rect_hit_fraction(
-        *,
-        start_x: float,
-        start_y: float,
-        end_x: float,
-        end_y: float,
-        rect: pygame.Rect,
-    ) -> float | None:
-        """Return first ray fraction intersecting one rectangle."""
-        ray_length = math.hypot(end_x - start_x, end_y - start_y)
-        if ray_length <= 0.0:
-            return None
-
-        start = (int(round(start_x)), int(round(start_y)))
-        end = (int(round(end_x)), int(round(end_y)))
-
-        clipped_line = rect.clipline(start, end)
-        if not clipped_line:
-            return None
-
-        hit_x, hit_y = clipped_line[0]
-        distance = math.hypot(float(hit_x) - start_x, float(hit_y) - start_y)
-
-        return clamp01(distance / ray_length)
