@@ -10,7 +10,7 @@ from evoenv.core.env import Action, Observation, validate_action, validate_obser
 from evoenv.core.sensors import RaySensor
 from evoenv.core.task import BaseTask
 from evoenv.core.task_registry import register_task_loader
-from evoenv.core.utils import clamp01
+from evoenv.core.utils import clamp, clamp01
 from evoenv.envs.gap_navigator import GapNavigatorEnv, SensorLayout
 from evoenv.envs.gap_navigator_config import GapNavigatorTaskConfig
 from evoenv.envs.gap_navigator_defaults import (
@@ -32,7 +32,7 @@ class GapNavigatorController:
     def act(self, observation: Observation) -> Action:
         """Return a clipped steering action in [-1, 1]."""
         output = self.net.calc(observation)
-        steering = clamp01(output[0])
+        steering = clamp(output[0], -1.0, 1.0)
         return [steering]
 
 
@@ -130,8 +130,8 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
         angle_range = self.sensor_config.max_angle - self.sensor_config.min_angle
 
         for idx in range(0, expected_size, 2):
-            length_raw = self._clamp01(vector[idx])
-            angle_raw = self._clamp01(vector[idx + 1])
+            length_raw = clamp01(vector[idx])
+            angle_raw = clamp01(vector[idx + 1])
 
             length = length_raw * self.sensor_config.max_length
 

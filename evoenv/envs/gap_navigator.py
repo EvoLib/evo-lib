@@ -1,14 +1,18 @@
 # SPDX-License-Identifier: MIT
 """Headless GapNavigator environment with falling obstacle rows."""
 
-import math
 import random
 from collections.abc import Iterator
 
 import pygame
 from evoenv.core.env import Action, Env, InfoDict, Observation, StepResult
-from evoenv.core.sensors import Pose2D, RaySensor, SensorLineState
-from evoenv.core.utils import clamp, clamp01
+from evoenv.core.sensors import (
+    Pose2D,
+    RaySensor,
+    SensorLineState,
+    ray_rect_hit_fraction,
+)
+from evoenv.core.utils import clamp
 from evoenv.envs.gap_navigator_objects import (
     AvoiderPlayer,
     GapRow,
@@ -226,12 +230,12 @@ class GapNavigatorEnv(Env):
         first_hit_fraction: float | None = None
 
         for block in self._iter_blocks():
-            hit_fraction = self._ray_block_hit_fraction(
+            hit_fraction = ray_rect_hit_fraction(
                 start_x=state.start_x,
                 start_y=state.start_y,
                 end_x=state.end_x,
                 end_y=state.end_y,
-                block=block,
+                rect=block.rect,
             )
             if hit_fraction is None:
                 continue
@@ -328,29 +332,3 @@ class GapNavigatorEnv(Env):
         for sprite in self.block_group:
             if isinstance(sprite, ObstacleBlockSprite):
                 yield sprite
-
-    @staticmethod
-    def _ray_block_hit_fraction(
-        *,
-        start_x: float,
-        start_y: float,
-        end_x: float,
-        end_y: float,
-        block: ObstacleBlockSprite,
-    ) -> float | None:
-        """Return first ray fraction intersecting one solid block."""
-        ray_length = math.hypot(end_x - start_x, end_y - start_y)
-        if ray_length <= 0.0:
-            return None
-
-        start = (int(round(start_x)), int(round(start_y)))
-        end = (int(round(end_x)), int(round(end_y)))
-
-        clipped_line = block.rect.clipline(start, end)
-        if not clipped_line:
-            return None
-
-        hit_x, hit_y = clipped_line[0]
-        distance = math.hypot(float(hit_x) - start_x, float(hit_y) - start_y)
-
-        return clamp01(distance / ray_length)
