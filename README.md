@@ -224,7 +224,7 @@ EvoLib includes a small set of examples that illustrate the core concepts step b
 2. [Strategies in Action](examples/02_strategies/03_mu_lambda.py) – (μ + λ) evolution step by step.
 3. [Function Approximation](examples/04_function_approximation/02_sine_point_approximation.py) – evolve support points to match a sine curve.
 4. [Evolution as Control](examples/05_advanced_topics/04_vector_control_with_obstacles.py) – evolve a controller in an environment.
-5. [Neuroevolution with Structural Growth](examples/07_evonet/03_structural_xor.py) – evolve networks with growing topology.
+5. [Neuroevolution with Structural Growth](examples/07_evonet/06_structural_xor.py) – evolve networks with growing topology.
 
 For deeper exploration, see the [full examples directory](examples/)
 
