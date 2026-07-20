@@ -13,7 +13,7 @@ from evoenv.core.sensors import (
     Pose2D,
     RaySensor,
     SensorLineState,
-    ray_rect_hit_fraction,
+    cast_ray_against_rects,
 )
 from evoenv.core.utils import clamp, clamp01
 from evoenv.envs.collector_objects import (
@@ -314,28 +314,12 @@ class CollectorEnv(Env):
         return value
 
     def _cast_sensor(self, sensor: RaySensor) -> tuple[float, float | None]:
-        """Cast one ray sensor and return sensor value plus hit fraction."""
-        state = sensor.get_state(self._sensor_pose(), value=0.0)
-        first_hit_fraction: float | None = None
-
-        for rect in self._iter_blocking_rects():
-            hit_fraction = ray_rect_hit_fraction(
-                start_x=state.start_x,
-                start_y=state.start_y,
-                end_x=state.end_x,
-                end_y=state.end_y,
-                rect=rect,
-            )
-            if hit_fraction is None:
-                continue
-
-            if first_hit_fraction is None or hit_fraction < first_hit_fraction:
-                first_hit_fraction = hit_fraction
-
-        if first_hit_fraction is None:
-            return 0.0, None
-
-        return 1.0 - first_hit_fraction, first_hit_fraction
+        """Cast one obstacle sensor."""
+        return cast_ray_against_rects(
+            sensor,
+            self._sensor_pose(),
+            self._iter_blocking_rects(),
+        )
 
     def _sensor_pose(self) -> Pose2D:
         """Return the sensor origin pose at the agent center."""

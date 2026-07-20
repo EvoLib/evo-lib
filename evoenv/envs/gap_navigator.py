@@ -10,7 +10,7 @@ from evoenv.core.sensors import (
     Pose2D,
     RaySensor,
     SensorLineState,
-    ray_rect_hit_fraction,
+    cast_ray_against_rects,
 )
 from evoenv.core.utils import clamp
 from evoenv.envs.gap_navigator_objects import (
@@ -174,12 +174,7 @@ class GapNavigatorEnv(Env):
 
     def get_sensor_states(self) -> list[SensorLineState]:
         """Return current sensor states for rendering and debugging."""
-        pose = Pose2D(
-            x=self.player.x,
-            y=self.player.y,
-            heading=0.0,
-        )
-
+        pose = self._sensor_pose()
         states: list[SensorLineState] = []
 
         for sensor in self.sensors:
@@ -218,35 +213,21 @@ class GapNavigatorEnv(Env):
         value, _hit_fraction = self._cast_sensor(sensor)
         return value
 
-    def _cast_sensor(self, sensor: RaySensor) -> tuple[float, float | None]:
-        """Cast one sensor ray and return proximity value plus hit fraction."""
-        pose = Pose2D(
+    def _sensor_pose(self) -> Pose2D:
+        """Return the sensor origin pose at the player center."""
+        return Pose2D(
             x=self.player.x,
             y=self.player.y,
             heading=0.0,
         )
-        state = sensor.get_state(pose, value=0.0)
 
-        first_hit_fraction: float | None = None
-
-        for block in self._iter_blocks():
-            hit_fraction = ray_rect_hit_fraction(
-                start_x=state.start_x,
-                start_y=state.start_y,
-                end_x=state.end_x,
-                end_y=state.end_y,
-                rect=block.rect,
-            )
-            if hit_fraction is None:
-                continue
-
-            if first_hit_fraction is None or hit_fraction < first_hit_fraction:
-                first_hit_fraction = hit_fraction
-
-        if first_hit_fraction is None:
-            return 0.0, None
-
-        return 1.0 - first_hit_fraction, first_hit_fraction
+    def _cast_sensor(self, sensor: RaySensor) -> tuple[float, float | None]:
+        """Cast one obstacle sensor."""
+        return cast_ray_against_rects(
+            sensor,
+            self._sensor_pose(),
+            self._iter_blocking_rects(),
+        )
 
     def _spawn_row(self, *, y: float) -> None:
         """Spawn one logical gap row and two solid block sprites."""
@@ -327,8 +308,8 @@ class GapNavigatorEnv(Env):
 
         return near_left or near_right
 
-    def _iter_blocks(self) -> Iterator[ObstacleBlockSprite]:
-        """Yield active obstacle block sprites."""
+    def _iter_blocking_rects(self) -> Iterator[pygame.Rect]:
+        """Yield active obstacle rectangles that block sensor rays."""
         for sprite in self.block_group:
             if isinstance(sprite, ObstacleBlockSprite):
-                yield sprite
+                yield sprite.rect

@@ -7,6 +7,7 @@ import math
 from dataclasses import dataclass
 
 import pygame
+from collection.abc import Iterable
 from evoenv.core.utils import clamp01
 
 
@@ -149,3 +150,32 @@ def ray_rect_hit_fraction(
     hit_distance = math.hypot(float(hit_x) - start_x, float(hit_y) - start_y)
 
     return clamp01(hit_distance / ray_length)
+
+
+def cast_ray_against_rects(
+    sensor: RaySensor,
+    pose: Pose2D,
+    rects: Iterable[pygame.Rect],
+) -> tuple[float, float | None]:
+    """Return proximity value and nearest hit fraction for one ray sensor."""
+    state = sensor.get_state(pose, value=0.0)
+    first_hit_fraction: float | None = None
+
+    for rect in rects:
+        hit_fraction = ray_rect_hit_fraction(
+            start_x=state.start_x,
+            start_y=state.start_y,
+            end_x=state.end_x,
+            end_y=state.end_y,
+            rect=rect,
+        )
+        if hit_fraction is None:
+            continue
+
+        if first_hit_fraction is None or hit_fraction < first_hit_fraction:
+            first_hit_fraction = hit_fraction
+
+    if first_hit_fraction is None:
+        return 0.0, None
+
+    return 1.0 - first_hit_fraction, first_hit_fraction

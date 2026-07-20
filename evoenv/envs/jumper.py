@@ -10,7 +10,7 @@ from evoenv.core.sensors import (
     Pose2D,
     RaySensor,
     SensorLineState,
-    ray_rect_hit_fraction,
+    cast_ray_against_rects,
 )
 from evoenv.core.utils import clamp01
 from evoenv.envs.jumper_defaults import (
@@ -186,28 +186,12 @@ class JumperEnv(Env):
         return value
 
     def _cast_sensor(self) -> tuple[float, float | None]:
-        """Cast the ray sensor and return sensor value plus hit fraction."""
-        state = self.sensor.get_state(self._sensor_pose(), value=0.0)
-        first_hit_fraction: float | None = None
-
-        for obstacle in self._iter_obstacles():
-            hit_fraction = ray_rect_hit_fraction(
-                start_x=state.start_x,
-                start_y=state.start_y,
-                end_x=state.end_x,
-                end_y=state.end_y,
-                rect=obstacle.rect,
-            )
-            if hit_fraction is None:
-                continue
-
-            if first_hit_fraction is None or hit_fraction < first_hit_fraction:
-                first_hit_fraction = hit_fraction
-
-        if first_hit_fraction is None:
-            return 0.0, None
-
-        return 1.0 - first_hit_fraction, first_hit_fraction
+        """Cast the obstacle sensor in the current environment."""
+        return cast_ray_against_rects(
+            self.sensor,
+            self._sensor_pose(),
+            self._iter_blocking_rects(),
+        )
 
     def _sensor_pose(self) -> Pose2D:
         """Return the player-front pose used as the Jumper sensor origin."""
@@ -335,3 +319,8 @@ class JumperEnv(Env):
         for sprite in self.obstacle_group:
             if isinstance(sprite, JumperObstacle):
                 yield sprite
+
+    def _iter_blocking_rects(self) -> Iterator[pygame.Rect]:
+        """Yield active obstacle rectangles that block the sensor ray."""
+        for obstacle in self._iter_obstacles():
+            yield obstacle.rect
