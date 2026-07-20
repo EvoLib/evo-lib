@@ -30,7 +30,7 @@ class LineFollowerController:
     def act(self, observation: Observation) -> Action:
         """Return a clipped steering action in [-1, 1]."""
         output = self.net.calc(observation)
-        turn = clamp(output[0])
+        turn = clamp(output[0], -1.0, 1.0)
         return [turn]
 
 
