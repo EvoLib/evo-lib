@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable
 from dataclasses import dataclass
 
 import pygame
-from collection.abc import Iterable
 from evoenv.core.utils import clamp01
 
 
