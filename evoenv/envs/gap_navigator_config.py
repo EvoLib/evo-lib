@@ -3,17 +3,14 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Self
 
-import yaml
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from evoenv.core.config import StrictConfigModel, YamlConfigModel
+from pydantic import Field, model_validator
 
 
-class GapNavigatorEnvConfig(BaseModel):
+class GapNavigatorEnvConfig(StrictConfigModel):
     """Simulation parameters for the GapNavigator environment."""
-
-    model_config = ConfigDict(extra="forbid")
 
     width: int = Field(gt=0)
     height: int = Field(gt=0)
@@ -49,10 +46,8 @@ class GapNavigatorEnvConfig(BaseModel):
         return self
 
 
-class GapNavigatorRewardConfig(BaseModel):
+class GapNavigatorRewardConfig(StrictConfigModel):
     """Reward shaping parameters for the GapNavigator task."""
-
-    model_config = ConfigDict(extra="forbid")
 
     pass_reward: float
     gap_alignment_reward: float = Field(ge=0.0)
@@ -61,20 +56,16 @@ class GapNavigatorRewardConfig(BaseModel):
     near_wall_penalty: float = Field(ge=0.0)
 
 
-class GapNavigatorFitnessConfig(BaseModel):
+class GapNavigatorFitnessConfig(StrictConfigModel):
     """Fitness parameters for the GapNavigator task."""
-
-    model_config = ConfigDict(extra="forbid")
 
     sensor_count_penalty: float = Field(ge=0.0)
     sensor_length_penalty: float = Field(ge=0.0)
     sensor_length_scale: float = Field(gt=0.0)
 
 
-class GapNavigatorSensorConfig(BaseModel):
+class GapNavigatorSensorConfig(StrictConfigModel):
     """Encoding parameters for evolved GapNavigator sensors."""
-
-    model_config = ConfigDict(extra="forbid")
 
     max_sensors: int = Field(gt=0)
     max_length: float = Field(gt=0.0)
@@ -94,25 +85,10 @@ class GapNavigatorSensorConfig(BaseModel):
         return self
 
 
-class GapNavigatorTaskConfig(BaseModel):
+class GapNavigatorTaskConfig(YamlConfigModel):
     """Complete YAML configuration for one GapNavigator experiment."""
-
-    model_config = ConfigDict(extra="forbid")
 
     env: GapNavigatorEnvConfig
     reward: GapNavigatorRewardConfig
     fitness: GapNavigatorFitnessConfig
     sensors: GapNavigatorSensorConfig
-
-    def to_yaml_dict(self) -> dict[str, object]:
-        """Return a YAML-serializable representation of the configuration."""
-        return self.model_dump(mode="json")
-
-    @classmethod
-    def from_yaml(cls, path: str | Path) -> Self:
-        """Load and validate a GapNavigator task configuration from YAML."""
-        config_path = Path(path)
-        with config_path.open("r", encoding="utf-8") as file:
-            raw_config = yaml.safe_load(file) or {}
-
-        return cls.model_validate(raw_config)

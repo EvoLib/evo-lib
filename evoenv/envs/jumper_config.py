@@ -3,17 +3,14 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Self
 
-import yaml
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from evoenv.core.config import StrictConfigModel, YamlConfigModel
+from pydantic import Field, model_validator
 
 
-class JumperEnvConfig(BaseModel):
+class JumperEnvConfig(StrictConfigModel):
     """Simulation parameters for the Jumper environment."""
-
-    model_config = ConfigDict(extra="forbid")
 
     width: int = Field(gt=0)
     height: int = Field(gt=0)
@@ -48,10 +45,8 @@ class JumperEnvConfig(BaseModel):
         return self
 
 
-class JumperRewardConfig(BaseModel):
+class JumperRewardConfig(StrictConfigModel):
     """Reward parameters for the Jumper task."""
-
-    model_config = ConfigDict(extra="forbid")
 
     collision_penalty: float = Field(ge=0.0)
     pass_reward: float
@@ -59,33 +54,16 @@ class JumperRewardConfig(BaseModel):
     jump_strength_penalty: float = Field(ge=0.0)
 
 
-class JumperSensorConfig(BaseModel):
+class JumperSensorConfig(StrictConfigModel):
     """Sensor parameters for the fixed Jumper ray sensor."""
-
-    model_config = ConfigDict(extra="forbid")
 
     length: float = Field(gt=0.0)
     angle: float
 
 
-class JumperTaskConfig(BaseModel):
+class JumperTaskConfig(YamlConfigModel):
     """Complete YAML configuration for one Jumper experiment."""
-
-    model_config = ConfigDict(extra="forbid")
 
     env: JumperEnvConfig
     reward: JumperRewardConfig
     sensor: JumperSensorConfig
-
-    def to_yaml_dict(self) -> dict[str, object]:
-        """Return a YAML-serializable representation of the configuration."""
-        return self.model_dump(mode="json")
-
-    @classmethod
-    def from_yaml(cls, path: str | Path) -> Self:
-        """Load and validate a Jumper task configuration from YAML."""
-        config_path = Path(path)
-        with config_path.open("r", encoding="utf-8") as file:
-            raw_config = yaml.safe_load(file) or {}
-
-        return cls.model_validate(raw_config)

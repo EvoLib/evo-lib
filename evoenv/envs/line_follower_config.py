@@ -3,17 +3,12 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Self
-
-import yaml
-from pydantic import BaseModel, ConfigDict, Field
+from evoenv.core.config import StrictConfigModel, YamlConfigModel
+from pydantic import Field
 
 
-class LineFollowerEnvConfig(BaseModel):
+class LineFollowerEnvConfig(StrictConfigModel):
     """Simulation parameters for the LineFollower environment."""
-
-    model_config = ConfigDict(extra="forbid")
 
     width: int = Field(gt=0)
     height: int = Field(gt=0)
@@ -28,32 +23,15 @@ class LineFollowerEnvConfig(BaseModel):
     max_missed_line_steps: int = Field(gt=0)
 
 
-class LineFollowerRewardConfig(BaseModel):
+class LineFollowerRewardConfig(StrictConfigModel):
     """Reward parameters for the LineFollower task."""
-
-    model_config = ConfigDict(extra="forbid")
 
     progress_reward_scale: float = Field(ge=0.0)
     missed_line_penalty: float = Field(ge=0.0)
 
 
-class LineFollowerTaskConfig(BaseModel):
+class LineFollowerTaskConfig(YamlConfigModel):
     """Complete YAML configuration for one LineFollower difficulty preset."""
-
-    model_config = ConfigDict(extra="forbid")
 
     env: LineFollowerEnvConfig
     reward: LineFollowerRewardConfig
-
-    def to_yaml_dict(self) -> dict[str, object]:
-        """Return a YAML-serializable representation of the configuration."""
-        return self.model_dump(mode="json")
-
-    @classmethod
-    def from_yaml(cls, path: str | Path) -> Self:
-        """Load and validate a LineFollower task configuration from YAML."""
-        config_path = Path(path)
-        with config_path.open("r", encoding="utf-8") as file:
-            raw_config = yaml.safe_load(file) or {}
-
-        return cls.model_validate(raw_config)
