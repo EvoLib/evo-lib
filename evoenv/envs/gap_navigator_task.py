@@ -15,7 +15,6 @@ from evoenv.envs.gap_navigator import GapNavigatorEnv, SensorLayout
 from evoenv.envs.gap_navigator_config import GapNavigatorTaskConfig
 from evoenv.envs.gap_navigator_defaults import (
     DEFAULT_DEBUG_EVERY_N_GENERATIONS,
-    DEFAULT_DEBUG_MAX_STEPS,
     DEFAULT_FPS,
 )
 from evoenv.renderers.pygame_gap_navigator import run_debug_episode
@@ -200,7 +199,7 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
         *,
         generation: int,
         every: int = DEFAULT_DEBUG_EVERY_N_GENERATIONS,
-        steps: int = DEFAULT_DEBUG_MAX_STEPS,
+        steps: int | None = None,
         title: str | None = None,
         filename: str | Path | None = None,
         gif_fps: int = DEFAULT_FPS,
