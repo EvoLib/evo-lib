@@ -2,6 +2,7 @@ env:
   width: 600
   height: 600
   max_steps: 1500
+  player_y_offset: 55
 
   row_speed: 5.5
   row_interval: 50

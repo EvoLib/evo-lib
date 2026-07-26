@@ -3,12 +3,10 @@
 
 from __future__ import annotations
 
-import math
 from pathlib import Path
 from typing import Self
 
 import yaml
-from evoenv.envs.gap_navigator_defaults import DEFAULT_PLAYER_Y_OFFSET
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
@@ -17,20 +15,20 @@ class GapNavigatorEnvConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    width: int = Field(default=400, gt=0)
-    height: int = Field(default=600, gt=0)
-    max_steps: int = Field(default=1500, gt=0)
+    width: int = Field(gt=0)
+    height: int = Field(gt=0)
+    max_steps: int = Field(gt=0)
 
-    player_y_offset: int = Field(default=DEFAULT_PLAYER_Y_OFFSET, ge=0)
-    player_speed: float = Field(default=5.6, gt=0.0)
+    player_y_offset: int = Field(ge=0)
+    player_speed: float = Field(gt=0.0)
 
-    row_speed: float = Field(default=4.0, gt=0.0)
-    row_interval: int = Field(default=62, gt=0)
-    obstacle_height: int = Field(default=28, gt=0)
-    min_gap_width: float = Field(default=135.0, gt=0.0)
-    max_gap_width: float = Field(default=195.0, gt=0.0)
-    edge_margin: float = Field(default=35.0, ge=0.0)
-    terminate_on_collision: bool = False
+    row_speed: float = Field(gt=0.0)
+    row_interval: int = Field(gt=0)
+    obstacle_height: int = Field(gt=0)
+    min_gap_width: float = Field(gt=0.0)
+    max_gap_width: float = Field(gt=0.0)
+    edge_margin: float = Field(ge=0.0)
+    terminate_on_collision: bool
 
     @model_validator(mode="after")
     def validate_geometry(self) -> Self:
@@ -56,11 +54,11 @@ class GapNavigatorRewardConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    pass_reward: float = 0.0
-    gap_alignment_reward: float = Field(default=0.040, ge=0.0)
-    movement_penalty: float = Field(default=0.014, ge=0.0)
-    collision_penalty: float = Field(default=6.5, ge=0.0)
-    near_wall_penalty: float = Field(default=0.040, ge=0.0)
+    pass_reward: float
+    gap_alignment_reward: float = Field(ge=0.0)
+    movement_penalty: float = Field(ge=0.0)
+    collision_penalty: float = Field(ge=0.0)
+    near_wall_penalty: float = Field(ge=0.0)
 
 
 class GapNavigatorFitnessConfig(BaseModel):
@@ -68,9 +66,9 @@ class GapNavigatorFitnessConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    sensor_count_penalty: float = Field(default=0.0, ge=0.0)
-    sensor_length_penalty: float = Field(default=1.0, ge=0.0)
-    sensor_length_scale: float = Field(default=500.0, gt=0.0)
+    sensor_count_penalty: float = Field(ge=0.0)
+    sensor_length_penalty: float = Field(ge=0.0)
+    sensor_length_scale: float = Field(gt=0.0)
 
 
 class GapNavigatorSensorConfig(BaseModel):
@@ -78,15 +76,11 @@ class GapNavigatorSensorConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    max_sensors: int = Field(default=6, gt=0)
-
-    max_length: float = Field(default=500.0, gt=0.0)
-    min_active_length: float = Field(
-        default=50,
-        ge=0.0,
-    )
-    min_angle: float = Field(default=-math.pi / 2)
-    max_angle: float = Field(default=math.pi / 2)
+    max_sensors: int = Field(gt=0)
+    max_length: float = Field(gt=0.0)
+    min_active_length: float = Field(ge=0.0)
+    min_angle: float
+    max_angle: float
 
     @model_validator(mode="after")
     def validate_sensor_range(self) -> Self:
@@ -105,12 +99,10 @@ class GapNavigatorTaskConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    env: GapNavigatorEnvConfig = Field(default_factory=GapNavigatorEnvConfig)
-    reward: GapNavigatorRewardConfig = Field(default_factory=GapNavigatorRewardConfig)
-    fitness: GapNavigatorFitnessConfig = Field(
-        default_factory=GapNavigatorFitnessConfig
-    )
-    sensors: GapNavigatorSensorConfig = Field(default_factory=GapNavigatorSensorConfig)
+    env: GapNavigatorEnvConfig
+    reward: GapNavigatorRewardConfig
+    fitness: GapNavigatorFitnessConfig
+    sensors: GapNavigatorSensorConfig
 
     def to_yaml_dict(self) -> dict[str, object]:
         """Return a YAML-serializable representation of the configuration."""

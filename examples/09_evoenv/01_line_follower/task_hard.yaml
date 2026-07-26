@@ -1,0 +1,16 @@
+env:
+  width: 1000
+  height: 600
+  max_steps: 800
+
+  line_complexity: 3.8
+  line_width: 4
+
+  base_speed: 5.5
+  turn_strength: 0.14
+
+  max_missed_line_steps: 20
+
+reward:
+  progress_reward_scale: 0.25
+  missed_line_penalty: 0.25
