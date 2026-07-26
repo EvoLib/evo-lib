@@ -43,6 +43,11 @@ class GapNavigatorEnv(Env):
         max_gap_width: float,
         edge_margin: float,
         terminate_on_collision: bool,
+        pass_reward: float,
+        gap_alignment_reward: float,
+        movement_penalty: float,
+        collision_penalty: float,
+        near_wall_penalty: float,
         sensors: SensorLayout | None = None,
     ) -> None:
         self.width = int(width)
@@ -60,6 +65,12 @@ class GapNavigatorEnv(Env):
         self.max_gap_width = float(max_gap_width)
         self.edge_margin = float(edge_margin)
         self.terminate_on_collision = bool(terminate_on_collision)
+
+        self.pass_reward = float(pass_reward)
+        self.gap_alignment_reward = float(gap_alignment_reward)
+        self.movement_penalty = float(movement_penalty)
+        self.collision_penalty = float(collision_penalty)
+        self.near_wall_penalty = float(near_wall_penalty)
 
         self.observation_size = self.max_sensors + 2
         self.action_size = 1
@@ -155,6 +166,21 @@ class GapNavigatorEnv(Env):
         if has_collision:
             self.collision += 1
 
+        gap_alignment = self._gap_alignment_score()
+        near_wall = self._is_near_wall()
+
+        reward = gap_alignment * self.gap_alignment_reward
+        reward -= abs(clamped_steering) * self.movement_penalty
+
+        if has_collision:
+            reward -= self.collision_penalty
+
+        if near_wall:
+            reward -= self.near_wall_penalty
+
+        if row_passed and self.terminate_on_collision:
+            reward += self.pass_reward
+
         done = self.step_count >= self.max_steps
         if has_collision and self.terminate_on_collision:
             done = True
@@ -166,11 +192,11 @@ class GapNavigatorEnv(Env):
             "collision": self.collision,
             "has_collision": has_collision,
             "row_passed": row_passed,
-            "gap_alignment": self._gap_alignment_score(),
-            "near_wall": self._is_near_wall(),
+            "gap_alignment": gap_alignment,
+            "near_wall": near_wall,
         }
 
-        return self._observe(), 0.0, done, info
+        return self._observe(), reward, done, info
 
     def get_sensor_states(self) -> list[SensorLineState]:
         """Return current sensor states for rendering and debugging."""

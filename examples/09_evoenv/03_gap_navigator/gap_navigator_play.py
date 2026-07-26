@@ -74,8 +74,8 @@ def main() -> None:
         controller.update()
         action = controller.act(observation)
 
-        observation, _env_reward, done, info = env.step(action)
-        total_reward += task.compute_reward(info)
+        observation, reward, done, _info = env.step(action)
+        total_reward += reward
 
         if done:
             print(f"Reward: {total_reward:.2f}")

@@ -9,7 +9,7 @@ from typing import Generic, TypeVar
 
 import pygame
 from evoenv.core.controller import Controller
-from evoenv.core.env import Env, InfoDict
+from evoenv.core.env import Env
 from evoenv.core.sensors import SensorLineState
 from PIL import Image
 
@@ -18,7 +18,6 @@ DrawFunction = Callable[
     [pygame.Surface, EnvT, float, pygame.font.Font, str],
     None,
 ]
-InfoRewardFunction = Callable[[InfoDict], float]
 
 
 class GifRecorder:
@@ -112,7 +111,6 @@ class PygameDebugRenderer(Generic[EnvT]):
         filename: str | Path | None = None,
         gif_fps: int,
         frame_skip: int = 1,
-        reward_fn: InfoRewardFunction | None = None,
     ) -> Path | None:
         """Run one rendered episode and optionally write an animated GIF."""
         if steps < 0:
@@ -128,9 +126,7 @@ class PygameDebugRenderer(Generic[EnvT]):
                 return recorder.save()
 
             action = controller.act(observation)
-            observation, env_reward, done, info = env.step(action)
-
-            reward = env_reward if reward_fn is None else reward_fn(info)
+            observation, reward, done, _info = env.step(action)
             total_reward += reward
 
             self.draw_env(screen, env, total_reward, font, title)

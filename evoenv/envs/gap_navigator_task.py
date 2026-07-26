@@ -6,7 +6,8 @@ from typing import Any
 
 from evoenv.core.checkpoint import EnvCheckpoint
 from evoenv.core.difficulty import Difficulty
-from evoenv.core.env import Action, Observation, validate_action, validate_observation
+from evoenv.core.env import Action, Observation
+from evoenv.core.evaluator import evaluate_episode
 from evoenv.core.sensors import RaySensor
 from evoenv.core.task import BaseTask
 from evoenv.core.task_registry import register_task_loader
@@ -96,6 +97,11 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
             max_gap_width=self.env_config.max_gap_width,
             edge_margin=self.env_config.edge_margin,
             terminate_on_collision=self.env_config.terminate_on_collision,
+            pass_reward=self.reward_config.pass_reward,
+            gap_alignment_reward=self.reward_config.gap_alignment_reward,
+            movement_penalty=self.reward_config.movement_penalty,
+            collision_penalty=self.reward_config.collision_penalty,
+            near_wall_penalty=self.reward_config.near_wall_penalty,
             sensors=sensors,
         )
 
@@ -149,49 +155,17 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
 
         return tuple(sensors)
 
-    def compute_reward(self, info: dict[str, Any]) -> float:
-        """Compute task reward from GapNavigator simulation info."""
-        reward = 0.0
-
-        reward += float(info["gap_alignment"]) * self.reward_config.gap_alignment_reward
-
-        reward -= abs(float(info["steering"])) * self.reward_config.movement_penalty
-
-        if bool(info["has_collision"]):
-            reward -= self.reward_config.collision_penalty
-
-        if bool(info["near_wall"]):
-            reward -= self.reward_config.near_wall_penalty
-
-        if bool(info["row_passed"]) and self.env_config.terminate_on_collision:
-            reward += self.reward_config.pass_reward
-
-        return reward
-
     def evaluate(self, indiv: Indiv) -> float:
-        """Run one full episode and return the accumulated task reward."""
-        sensor_layout = self.make_sensor_layout(indiv)
-        env = self.make_env(sensors=sensor_layout)
+        """Evaluate an individual with its evolved sensor layout."""
+        env = self.make_env(sensors=self.make_sensor_layout(indiv))
         controller = self.make_controller(indiv)
 
-        observation = env.reset(seed=self.seed)
-        validate_observation(env, observation)
-
-        total_reward = 0.0
-
-        for _ in range(self.max_steps):
-            action = controller.act(observation)
-            validate_action(env, action)
-
-            observation, _env_reward, done, info = env.step(action)
-            validate_observation(env, observation)
-
-            total_reward += self.compute_reward(info)
-
-            if done:
-                break
-
-        return total_reward
+        return evaluate_episode(
+            env=env,
+            controller=controller,
+            seed=self.seed,
+            max_steps=self.max_steps,
+        )
 
     def visualize(
         self,
@@ -222,7 +196,6 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
             filename=filename,
             gif_fps=gif_fps,
             frame_skip=frame_skip,
-            reward_fn=self.compute_reward,
         )
 
 

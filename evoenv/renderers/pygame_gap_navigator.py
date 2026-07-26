@@ -11,7 +11,6 @@ from evoenv.envs.gap_navigator_defaults import (
     DEFAULT_FPS,
 )
 from evoenv.renderers.pygame_common import (
-    InfoRewardFunction,
     PygameDebugRenderer,
     draw_ray_sensors,
     draw_text_overlay,
@@ -65,7 +64,6 @@ def run_debug_episode(
     filename: str | Path | None = None,
     gif_fps: int = DEFAULT_FPS,
     frame_skip: int = 1,
-    reward_fn: InfoRewardFunction | None = None,
 ) -> Path | None:
     """Run debug rendering periodically during training."""
     if not enabled or generation % every != 0:
@@ -81,5 +79,4 @@ def run_debug_episode(
         filename=filename,
         gif_fps=gif_fps,
         frame_skip=frame_skip,
-        reward_fn=reward_fn,
     )
