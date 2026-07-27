@@ -262,10 +262,12 @@ Current environments:
 |---|---|
 | `01_line_follower/` | Sensor-based steering and continuous correction |
 | `02_jumper/` | Timing, discrete decisions, and delayed action effects |
+| `03_gap_navigator/` | Gap Steering with Evolvable Sensors |
+| `04_collector` | Target Following, Obstacle Avoidance, and Reward Shaping |
 
 ### Example output
 <p align="center">
-  <img src="./09_evoenv/01_line_follower/frames/linefollower.gif" alt="LineFollower animation" width="512"/>
+  <img src="./09_evoenv/04_collector/collector.gif" alt="Collector animation" width="512"/>
 </p>
 
 See: [`09_evoenv/README.md`](09_evoenv/README.md)
