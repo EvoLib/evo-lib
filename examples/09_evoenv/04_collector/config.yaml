@@ -1,0 +1,43 @@
+random_seed: 42
+
+parent_pool_size: 20
+offspring_pool_size: 40
+max_generations: 50
+max_indiv_age: 0
+num_elites: 1
+
+parallel:
+  backend: ray
+  num_cpus: 8
+    #address: auto
+
+evolution:
+  strategy: mu_plus_lambda
+
+modules:
+  brain:
+    type: evonet
+
+    dim: [6, 6, 2]
+    activation: [linear, tanh, tanh]
+
+    initializer: default
+
+    connectivity:
+      scope: adjacent
+      density: 1.0
+      recurrent: none
+
+    weights:
+      initializer: normal
+      std: 0.5
+      bounds: [-1.0, 1.0]
+
+    bias:
+      initializer: zero
+      bounds: [-1.0, 1.0]
+
+    mutation:
+      strategy: constant
+      probability: 1.0
+      strength: 0.15
