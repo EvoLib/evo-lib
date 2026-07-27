@@ -17,7 +17,7 @@ For a general overview of the Pygame-based EvoEnv examples, see the main README
 in `examples/09_evoenv/`.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/04_collector/frames/collector.gif" alt="Collector sample" width="512"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/04_collector/collector.gif" alt="Collector sample" width="512"/>
 </p>
 
 ---

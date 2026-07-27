@@ -21,7 +21,7 @@ in `examples/09_evoenv/`.
 ---
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/01_line_follower/frames/linefollower.gif" alt="LineFollower sample" width="512"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/01_line_follower/linefollower.gif" alt="LineFollower sample" width="512"/>
 </p>
 
 ---

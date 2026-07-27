@@ -22,7 +22,7 @@ README in `examples/09_evoenv/`.
 ---
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/03_gap_navigator/frames/gap_navigator.gif" alt="GapNavigator sample" width="512"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/03_gap_navigator/gap_navigator.gif" alt="GapNavigator sample" width="512"/>
 </p>
 
 ---
