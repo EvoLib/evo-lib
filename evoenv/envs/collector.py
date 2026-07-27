@@ -24,6 +24,14 @@ from evoenv.envs.collector_objects import (
     distance,
 )
 
+_WALL_SENSOR_THICKNESS = 10
+_OBSTACLE_SPAWN_ATTEMPTS = 100
+_FOOD_SPAWN_ATTEMPTS = 200
+_AGENT_OBSTACLE_CLEARANCE = 70
+_AGENT_FOOD_CLEARANCE = 60.0
+_OBSTACLE_GAP = 20
+_FOOD_OBSTACLE_CLEARANCE = 4
+
 
 class CollectorEnv(Env):
     """
@@ -192,7 +200,7 @@ class CollectorEnv(Env):
             "food_left": len(self.food_items),
             "food_collected": self.food_collected,
             "collected_now": collected_now,
-            "collision": self.collision_count,
+            "collision_count": self.collision_count,
             "has_collision": has_collision,
             "visited_cells": len(self.visited_cells),
         }
@@ -330,20 +338,44 @@ class CollectorEnv(Env):
         for obstacle in self.obstacles:
             yield obstacle.rect
 
-        wall_thickness = 10
-        yield pygame.Rect(-wall_thickness, 0, wall_thickness, self.height)
-        yield pygame.Rect(self.width, 0, wall_thickness, self.height)
-        yield pygame.Rect(0, -wall_thickness, self.width, wall_thickness)
-        yield pygame.Rect(0, self.height, self.width, wall_thickness)
+        yield pygame.Rect(
+            -_WALL_SENSOR_THICKNESS,
+            0,
+            _WALL_SENSOR_THICKNESS,
+            self.height,
+        )
+        yield pygame.Rect(
+            self.width,
+            0,
+            _WALL_SENSOR_THICKNESS,
+            self.height,
+        )
+        yield pygame.Rect(
+            0,
+            -_WALL_SENSOR_THICKNESS,
+            self.width,
+            _WALL_SENSOR_THICKNESS,
+        )
+        yield pygame.Rect(
+            0,
+            self.height,
+            self.width,
+            _WALL_SENSOR_THICKNESS,
+        )
 
     def _spawn_obstacles(self) -> list[CollectorObstacle]:
-        """Create random rectangular obstacles."""
+        """Create the configured number of random rectangular obstacles."""
         obstacles: list[CollectorObstacle] = []
-        protected_center = pygame.Rect(0, 0, 140, 140)
+        protected_center = pygame.Rect(
+            0,
+            0,
+            _AGENT_OBSTACLE_CLEARANCE * 2,
+            _AGENT_OBSTACLE_CLEARANCE * 2,
+        )
         protected_center.center = (int(round(self.agent.x)), int(round(self.agent.y)))
 
         for _ in range(self.obstacle_count):
-            for _attempt in range(100):
+            for _attempt in range(_OBSTACLE_SPAWN_ATTEMPTS):
                 width = self._rng.randint(
                     self.obstacle_min_size,
                     self.obstacle_max_size,
@@ -354,11 +386,11 @@ class CollectorEnv(Env):
                 )
                 x = self._rng.randint(
                     self.spawn_margin,
-                    max(self.spawn_margin, self.width - self.spawn_margin - width),
+                    self.width - self.spawn_margin - width,
                 )
                 y = self._rng.randint(
                     self.spawn_margin,
-                    max(self.spawn_margin, self.height - self.spawn_margin - height),
+                    self.height - self.spawn_margin - height,
                 )
                 rect = pygame.Rect(x, y, width, height)
 
@@ -366,18 +398,26 @@ class CollectorEnv(Env):
                     continue
 
                 if any(
-                    rect.colliderect(obstacle.rect.inflate(20, 20))
+                    rect.colliderect(
+                        obstacle.rect.inflate(_OBSTACLE_GAP, _OBSTACLE_GAP)
+                    )
                     for obstacle in obstacles
                 ):
                     continue
 
                 obstacles.append(CollectorObstacle(rect=rect))
                 break
+            else:
+                raise RuntimeError(
+                    "Could not spawn all Collector obstacles "
+                    f"({len(obstacles)}/{self.obstacle_count}). Reduce "
+                    "obstacle_count, obstacle sizes, spawn_margin, or obstacle gap."
+                )
 
         return obstacles
 
     def _spawn_food_items(self) -> list[CollectorFood]:
-        """Create random food items outside obstacles."""
+        """Create the configured number of non-overlapping food items."""
         food_items: list[CollectorFood] = []
         min_x = self.spawn_margin + self.food_radius
         max_x = self.width - self.spawn_margin - self.food_radius
@@ -385,26 +425,39 @@ class CollectorEnv(Env):
         max_y = self.height - self.spawn_margin - self.food_radius
 
         for _ in range(self.food_count):
-            for _attempt in range(200):
+            for _attempt in range(_FOOD_SPAWN_ATTEMPTS):
                 x = self._rng.uniform(float(min_x), float(max_x))
                 y = self._rng.uniform(float(min_y), float(max_y))
 
-                if distance((x, y), self.agent.position) < 60.0:
+                if distance((x, y), self.agent.position) < _AGENT_FOOD_CLEARANCE:
                     continue
 
                 if any(
                     circle_intersects_rect(
                         x=x,
                         y=y,
-                        radius=float(self.food_radius + 4),
+                        radius=float(self.food_radius + _FOOD_OBSTACLE_CLEARANCE),
                         rect=obstacle.rect,
                     )
                     for obstacle in self.obstacles
                 ):
                     continue
 
+                if any(
+                    distance((x, y), food.position)
+                    < float(self.food_radius + food.radius)
+                    for food in food_items
+                ):
+                    continue
+
                 food_items.append(CollectorFood(x=x, y=y, radius=self.food_radius))
                 break
+            else:
+                raise RuntimeError(
+                    "Could not spawn all Collector food items "
+                    f"({len(food_items)}/{self.food_count}). Reduce food_count, "
+                    "food_radius, spawn_margin, or obstacle density."
+                )
 
         return food_items
 
