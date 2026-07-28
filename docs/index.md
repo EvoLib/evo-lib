@@ -42,6 +42,7 @@ lists the central imports exposed by `evolib`.
 getting_started
 config_guide
 config_parameter
+evoenv
 ```
 
 ```{toctree}
