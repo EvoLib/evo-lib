@@ -232,6 +232,13 @@ modules:
 
 For expensive problems, EvoLib can evaluate individuals in parallel using Ray.
 
+Install the optional parallel evaluation support before selecting the Ray
+backend:
+
+```bash
+pip install "evolib[parallel]"
+```
+
 ```yaml
 parallel:
   backend: ray         # backend: none | ray

@@ -31,7 +31,10 @@ def _ensure_ray_initialized(
     global _ray_initialized
 
     if ray is None:
-        raise RuntimeError("Ray is not installed. Install with `pip install ray`.")
+        raise RuntimeError(
+            "Ray is not installed. Install parallel evaluation support with "
+            'pip install "evolib[parallel]".'
+        )
 
     if not _ray_initialized:
         init_kwargs: dict[str, Any] = {}

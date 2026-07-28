@@ -43,7 +43,6 @@ dev = [
     "docformatter==1.7.5",
     "types-PyYAML",
     "matplotlib",
-    "ray",
 ]
 docs = [
   "sphinx",
@@ -57,6 +56,9 @@ test = [
 evoenv = [
     "pygame>=2.5",
     "pillow>=10.0",
+]
+parallel = [
+    "ray",
 ]
 
 
