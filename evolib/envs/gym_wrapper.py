@@ -3,21 +3,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, TypeAlias, cast
 
-try:
-    import gymnasium as gym
-except ImportError as e:
-    raise ImportError(
-        "Gymnasium is required for GymEnv. Please install with `pip install gymnasium`."
-    ) from e
-
-try:
-    import imageio
-except ImportError as e:
-    raise ImportError(
-        "imageio is required for GymEnv visualization. "
-        "Please install with `pip install imageio`."
-    ) from e
-
+import gymnasium as gym
+import imageio
 import numpy as np
 
 if TYPE_CHECKING:

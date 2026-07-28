@@ -13,10 +13,6 @@ observations, rewards, and termination signals.
 
 * Basic Gymnasium concepts (`env.reset()`, `env.step(action)`).  
 * EvoLib basics: populations, individuals, fitness assignment.  
-* Installed extras:  
-  ```bash
-  pip install gymnasium[box2d] imageio
-  ```
 
 ---
 
