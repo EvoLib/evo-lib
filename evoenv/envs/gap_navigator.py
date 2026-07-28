@@ -92,7 +92,10 @@ class GapNavigatorEnv(Env):
         )
 
         self.gap_rows: list[GapRow] = []
-        self.block_group = pygame.sprite.Group()
+
+        self.block_group: pygame.sprite.Group[ObstacleBlockSprite] = (
+            pygame.sprite.Group()
+        )
 
         self.step_count = 0
         self.passed_rows = 0

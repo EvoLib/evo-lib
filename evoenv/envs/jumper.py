@@ -90,7 +90,7 @@ class JumperEnv(Env):
             jump_velocity=self.jump_velocity,
         )
 
-        self.obstacle_group = pygame.sprite.Group()
+        self.obstacle_group: pygame.sprite.Group[JumperObstacle] = pygame.sprite.Group()
 
         self.step_count = 0
         self.passed_obstacles = 0
