@@ -6,11 +6,6 @@ max_generations: 50
 max_indiv_age: 0
 num_elites: 1
 
-parallel:
-  backend: ray
-  num_cpus: 8
-    #address: auto
-
 evolution:
   strategy: mu_plus_lambda
 
