@@ -21,6 +21,7 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 - **Educational value**: examples and a clean API make it practical for illustrating evolutionary concepts.  
 - **Neuroevolution support**: evolvable neural networks with explicit topology, recurrence, delays, and structural mutation (EvoNet).  
 - **Gymnasium integration**: run [Gymnasium](https://gymnasium.farama.org) benchmarks (e.g. CartPole, LunarLander) via a simple wrapper.
+- **EvoEnv**: build small, controllable Pygame environments for evolutionary experiments.
 - **Parallel evaluation (optional)**: basic support for [Ray](https://www.ray.io/) to speed up fitness evaluations.  
 - **HELI (Hierarchical Evolution with Lineage Incubation)**  
   Runs short micro-evolutions ("incubations") for structure-mutated individuals, allowing new topologies to stabilize before rejoining the main population.  
@@ -36,11 +37,24 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 
 ## Installation
 
+EvoLib requires Python 3.12 or newer.
+
 ```bash
 pip install evolib
 ```
 
-Requirements: Python 3.12+ and packages in `requirements.txt`.
+Install the optional Pygame dependencies for EvoEnv with:
+
+```bash
+pip install "evolib[evoenv]"
+```
+
+Install optional Ray-based parallel evaluation with:
+
+```bash
+pip install "evolib[parallel]"
+```
+
 
 ---
 
@@ -192,27 +206,17 @@ gif = env.visualize(indiv, gen=10)    # render & save as GIF
 
 ---
 
-## Preview: Pygame Integration
+## EvoEnv
 
-Early prototypes demonstrate how evolutionary algorithms can evolve both neural networks and sensor properties such as number, range, and orientation for agents in 2D worlds built with pygame. This illustrates how networks and sensors co-adapt to dynamic environments with collisions and feedback.
-
-### Ant/Food Prototype
-In this video, agents use simple sensors to learn how to collect food while avoiding collisions with the environment.
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/assets/ant.gif" alt="Pygame Integration Preview" width="640"/>
-</p>
-
-### Flappy Bird–style Prototype
-Another prototype uses a **Flappy Bird–like 2D world**, where agents must pass through moving gaps.
-Both the **neural controller** and the **sensors** (number, length, angle) are evolved, allowing perception and action to adapt together.
-This illustrates how EvoLib can be applied to simple game-like environments, making the joint evolution of sensing and control directly observable.
+EvoEnv provides small, controllable Pygame environments for
+evolutionary experiments with EvoLib. Environments separate headless simulation,
+controller integration, and visualization.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/assets/flappy.gif" alt="Pygame Integration Preview" width="160"/>
+<img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/04_collector/collector.gif" alt="EvoEnv Collector example" width="512"/>
 </p>
 
-*This video shows the best agent from the final generation rather than the full evolutionary process.*
+👉 [Examples](https://github.com/EvoLib/evo-lib/tree/main/examples/09_evoenv/README.md)
 
 ---
 
@@ -238,10 +242,9 @@ For deeper exploration, see the [full examples directory](examples/)
 - [X] Composite Parameters (multi-module individuals)
 - [X] Neuroevolution
 - [X] Topological Evolution (neurons, edges)
-- [X] Ray Support for Parallel Evaluation (early prototypes)
-- [X] OpenAI Gymnasium / Gym Wrapper
-- [ ] Game Environment Integration (pygame - early prototypes)
-
+- [X] Ray Support for Parallel Evaluation
+- [X] Gymnasium Integration
+- [X] EvoEnv for small Pygame-based evolutionary environments
 
 ---
 
