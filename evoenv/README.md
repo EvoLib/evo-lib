@@ -100,27 +100,43 @@ geometry, and environment-specific options.
 
 ```yaml
 env:
-  width: 800
+  width: 600
   height: 600
-  max_steps: 1000
-  food_count: 3
-  obstacle_count: 5
+  max_steps: 1500
+  player_y_offset: 55
+
+  row_speed: 4.0
+  row_interval: 62
+  obstacle_height: 28
+
+  min_gap_width: 135
+  max_gap_width: 195
+  edge_margin: 35
+
+  player_speed: 5.6
   terminate_on_collision: false
 
 reward:
-  food_reward: 10.0
-  distance_reward: 0.05
-  exploration_reward: 0.02
-  collision_penalty: -5.0
-  step_penalty: -0.001
-  turn_penalty: -0.002
+  pass_reward: 0.0  # pass_reward is only used when terminate_on_collision is enabled.
 
-sensor:
-  ray_length: 120.0
-  ray_angles: [-60.0, 0.0, 60.0]
+  gap_alignment_reward: 0.040
+  movement_penalty: 0.014
+  collision_penalty: 6.5
+  near_wall_penalty: 0.040
 
-exploration:
-  cell_size: 40
+fitness:
+  sensor_count_penalty: 0.0
+  sensor_length_penalty: 1.0
+  sensor_length_scale: 500.0
+
+sensors:
+  max_sensors: 6
+
+  max_length: 500.0
+  min_active_length: 0.0
+
+  min_angle: -1.57079632679
+  max_angle: 1.57079632679
 ```
 
 

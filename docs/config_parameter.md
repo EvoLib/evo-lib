@@ -156,7 +156,7 @@ The `vector` module defines an evolvable parameter vector.
 | `bounds`                         | `tuple[float, float]`                             | `[-1.0, 1.0]`  | Hard clamp range applied after mutation. |
 | `init_bounds`                    | `tuple[float, float] \| null`                     | `null`         | Clamp applied only during initialization. Falls back to `bounds` if not set. |
 | `shape`                          | `tuple[int, ...] \| null`                         | `null`         | Optional explicit shape. If set, `dim = product(shape)`. Shape is retained as metadata. |
-| `values`                         | `list[float] \| null`                             | `null`         | Required for `initializer: fixed_vector`. If `dim` is omitted, it is inferred from `len(values)`. |
+| `values`                         | `list[float] \| null`                             | `null`         | Required for `initializer: fixed`. If `dim` is omitted, it is inferred from `len(values)`. |
 | `activation`                     | `str \| null`                                     | `null`         | Only relevant if `structure: "net"`. |
 | `mean`                           | `float \| null`                                   | `0.0`          | Mean parameter for normal-based initializers (if used by initializer). |
 | `std`                            | `float \| null`                                   | `1.0`          | Standard deviation for normal-based initializers (if used by initializer). |
@@ -246,7 +246,7 @@ modules:
 modules:
   main:
     type: vector
-    initializer: fixed_vector
+    initializer: fixed
     values: [0.0, 1.0, 0.5, -0.5]
     bounds: [-1.0, 1.0]
 
@@ -264,7 +264,7 @@ modules:
     type: vector
     structure: flat
     dim: 6
-    initializer: normal_vector
+    initializer: normal
     mean: 0.0
     std: 0.2
     bounds: [-1.0, 1.0]
@@ -548,7 +548,7 @@ modules:
   controller:
     type: vector
     dim: 8
-    initializer: normal_vector
+    initializer: normal
     bounds: [-1.0, 1.0]
     mutation:
       strategy: adaptive_individual
@@ -561,6 +561,10 @@ modules:
     type: evonet
     dim: [4, 0, 0, 2]
     activation: [linear, tanh, tanh, tanh]
+
+    connectivity:
+      scope: adjacent
+      density: 1.0
 
     delay:
       initializer: uniform

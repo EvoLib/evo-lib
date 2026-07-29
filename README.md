@@ -118,7 +118,7 @@ modules:
       density: 1.0
 
     weights:
-      initializer: random
+      initializer: uniform
       bounds: [-1.0, 1.0]
 
     bias:

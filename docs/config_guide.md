@@ -100,7 +100,7 @@ modules:
   ys:
     type: vector
     dim: 6
-    initializer: zero_vector
+    initializer: zero
     bounds: [-1.5, 1.5]
     mutation:
       strategy: constant

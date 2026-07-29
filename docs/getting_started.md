@@ -40,7 +40,7 @@ modules:
   main:
     type: vector
     dim: 5
-    initializer: normal_vector
+    initializer: normal
     bounds: [-5.0, 5.0]
     mutation:
       strategy: constant
