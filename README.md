@@ -105,7 +105,8 @@ modules:
     mutation:
       strategy: adaptive_individual
       probability: 1.0
-      strength: 0.1
+      min_strength: 0.01
+      max_strength: 0.1
 
   brain:
     type: evonet
