@@ -1,28 +1,26 @@
 # EvoLib
 
-EvoLib is a lightweight and transparent framework for evolutionary computation,
-neuroevolution, and small controlled experiments.
+EvoLib is a framework for evolutionary computation, neuroevolution, and small
+controlled experiments.
 
-The project emphasizes understandable implementations, explicit configuration,
-and modular components that can be combined without hiding the evolutionary
-process behind a large framework.
+It uses explicit configuration and modular components. Evolutionary strategies,
+parameter representations, operators, and evaluation environments can be
+selected and combined separately.
 
 ## Project areas
 
-- **Evolutionary strategies** — configurable selection, reproduction,
+* **Evolutionary strategies** — configurable selection, reproduction,
   replacement, crossover, and mutation.
-- **Parameter representations** — vectors, network vectors, and EvoNet neural
+* **Parameter representations** — vectors, network vectors, and EvoNet neural
   networks.
-- **Neuroevolution** — weight, bias, activation, recurrent, delay, and
-  structural evolution.
-- **HELI** — lineage incubation for stabilizing newly mutated network
-  structures.
-- **Gymnasium integration** — evaluation and visualization on established
+* **Neuroevolution** — evolution of weights, biases, activation functions,
+  recurrent connections, delays, and network structures.
+* **HELI** — lineage incubation for newly mutated network structures.
+* **Gymnasium integration** — evaluation and visualization using Gymnasium
   environments.
-- **EvoEnv** — small Pygame-based environments for focused evolutionary
-  questions, teaching examples, and rapid prototyping.
-- **Optional parallel evaluation** — Ray-based fitness evaluation for workloads
-  that benefit from parallel execution.
+* **EvoEnv** — small Pygame-based environments for controlled evolutionary
+  experiments and teaching examples.
+* **Parallel evaluation** — optional Ray-based fitness evaluation.
 
 ## Start here
 
@@ -30,14 +28,14 @@ New users should begin with the
 [getting started guide](getting_started.md), followed by the
 [configuration guide](config_guide.md).
 
-The [configuration parameter reference](config_parameter.md) provides a compact
-overview of the available YAML settings. The [public API](api_public_api.md)
-lists the central imports exposed by `evolib`.
+The [configuration parameter reference](config_parameter.md) lists the
+available YAML settings. Documentation for the included Pygame-based
+environments is available under [EvoEnv](evoenv.md).
 
 ```{toctree}
 :maxdepth: 1
 :hidden:
-:caption: Start here
+:caption: Guides
 
 getting_started
 config_guide
@@ -96,3 +94,4 @@ api_utils_history_logger
 
 api_public_api
 ```
+
