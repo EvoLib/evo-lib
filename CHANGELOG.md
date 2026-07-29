@@ -1,29 +1,37 @@
 ## Unreleased
 
 ### Added
-- Added `evoenv` as a lightweight environment layer for EvoLib examples.
-- Added EvoEnv example set for small sensor/action tasks.
-- Added custom environment examples: Line Follower, Jumper, and Gap Navigator.
-- Added YAML-based task configuration for EvoEnv examples.
-- Added Pydantic task config models for environment-specific settings.
-- Added pygame visualization and play scripts for selected EvoEnv tasks.
+- Added EvoEnv as a top-level package for small Pygame-based evolutionary
+  environments.
+- Added the Line Follower, Jumper, Gap Navigator, and Collector environments.
+- Added YAML-based task configuration with Pydantic validation.
+- Added shared task, controller, sensor, renderer, and checkpoint infrastructure.
+- Added built-in task registration and checkpoint-based task reconstruction.
+- Added training, rule-based, play, and visualization scripts for EvoEnv examples.
+- Added the optional `parallel` extra for Ray-based fitness evaluation.
 
 ### Changed
+- Made Gymnasium with Box2D support and ImageIO regular runtime dependencies.
+- Changed example configurations to use sequential evaluation by default.
+- Extended CI quality checks to cover both `evolib` and `evoenv`.
 - Simplified Jumper to one compact standard task instead of difficulty presets.
-- Moved physics, obstacle, reward, and sensor settings out of Python constants.
-- Refactored Gap Navigator obstacle handling around explicit row/block data.
-- Updated EvoEnv example READMEs and documentation positioning.
-- Moved environment and reward settings from hard-coded presets to difficulty-specific `task_*.yaml` files.
+- Moved environment, physics, reward, obstacle, and sensor settings from
+  hard-coded Python constants into YAML task files.
+- Refactored shared sensor, renderer, and environment utilities for reuse across
+  EvoEnv examples.
+- Updated EvoEnv documentation and example structure.
 
 ### Fixed
 - Fixed sensor-state handling in Gap Navigator.
 - Improved pygame-based collision handling in EvoEnv examples.
 - Fixed Jumper observation consistency after the config refactor.
+- Fixed optional Ray installation guidance via the `parallel` extra.
 
 ### Removed
 - Removed Jumper `easy`, `medium`, and `hard` presets.
 - Removed hard-coded `jumper_settings.py`.
 - Removed hard-coded `gap_navigator_settings.py`.
+- Removed the obsolete root `requirements.txt`.
 
 ## EvoLib 0.2.0
 
