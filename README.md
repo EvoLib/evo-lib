@@ -43,12 +43,6 @@ EvoLib requires Python 3.12 or newer.
 pip install evolib
 ```
 
-Install the optional Pygame dependencies for EvoEnv with:
-
-```bash
-pip install "evolib[evoenv]"
-```
-
 Install optional Ray-based parallel evaluation with:
 
 ```bash
