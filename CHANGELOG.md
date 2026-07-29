@@ -1,4 +1,4 @@
-## Unreleased
+## EvoLib 0.3.0
 
 ### Added
 - Added EvoEnv as a top-level package for small Pygame-based evolutionary
