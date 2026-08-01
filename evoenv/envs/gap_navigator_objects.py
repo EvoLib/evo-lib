@@ -10,6 +10,9 @@ from evoenv.core.utils import clamp
 class AvoiderPlayer(pygame.sprite.Sprite):
     """Horizontally moving player body."""
 
+    image: pygame.Surface
+    rect: pygame.Rect
+
     def __init__(
         self,
         *,
@@ -115,6 +118,9 @@ class GapRow:
 
 class ObstacleBlockSprite(pygame.sprite.Sprite):
     """One solid rectangular obstacle block belonging to a logical gap row."""
+
+    image: pygame.Surface
+    rect: pygame.Rect
 
     def __init__(
         self,

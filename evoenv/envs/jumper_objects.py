@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 """Reusable simulation objects for the Jumper environment."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import pygame
 from evoenv.core.utils import clamp01
@@ -9,6 +9,9 @@ from evoenv.core.utils import clamp01
 
 class JumperPlayer(pygame.sprite.Sprite):
     """Player body with vertical jump physics."""
+
+    image: pygame.Surface
+    rect: pygame.Rect
 
     def __init__(
         self,
@@ -99,6 +102,9 @@ class JumperObstacle(pygame.sprite.Sprite):
     height: int
     color: tuple[int, int, int] = (255, 120, 80)
     counted: bool = False
+
+    image: pygame.Surface = field(init=False, repr=False)
+    rect: pygame.Rect = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         super().__init__()
