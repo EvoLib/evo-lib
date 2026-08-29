@@ -74,7 +74,7 @@ class ConnectivityConfig(BaseModel):
         if isinstance(v, str):
             if v.lower() == "none":
                 return []
-            return [v]
+            return [RecurrentKind(v)]
         return v
 
     @model_validator(mode="after")

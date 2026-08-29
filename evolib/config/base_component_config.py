@@ -207,13 +207,13 @@ class DelayMutationConfig(BaseModel):
 
 class AddNeuron(BaseModel):
     probability: float = Field(0.0, ge=0.0, le=1.0)
-    init_connection_ratio: Optional[float] = Field(
+    init_connection_ratio: float = Field(
         default=1.0,
         ge=0.0,
         le=1.0,
         description="Fraction of allowed connections to actually add [0.0, 1.0]).",
     )
-    init: Optional[Literal["none", "zero", "near_zero", "random"]] = "zero"
+    init: Literal["none", "zero", "near_zero", "random"] = "zero"
 
     # Whitelist for random activation selection
     activations_allowed: Optional[list[str]] = Field(
@@ -252,7 +252,7 @@ class AddConnection(BaseModel):
             "Maximum number of new connections to add per structural mutation event."
         ),
     )
-    init: Optional[Literal["none", "zero", "near_zero", "random"]] = "zero"
+    init: Literal["zero", "near_zero", "random"] = "zero"
 
 
 class RemoveConnection(BaseModel):
@@ -280,7 +280,7 @@ class StructuralTopology(BaseModel):
         "add_connection. Empty means none.",
     )
 
-    connection_scope: Optional[Literal["adjacent", "crosslayer"]] = "adjacent"
+    connection_scope: Literal["adjacent", "crosslayer"] = "adjacent"
 
     max_neurons: Optional[int] = Field(
         default=None,
@@ -307,14 +307,11 @@ class StructuralTopology(BaseModel):
         if isinstance(v, str):
             if v.lower() == "none":
                 return []
-            return [v]
+            return [RecurrentKind(v)]
         return v
 
     @model_validator(mode="after")
     def _validate_topology(self) -> "StructuralTopology":
-        if self.connection_scope not in {None, "adjacent", "crosslayer"}:
-            raise ValueError(f"Invalid connection_scope: {self.connection_scope}")
-
         if self.max_connections is not None and self.max_connections <= 0:
             raise ValueError("max_connections must be > 0")
         if self.max_neurons is not None and self.max_neurons <= 0:

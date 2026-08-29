@@ -11,6 +11,7 @@ from typing import Literal
 import numpy as np
 from evonet.activation import random_function_name
 from evonet.enums import ConnectionType, NeuronRole
+from numpy.typing import NDArray
 
 from evolib.config.evonet_component_config import DelayConfig, EvoNetComponentConfig
 from evolib.config.schema import FullConfig
@@ -25,6 +26,7 @@ def _clip(x: np.ndarray, bounds: tuple[float, float]) -> np.ndarray:
 def _apply_weights_init(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
     weights_cfg = cfg.weights
     size = para.net.num_weights
+    weights: NDArray[np.float64]
 
     if weights_cfg.initializer is None:
         return
@@ -55,6 +57,7 @@ def _apply_weights_init(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
 def _apply_bias_init(para: EvoNet, cfg: EvoNetComponentConfig) -> None:
     bias_cfg = cfg.bias
     size = para.net.num_biases
+    bias: NDArray[np.float64]
 
     if bias_cfg.initializer is None:
         return
