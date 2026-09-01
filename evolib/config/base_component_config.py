@@ -421,13 +421,6 @@ class ActivationMutationConfig(BaseModel):
         return self
 
 
-class EvoNetNeuronDynamicsConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    name: str = "standard"
-    params: dict[str, float] = Field(default_factory=dict)
-
-
 class EvoNetMutationConfig(MutationConfig):
     """
     EvoNet-specific variant with optional per-scope overrides.

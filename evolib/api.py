@@ -1,3 +1,4 @@
+from evolib.config.evonet_component_config import EvoNetComponentConfig
 from evolib.core.individual import Indiv as Individual
 from evolib.core.population import Pop as Population
 from evolib.envs.gym_wrapper import GymEnv
@@ -59,6 +60,7 @@ __all__ = [
     "Individual",
     "Vector",
     "EvoNet",
+    "EvoNetComponentConfig",
     "NetVector",
     "HistoryLogger",
     "plot_fitness",

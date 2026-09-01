@@ -11,7 +11,7 @@ import random as rng
 from typing import Any, Literal, Optional, Self
 
 import numpy as np
-from evonet.core import Nnet
+from evonet import Nnet
 from evonet.enums import NeuronRole
 from evonet.mutation import mutate_activations, mutate_bias, mutate_weight
 
@@ -79,6 +79,22 @@ class EvoNet(ParaBase):
 
         # Delay
         self.delay_mutation_cfg: DelayMutationConfig | None = None
+
+    @classmethod
+    def from_config(cls, cfg: EvoNetComponentConfig) -> Self:
+        """
+        Build an EvoLib EvoNet representation from a component config.
+
+        Network structure and parameter initialization are delegated to EvoNet; EvoLib
+        applies only the evolutionary mutation and crossover configuration.
+        """
+        config = cfg.model_copy(deep=True)
+
+        para = cls()
+        para.apply_config(config)
+        para.net = Nnet.from_config(config)
+
+        return para
 
     def __deepcopy__(self, memo: dict[int, object]) -> Self:
         """
