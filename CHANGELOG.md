@@ -1,3 +1,15 @@
+## Unreleased
+
+### Changed
+- Updated EvoLib to use the EvoNet 0.3 configuration and initialization API.
+
+### Fixed
+- Fixed pygame sprite attribute typing in EvoEnv.
+- Fixed EvoNet configuration typing and recurrent-kind normalization.
+
+### Removed
+- Removed the unused EvoEnv batch API.
+
 ## EvoLib 0.3.0
 
 ### Added
