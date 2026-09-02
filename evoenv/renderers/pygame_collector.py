@@ -16,18 +16,13 @@ from evoenv.envs.collector_defaults import (
 from evoenv.renderers.pygame_common import (
     PygameDebugRenderer,
     draw_ray_sensors,
-    draw_text_overlay,
+    draw_text_panel,
+    split_debug_screen,
 )
 
 
-def draw_env(
-    screen: pygame.Surface,
-    env: CollectorEnv,
-    total_reward: float,
-    font: pygame.font.Font,
-    title: str = "Collector",
-) -> None:
-    """Draw the full Collector environment."""
+def draw_world(screen: pygame.Surface, env: CollectorEnv) -> None:
+    """Draw the Collector world without debug text."""
     screen.fill((20, 20, 20))
 
     for obstacle in env.obstacles:
@@ -52,15 +47,48 @@ def draw_env(
     )
     pygame.draw.line(screen, (180, 220, 255), agent_pos, heading_end, 2)
 
+
+def draw_info(
+    screen: pygame.Surface,
+    env: CollectorEnv,
+    total_reward: float,
+    font: pygame.font.Font,
+    *,
+    title: str,
+) -> None:
+    """Draw textual debug information in the side panel."""
     lines = [
         title,
-        f"reward={total_reward:.2f} step={env.step_count}",
-        f"food={env.food_collected} left={len(env.food_items)} "
+        f"reward={total_reward:.2f}",
+        f"step={env.step_count}",
+        f"food={env.food_collected} left={len(env.food_items)}",
         f"collisions={env.collision_count}",
         f"visited_cells={len(env.visited_cells)}",
         "ESC: quit",
     ]
-    draw_text_overlay(screen, font, lines)
+    draw_text_panel(screen, font, lines)
+
+
+def draw_env(
+    screen: pygame.Surface,
+    env: CollectorEnv,
+    total_reward: float,
+    font: pygame.font.Font,
+    title: str = "Collector",
+) -> None:
+    """Draw the full Collector debug frame."""
+    world_screen, info_screen = split_debug_screen(
+        screen,
+        (env.width, env.height),
+    )
+    draw_world(world_screen, env)
+    draw_info(
+        info_screen,
+        env,
+        total_reward,
+        font,
+        title=title,
+    )
 
 
 _DEBUG_RENDERER = PygameDebugRenderer[CollectorEnv](

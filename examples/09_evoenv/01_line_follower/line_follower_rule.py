@@ -10,6 +10,7 @@ from evoenv.core.difficulty import difficulty_task_path
 from evoenv.core.env import Action, Observation
 from evoenv.envs.line_follower_defaults import DEFAULT_FPS
 from evoenv.envs.line_follower_task import LineFollowerTask
+from evoenv.renderers.pygame_common import debug_display_size
 from evoenv.renderers.pygame_line_follower import draw_env
 
 FPS = DEFAULT_FPS
@@ -41,7 +42,7 @@ def main() -> None:
     total_reward = 0.0
 
     pygame.init()
-    screen = pygame.display.set_mode((env.width, env.height))
+    screen = pygame.display.set_mode(debug_display_size((env.width, env.height)))
     pygame.display.set_caption("EvoLib Env - LineFollower Rule")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 24)

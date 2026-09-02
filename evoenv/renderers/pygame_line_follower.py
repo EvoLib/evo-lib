@@ -12,7 +12,11 @@ from evoenv.envs.line_follower_defaults import (
     DEFAULT_DEBUG_EVERY_N_GENERATIONS,
     DEFAULT_FPS,
 )
-from evoenv.renderers.pygame_common import PygameDebugRenderer, draw_text_overlay
+from evoenv.renderers.pygame_common import (
+    PygameDebugRenderer,
+    draw_text_panel,
+    split_debug_screen,
+)
 
 
 def draw_robot(screen: pygame.Surface, env: LineFollowerEnv) -> None:
@@ -49,27 +53,39 @@ def draw_sensors(
         pygame.draw.circle(screen, color, sensor_pos, robot.sensor_radius)
 
 
-def draw_overlay(
+def draw_world(screen: pygame.Surface, env: LineFollowerEnv) -> None:
+    """Draw the LineFollower world without debug text."""
+    screen.fill((20, 20, 20))
+    screen.blit(env.line_surface, (0, 0))
+
+    sensor_states = env.get_sensor_states()
+    draw_robot(screen, env)
+    draw_sensors(screen, env, sensor_states)
+
+
+def draw_info(
     screen: pygame.Surface,
     env: LineFollowerEnv,
-    sensor_states: list[SensorPointState],
     total_reward: float,
     font: pygame.font.Font,
     *,
     title: str,
 ) -> None:
-    """Draw textual debug information."""
+    """Draw textual debug information in the side panel."""
+    sensor_states = env.get_sensor_states()
     values = " ".join(f"{state.value:.0f}" for state in sensor_states)
 
     lines = [
         title,
-        f"x={env.robot.x:.1f} y={env.robot.y:.1f} angle={env.robot.angle:.2f}",
+        f"x={env.robot.x:.1f} y={env.robot.y:.1f}",
+        f"angle={env.robot.angle:.2f}",
         f"sensors=[{values}]",
         f"missed_line_steps={env.missed_line_steps}",
-        f"reward={total_reward:.2f} step={env.step_count}",
+        f"reward={total_reward:.2f}",
+        f"step={env.step_count}",
         "ESC: quit",
     ]
-    draw_text_overlay(screen, font, lines)
+    draw_text_panel(screen, font, lines)
 
 
 def draw_env(
@@ -79,17 +95,15 @@ def draw_env(
     font: pygame.font.Font,
     title: str = "LineFollower",
 ) -> None:
-    """Draw the full LineFollower environment."""
-    screen.fill((20, 20, 20))
-    screen.blit(env.line_surface, (0, 0))
-
-    sensor_states = env.get_sensor_states()
-    draw_robot(screen, env)
-    draw_sensors(screen, env, sensor_states)
-    draw_overlay(
+    """Draw the full LineFollower debug frame."""
+    world_screen, info_screen = split_debug_screen(
         screen,
+        (env.width, env.height),
+    )
+    draw_world(world_screen, env)
+    draw_info(
+        info_screen,
         env,
-        sensor_states,
         total_reward,
         font,
         title=title,

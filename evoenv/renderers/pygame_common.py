@@ -19,6 +19,8 @@ DrawFunction = Callable[
     None,
 ]
 
+INFO_PANEL_WIDTH = 300
+
 
 class GifRecorder:
     """Collect rendered Pygame frames and write them as an animated GIF."""
@@ -163,9 +165,10 @@ class PygameDebugRenderer(Generic[EnvT]):
         if not pygame.font.get_init():
             pygame.font.init()
 
+        display_size = debug_display_size(size)
         display_surface = pygame.display.get_surface()
-        if display_surface is None or display_surface.get_size() != size:
-            self.screen = pygame.display.set_mode(size)
+        if display_surface is None or display_surface.get_size() != display_size:
+            self.screen = pygame.display.set_mode(display_size)
         else:
             self.screen = display_surface
 
@@ -189,6 +192,33 @@ class PygameDebugRenderer(Generic[EnvT]):
                 return True
 
         return False
+
+
+def debug_display_size(size: tuple[int, int]) -> tuple[int, int]:
+    """Return the full debug-window size for an environment world size."""
+    width, height = size
+    if width <= 0 or height <= 0:
+        raise ValueError("width and height must be greater than zero.")
+
+    return width + INFO_PANEL_WIDTH, height
+
+
+def split_debug_screen(
+    screen: pygame.Surface,
+    world_size: tuple[int, int],
+) -> tuple[pygame.Surface, pygame.Surface]:
+    """Split a debug window into world and information surfaces."""
+    width, height = world_size
+    expected_size = debug_display_size(world_size)
+
+    if screen.get_size() != expected_size:
+        raise ValueError(
+            f"debug screen must have size {expected_size}, got {screen.get_size()}."
+        )
+
+    world_screen = screen.subsurface(pygame.Rect(0, 0, width, height))
+    info_screen = screen.subsurface(pygame.Rect(width, 0, INFO_PANEL_WIDTH, height))
+    return world_screen, info_screen
 
 
 def draw_ray_sensors(
@@ -225,3 +255,17 @@ def draw_text_overlay(
         text = font.render(line, True, color)
         screen.blit(text, (x, y_offset))
         y_offset += line_height
+
+
+def draw_text_panel(
+    screen: pygame.Surface,
+    font: pygame.font.Font,
+    lines: list[str],
+    *,
+    background: tuple[int, int, int] = (28, 30, 36),
+    border: tuple[int, int, int] = (70, 70, 76),
+) -> None:
+    """Draw debug information on a dedicated side panel."""
+    screen.fill(background)
+    pygame.draw.line(screen, border, (0, 0), (0, screen.get_height()), 1)
+    draw_text_overlay(screen, font, lines)

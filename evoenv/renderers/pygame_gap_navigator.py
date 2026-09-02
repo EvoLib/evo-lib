@@ -13,18 +13,13 @@ from evoenv.envs.gap_navigator_defaults import (
 from evoenv.renderers.pygame_common import (
     PygameDebugRenderer,
     draw_ray_sensors,
-    draw_text_overlay,
+    draw_text_panel,
+    split_debug_screen,
 )
 
 
-def draw_env(
-    screen: pygame.Surface,
-    env: GapNavigatorEnv,
-    total_reward: float,
-    font: pygame.font.Font,
-    title: str = "GapNavigator",
-) -> None:
-    """Draw the full GapNavigator environment."""
+def draw_world(screen: pygame.Surface, env: GapNavigatorEnv) -> None:
+    """Draw the GapNavigator world without debug text."""
     screen.fill((20, 20, 20))
 
     env.block_group.draw(screen)
@@ -35,13 +30,47 @@ def draw_env(
     draw_ray_sensors(screen, env.get_sensor_states())
     pygame.draw.rect(screen, (80, 180, 255), env.player.rect)
 
+
+def draw_info(
+    screen: pygame.Surface,
+    env: GapNavigatorEnv,
+    total_reward: float,
+    font: pygame.font.Font,
+    *,
+    title: str,
+) -> None:
+    """Draw textual debug information in the side panel."""
     lines = [
         title,
-        f"reward={total_reward:.2f} step={env.step_count}",
-        f"passed={env.passed_rows} collision={env.collision}",
+        f"reward={total_reward:.2f}",
+        f"step={env.step_count}",
+        f"passed={env.passed_rows}",
+        f"collision={env.collision}",
         "ESC: quit",
     ]
-    draw_text_overlay(screen, font, lines)
+    draw_text_panel(screen, font, lines)
+
+
+def draw_env(
+    screen: pygame.Surface,
+    env: GapNavigatorEnv,
+    total_reward: float,
+    font: pygame.font.Font,
+    title: str = "GapNavigator",
+) -> None:
+    """Draw the full GapNavigator debug frame."""
+    world_screen, info_screen = split_debug_screen(
+        screen,
+        (env.width, env.height),
+    )
+    draw_world(world_screen, env)
+    draw_info(
+        info_screen,
+        env,
+        total_reward,
+        font,
+        title=title,
+    )
 
 
 _DEBUG_RENDERER = PygameDebugRenderer[GapNavigatorEnv](

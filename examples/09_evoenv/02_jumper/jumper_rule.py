@@ -6,6 +6,7 @@ from evoenv.core.controller import CallbackController
 from evoenv.core.env import Action, Observation
 from evoenv.envs.jumper_defaults import DEFAULT_FPS
 from evoenv.envs.jumper_task import JumperTask
+from evoenv.renderers.pygame_common import debug_display_size
 from evoenv.renderers.pygame_jumper import draw_env
 
 TASK_CONFIG_PATH = "task.yaml"
@@ -36,7 +37,7 @@ def main() -> None:
     total_reward = 0.0
 
     pygame.init()
-    screen = pygame.display.set_mode((env.width, env.height))
+    screen = pygame.display.set_mode(debug_display_size((env.width, env.height)))
     pygame.display.set_caption("EvoEnv - Jumper Rule")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 24)
