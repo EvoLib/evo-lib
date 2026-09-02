@@ -5,7 +5,7 @@ import pygame
 from evoenv.core.env import Action, Observation
 from evoenv.envs.jumper_defaults import DEFAULT_FPS
 from evoenv.envs.jumper_task import JumperTask
-from evoenv.renderers.pygame_common import debug_display_size
+from evoenv.renderers.pygame_common import PygameWindow
 from evoenv.renderers.pygame_jumper import draw_env
 
 TASK_CONFIG_PATH = "task.yaml"
@@ -39,28 +39,22 @@ def main() -> None:
     env = task.make_env()
     controller = ManualJumperController()
 
-    pygame.init()
-    screen = pygame.display.set_mode(debug_display_size((env.width, env.height)))
-    pygame.display.set_caption("Jumper - Manual")
-    clock = pygame.time.Clock()
-    font = pygame.font.SysFont(None, 24)
+    window = PygameWindow(
+        (env.width, env.height),
+        caption="Jumper - Manual",
+        fps=FPS,
+    )
 
     observation = env.reset()
     total_reward = 0.0
 
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+    while window.running:
+        if window.process_events():
+            observation = env.reset()
+            total_reward = 0.0
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-
-                if event.key == pygame.K_r:
-                    observation = env.reset()
-                    total_reward = 0.0
+        if not window.running:
+            break
 
         controller.update()
         action = controller.act(observation)
@@ -73,11 +67,16 @@ def main() -> None:
             observation = env.reset()
             total_reward = 0.0
 
-        draw_env(screen, env, total_reward, font, title="Manual Jumper")
-        pygame.display.flip()
-        clock.tick(FPS)
+        draw_env(
+            window.screen,
+            env,
+            total_reward,
+            window.font,
+            title="Manual Jumper",
+        )
+        window.update()
 
-    pygame.quit()
+    window.close()
 
 
 if __name__ == "__main__":

@@ -1,14 +1,13 @@
 # SPDX-License-Identifier: MIT
 """Run a simple sensor-based rule controller on GapNavigatorEnv."""
 
-import pygame
 from evoenv.cli import parse_env_args
 from evoenv.core.controller import CallbackController
 from evoenv.core.difficulty import difficulty_task_path
 from evoenv.core.env import Action, Observation
 from evoenv.envs.gap_navigator_defaults import DEFAULT_FPS
 from evoenv.envs.gap_navigator_task import GapNavigatorTask
-from evoenv.renderers.pygame_common import debug_display_size
+from evoenv.renderers.pygame_common import PygameWindow
 from evoenv.renderers.pygame_gap_navigator import draw_env
 
 args = parse_env_args(description="Run a GapNavigator rule agent.")
@@ -43,28 +42,22 @@ def main() -> None:
     env = task.make_env()
     controller = CallbackController(gap_navigator_rule)
 
-    pygame.init()
-    screen = pygame.display.set_mode(debug_display_size((env.width, env.height)))
-    pygame.display.set_caption("EvoLib Env - GapNavigator Rule")
-    clock = pygame.time.Clock()
-    font = pygame.font.SysFont(None, 24)
+    window = PygameWindow(
+        (env.width, env.height),
+        caption="EvoLib Env - GapNavigator Rule",
+        fps=DEFAULT_FPS,
+    )
 
     observation = env.reset()
     total_reward = 0.0
 
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+    while window.running:
+        if window.process_events():
+            observation = env.reset()
+            total_reward = 0.0
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-
-                if event.key == pygame.K_r:
-                    observation = env.reset()
-                    total_reward = 0.0
+        if not window.running:
+            break
 
         action = controller.act(observation)
         observation, reward, done, _info = env.step(action)
@@ -75,11 +68,16 @@ def main() -> None:
             observation = env.reset()
             total_reward = 0.0
 
-        draw_env(screen, env, total_reward, font, title="Sensor-rule GapNavigator")
-        pygame.display.flip()
-        clock.tick(DEFAULT_FPS)
+        draw_env(
+            window.screen,
+            env,
+            total_reward,
+            window.font,
+            title="Sensor-rule GapNavigator",
+        )
+        window.update()
 
-    pygame.quit()
+    window.close()
 
 
 if __name__ == "__main__":

@@ -1,16 +1,13 @@
 # SPDX-License-Identifier: MIT
 """Run a simple rule-based steering controller on LineFollowerEnv."""
 
-import sys
-
-import pygame
 from evoenv.cli import parse_env_args
 from evoenv.core.controller import CallbackController
 from evoenv.core.difficulty import difficulty_task_path
 from evoenv.core.env import Action, Observation
 from evoenv.envs.line_follower_defaults import DEFAULT_FPS
 from evoenv.envs.line_follower_task import LineFollowerTask
-from evoenv.renderers.pygame_common import debug_display_size
+from evoenv.renderers.pygame_common import PygameWindow
 from evoenv.renderers.pygame_line_follower import draw_env
 
 FPS = DEFAULT_FPS
@@ -41,26 +38,19 @@ def main() -> None:
     observation = env.reset()
     total_reward = 0.0
 
-    pygame.init()
-    screen = pygame.display.set_mode(debug_display_size((env.width, env.height)))
-    pygame.display.set_caption("EvoLib Env - LineFollower Rule")
-    clock = pygame.time.Clock()
-    font = pygame.font.SysFont(None, 24)
+    window = PygameWindow(
+        (env.width, env.height),
+        caption="EvoLib Env - LineFollower Rule",
+        fps=FPS,
+    )
 
-    running = True
+    while window.running:
+        if window.process_events():
+            observation = env.reset()
+            total_reward = 0.0
 
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-
-                if event.key == pygame.K_r:
-                    observation = env.reset()
-                    total_reward = 0.0
+        if not window.running:
+            break
 
         action = controller.act(observation)
         observation, reward, done, _ = env.step(action)
@@ -71,13 +61,16 @@ def main() -> None:
             observation = env.reset()
             total_reward = 0.0
 
-        draw_env(screen, env, total_reward, font, title="Rule-based LineFollower")
+        draw_env(
+            window.screen,
+            env,
+            total_reward,
+            window.font,
+            title="Rule-based LineFollower",
+        )
+        window.update()
 
-        pygame.display.flip()
-        clock.tick(FPS)
-
-    pygame.quit()
-    sys.exit(0)
+    window.close()
 
 
 if __name__ == "__main__":

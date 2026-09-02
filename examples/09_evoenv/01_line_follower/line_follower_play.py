@@ -7,7 +7,7 @@ from evoenv.core.difficulty import difficulty_task_path
 from evoenv.core.env import Action, Observation
 from evoenv.envs.line_follower_defaults import DEFAULT_FPS
 from evoenv.envs.line_follower_task import LineFollowerTask
-from evoenv.renderers.pygame_common import debug_display_size
+from evoenv.renderers.pygame_common import PygameWindow
 from evoenv.renderers.pygame_line_follower import draw_env
 
 FPS = DEFAULT_FPS
@@ -55,28 +55,22 @@ def main() -> None:
     env = task.make_env()
     controller = ManualController()
 
-    pygame.init()
-    screen = pygame.display.set_mode(debug_display_size((env.width, env.height)))
-    pygame.display.set_caption("LineFollower - Manual")
-    clock = pygame.time.Clock()
-    font = pygame.font.SysFont(None, 24)
+    window = PygameWindow(
+        (env.width, env.height),
+        caption="LineFollower - Manual",
+        fps=FPS,
+    )
 
     observation = env.reset()
     total_reward = 0.0
 
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+    while window.running:
+        if window.process_events():
+            observation = env.reset()
+            total_reward = 0.0
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-
-                if event.key == pygame.K_r:
-                    observation = env.reset()
-                    total_reward = 0.0
+        if not window.running:
+            break
 
         controller.update()
         action = controller.act(observation)
@@ -90,17 +84,15 @@ def main() -> None:
             total_reward = 0.0
 
         draw_env(
-            screen,
+            window.screen,
             env,
             total_reward,
-            font,
+            window.font,
             title="Manual LineFollower",
         )
+        window.update()
 
-        pygame.display.flip()
-        clock.tick(FPS)
-
-    pygame.quit()
+    window.close()
 
 
 if __name__ == "__main__":

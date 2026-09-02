@@ -1,7 +1,11 @@
 ## Unreleased
 
+### Added
+- Added separate debug info panels to EvoEnv renderers.
+
 ### Changed
 - Updated EvoLib to use the EvoNet 0.3 configuration and initialization API.
+- Simplified EvoEnv Pygame examples by centralizing window and event handling.
 
 ### Fixed
 - Fixed pygame sprite attribute typing in EvoEnv.

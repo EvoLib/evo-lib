@@ -76,6 +76,66 @@ class GifRecorder:
         return self.filename
 
 
+class PygameWindow:
+    """Manage the Pygame window used by interactive EvoEnv examples."""
+
+    def __init__(
+        self,
+        world_size: tuple[int, int],
+        *,
+        caption: str,
+        fps: int,
+        font_size: int = 24,
+    ) -> None:
+        if fps <= 0:
+            raise ValueError("fps must be greater than zero.")
+        if font_size <= 0:
+            raise ValueError("font_size must be greater than zero.")
+
+        self.world_size = world_size
+        self.fps = int(fps)
+
+        if not pygame.get_init():
+            pygame.init()
+        if not pygame.display.get_init():
+            pygame.display.init()
+        if not pygame.font.get_init():
+            pygame.font.init()
+
+        self.screen = pygame.display.set_mode(debug_display_size(world_size))
+        pygame.display.set_caption(caption)
+
+        self.clock = pygame.time.Clock()
+        self.font = pygame.font.SysFont(None, font_size)
+        self.running = True
+
+    def process_events(self) -> bool:
+        """Process window events and return True when a reset was requested."""
+        reset_requested = False
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.running = False
+                elif event.key == pygame.K_r:
+                    reset_requested = True
+
+        return reset_requested
+
+    def update(self) -> None:
+        """Present the current frame and limit the frame rate."""
+        pygame.display.flip()
+        self.clock.tick(self.fps)
+
+    def close(self) -> None:
+        """Close the Pygame window."""
+        pygame.quit()
+        self.running = False
+
+
 class PygameDebugRenderer(Generic[EnvT]):
     """Render persistent Pygame debug episodes."""
 
@@ -96,10 +156,7 @@ class PygameDebugRenderer(Generic[EnvT]):
         self.draw_env = draw_env
         self.fps = int(fps)
         self.font_size = int(font_size)
-
-        self.screen: pygame.Surface | None = None
-        self.clock: pygame.time.Clock | None = None
-        self.font: pygame.font.Font | None = None
+        self.window: PygameWindow | None = None
 
     def run_episode(
         self,
@@ -118,24 +175,23 @@ class PygameDebugRenderer(Generic[EnvT]):
         if steps < 0:
             raise ValueError("steps must not be negative.")
 
-        screen, clock, font = self._get_resources(size)
+        window = self._get_window(size)
         observation = env.reset(seed=seed)
         total_reward = 0.0
         recorder = GifRecorder(filename, fps=gif_fps, frame_skip=frame_skip)
 
         for step in range(steps):
-            if self._should_stop():
+            window.process_events()
+            if not window.running:
                 return recorder.save()
 
             action = controller.act(observation)
             observation, reward, done, _info = env.step(action)
             total_reward += reward
 
-            self.draw_env(screen, env, total_reward, font, title)
-            recorder.capture(screen, step=step)
-
-            pygame.display.flip()
-            clock.tick(self.fps)
+            self.draw_env(window.screen, env, total_reward, window.font, title)
+            recorder.capture(window.screen, step=step)
+            window.update()
 
             if done:
                 break
@@ -144,54 +200,28 @@ class PygameDebugRenderer(Generic[EnvT]):
 
     def close(self) -> None:
         """Close Pygame and discard cached display resources."""
-        pygame.quit()
-        self.screen = None
-        self.clock = None
-        self.font = None
+        if self.window is not None:
+            self.window.close()
+            self.window = None
 
-    def _get_resources(
-        self,
-        size: tuple[int, int],
-    ) -> tuple[pygame.Surface, pygame.time.Clock, pygame.font.Font]:
-        """Initialize and return persistent Pygame resources."""
-        width, height = size
-        if width <= 0 or height <= 0:
-            raise ValueError("width and height must be greater than zero.")
+    def _get_window(self, size: tuple[int, int]) -> PygameWindow:
+        """Return a reusable Pygame window for the requested world size."""
+        if (
+            self.window is None
+            or not self.window.running
+            or self.window.world_size != size
+        ):
+            if self.window is not None:
+                self.window.close()
 
-        if not pygame.get_init():
-            pygame.init()
-        if not pygame.display.get_init():
-            pygame.display.init()
-        if not pygame.font.get_init():
-            pygame.font.init()
+            self.window = PygameWindow(
+                size,
+                caption=self.caption,
+                fps=self.fps,
+                font_size=self.font_size,
+            )
 
-        display_size = debug_display_size(size)
-        display_surface = pygame.display.get_surface()
-        if display_surface is None or display_surface.get_size() != display_size:
-            self.screen = pygame.display.set_mode(display_size)
-        else:
-            self.screen = display_surface
-
-        pygame.display.set_caption(self.caption)
-
-        if self.clock is None:
-            self.clock = pygame.time.Clock()
-        if self.font is None:
-            self.font = pygame.font.SysFont(None, self.font_size)
-
-        return self.screen, self.clock, self.font
-
-    def _should_stop(self) -> bool:
-        """Return True when the current rendered episode should stop."""
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.close()
-                return True
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                return True
-
-        return False
+        return self.window
 
 
 def debug_display_size(size: tuple[int, int]) -> tuple[int, int]:
