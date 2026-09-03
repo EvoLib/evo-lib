@@ -1,4 +1,4 @@
-## Unreleased
+## EvoLib 0.3.1
 
 ### Added
 - Added separate debug info panels to EvoEnv renderers.
