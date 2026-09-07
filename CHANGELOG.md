@@ -1,3 +1,8 @@
+## Unreleased
+
+### Added
+- Added Vector.from_config() and refactored vector initializers to delegate to the centralized configuration-based initialization path.
+
 ## EvoLib 0.3.1
 
 ### Added

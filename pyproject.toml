@@ -62,10 +62,11 @@ parallel = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["evolib*", "evoenv*"]
+include = ["evolib*", "evoenv*", "evosim*"]
 
 [tool.setuptools.package-data]
 "evolib" = ["py.typed"]
+"evosim" = ["py.typed"]
 
 # Tool-Konfigurationen
 [tool.black]
@@ -75,8 +76,8 @@ target-version = ["py311"]
 [tool.isort]
 profile = "black"
 line_length = 88
-known_first_party = ["evolib"]
-src_paths = ["evolib"]
+known_first_party = ["evolib", "evoenv", "evosim"]
+src_paths = ["evolib", "evoenv", "evosim"]
 
 [tool.mypy]
 python_version = "3.12"

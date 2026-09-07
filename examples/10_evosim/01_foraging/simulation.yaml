@@ -1,0 +1,121 @@
+seed: 1
+steps: 100000
+
+metrics:
+  interval: 100
+  file: metrics.csv
+
+world:
+  width: 900
+  height: 600
+  initial_population: 20
+  max_population: 200
+
+food:
+  initial_count: 50
+  max_count: 150
+  spawn_rate: 0.1
+  radius: 4.0
+  energy: 14.0
+
+forager:
+  radius: 7.0
+  max_speed: 2.5
+  max_turn_rate: 0.22
+  reverse_factor: 0.3
+
+  initial_energy: 55.0
+  energy_capacity: 100.0
+  basal_cost: 0.045
+  movement_cost: 0.025
+  turn_cost_factor: 1.0
+
+  reproduction_threshold: 90.0
+  reproduction_cost: 34.0
+  offspring_energy: 28.0
+  min_reproduction_age_steps: 80
+  max_lifetime_steps: 5000
+
+modules:
+  controller:
+    type: evonet
+    dim: [4, 6, 2]
+    activation: [linear, tanh, tanh]
+    initializer: default
+
+    connectivity:
+      scope: adjacent
+      density: 1.0
+      recurrent: []
+
+    weights:
+      initializer: normal
+      std: 0.45
+      bounds: [-3.0, 3.0]
+
+    bias:
+      initializer: normal
+      std: 0.2
+      bounds: [-2.0, 2.0]
+
+    mutation:
+      strategy: constant
+      strength: 0.12
+      probability: 0.25
+
+      biases:
+        strategy: constant
+        strength: 0.06
+        probability: 0.25
+
+#      structural:
+#        add_neuron:
+#          probability: 0.002
+#          init_connection_ratio: 1.0
+#          activations_allowed: [tanh]
+#          init: random
+#
+#        remove_neuron:
+#          probability: 0.001
+#
+#        add_connection:
+#          probability: 0.004
+#
+#        remove_connection:
+#          probability: 0.002
+#
+#        topology:
+#          recurrent: none
+#          connection_scope: crosslayer
+#          max_neurons: 12
+#          max_connections: 80
+
+  sensor_angles:
+    type: vector
+    initializer: fixed
+    values: [-0.6, 0.0, 0.6]
+    bounds: [-3.141592653589793, 3.141592653589793]
+    mutation:
+      strategy: constant
+      strength: 0.0
+      probability: 0.0
+
+  sensor_fovs:
+    type: vector
+    initializer: fixed
+    values: [0.7, 0.7, 0.7]
+    bounds: [0.1, 1.5707963267948966]
+    mutation:
+      strategy: constant
+      strength: 0.1
+      probability: 1.0
+
+  sensor_ranges:
+    type: vector
+    initializer: fixed
+    values: [120.0, 120.0, 120.0]
+    bounds: [20.0, 200.0]
+    mutation:
+      strategy: constant
+      strength: 1.0
+      probability: 1.0
