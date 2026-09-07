@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: MIT
 
+from typing import Self
+
 import numpy as np
 
 from evolib.config.vector_component_config import VectorComponentConfig
@@ -45,6 +47,102 @@ class Vector(ParaBase):
 
         # Evolution control parameters (mutation, crossover, etc.)
         self.evo_params = EvoControlParams()
+
+    @classmethod
+    def from_config(cls, cfg: VectorComponentConfig) -> Self:
+        """
+        Build and initialize a Vector from a validated component config.
+
+        The supplied config is deep-copied because apply_config() normalizes
+        structured dimensions in-place.
+
+        Args:
+            cfg: Validated VectorComponentConfig.
+
+        Returns:
+            Fully configured and initialized Vector.
+        """
+        config = cfg.model_copy(deep=True)
+
+        para = cls()
+        para.apply_config(config)
+
+        match config.initializer:
+            case "normal":
+                para.vector = np.random.normal(
+                    loc=config.mean or 0.0,
+                    scale=config.std or 1.0,
+                    size=para.dim,
+                )
+
+                bounds = para.init_bounds or para.bounds
+                if bounds is not None:
+                    para.vector = np.clip(para.vector, *bounds)
+
+            case "uniform":
+                if para.init_bounds is None:
+                    raise ValueError(
+                        "init_bounds must be set for uniform initialization."
+                    )
+
+                para.vector = np.random.uniform(
+                    *para.init_bounds,
+                    size=int(para.dim),
+                )
+
+            case "zero":
+                para.vector = np.zeros(para.dim)
+
+            case "fixed":
+                if config.values is None:
+                    raise ValueError("values must be defined for fixed initialization.")
+
+                para.vector = np.asarray(config.values, dtype=float)
+
+            case "adaptive":
+                if para.init_bounds is None:
+                    raise ValueError(
+                        "init_bounds must be set for adaptive initialization."
+                    )
+
+                if (
+                    para.evo_params.min_mutation_strength is None
+                    or para.evo_params.max_mutation_strength is None
+                ):
+                    raise ValueError(
+                        "min/max mutation strength must be defined for "
+                        "adaptive initialization."
+                    )
+
+                para.vector = np.random.uniform(
+                    *para.init_bounds,
+                    size=int(para.dim),
+                )
+
+                if para.randomize_mutation_strengths:
+                    para.evo_params.mutation_strengths = np.random.uniform(
+                        para.evo_params.min_mutation_strength,
+                        para.evo_params.max_mutation_strength,
+                        size=para.dim,
+                    )
+                else:
+                    if para.evo_params.mutation_strength is None:
+                        raise ValueError(
+                            "mutation_strength must be defined for non-random "
+                            "adaptive initialization."
+                        )
+
+                    para.evo_params.mutation_strengths = np.full(
+                        para.dim,
+                        para.evo_params.mutation_strength,
+                    )
+
+            case _:
+                raise ValueError(
+                    f"Unsupported vector initializer: {config.initializer!r}"
+                )
+
+        return para
 
     def apply_config(self, cfg: ModuleConfig) -> None:
         """
