@@ -103,23 +103,22 @@ class ForagingModulesConfig(BaseModel):
     @model_validator(mode="after")
     def validate_sensor_modules(self) -> Self:
         """Validate Foraging-specific sensor and controller constraints."""
-        dims = (
-            self.sensor_angles.dim,
-            self.sensor_fovs.dim,
-            self.sensor_ranges.dim,
-        )
+        angle_dim = self.sensor_angles.dim
+        fov_dim = self.sensor_fovs.dim
+        range_dim = self.sensor_ranges.dim
 
-        if not all(isinstance(dim, int) for dim in dims):
+        if not (
+            isinstance(angle_dim, int)
+            and isinstance(fov_dim, int)
+            and isinstance(range_dim, int)
+        ):
             raise ValueError(
                 "Foraging sensor vectors must use flat integer dimensions."
             )
 
-        sensor_count = self.sensor_angles.dim
+        sensor_count = angle_dim
 
-        if not (
-            self.sensor_fovs.dim == sensor_count
-            and self.sensor_ranges.dim == sensor_count
-        ):
+        if not (fov_dim == sensor_count and range_dim == sensor_count):
             raise ValueError(
                 "Sensor angle, FOV, and range vectors must have equal size."
             )
