@@ -10,7 +10,7 @@ For the general EvoSim architecture and its distinction from EvoEnv, see
 ---
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/10_evosim/01_foraging/forager.gif" alt="Foraging sample" width="512"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/10_evosim/01_foraging/foraging.gif" alt="Foraging sample" width="512"/>
 </p>
 
 ---
