@@ -40,8 +40,8 @@ Each simulation step:
 ```text
 calculate actions
 -> move and spend energy
--> resolve food consumption
 -> remove dead Foragers
+-> resolve food consumption
 -> reproduce eligible Foragers
 -> spawn food
 ```
