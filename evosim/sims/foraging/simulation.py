@@ -88,8 +88,8 @@ class ForagingSimulation(Simulation):
         actions = [self._calculate_action(forager) for forager in self.foragers]
 
         self._apply_actions(actions)
-        self._consume_food()
         self._remove_dead_foragers()
+        self._consume_food()
         self._reproduce()
         self._spawn_food()
 
@@ -159,7 +159,7 @@ class ForagingSimulation(Simulation):
                 sensor_values[index] = max(sensor_values[index], float(strength))
 
         cfg = self.config.forager
-        energy = min(max(forager.energy / cfg.energy_capacity, 0.0), 1.0)
+        energy = forager.energy / cfg.energy_capacity
         return [*sensor_values, energy]
 
     def _make_founder(self) -> Forager:
@@ -302,8 +302,7 @@ class ForagingSimulation(Simulation):
         candidates: list[tuple[float, int, int]] = []
 
         for forager_index, forager in enumerate(self.foragers):
-            # Foragers at or above their nominal energy capacity cannot
-            # consume additional food.
+            # Foragers at energy capacity cannot consume additional food.
             if forager.energy >= energy_capacity:
                 continue
 
@@ -338,15 +337,12 @@ class ForagingSimulation(Simulation):
 
             forager = self.foragers[forager_index]
 
-            # An earlier consumption in this same simulation step may already
-            # have raised the forager to or above its energy capacity.
+            # An earlier consumption in this step may already have filled
+            # the forager's energy capacity.
             if forager.energy >= energy_capacity:
                 continue
 
-            # Consume the complete food resource. A single resource may raise
-            # energy above energy_capacity; further consumption is then blocked
-            # until energy drops below the threshold again.
-            forager.energy += food_energy
+            forager.energy = min(forager.energy + food_energy, energy_capacity)
             consumed_food.add(food_index)
             self.food_eaten += 1
 
