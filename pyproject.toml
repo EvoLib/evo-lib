@@ -108,13 +108,13 @@ disable = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "-q --cov=evolib --cov-report=term-missing:skip-covered --cov-branch"
+addopts = "-q --cov=evolib --cov=evoenv --cov=evosim --cov-report=term-missing:skip-covered --cov-branch"
 testpaths = ["tests"]
 python_files = "test_*.py"
 
 [tool.coverage.run]
 branch = true
-source = ["evolib"]
+source = ["evolib", "evoenv", "evosim"]
 
 [tool.coverage.report]
 #fail_under = 80
