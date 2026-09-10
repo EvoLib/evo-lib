@@ -84,7 +84,7 @@ def test_one_food_item_is_consumed_by_nearest_forager_only() -> None:
     second.x = 104.0
     second.y = 100.0
 
-    first.energy = 10.0
+    first.energy = sim.config.forager.energy_capacity - 1.0
     second.energy = 10.0
 
     sim.food = [
@@ -99,7 +99,7 @@ def test_one_food_item_is_consumed_by_nearest_forager_only() -> None:
 
     assert sim.food == []
     assert sim.food_eaten == 1
-    assert first.energy == pytest.approx(10.0 + sim.config.food.energy)
+    assert first.energy == pytest.approx(sim.config.forager.energy_capacity)
     assert second.energy == pytest.approx(10.0)
 
 

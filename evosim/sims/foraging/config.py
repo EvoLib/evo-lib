@@ -74,6 +74,12 @@ class ForagerConfig(BaseModel):
     @model_validator(mode="after")
     def validate_reproduction_energy(self) -> Self:
         """Validate the simple energy budget used for asexual reproduction."""
+        if self.initial_energy > self.energy_capacity:
+            raise ValueError("initial_energy must not exceed energy_capacity.")
+        if self.offspring_energy > self.energy_capacity:
+            raise ValueError("offspring_energy must not exceed energy_capacity.")
+        if self.reproduction_threshold > self.energy_capacity:
+            raise ValueError("reproduction_threshold must not exceed energy_capacity.")
         if self.reproduction_cost < self.offspring_energy:
             raise ValueError("reproduction_cost must be >= offspring_energy.")
         if self.reproduction_threshold <= self.reproduction_cost:
