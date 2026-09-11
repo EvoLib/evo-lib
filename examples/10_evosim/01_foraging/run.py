@@ -9,7 +9,8 @@ from typing import TextIO
 
 from evosim.sims.foraging import ForagingConfig, ForagingSimulation
 
-CONFIG_PATH = Path(__file__).with_name("simulation.yaml")
+# CONFIG_PATH = Path(__file__).with_name("simulation.yaml")
+CONFIG_PATH = "simulation.yaml"
 
 
 class CsvMetricsLogger:
@@ -56,12 +57,29 @@ def _log_if_due(
     config: ForagingConfig,
 ) -> None:
     if simulation.step_count % config.metrics.interval == 0:
-        logger.write(simulation)
+        _log_metrics(logger, simulation)
 
 
 def _log_final(logger: CsvMetricsLogger, simulation: ForagingSimulation) -> None:
     if logger.last_step != simulation.step_count:
-        logger.write(simulation)
+        _log_metrics(logger, simulation)
+
+
+def _print_status(simulation: ForagingSimulation) -> None:
+    """Print one compact simulation status line."""
+    print(
+        f"step={simulation.step_count} "
+        f"population={simulation.population_size} "
+        f"food={len(simulation.food)} "
+        f"births={simulation.births} "
+        f"deaths={simulation.deaths} "
+        f"mean_energy={simulation.mean_energy:.1f}"
+    )
+
+
+def _log_metrics(logger: CsvMetricsLogger, simulation: ForagingSimulation) -> None:
+    logger.write(simulation)
+    _print_status(simulation)
 
 
 def run_headless(config: ForagingConfig) -> None:
@@ -69,7 +87,7 @@ def run_headless(config: ForagingConfig) -> None:
     simulation = ForagingSimulation(config)
 
     with CsvMetricsLogger(_metrics_path(config)) as logger:
-        logger.write(simulation)
+        _log_metrics(logger, simulation)
         while simulation.step_count < config.steps and not simulation.is_extinct:
             simulation.step()
             _log_if_due(logger, simulation, config)
@@ -94,7 +112,7 @@ def run_rendered(config: ForagingConfig) -> None:
 
     try:
         with CsvMetricsLogger(_metrics_path(config)) as logger:
-            logger.write(simulation)
+            _log_metrics(logger, simulation)
             while (
                 window.running
                 and simulation.step_count < config.steps
