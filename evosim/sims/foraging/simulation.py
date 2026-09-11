@@ -97,7 +97,7 @@ class ForagingSimulation(Simulation):
 
     def metrics(self) -> dict[str, int | float]:
         """Return the current simulation metrics without performing I/O."""
-        return {
+        metrics: dict[str, int | float] = {
             "step": self.step_count,
             "population": self.population_size,
             "food": len(self.food),
@@ -107,6 +107,38 @@ class ForagingSimulation(Simulation):
             "mean_energy": self.mean_energy,
             "oldest_lifetime": self.oldest_lifetime_steps,
         }
+        metrics.update(self._sensor_parameter_metrics())
+        return metrics
+
+    def _sensor_parameter_metrics(self) -> dict[str, float]:
+        """Return population statistics for evolvable sensor parameters."""
+        sensor_count = self.config.modules.sensor_count
+        metrics: dict[str, float] = {}
+
+        if not self.foragers:
+            for index in range(sensor_count):
+                metrics[f"sensor_{index}_fov_mean"] = math.nan
+                metrics[f"sensor_{index}_fov_std"] = math.nan
+                metrics[f"sensor_{index}_range_mean"] = math.nan
+                metrics[f"sensor_{index}_range_std"] = math.nan
+            return metrics
+
+        sensor_arrays = [self._sensor_arrays(forager) for forager in self.foragers]
+        fovs = np.stack([arrays[1] for arrays in sensor_arrays])
+        ranges = np.stack([arrays[2] for arrays in sensor_arrays])
+
+        fov_means = np.mean(fovs, axis=0)
+        fov_stds = np.std(fovs, axis=0)
+        range_means = np.mean(ranges, axis=0)
+        range_stds = np.std(ranges, axis=0)
+
+        for index in range(sensor_count):
+            metrics[f"sensor_{index}_fov_mean"] = float(fov_means[index])
+            metrics[f"sensor_{index}_fov_std"] = float(fov_stds[index])
+            metrics[f"sensor_{index}_range_mean"] = float(range_means[index])
+            metrics[f"sensor_{index}_range_std"] = float(range_stds[index])
+
+        return metrics
 
     def sensor_layout(self, forager: Forager) -> list[FoodSensor]:
         """Decode the local food sensors carried by one Forager."""
