@@ -27,14 +27,19 @@ class ForagingSession:
         self._closed = False
         self._window: PygameWindow | None = None
         self._renderer: PygameForagingRenderer | None = None
+        self._file: TextIO | None = None
+        self._writer: csv.DictWriter[str] | None = None
 
-        metrics_path = Path(self.simulation.config.metrics.file)
-        metrics_path.parent.mkdir(parents=True, exist_ok=True)
-        self._file: TextIO = metrics_path.open("w", encoding="utf-8", newline="")
+        metrics_file = self.simulation.config.metrics.file
+        if metrics_file is not None:
+            metrics_path = Path(metrics_file)
+            metrics_path.parent.mkdir(parents=True, exist_ok=True)
+            self._file = metrics_path.open("w", encoding="utf-8", newline="")
 
-        metrics = simulation.metrics()
-        self._writer = csv.DictWriter(self._file, fieldnames=list(metrics))
-        self._writer.writeheader()
+            metrics = simulation.metrics()
+            self._writer = csv.DictWriter(self._file, fieldnames=list(metrics))
+            self._writer.writeheader()
+
         self._last_logged_step: int | None = None
 
         if render:
@@ -83,7 +88,8 @@ class ForagingSession:
         if self._window is not None:
             self._window.close()
 
-        self._file.close()
+        if self._file is not None:
+            self._file.close()
         self._closed = True
 
     def _process_events(self) -> None:
@@ -117,8 +123,11 @@ class ForagingSession:
 
     def _write_metrics(self) -> None:
         metrics = self.simulation.metrics()
-        self._writer.writerow(metrics)
-        self._file.flush()
+
+        if self._writer is not None and self._file is not None:
+            self._writer.writerow(metrics)
+            self._file.flush()
+
         self._last_logged_step = self.simulation.step_count
 
         print(

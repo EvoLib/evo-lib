@@ -88,12 +88,12 @@ class ForagerConfig(BaseModel):
 
 
 class MetricsConfig(BaseModel):
-    """Periodic CSV metric logging settings."""
+    """Periodic metric logging settings."""
 
     model_config = ConfigDict(extra="forbid")
 
     interval: int = Field(default=100, gt=0)
-    file: str = "metrics.csv"
+    file: str | None = None
 
 
 class ForagingModulesConfig(BaseModel):

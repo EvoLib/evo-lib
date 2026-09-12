@@ -3,7 +3,7 @@ steps: 100000
 
 metrics:
   interval: 100
-  file: metrics.csv
+  #file: metrics.csv
 
 world:
   width: 900
