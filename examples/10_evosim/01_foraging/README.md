@@ -158,13 +158,15 @@ reproduction.
 Headless:
 
 ```bash
-python examples/10_evosim/01_foraging/run.py
+cd examples/10_evosim/01_foraging
+python run.py
 ```
 
 With Pygame visualization:
 
 ```bash
-python examples/10_evosim/01_foraging/run.py --render
+cd examples/10_evosim/01_foraging
+python run.py --render
 ```
 
 Both modes use the same simulation logic and `simulation.yaml`.

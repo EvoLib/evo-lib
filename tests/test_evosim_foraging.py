@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pytest
 
-from evosim.sims.foraging.config import ForagingConfig
 from evosim.sims.foraging.objects import Food
 from evosim.sims.foraging.simulation import ForagingSimulation
 
@@ -20,8 +19,7 @@ _CONFIG_PATH = (
 
 
 def _simulation() -> ForagingSimulation:
-    config = ForagingConfig.from_yaml(_CONFIG_PATH)
-    return ForagingSimulation(config)
+    return ForagingSimulation(_CONFIG_PATH)
 
 
 def test_reset_with_same_seed_reproduces_initial_world() -> None:

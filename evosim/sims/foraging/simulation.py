@@ -3,6 +3,7 @@
 
 import math
 import random
+from pathlib import Path
 
 import numpy as np
 
@@ -22,8 +23,10 @@ from evosim.sims.foraging.objects import Food, FoodSensor, Forager, ForagerActio
 class ForagingSimulation(Simulation):
     """Persistent world with resources and synchronously updated Foragers."""
 
-    def __init__(self, config: ForagingConfig) -> None:
+    def __init__(self, config: ForagingConfig | str | Path) -> None:
         super().__init__()
+        if isinstance(config, (str, Path)):
+            config = ForagingConfig.from_yaml(config)
         self.config = config
         self.rng = np.random.default_rng()
 

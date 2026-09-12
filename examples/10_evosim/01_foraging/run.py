@@ -1,24 +1,15 @@
 # SPDX-License-Identifier: MIT
 """Run the built-in persistent Foraging simulation."""
 
-from pathlib import Path
-
 from evosim.cli import parse_sim_args
-from evosim.sims.foraging import ForagingConfig, ForagingSession, ForagingSimulation
-
-CONFIG_PATH = Path(__file__).with_name("simulation.yaml")
+from evosim.sims.foraging import ForagingSession, ForagingSimulation
 
 
 def main() -> None:
     args = parse_sim_args(description=__doc__)
 
-    config = ForagingConfig.from_yaml(CONFIG_PATH)
-    simulation = ForagingSimulation(config)
-    session = ForagingSession(
-        simulation,
-        render=args.render,
-        output_dir=CONFIG_PATH.parent,
-    )
+    simulation = ForagingSimulation("simulation.yaml")
+    session = ForagingSession(simulation, render=args.render)
 
     while simulation.running and session.running:
         session.process_events()
