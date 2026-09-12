@@ -10,7 +10,8 @@ from evosim.renderers.pygame_common import (
     draw_text_panel,
     split_simulation_screen,
 )
-from evosim.sims.foraging import Forager, ForagingSimulation
+from evosim.sims.foraging.objects import Forager
+from evosim.sims.foraging.simulation import ForagingSimulation
 
 DEFAULT_FPS = 60
 _LOW_ENERGY_COLOR = (31, 58, 95)
