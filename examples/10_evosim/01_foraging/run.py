@@ -3,15 +3,9 @@
 
 from evosim.sims.foraging import ForagingSession, ForagingSimulation
 
+simulation = ForagingSimulation("simulation.yaml")
+session = ForagingSession(simulation, render=True)
 
-def main() -> None:
-    simulation = ForagingSimulation("simulation.yaml")
-    session = ForagingSession(simulation, render=True)
-
-    while simulation.running and session.running:
-        simulation.step()
-        session.update()
-
-
-if __name__ == "__main__":
-    main()
+while simulation.running and session.running:
+    simulation.step()
+    session.update()
