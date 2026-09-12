@@ -22,14 +22,13 @@ class ForagingSession:
         simulation: ForagingSimulation,
         *,
         render: bool = False,
-        output_dir: str | Path = ".",
     ) -> None:
         self.simulation = simulation
         self._closed = False
         self._window: PygameWindow | None = None
         self._renderer: PygameForagingRenderer | None = None
 
-        metrics_path = self._metrics_path(Path(output_dir))
+        metrics_path = Path(self.simulation.config.metrics.file)
         metrics_path.parent.mkdir(parents=True, exist_ok=True)
         self._file: TextIO = metrics_path.open("w", encoding="utf-8", newline="")
 
@@ -100,12 +99,6 @@ class ForagingSession:
 
         if not self._window.running:
             self.close()
-
-    def _metrics_path(self, output_dir: Path) -> Path:
-        path = Path(self.simulation.config.metrics.file)
-        if path.is_absolute():
-            return path
-        return output_dir / path
 
     def _open_renderer(self) -> None:
         from evosim.renderers.pygame_common import PygameWindow
