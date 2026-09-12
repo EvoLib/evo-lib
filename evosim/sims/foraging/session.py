@@ -50,22 +50,12 @@ class ForagingSession:
         """Return whether the session is still active."""
         return not self._closed
 
-    def process_events(self) -> None:
-        """Process optional visualization events."""
-        if self._closed or self._window is None:
+    def update(self) -> None:
+        """Update session state, metrics output, and optional visualization."""
+        if self._closed:
             return
 
-        import pygame
-
-        pressed = self._window.process_events()
-        if pygame.K_s in pressed and self._renderer is not None:
-            self._renderer.toggle_sensors()
-
-        if not self._window.running:
-            self.close()
-
-    def update(self) -> None:
-        """Update metrics output and optional visualization."""
+        self._process_events()
         if self._closed:
             return
 
@@ -96,6 +86,20 @@ class ForagingSession:
 
         self._file.close()
         self._closed = True
+
+    def _process_events(self) -> None:
+        """Process optional visualization events."""
+        if self._window is None:
+            return
+
+        import pygame
+
+        pressed = self._window.process_events()
+        if pygame.K_s in pressed and self._renderer is not None:
+            self._renderer.toggle_sensors()
+
+        if not self._window.running:
+            self.close()
 
     def _metrics_path(self, output_dir: Path) -> Path:
         path = Path(self.simulation.config.metrics.file)

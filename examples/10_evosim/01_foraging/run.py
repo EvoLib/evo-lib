@@ -9,7 +9,6 @@ def main() -> None:
     session = ForagingSession(simulation, render=True)
 
     while simulation.running and session.running:
-        session.process_events()
         simulation.step()
         session.update()
 
