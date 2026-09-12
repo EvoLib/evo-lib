@@ -52,6 +52,11 @@ class ForagingSimulation(Simulation):
         return not self.foragers
 
     @property
+    def running(self) -> bool:
+        """Return whether the configured simulation should continue."""
+        return self.step_count < self.config.steps and not self.is_extinct
+
+    @property
     def mean_energy(self) -> float:
         """Return mean energy of living Foragers, or zero after extinction."""
         if not self.foragers:

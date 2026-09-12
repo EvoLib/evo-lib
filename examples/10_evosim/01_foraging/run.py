@@ -4,7 +4,7 @@
 import argparse
 from pathlib import Path
 
-from evosim.sims.foraging import ForagingConfig, run_foraging
+from evosim.sims.foraging import ForagingConfig, ForagingSession, ForagingSimulation
 
 CONFIG_PATH = Path(__file__).with_name("simulation.yaml")
 
@@ -20,7 +20,17 @@ def main() -> None:
     args = parser.parse_args()
 
     config = ForagingConfig.from_yaml(CONFIG_PATH)
-    run_foraging(config, render=args.render, output_dir=CONFIG_PATH.parent)
+    simulation = ForagingSimulation(config)
+    session = ForagingSession(
+        simulation,
+        render=args.render,
+        output_dir=CONFIG_PATH.parent,
+    )
+
+    while simulation.running and session.running:
+        session.process_events()
+        simulation.step()
+        session.update()
 
 
 if __name__ == "__main__":
