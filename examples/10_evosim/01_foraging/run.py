@@ -1,15 +1,12 @@
 # SPDX-License-Identifier: MIT
 """Run the built-in persistent Foraging simulation."""
 
-from evosim.cli import parse_sim_args
 from evosim.sims.foraging import ForagingSession, ForagingSimulation
 
 
 def main() -> None:
-    args = parse_sim_args(description=__doc__)
-
     simulation = ForagingSimulation("simulation.yaml")
-    session = ForagingSession(simulation, render=args.render)
+    session = ForagingSession(simulation, render=True)
 
     while simulation.running and session.running:
         session.process_events()

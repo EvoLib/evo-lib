@@ -155,21 +155,14 @@ reproduction.
 
 ## Run
 
-Headless:
-
 ```bash
 cd examples/10_evosim/01_foraging
 python run.py
 ```
 
-With Pygame visualization:
-
-```bash
-cd examples/10_evosim/01_foraging
-python run.py --render
-```
-
-Both modes use the same simulation logic and `simulation.yaml`.
+The example enables Pygame visualization with `render=True` in `run.py`. Set it
+to `False` for headless execution. Both modes use the same simulation logic and
+`simulation.yaml`.
 
 During rendering:
 
