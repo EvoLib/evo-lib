@@ -1,5 +1,5 @@
 seed: 1
-steps: 100000
+max_steps: 100000
 
 metrics:
   interval: 100

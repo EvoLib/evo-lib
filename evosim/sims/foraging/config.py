@@ -162,7 +162,7 @@ class ForagingConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     seed: int | None = 1
-    steps: int = Field(default=100_000, gt=0)
+    max_steps: int = Field(default=100_000, gt=0)
     metrics: MetricsConfig = Field(default_factory=MetricsConfig)
     world: WorldConfig = Field(default_factory=WorldConfig)
     food: FoodConfig = Field(default_factory=FoodConfig)
