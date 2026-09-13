@@ -69,7 +69,7 @@ The default settings are:
 | `reproduction_cost`          | `34.0` |
 | `offspring_energy`           | `28.0` |
 | `min_reproduction_age_steps` |   `80` |
-| `max_age_steps`         | `5000` |
+| `max_age_steps`              | `5000` |
 
 Offspring receive a copied EvoLib `Indiv` which is mutated before being added to
 the population.
@@ -175,6 +175,9 @@ During rendering:
 
 ## Metrics
 
-The example writes aggregate population, food, birth, death, energy, and
-age statistics to `metrics.csv`.
+The session prints a compact status line at the configured `metrics.interval`.
+
+CSV output is optional. Set `metrics.file` to a path such as `metrics.csv` to
+write the complete metric set. If `file` is omitted or `null`, no CSV file is
+created.
 

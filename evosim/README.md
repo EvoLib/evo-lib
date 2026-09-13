@@ -49,6 +49,7 @@ process.
 | Simulation implementation | World state and interaction rules                |
 | Objects                   | Simulation-specific agents, resources, and state |
 | Configuration             | Validated simulation parameters                  |
+| `ForagingSession`         | Metrics output and optional visualization        |
 | Renderer                  | Optional visualization                           |
 
 
@@ -74,12 +75,11 @@ Built-in simulations use YAML configuration.
 
 ## Headless and Rendered Runs
 
-Simulation logic is independent of visualization. The same simulation can run
-headless or with a renderer for inspection.
+Simulation logic is independent of visualization. Rendering is controlled when
+the Foraging session is created:
 
-For example:
-
-```bash
-python examples/10_evosim/01_foraging/run.py
-python examples/10_evosim/01_foraging/run.py --render
+```python
+session = ForagingSession(simulation, render=True)
 ```
+
+Set `render=False` for headless execution.
