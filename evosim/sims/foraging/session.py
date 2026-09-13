@@ -40,12 +40,12 @@ class ForagingSession:
             self._writer = csv.DictWriter(self._file, fieldnames=list(metrics))
             self._writer.writeheader()
 
-        self._last_logged_step: int | None = None
+        self._last_reported_step: int | None = None
 
         if render:
             self._open_renderer()
 
-        self._write_metrics()
+        self._report_metrics()
         if not simulation.running:
             self.close()
 
@@ -64,7 +64,7 @@ class ForagingSession:
             return
 
         if self.simulation.step_count % self.simulation.config.metrics.interval == 0:
-            self._write_metrics()
+            self._report_metrics()
 
         if self._window is not None and self._renderer is not None:
             self._renderer.draw(
@@ -78,12 +78,12 @@ class ForagingSession:
             self.close()
 
     def close(self) -> None:
-        """Write final metrics and release session resources."""
+        """Report final metrics and release session resources."""
         if self._closed:
             return
 
-        if self._last_logged_step != self.simulation.step_count:
-            self._write_metrics()
+        if self._last_reported_step != self.simulation.step_count:
+            self._report_metrics()
 
         if self._window is not None:
             self._window.close()
@@ -121,14 +121,14 @@ class ForagingSession:
             panel_width=self._renderer.panel_width,
         )
 
-    def _write_metrics(self) -> None:
+    def _report_metrics(self) -> None:
         metrics = self.simulation.metrics()
 
         if self._writer is not None and self._file is not None:
             self._writer.writerow(metrics)
             self._file.flush()
 
-        self._last_logged_step = self.simulation.step_count
+        self._last_reported_step = self.simulation.step_count
 
         print(
             f"step={metrics['step']} "
