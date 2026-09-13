@@ -108,7 +108,7 @@ def test_reproduction_creates_independent_offspring_and_charges_parent() -> None
 
     cfg = sim.config.forager
     parent.energy = cfg.reproduction_threshold
-    parent.lifetime_steps = cfg.min_reproduction_age_steps
+    parent.age_steps = cfg.min_reproduction_age_steps
 
     sim._reproduce()
 
