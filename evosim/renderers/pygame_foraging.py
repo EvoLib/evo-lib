@@ -218,7 +218,7 @@ class PygameForagingRenderer:
             f"deaths={simulation.deaths}",
             f"food_eaten={simulation.food_eaten}",
             f"mean_energy={simulation.mean_energy:.1f}",
-            f"oldest={simulation.oldest_lifetime_steps}",
+            f"oldest={simulation.oldest_age_steps}",
             "",
             f"sensors={'on' if self.show_sensors else 'off'}",
             "S: toggle sensors",

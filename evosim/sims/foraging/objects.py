@@ -34,7 +34,7 @@ class Forager:
     heading: float
     energy: float
     radius: float
-    lifetime_steps: int = 0
+    age_steps: int = 0
 
 
 @dataclass(slots=True, frozen=True)

@@ -69,7 +69,7 @@ class ForagerConfig(BaseModel):
     reproduction_cost: float = Field(default=34.0, gt=0.0)
     offspring_energy: float = Field(default=28.0, gt=0.0)
     min_reproduction_age_steps: int = Field(default=80, ge=0)
-    max_lifetime_steps: int = Field(default=5000, ge=0)
+    max_age_steps: int = Field(default=5000, ge=0)
 
     @model_validator(mode="after")
     def validate_reproduction_energy(self) -> Self:

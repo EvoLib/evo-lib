@@ -55,7 +55,7 @@ consumes it.
 
 Movement, turning, and basic survival consume energy. Food restores energy.
 
-A Forager dies when its energy is depleted or its maximum lifetime is reached.
+A Forager dies when its energy is depleted or its maximum age is reached.
 
 Reproduction requires sufficient energy and a minimum age. The parent pays a
 reproduction cost, while the offspring starts with its own energy reserve.
@@ -69,7 +69,7 @@ The default settings are:
 | `reproduction_cost`          | `34.0` |
 | `offspring_energy`           | `28.0` |
 | `min_reproduction_age_steps` |   `80` |
-| `max_lifetime_steps`         | `5000` |
+| `max_age_steps`         | `5000` |
 
 Offspring receive a copied EvoLib `Indiv` which is mutated before being added to
 the population.
@@ -176,5 +176,5 @@ During rendering:
 ## Metrics
 
 The example writes aggregate population, food, birth, death, energy, and
-lifetime statistics to `metrics.csv`.
+age statistics to `metrics.csv`.
 

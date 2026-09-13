@@ -67,9 +67,9 @@ class ForagingSimulation(Simulation):
         return float(np.mean([forager.energy for forager in self.foragers]))
 
     @property
-    def oldest_lifetime_steps(self) -> int:
+    def oldest_age_steps(self) -> int:
         """Return age of the oldest living Forager in simulation steps."""
-        return max((forager.lifetime_steps for forager in self.foragers), default=0)
+        return max((forager.age_steps for forager in self.foragers), default=0)
 
     def reset(self, *, seed: int | None = None) -> None:
         """Reset world, population, resources, counters, and random state."""
@@ -113,7 +113,7 @@ class ForagingSimulation(Simulation):
             "deaths": self.deaths,
             "food_eaten": self.food_eaten,
             "mean_energy": self.mean_energy,
-            "oldest_lifetime": self.oldest_lifetime_steps,
+            "oldest_age": self.oldest_age_steps,
         }
         metrics.update(self._sensor_parameter_metrics())
         return metrics
@@ -329,7 +329,7 @@ class ForagingSimulation(Simulation):
                 + cfg.movement_cost * abs(distance)
                 + cfg.movement_cost * cfg.turn_cost_factor * abs(delta_heading)
             )
-            forager.lifetime_steps += 1
+            forager.age_steps += 1
 
     def _consume_food(self) -> None:
         """Resolve food consumption based on distance and energy capacity."""
@@ -395,14 +395,12 @@ class ForagingSimulation(Simulation):
         ]
 
     def _remove_dead_foragers(self) -> None:
-        max_lifetime = self.config.forager.max_lifetime_steps
+        max_age = self.config.forager.max_age_steps
         living: list[Forager] = []
 
         for forager in self.foragers:
-            lifetime_expired = (
-                max_lifetime > 0 and forager.lifetime_steps >= max_lifetime
-            )
-            if forager.energy <= 0.0 or lifetime_expired:
+            age_expired = max_age > 0 and forager.age_steps >= max_age
+            if forager.energy <= 0.0 or age_expired:
                 self.deaths += 1
             else:
                 living.append(forager)
@@ -419,7 +417,7 @@ class ForagingSimulation(Simulation):
             forager
             for forager in self.foragers
             if forager.energy >= cfg.reproduction_threshold
-            and forager.lifetime_steps >= cfg.min_reproduction_age_steps
+            and forager.age_steps >= cfg.min_reproduction_age_steps
         ]
         if not eligible:
             return

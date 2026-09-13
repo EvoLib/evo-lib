@@ -34,7 +34,7 @@ forager:
   reproduction_cost: 34.0
   offspring_energy: 28.0
   min_reproduction_age_steps: 80
-  max_lifetime_steps: 5000
+  max_age_steps: 5000
 
 modules:
   controller:
