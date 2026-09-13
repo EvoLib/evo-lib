@@ -68,28 +68,6 @@ modules:
         strength: 0.06
         probability: 0.25
 
-#      structural:
-#        add_neuron:
-#          probability: 0.002
-#          init_connection_ratio: 1.0
-#          activations_allowed: [tanh]
-#          init: random
-#
-#        remove_neuron:
-#          probability: 0.001
-#
-#        add_connection:
-#          probability: 0.004
-#
-#        remove_connection:
-#          probability: 0.002
-#
-#        topology:
-#          recurrent: none
-#          connection_scope: crosslayer
-#          max_neurons: 12
-#          max_connections: 80
-
   sensor_angles:
     type: vector
     initializer: fixed
