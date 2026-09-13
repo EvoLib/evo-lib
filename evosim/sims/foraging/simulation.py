@@ -274,22 +274,23 @@ class ForagingSimulation(Simulation):
             raise TypeError("Foraging requires an EvoNet 'controller' component.")
         return controller
 
-    def _sensor_vector(self, forager: Forager, name: str) -> Vector:
-        vector = self._composite(forager)[name]
-        if not isinstance(vector, Vector):
-            raise TypeError(f"Foraging requires a Vector '{name}' component.")
-        return vector
-
     def _sensor_arrays(
         self, forager: Forager
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return aligned angle, FOV, and range arrays for one Forager."""
-        angles = self._sensor_vector(forager, "sensor_angles").vector
-        fovs = self._sensor_vector(forager, "sensor_fovs").vector
-        ranges = self._sensor_vector(forager, "sensor_ranges").vector
-        if not (len(angles) == len(fovs) == len(ranges)):
-            raise ValueError("Foraging sensor vectors must have equal size.")
-        return angles, fovs, ranges
+        para = self._composite(forager)
+        angles = para["sensor_angles"]
+        fovs = para["sensor_fovs"]
+        ranges = para["sensor_ranges"]
+
+        if not (
+            isinstance(angles, Vector)
+            and isinstance(fovs, Vector)
+            and isinstance(ranges, Vector)
+        ):
+            raise TypeError("Foraging sensor components must be Vectors.")
+
+        return angles.vector, fovs.vector, ranges.vector
 
     def _calculate_action(self, forager: Forager) -> ForagerAction:
         outputs = self._controller(forager).calc(self.observation(forager))
