@@ -15,9 +15,18 @@ class Food:
     radius: float
 
 
+@dataclass(slots=True)
+class Poison:
+    """One consumable poison item."""
+
+    x: float
+    y: float
+    radius: float
+
+
 @dataclass(slots=True, frozen=True)
-class FoodSensor:
-    """Decoded local food sensor carried by one Forager."""
+class ForagingSensor:
+    """Decoded local sensor carried by one Forager."""
 
     angle: float
     fov: float

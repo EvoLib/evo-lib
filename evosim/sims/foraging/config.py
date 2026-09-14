@@ -49,6 +49,26 @@ class FoodConfig(BaseModel):
         return self
 
 
+class PoisonConfig(BaseModel):
+    """Optional poison spawning and damage settings."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = False
+    initial_count: int = Field(default=20, ge=0)
+    max_count: int = Field(default=60, ge=0)
+    spawn_rate: float = Field(default=0.04, ge=0.0)
+    radius: float = Field(default=4.0, gt=0.0)
+    damage: float = Field(default=20.0, gt=0.0)
+
+    @model_validator(mode="after")
+    def validate_poison_limit(self) -> Self:
+        """Ensure the initial poison count fits below the configured limit."""
+        if self.initial_count > self.max_count:
+            raise ValueError("initial_count must not exceed max_count.")
+        return self
+
+
 class ForagerConfig(BaseModel):
     """Forager body, movement, energy, and reproduction settings."""
 
@@ -137,11 +157,6 @@ class ForagingModulesConfig(BaseModel):
         if range_low <= 0.0:
             raise ValueError("Sensor range bounds must be greater than zero.")
 
-        if self.controller.dim[0] != sensor_count + 1:
-            raise ValueError(
-                "Foraging requires one EvoNet input per food sensor plus energy."
-            )
-
         if self.controller.dim[-1] != 2:
             raise ValueError("Foraging requires two EvoNet output neurons.")
 
@@ -149,7 +164,7 @@ class ForagingModulesConfig(BaseModel):
 
     @property
     def sensor_count(self) -> int:
-        """Return the number of configured local food sensors."""
+        """Return the number of configured local sensors."""
         dim = self.sensor_angles.dim
         if not isinstance(dim, int):
             raise ValueError("Foraging sensor vectors require integer dimensions.")
@@ -166,8 +181,21 @@ class ForagingConfig(BaseModel):
     metrics: MetricsConfig = Field(default_factory=MetricsConfig)
     world: WorldConfig = Field(default_factory=WorldConfig)
     food: FoodConfig = Field(default_factory=FoodConfig)
+    poison: PoisonConfig = Field(default_factory=PoisonConfig)
     forager: ForagerConfig = Field(default_factory=ForagerConfig)
     modules: ForagingModulesConfig
+
+    @model_validator(mode="after")
+    def validate_controller_inputs(self) -> Self:
+        """Validate controller inputs for the enabled sensory channels."""
+        channels_per_sensor = 2 if self.poison.enabled else 1
+        expected_inputs = self.modules.sensor_count * channels_per_sensor + 1
+        if self.modules.controller.dim[0] != expected_inputs:
+            raise ValueError(
+                f"Foraging requires {expected_inputs} EvoNet inputs for the "
+                "configured sensory channels."
+            )
+        return self
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> Self:

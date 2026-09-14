@@ -134,6 +134,7 @@ class ForagingSession:
             f"step={metrics['step']} "
             f"population={metrics['population']} "
             f"food={metrics['food']} "
+            f"poison={metrics['poison']} "
             f"births={metrics['births']} "
             f"deaths={metrics['deaths']} "
             f"mean_energy={metrics['mean_energy']:.1f}"

@@ -16,6 +16,8 @@ from evosim.sims.foraging.simulation import ForagingSimulation
 DEFAULT_FPS = 60
 _LOW_ENERGY_COLOR = (31, 58, 95)
 _HIGH_ENERGY_COLOR = (86, 204, 242)
+_FOOD_COLOR = (80, 220, 120)
+_POISON_COLOR = (220, 80, 100)
 _SENSOR_COLORS = (
     (80, 180, 233),
     (230, 159, 0),
@@ -65,7 +67,15 @@ class PygameForagingRenderer:
         for resource in simulation.food:
             pygame.draw.circle(
                 screen,
-                (80, 220, 120),
+                _FOOD_COLOR,
+                (int(round(resource.x)), int(round(resource.y))),
+                int(round(resource.radius)),
+            )
+
+        for resource in simulation.poison:
+            pygame.draw.circle(
+                screen,
+                _POISON_COLOR,
                 (int(round(resource.x)), int(round(resource.y))),
                 int(round(resource.radius)),
             )
@@ -214,9 +224,11 @@ class PygameForagingRenderer:
             f"step={simulation.step_count}",
             f"population={simulation.population_size}",
             f"food={len(simulation.food)}",
+            f"poison={len(simulation.poison)}",
             f"births={simulation.births}",
             f"deaths={simulation.deaths}",
             f"food_eaten={simulation.food_eaten}",
+            f"poison_eaten={simulation.poison_eaten}",
             f"mean_energy={simulation.mean_energy:.1f}",
             f"oldest={simulation.oldest_age_steps}",
             "",

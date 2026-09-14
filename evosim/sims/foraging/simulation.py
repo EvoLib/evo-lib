@@ -3,6 +3,7 @@
 
 import math
 import random
+from collections.abc import Sequence
 from pathlib import Path
 
 import numpy as np
@@ -17,7 +18,13 @@ from evosim.core.geometry import (
 )
 from evosim.core.simulation import Simulation
 from evosim.sims.foraging.config import ForagingConfig
-from evosim.sims.foraging.objects import Food, FoodSensor, Forager, ForagerAction
+from evosim.sims.foraging.objects import (
+    Food,
+    Forager,
+    ForagerAction,
+    ForagingSensor,
+    Poison,
+)
 
 
 class ForagingSimulation(Simulation):
@@ -32,10 +39,12 @@ class ForagingSimulation(Simulation):
 
         self.foragers: list[Forager] = []
         self.food: list[Food] = []
+        self.poison: list[Poison] = []
 
         self.births = 0
         self.deaths = 0
         self.food_eaten = 0
+        self.poison_eaten = 0
 
         self.reset(seed=config.seed)
 
@@ -85,11 +94,17 @@ class ForagingSimulation(Simulation):
         self.births = 0
         self.deaths = 0
         self.food_eaten = 0
+        self.poison_eaten = 0
 
         self.foragers = [
             self._make_founder() for _ in range(self.config.world.initial_population)
         ]
         self.food = [self._make_food() for _ in range(self.config.food.initial_count)]
+        self.poison = []
+        if self.config.poison.enabled:
+            self.poison = [
+                self._make_poison() for _ in range(self.config.poison.initial_count)
+            ]
 
     def step(self) -> None:
         """Advance one synchronous simulation step."""
@@ -98,8 +113,13 @@ class ForagingSimulation(Simulation):
         self._apply_actions(actions)
         self._remove_dead_foragers()
         self._consume_food()
+        if self.config.poison.enabled:
+            self._consume_poison()
+            self._remove_dead_foragers()
         self._reproduce()
         self._spawn_food()
+        if self.config.poison.enabled:
+            self._spawn_poison()
 
         self.step_count += 1
 
@@ -109,9 +129,11 @@ class ForagingSimulation(Simulation):
             "step": self.step_count,
             "population": self.population_size,
             "food": len(self.food),
+            "poison": len(self.poison),
             "births": self.births,
             "deaths": self.deaths,
             "food_eaten": self.food_eaten,
+            "poison_eaten": self.poison_eaten,
             "mean_energy": self.mean_energy,
             "oldest_age": self.oldest_age_steps,
         }
@@ -148,14 +170,14 @@ class ForagingSimulation(Simulation):
 
         return metrics
 
-    def sensor_layout(self, forager: Forager) -> list[FoodSensor]:
-        """Decode the local food sensors carried by one Forager."""
+    def sensor_layout(self, forager: Forager) -> list[ForagingSensor]:
+        """Decode the local sensors carried by one Forager."""
         angles, fovs, ranges = self._sensor_arrays(forager)
 
-        sensors: list[FoodSensor] = []
+        sensors: list[ForagingSensor] = []
 
         for angle, fov, sensor_range in zip(angles, fovs, ranges, strict=True):
-            sensor = FoodSensor(
+            sensor = ForagingSensor(
                 angle=float(angle),
                 fov=float(fov),
                 range=float(sensor_range),
@@ -165,11 +187,49 @@ class ForagingSimulation(Simulation):
         return sensors
 
     def observation(self, forager: Forager) -> list[float]:
-        """Return local food sensor activations plus normalized energy."""
+        """Return enabled sensor channels plus normalized energy."""
         angles, fovs, ranges = self._sensor_arrays(forager)
+        food_values = self._sense_resources(
+            forager,
+            self.food,
+            angles,
+            fovs,
+            ranges,
+        )
+
+        cfg = self.config.forager
+        energy = forager.energy / cfg.energy_capacity
+        if not self.config.poison.enabled:
+            return [*food_values, energy]
+
+        poison_values = self._sense_resources(
+            forager,
+            self.poison,
+            angles,
+            fovs,
+            ranges,
+        )
+
+        sensor_values: list[float] = []
+
+        for food_value, poison_value in zip(food_values, poison_values, strict=True):
+            sensor_values.append(food_value)
+            sensor_values.append(poison_value)
+
+        return [*sensor_values, energy]
+
+    def _sense_resources(
+        self,
+        forager: Forager,
+        resources: Sequence[Food | Poison],
+        angles: np.ndarray,
+        fovs: np.ndarray,
+        ranges: np.ndarray,
+    ) -> list[float]:
+        """Return one activation per spatial sensor for a resource channel."""
         sensor_values = [0.0 for _ in range(len(angles))]
 
-        for resource in self.food:
+        for resource in resources:
             dx, dy = toroidal_displacement(
                 forager.x,
                 forager.y,
@@ -198,9 +258,7 @@ class ForagingSimulation(Simulation):
                 strength = 1.0 - distance / sensor_range
                 sensor_values[index] = max(sensor_values[index], float(strength))
 
-        cfg = self.config.forager
-        energy = forager.energy / cfg.energy_capacity
-        return [*sensor_values, energy]
+        return sensor_values
 
     def _make_founder(self) -> Forager:
         modules = self.config.modules
@@ -257,6 +315,13 @@ class ForagingSimulation(Simulation):
             x=float(self.rng.uniform(0.0, self.config.world.width)),
             y=float(self.rng.uniform(0.0, self.config.world.height)),
             radius=self.config.food.radius,
+        )
+
+    def _make_poison(self) -> Poison:
+        return Poison(
+            x=float(self.rng.uniform(0.0, self.config.world.width)),
+            y=float(self.rng.uniform(0.0, self.config.world.height)),
+            radius=self.config.poison.radius,
         )
 
     @staticmethod
@@ -331,24 +396,18 @@ class ForagingSimulation(Simulation):
             )
             forager.age_steps += 1
 
-    def _consume_food(self) -> None:
-        """Resolve food consumption based on distance and energy capacity."""
+    def _contact_candidates(
+        self,
+        resources: Sequence[Food | Poison],
+    ) -> list[tuple[float, int, int]]:
+        """Return sorted Forager-resource contacts for consumable objects."""
         width = self.config.world.width
         height = self.config.world.height
-        food_energy = self.config.food.energy
-        energy_capacity = self.config.forager.energy_capacity
-
-        # Store all valid forager-food contacts as:
-        # (distance_squared, forager_index, food_index)
         candidates: list[tuple[float, int, int]] = []
 
         for forager_index, forager in enumerate(self.foragers):
-            # Foragers at energy capacity cannot consume additional food.
-            if forager.energy >= energy_capacity:
-                continue
-
-            for food_index, resource in enumerate(self.food):
-                eat_radius = forager.radius + resource.radius
+            for resource_index, resource in enumerate(resources):
+                consume_radius = forager.radius + resource.radius
                 distance_squared = toroidal_distance_squared(
                     forager.x,
                     forager.y,
@@ -357,17 +416,17 @@ class ForagingSimulation(Simulation):
                     width,
                     height,
                 )
+                if distance_squared <= consume_radius * consume_radius:
+                    candidates.append((distance_squared, forager_index, resource_index))
 
-                # Only resources inside the physical consumption radius
-                # are relevant candidates.
-                if distance_squared > eat_radius * eat_radius:
-                    continue
-
-                candidates.append((distance_squared, forager_index, food_index))
-
-        # Resolve contacts from nearest to farthest. This avoids making food
-        # consumption depend on the current ordering of self.food.
         candidates.sort(key=lambda candidate: candidate[0])
+        return candidates
+
+    def _consume_food(self) -> None:
+        """Resolve food consumption based on distance and energy capacity."""
+        food_energy = self.config.food.energy
+        energy_capacity = self.config.forager.energy_capacity
+        candidates = self._contact_candidates(self.food)
 
         consumed_food: set[int] = set()
 
@@ -392,6 +451,33 @@ class ForagingSimulation(Simulation):
             resource
             for food_index, resource in enumerate(self.food)
             if food_index not in consumed_food
+        ]
+
+    def _consume_poison(self) -> None:
+        """Resolve poison consumption and apply configured damage."""
+        if not self.config.poison.enabled:
+            return
+
+        damage = self.config.poison.damage
+        candidates = self._contact_candidates(self.poison)
+        consumed_poison: set[int] = set()
+
+        for _, forager_index, poison_index in candidates:
+            if poison_index in consumed_poison:
+                continue
+
+            forager = self.foragers[forager_index]
+            if forager.energy <= 0.0:
+                continue
+
+            forager.energy -= damage
+            consumed_poison.add(poison_index)
+            self.poison_eaten += 1
+
+        self.poison = [
+            resource
+            for poison_index, resource in enumerate(self.poison)
+            if poison_index not in consumed_poison
         ]
 
     def _remove_dead_foragers(self) -> None:
@@ -443,3 +529,17 @@ class ForagingSimulation(Simulation):
             int(self.rng.poisson(self.config.food.spawn_rate)),
         )
         self.food.extend(self._make_food() for _ in range(spawn_count))
+
+    def _spawn_poison(self) -> None:
+        if not self.config.poison.enabled:
+            return
+
+        free_slots = self.config.poison.max_count - len(self.poison)
+        if free_slots <= 0 or self.config.poison.spawn_rate <= 0.0:
+            return
+
+        spawn_count = min(
+            free_slots,
+            int(self.rng.poisson(self.config.poison.spawn_rate)),
+        )
+        self.poison.extend(self._make_poison() for _ in range(spawn_count))
