@@ -187,7 +187,7 @@ class ForagingSimulation(Simulation):
         return sensors
 
     def observation(self, forager: Forager) -> list[float]:
-        """Return enabled sensor channels plus normalized energy."""
+        """Return enabled sensor channels plus normalized internal state."""
         angles, fovs, ranges = self._sensor_arrays(forager)
         food_values = self._sense_resources(
             forager,
@@ -199,8 +199,13 @@ class ForagingSimulation(Simulation):
 
         cfg = self.config.forager
         energy = forager.energy / cfg.energy_capacity
+        feeding_cooldown = (
+            forager.feeding_cooldown / cfg.feeding_cooldown_steps
+            if cfg.feeding_cooldown_steps > 0
+            else 0.0
+        )
         if not self.config.poison.enabled:
-            return [*food_values, energy]
+            return [*food_values, energy, feeding_cooldown]
 
         poison_values = self._sense_resources(
             forager,
@@ -216,7 +221,7 @@ class ForagingSimulation(Simulation):
             sensor_values.append(food_value)
             sensor_values.append(poison_value)
 
-        return [*sensor_values, energy]
+        return [*sensor_values, energy, feeding_cooldown]
 
     def _sense_resources(
         self,
@@ -395,6 +400,8 @@ class ForagingSimulation(Simulation):
                 + cfg.movement_cost * cfg.turn_cost_factor * abs(delta_heading)
             )
             forager.age_steps += 1
+            if forager.feeding_cooldown > 0:
+                forager.feeding_cooldown -= 1
 
     def _contact_candidates(
         self,
@@ -423,9 +430,9 @@ class ForagingSimulation(Simulation):
         return candidates
 
     def _consume_food(self) -> None:
-        """Resolve food consumption based on distance and energy capacity."""
+        """Resolve food consumption based on distance, capacity, and cooldown."""
         food_energy = self.config.food.energy
-        energy_capacity = self.config.forager.energy_capacity
+        cfg = self.config.forager
         candidates = self._contact_candidates(self.food)
 
         consumed_food: set[int] = set()
@@ -437,12 +444,19 @@ class ForagingSimulation(Simulation):
 
             forager = self.foragers[forager_index]
 
-            # An earlier consumption in this step may already have filled
-            # the forager's energy capacity.
-            if forager.energy >= energy_capacity:
+            if forager.feeding_cooldown > 0:
                 continue
 
-            forager.energy = min(forager.energy + food_energy, energy_capacity)
+            # An earlier consumption in this step may already have filled
+            # the forager's energy capacity.
+            if forager.energy >= cfg.energy_capacity:
+                continue
+
+            forager.energy = min(
+                forager.energy + food_energy,
+                cfg.energy_capacity,
+            )
+            forager.feeding_cooldown = cfg.feeding_cooldown_steps
             consumed_food.add(food_index)
             self.food_eaten += 1
 

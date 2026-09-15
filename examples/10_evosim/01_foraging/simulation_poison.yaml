@@ -8,7 +8,7 @@ metrics:
 world:
   width: 900
   height: 600
-  initial_population: 20
+  initial_population: 60
   max_population: 200
 
 food:
@@ -37,6 +37,7 @@ forager:
   basal_cost: 0.045
   movement_cost: 0.025
   turn_cost_factor: 1.0
+  feeding_cooldown_steps: 20
 
   reproduction_threshold: 90.0
   reproduction_cost: 34.0
@@ -47,7 +48,7 @@ forager:
 modules:
   controller:
     type: evonet
-    dim: [7, 6, 2]
+    dim: [8, 6, 2]
     activation: [linear, tanh, tanh]
     initializer: default
 

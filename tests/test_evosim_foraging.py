@@ -70,9 +70,20 @@ def test_food_sensor_uses_toroidal_world_geometry() -> None:
 
     expected_center = 1.0 - 10.0 / sensors[1].range
 
-    assert len(observation) == 4
+    assert len(observation) == 5
     assert observation[:3] == pytest.approx([0.0, expected_center, 0.0])
     assert observation[3] == pytest.approx(0.5)
+    assert observation[4] == pytest.approx(0.0)
+
+
+def test_feeding_cooldown_is_normalized_in_observation() -> None:
+    sim = _simulation()
+    forager = sim.foragers[0]
+    forager.feeding_cooldown = sim.config.forager.feeding_cooldown_steps // 2
+
+    observation = sim.observation(forager)
+
+    assert observation[-1] == pytest.approx(0.5)
 
 
 def test_poison_adds_a_second_channel_per_sensor() -> None:
@@ -104,11 +115,12 @@ def test_poison_adds_a_second_channel_per_sensor() -> None:
     expected_food = 1.0 - 10.0 / sensors[1].range
     expected_poison = 1.0 - 20.0 / sensors[1].range
 
-    assert len(observation) == 7
+    assert len(observation) == 8
     assert observation[:6] == pytest.approx(
         [0.0, 0.0, expected_food, expected_poison, 0.0, 0.0]
     )
     assert observation[6] == pytest.approx(0.5)
+    assert observation[7] == pytest.approx(0.0)
 
 
 def test_one_food_item_is_consumed_by_nearest_forager_only() -> None:
@@ -137,7 +149,34 @@ def test_one_food_item_is_consumed_by_nearest_forager_only() -> None:
     assert sim.food == []
     assert sim.food_eaten == 1
     assert first.energy == pytest.approx(sim.config.forager.energy_capacity)
+    assert first.feeding_cooldown == sim.config.forager.feeding_cooldown_steps
     assert second.energy == pytest.approx(10.0)
+
+
+def test_feeding_cooldown_limits_food_consumption() -> None:
+    sim = _simulation()
+    forager = sim.foragers[0]
+    sim.foragers = [forager]
+    forager.x = 100.0
+    forager.y = 100.0
+    forager.energy = 10.0
+    sim.food = [
+        Food(x=100.0, y=100.0, radius=sim.config.food.radius),
+        Food(x=100.0, y=100.0, radius=sim.config.food.radius),
+    ]
+
+    sim._consume_food()
+
+    assert len(sim.food) == 1
+    assert sim.food_eaten == 1
+    assert forager.feeding_cooldown == sim.config.forager.feeding_cooldown_steps
+
+    energy_after_first_food = forager.energy
+    sim._consume_food()
+
+    assert len(sim.food) == 1
+    assert sim.food_eaten == 1
+    assert forager.energy == pytest.approx(energy_after_first_food)
 
 
 def test_one_poison_item_is_consumed_by_nearest_forager_only() -> None:

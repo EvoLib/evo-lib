@@ -84,6 +84,7 @@ class ForagerConfig(BaseModel):
     movement_cost: float = Field(default=0.025, ge=0.0)
     turn_cost_factor: float = Field(default=1.0, ge=0.0)
     reverse_factor: float = Field(default=0.3, ge=0.0)
+    feeding_cooldown_steps: int = Field(default=20, ge=0)
 
     reproduction_threshold: float = Field(default=90.0, gt=0.0)
     reproduction_cost: float = Field(default=34.0, gt=0.0)
@@ -189,11 +190,11 @@ class ForagingConfig(BaseModel):
     def validate_controller_inputs(self) -> Self:
         """Validate controller inputs for the enabled sensory channels."""
         channels_per_sensor = 2 if self.poison.enabled else 1
-        expected_inputs = self.modules.sensor_count * channels_per_sensor + 1
+        expected_inputs = self.modules.sensor_count * channels_per_sensor + 2
         if self.modules.controller.dim[0] != expected_inputs:
             raise ValueError(
                 f"Foraging requires {expected_inputs} EvoNet inputs for the "
-                "configured sensory channels."
+                "configured sensory and state inputs."
             )
         return self
 

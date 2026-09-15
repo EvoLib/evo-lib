@@ -57,14 +57,17 @@ Forager killed by poison is removed before reproduction, and new poison is
 spawned after food.
 
 If several Foragers reach the same food or poison item, the closest eligible
-Forager gets it. A Forager already at its energy capacity does not consume food.
+Forager gets it. A Forager already at its energy capacity or still in its
+feeding cooldown does not consume food.
 
 ---
 
 ## Energy and Reproduction
 
-Movement, turning, and basic survival consume energy. Food restores energy. In
-the poison variant, poison removes a fixed amount of energy.
+Movement, turning, and basic survival consume energy. Food restores energy and
+starts a short feeding cooldown during which no additional food can be consumed.
+The remaining cooldown is available to the controller as a normalized internal
+state. In the poison variant, poison removes a fixed amount of energy.
 
 A Forager dies when its energy is depleted or its maximum age is reached.
 
@@ -76,6 +79,7 @@ The default settings are:
 | Setting                      |  Value |
 | ---------------------------- | -----: |
 | `initial_energy`             | `55.0` |
+| `feeding_cooldown_steps`     |   `20` |
 | `reproduction_threshold`     | `90.0` |
 | `reproduction_cost`          | `34.0` |
 | `offspring_energy`           | `28.0` |
@@ -89,14 +93,15 @@ the population.
 
 ## Observation Space
 
-With poison disabled, the controller receives the original four values:
+With poison disabled, the controller receives five values:
 
-| Index | Value           | Meaning                   |
-| ----: | --------------- | ------------------------- |
-|     0 | `food_sensor_0` | Left food sensor          |
-|     1 | `food_sensor_1` | Center food sensor        |
-|     2 | `food_sensor_2` | Right food sensor         |
-|     3 | `energy`        | Normalized current energy |
+| Index | Value              | Meaning                              |
+| ----: | ------------------ | ------------------------------------ |
+|     0 | `food_sensor_0`    | Left food sensor                     |
+|     1 | `food_sensor_1`    | Center food sensor                   |
+|     2 | `food_sensor_2`    | Right food sensor                    |
+|     3 | `energy`           | Normalized current energy            |
+|     4 | `feeding_cooldown` | Normalized remaining feeding cooldown |
 
 With poison enabled, the same three spatial sensors each produce separate food
 and poison channels:
@@ -110,6 +115,7 @@ and poison channels:
 |     4 | `sensor_2_food`   | Food signal in the right sensor |
 |     5 | `sensor_2_poison` | Poison signal in the right sensor |
 |     6 | `energy`          | Normalized current energy       |
+|     7 | `feeding_cooldown` | Normalized remaining feeding cooldown |
 
 Each spatial sensor has one angle, field of view, and range. For a visible
 resource at distance `d`:
@@ -157,20 +163,20 @@ Reverse movement is possible but slower than forward movement.
 
 ## Controller
 
-The baseline controller keeps the original four inputs:
+The baseline controller uses five inputs:
 
 ```yaml
 controller:
   type: evonet
-  dim: [4, 6, 2]
+  dim: [5, 6, 2]
 ```
 
-The poison variant uses seven inputs:
+The poison variant uses eight inputs:
 
 ```yaml
 controller:
   type: evonet
-  dim: [7, 6, 2]
+  dim: [8, 6, 2]
 ```
 
 The two outputs control turning and throttle. Controller parameters mutate
