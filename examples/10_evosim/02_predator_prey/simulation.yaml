@@ -1,0 +1,120 @@
+seed: 1
+max_steps: 50000
+
+metrics:
+  interval: 100
+  #file: metrics.csv
+
+world:
+  width: 900
+  height: 600
+
+prey:
+  initial_population: 60
+  max_population: 100
+
+  radius: 7.0
+  max_speed: 2.8
+  max_turn_rate: 0.22
+  reverse_factor: 0.3
+
+  energy_capacity: 100.0
+  movement_cost: 0.04
+  grazing_rate: 0.12
+  grazing_max_speed: 0.1
+
+  reproduction_interval_steps: 700
+  reproduction_interval_jitter_steps: 100
+  offspring_dispersion: 200.0
+
+  energy_value: 30.0
+
+predator:
+  initial_population: 20
+  max_population: 30
+
+  radius: 7.0
+  max_speed: 2.5
+  max_turn_rate: 0.11
+  reverse_factor: 0.3
+
+  initial_energy: 50.0
+  energy_capacity: 100.0
+  basal_cost: 0.025
+  movement_cost: 0.05
+  feeding_cooldown_steps: 15
+  reproduction_cooldown_steps: 300
+  offspring_dispersion: 300.0
+
+modules:
+  prey:
+    ray_count: 29
+    sensor_fov: 6.283185307179586
+    sensor_range: 100.0
+
+    controller:
+      type: evonet
+      dim: [30, 6, 2]
+      activation: [linear, tanh, tanh]
+      initializer: default
+
+      connectivity:
+        scope: adjacent
+        density: 1.0
+        recurrent: [direct]
+
+      weights:
+        initializer: normal
+        std: 0.45
+        bounds: [-3.0, 3.0]
+
+      bias:
+        initializer: normal
+        std: 0.2
+        bounds: [-2.0, 2.0]
+
+      mutation:
+        strategy: constant
+        strength: 0.12
+        probability: 0.25
+
+        biases:
+          strategy: constant
+          strength: 0.06
+          probability: 0.25
+
+  predator:
+    ray_count: 19
+    sensor_fov: 1.5707963267948966
+    sensor_range: 80.0
+
+    controller:
+      type: evonet
+      dim: [21, 6, 2]
+      activation: [linear, tanh, tanh]
+      initializer: default
+
+      connectivity:
+        scope: adjacent
+        density: 1.0
+        recurrent: [direct]
+
+      weights:
+        initializer: normal
+        std: 0.45
+        bounds: [-3.0, 3.0]
+
+      bias:
+        initializer: normal
+        std: 0.2
+        bounds: [-2.0, 2.0]
+
+      mutation:
+        strategy: constant
+        strength: 0.12
+        probability: 0.25
+
+        biases:
+          strategy: constant
+          strength: 0.06
+          probability: 0.25

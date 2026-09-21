@@ -49,7 +49,7 @@ process.
 | Simulation implementation | World state and interaction rules                |
 | Objects                   | Simulation-specific agents, resources, and state |
 | Configuration             | Validated simulation parameters                  |
-| `ForagingSession`         | Metrics output and optional visualization        |
+| Simulation session        | Metrics output and optional visualization        |
 | Renderer                  | Optional visualization                           |
 
 
@@ -69,6 +69,19 @@ There is no explicit fitness function or generation boundary.
 See
 [`examples/10_evosim/01_foraging/`](../examples/10_evosim/01_foraging/).
 
+### Predator-Prey
+
+Predator-Prey contains two independently evolving populations. Prey balance
+stationary grazing against movement and escape, while Predators must find and
+capture Prey to survive and reproduce.
+
+The two populations deliberately use different life-history rules: Prey die only
+through predation and reproduce on a time-based schedule, while Predator survival and
+reproduction depend on energy gained from successful captures.
+
+See
+[`examples/10_evosim/02_predator_prey/`](../examples/10_evosim/02_predator_prey/).
+
 ## Configuration
 
 Built-in simulations use YAML configuration.
@@ -76,7 +89,7 @@ Built-in simulations use YAML configuration.
 ## Headless and Rendered Runs
 
 Simulation logic is independent of visualization. Rendering is controlled when
-the Foraging session is created:
+a simulation session is created:
 
 ```python
 session = ForagingSession(simulation, render=True)
