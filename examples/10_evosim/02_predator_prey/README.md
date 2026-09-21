@@ -10,6 +10,12 @@ For the general EvoSim architecture and its distinction from EvoEnv, see
 
 ---
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/10_evosim/02_predator_prey/predator_prey.gif" alt="PredatorPrey sample" width="512"/>
+</p>
+
+---
+
 ## Goal
 
 This example demonstrates **continuous competitive coevolution** in a persistent
