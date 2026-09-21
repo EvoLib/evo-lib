@@ -3,7 +3,6 @@
 
 from evosim.sims.foraging import ForagingSession, ForagingSimulation
 
-# simulation = ForagingSimulation("simulation.yaml")
 simulation = ForagingSimulation("simulation_poison.yaml")
 
 session = ForagingSession(simulation, render=True)

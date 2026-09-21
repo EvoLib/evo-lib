@@ -4,7 +4,7 @@ A population of evolved Foragers moves through a shared 2D world, searches for
 food, spends energy, reproduces, and dies. There are no generations and no
 explicit fitness values; selection is driven by survival and reproduction.
 
-`simulation.yaml` is food-only. `simulation_poison.yaml` enables an optional
+`simulation.yaml` is food-only. `simulation_poison.yaml` enables 
 poison variant.
 
 For the general EvoSim architecture and its distinction from EvoEnv, see
@@ -193,10 +193,10 @@ cd examples/10_evosim/01_foraging
 python run.py
 ```
 
-Run the poison variant:
+Run the simulation:
 
 ```bash
-python run.py simulation_poison.yaml
+python run.py
 ```
 
 The example enables Pygame visualization with `render=True` in `run.py`. Set it
