@@ -341,7 +341,7 @@ The included `simulation.yaml` uses:
 
 | Parameter | Prey | Predator |
 | --- | ---: | ---: |
-| Initial population | 100 | 20 |
+| Initial population | 60 | 20 |
 | Maximum population | 100 | 30 |
 | Maximum speed | 2.8 | 2.5 |
 | Maximum turn rate | 0.22 | 0.11 |
