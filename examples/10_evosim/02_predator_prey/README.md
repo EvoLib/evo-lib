@@ -42,10 +42,10 @@ better pursuit
 
 This reciprocal dependency is the central purpose of the example.
 
-The simulation can produce changing pursuit and escape strategies, population
-fluctuations, bottlenecks, disengagement, or extinction. These changes are
-evidence of coevolutionary dynamics, but they are **not by themselves evidence
-of cumulative evolutionary progress**.
+The simulation can produce changing pursuit and escape behavior, population
+fluctuations, bottlenecks, disengagement, or extinction. These outcomes are 
+consistent with coevolutionary dynamics, but population change alone does not
+demonstrate adaptive evolutionary change.
 
 ---
 
@@ -78,8 +78,7 @@ Several well-known effects can prevent such an interpretation:
 - **Bootstrap failure** – coevolution may fail to start when useful variation does
   not create a sufficient initial advantage.
 
-Population change therefore means that evolution is occurring, not necessarily
-that general capability is increasing.
+Population change alone does not establish adaptive evolutionary progress.
 
 ---
 

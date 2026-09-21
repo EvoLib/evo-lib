@@ -1,7 +1,7 @@
 # EvoSim
 
-EvoSim provides small, persistent multi-agent simulations for evolutionary
-experiments with EvoLib.
+EvoSim provides a lightweight structure and built-in persistent multi-agent
+simulations for evolutionary experiments with EvoLib.
 
 Unlike EvoEnv, EvoSim does not evaluate one controller in a sequence of isolated
 episodes. Multiple individuals coexist in the same world while resources,

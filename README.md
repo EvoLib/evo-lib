@@ -22,7 +22,7 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 - **Neuroevolution support**: evolvable neural networks with explicit topology, recurrence, delays, and structural mutation (EvoNet).  
 - **Gymnasium integration**: run [Gymnasium](https://gymnasium.farama.org) benchmarks (e.g. CartPole, LunarLander) via a simple wrapper.
 - **EvoEnv**: build small, controllable Pygame environments for evolutionary experiments.
-- **EvoSim**: run persistent multi-agent simulations where survival, reproduction, resource competition, and interaction drive continuous evolution.
+- **EvoSim**: lightweight support for persistent evolutionary simulations, with built-in examples for resource competition and competitive coevolution..
 - **Parallel evaluation (optional)**: basic support for [Ray](https://www.ray.io/) to speed up fitness evaluations.  
 - **HELI (Hierarchical Evolution with Lineage Incubation)**  
   Runs short micro-evolutions ("incubations") for structure-mutated individuals, allowing new topologies to stabilize before rejoining the main population.  
