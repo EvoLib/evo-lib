@@ -239,7 +239,11 @@ class Vector(ParaBase):
             noise = np.random.normal(
                 loc=0.0, scale=self.evo_params.mutation_strength, size=self.vector.shape
             )
-            prob = self.evo_params.mutation_probability or 1.0
+            prob = (
+                self.evo_params.mutation_probability
+                if self.evo_params.mutation_probability is not None
+                else 1.0
+            )
             mask = (np.random.rand(len(self.vector)) < prob).astype(np.float64)
             self.vector += noise * mask
 
