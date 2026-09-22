@@ -7,8 +7,7 @@ Unlike EvoEnv, EvoSim does not evaluate one controller in a sequence of isolated
 episodes. Multiple individuals coexist in the same world while resources,
 population size, birth, and death change continuously.
 
-This makes EvoSim suitable for experiments where selection pressure emerges from
-the interaction between agents and their environment.
+EvoSim supports experiments in which agent-environment interactions affect survival and reproduction.
 
 ## Scope
 
@@ -21,9 +20,6 @@ Typical EvoSim experiments may involve:
 * evolving controllers or sensor parameters
 * population-dependent selection pressure
 * persistent spatial interaction between individuals
-
-EvoSim is intended for small, inspectable research and demonstration
-simulations rather than large-scale agent-based simulation.
 
 ## EvoSim and EvoEnv
 

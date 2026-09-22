@@ -231,8 +231,9 @@ interaction between agents.
 EvoSim is intended for experiments where the population and the persistent world
 are part of the evolutionary process. The current simulations:
 
-- **Foraging** – agents compete for shared resources while energy, reproduction,
-  sensor parameters, and population size evolve continuously.
+- **Foraging** – agents compete for shared resources while sensor parameters evolve
+  while energy, reproduction, and population size change continuously.
+  
 - **Predator-Prey** – two independently evolving populations create reciprocal
   selection pressure through pursuit, escape, survival, and reproduction.
 

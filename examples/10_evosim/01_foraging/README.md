@@ -186,16 +186,10 @@ together with the enabled sensor parameters during reproduction.
 
 ## Run
 
-Run the food-only baseline:
-
-```bash
-cd examples/10_evosim/01_foraging
-python run.py
-```
-
 Run the simulation:
 
 ```bash
+cd examples/10_evosim/01_foraging
 python run.py
 ```
 
