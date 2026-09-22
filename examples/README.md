@@ -20,6 +20,7 @@ Gymnasium integration, EvoEnv environments.
 | `07_evonet/` | EvoNet, structural mutation, and evolvable neural networks |
 | `08_gym/` | Integration with Gymnasium environments |
 | `09_evoenv/` | EvoEnv visual environments with play, rule, train, and watch workflow |
+| `10_evosim/` | Persistent multi-agent evolution, resource competition, and competitive coevolution |
 
 The examples are intentionally ordered by complexity and build upon
 previous concepts where possible.

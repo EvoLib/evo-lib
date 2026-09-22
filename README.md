@@ -22,6 +22,7 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 - **Neuroevolution support**: evolvable neural networks with explicit topology, recurrence, delays, and structural mutation (EvoNet).  
 - **Gymnasium integration**: run [Gymnasium](https://gymnasium.farama.org) benchmarks (e.g. CartPole, LunarLander) via a simple wrapper.
 - **EvoEnv**: build small, controllable Pygame environments for evolutionary experiments.
+- **EvoSim**: lightweight support for persistent evolutionary simulations, with built-in examples for resource competition and competitive coevolution..
 - **Parallel evaluation (optional)**: basic support for [Ray](https://www.ray.io/) to speed up fitness evaluations.  
 - **HELI (Hierarchical Evolution with Lineage Incubation)**  
   Runs short micro-evolutions ("incubations") for structure-mutated individuals, allowing new topologies to stabilize before rejoining the main population.  
@@ -175,6 +176,7 @@ It can be applied to:
 - **Multi-module evolution**: combine different parameter types (e.g. controller + brain).  
 - **Strategy comparison**: benchmark and visualize mutation, selection, and crossover operators.  
 - **Function optimization**: test behavior on benchmark functions (Sphere, Ackley, …).  
+- **Persistent multi-agent evolution**: study resource competition, survival, reproduction, ecological feedback, and coevolution with EvoSim.
 - **Showcases**: structural XOR, image approximation, and other demo tasks.  
 - **Rapid prototyping**: experiment with new evolutionary ideas in a lightweight environment.  
 
@@ -215,6 +217,33 @@ controller integration, and visualization.
 
 ---
 
+## EvoSim
+
+EvoSim provides small, persistent multi-agent simulations for evolutionary
+experiments with EvoLib.
+
+Unlike EvoEnv, EvoSim does not evaluate one controller in a sequence of isolated
+episodes. Multiple individuals coexist in the same world while resources,
+population size, birth, and death change continuously. Selection pressure can
+therefore emerge directly from survival, reproduction, competition, and
+interaction between agents.
+
+EvoSim is intended for experiments where the population and the persistent world
+are part of the evolutionary process. The current simulations:
+
+- **Foraging** – agents compete for shared resources while sensor parameters evolve
+  and energy, reproduction, and population size change continuously.
+  
+- **Predator-Prey** – two independently evolving populations create reciprocal
+  selection pressure through pursuit, escape, survival, and reproduction.
+
+EvoSim is aimed at small, inspectable simulations rather than large-scale agent-based simulation.
+
+👉 [EvoSim documentation](evosim/README.md)  
+👉 [Examples](examples/10_evosim/)
+
+---
+
 ## Learn EvoLib in 5 Steps
 
 EvoLib includes a small set of examples that illustrate the core concepts step by step:
@@ -240,6 +269,7 @@ For deeper exploration, see the [full examples directory](examples/)
 - [X] Ray Support for Parallel Evaluation
 - [X] Gymnasium Integration
 - [X] EvoEnv for small Pygame-based evolutionary environments
+- [X] EvoSim for persistent multi-agent evolutionary simulations
 
 ---
 

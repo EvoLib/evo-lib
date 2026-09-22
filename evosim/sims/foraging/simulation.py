@@ -1,0 +1,559 @@
+# SPDX-License-Identifier: MIT
+"""Persistent two-dimensional Foraging simulation."""
+
+import math
+import random
+from collections.abc import Sequence
+from pathlib import Path
+
+import numpy as np
+
+from evolib import EvoNet, Indiv, Vector
+from evolib.representation.composite import ParaComposite
+from evosim.core.geometry import (
+    angle_delta,
+    toroidal_displacement,
+    toroidal_distance_squared,
+    wrap_coordinate,
+)
+from evosim.core.simulation import Simulation
+from evosim.sims.foraging.config import ForagingConfig
+from evosim.sims.foraging.objects import (
+    Food,
+    Forager,
+    ForagerAction,
+    ForagingSensor,
+    Poison,
+)
+
+
+class ForagingSimulation(Simulation):
+    """Persistent world with resources and synchronously updated Foragers."""
+
+    def __init__(self, config: ForagingConfig | str | Path) -> None:
+        super().__init__()
+        if isinstance(config, (str, Path)):
+            config = ForagingConfig.from_yaml(config)
+        self.config = config
+        self.rng = np.random.default_rng()
+
+        self.foragers: list[Forager] = []
+        self.food: list[Food] = []
+        self.poison: list[Poison] = []
+
+        self.births = 0
+        self.deaths = 0
+        self.food_eaten = 0
+        self.poison_eaten = 0
+
+        self.reset(seed=config.seed)
+
+    @property
+    def world_size(self) -> tuple[int, int]:
+        """Return world dimensions in simulation units."""
+        return self.config.world.width, self.config.world.height
+
+    @property
+    def population_size(self) -> int:
+        """Return the number of currently living Foragers."""
+        return len(self.foragers)
+
+    @property
+    def is_extinct(self) -> bool:
+        """Return whether no living Foragers remain."""
+        return not self.foragers
+
+    @property
+    def running(self) -> bool:
+        """Return whether the configured simulation should continue."""
+        return self.step_count < self.config.max_steps and not self.is_extinct
+
+    @property
+    def mean_energy(self) -> float:
+        """Return mean energy of living Foragers, or zero after extinction."""
+        if not self.foragers:
+            return 0.0
+        return float(np.mean([forager.energy for forager in self.foragers]))
+
+    @property
+    def oldest_age_steps(self) -> int:
+        """Return age of the oldest living Forager in simulation steps."""
+        return max((forager.age_steps for forager in self.foragers), default=0)
+
+    def reset(self, *, seed: int | None = None) -> None:
+        """Reset world, population, resources, counters, and random state."""
+        if seed is None:
+            seed = self.config.seed
+
+        self.rng = np.random.default_rng(seed)
+        if seed is not None:
+            random.seed(seed)
+            np.random.seed(seed)
+
+        self.step_count = 0
+        self.births = 0
+        self.deaths = 0
+        self.food_eaten = 0
+        self.poison_eaten = 0
+
+        self.foragers = [
+            self._make_founder() for _ in range(self.config.world.initial_population)
+        ]
+        self.food = [self._make_food() for _ in range(self.config.food.initial_count)]
+        self.poison = []
+        if self.config.poison.enabled:
+            self.poison = [
+                self._make_poison() for _ in range(self.config.poison.initial_count)
+            ]
+
+    def step(self) -> None:
+        """Advance one synchronous simulation step."""
+        actions = [self._calculate_action(forager) for forager in self.foragers]
+
+        self._apply_actions(actions)
+        self._remove_dead_foragers()
+        self._consume_food()
+        if self.config.poison.enabled:
+            self._consume_poison()
+            self._remove_dead_foragers()
+        self._reproduce()
+        self._spawn_food()
+        if self.config.poison.enabled:
+            self._spawn_poison()
+
+        self.step_count += 1
+
+    def metrics(self) -> dict[str, int | float]:
+        """Return the current simulation metrics without performing I/O."""
+        metrics: dict[str, int | float] = {
+            "step": self.step_count,
+            "population": self.population_size,
+            "food": len(self.food),
+            "poison": len(self.poison),
+            "births": self.births,
+            "deaths": self.deaths,
+            "food_eaten": self.food_eaten,
+            "poison_eaten": self.poison_eaten,
+            "mean_energy": self.mean_energy,
+            "oldest_age": self.oldest_age_steps,
+        }
+        metrics.update(self._sensor_parameter_metrics())
+        return metrics
+
+    def _sensor_parameter_metrics(self) -> dict[str, float]:
+        """Return population statistics for evolvable sensor parameters."""
+        sensor_count = self.config.modules.sensor_count
+        metrics: dict[str, float] = {}
+
+        if not self.foragers:
+            for index in range(sensor_count):
+                metrics[f"sensor_{index}_fov_mean"] = math.nan
+                metrics[f"sensor_{index}_fov_std"] = math.nan
+                metrics[f"sensor_{index}_range_mean"] = math.nan
+                metrics[f"sensor_{index}_range_std"] = math.nan
+            return metrics
+
+        sensor_arrays = [self._sensor_arrays(forager) for forager in self.foragers]
+        fovs = np.stack([arrays[1] for arrays in sensor_arrays])
+        ranges = np.stack([arrays[2] for arrays in sensor_arrays])
+
+        fov_means = np.mean(fovs, axis=0)
+        fov_stds = np.std(fovs, axis=0)
+        range_means = np.mean(ranges, axis=0)
+        range_stds = np.std(ranges, axis=0)
+
+        for index in range(sensor_count):
+            metrics[f"sensor_{index}_fov_mean"] = float(fov_means[index])
+            metrics[f"sensor_{index}_fov_std"] = float(fov_stds[index])
+            metrics[f"sensor_{index}_range_mean"] = float(range_means[index])
+            metrics[f"sensor_{index}_range_std"] = float(range_stds[index])
+
+        return metrics
+
+    def sensor_layout(self, forager: Forager) -> list[ForagingSensor]:
+        """Decode the local sensors carried by one Forager."""
+        angles, fovs, ranges = self._sensor_arrays(forager)
+
+        sensors: list[ForagingSensor] = []
+
+        for angle, fov, sensor_range in zip(angles, fovs, ranges, strict=True):
+            sensor = ForagingSensor(
+                angle=float(angle),
+                fov=float(fov),
+                range=float(sensor_range),
+            )
+            sensors.append(sensor)
+
+        return sensors
+
+    def observation(self, forager: Forager) -> list[float]:
+        """Return enabled sensor channels plus normalized internal state."""
+        angles, fovs, ranges = self._sensor_arrays(forager)
+        food_values = self._sense_resources(
+            forager,
+            self.food,
+            angles,
+            fovs,
+            ranges,
+        )
+
+        cfg = self.config.forager
+        energy = forager.energy / cfg.energy_capacity
+        feeding_cooldown = (
+            forager.feeding_cooldown / cfg.feeding_cooldown_steps
+            if cfg.feeding_cooldown_steps > 0
+            else 0.0
+        )
+        if not self.config.poison.enabled:
+            return [*food_values, energy, feeding_cooldown]
+
+        poison_values = self._sense_resources(
+            forager,
+            self.poison,
+            angles,
+            fovs,
+            ranges,
+        )
+
+        sensor_values: list[float] = []
+
+        for food_value, poison_value in zip(food_values, poison_values, strict=True):
+            sensor_values.append(food_value)
+            sensor_values.append(poison_value)
+
+        return [*sensor_values, energy, feeding_cooldown]
+
+    def _sense_resources(
+        self,
+        forager: Forager,
+        resources: Sequence[Food | Poison],
+        angles: np.ndarray,
+        fovs: np.ndarray,
+        ranges: np.ndarray,
+    ) -> list[float]:
+        """Return one activation per spatial sensor for a resource channel."""
+        sensor_values = [0.0 for _ in range(len(angles))]
+
+        for resource in resources:
+            dx, dy = toroidal_displacement(
+                forager.x,
+                forager.y,
+                resource.x,
+                resource.y,
+                self.config.world.width,
+                self.config.world.height,
+            )
+            distance = math.hypot(dx, dy)
+
+            if distance <= 1e-12:
+                sensor_values = [1.0 for _ in sensor_values]
+                continue
+
+            bearing = math.atan2(dy, dx)
+            relative_bearing = angle_delta(forager.heading, bearing)
+
+            for index, (angle, fov, sensor_range) in enumerate(
+                zip(angles, fovs, ranges, strict=True)
+            ):
+                if distance > sensor_range:
+                    continue
+                if abs(angle_delta(float(angle), relative_bearing)) > fov / 2.0:
+                    continue
+
+                strength = 1.0 - distance / sensor_range
+                sensor_values[index] = max(sensor_values[index], float(strength))
+
+        return sensor_values
+
+    def _make_founder(self) -> Forager:
+        modules = self.config.modules
+        para = ParaComposite(
+            {
+                "controller": EvoNet.from_config(modules.controller),
+                "sensor_angles": Vector.from_config(modules.sensor_angles),
+                "sensor_fovs": Vector.from_config(modules.sensor_fovs),
+                "sensor_ranges": Vector.from_config(modules.sensor_ranges),
+            }
+        )
+        return self._place_forager(Indiv(para), self.config.forager.initial_energy)
+
+    def _make_offspring(self, parent: Forager) -> Forager:
+        child_indiv = parent.indiv.copy(
+            reset_fitness=True,
+            reset_age=True,
+            reset_origin=True,
+        )
+        child_indiv.mutate()
+
+        spawn_angle = float(self.rng.uniform(0.0, math.tau))
+        spawn_distance = parent.radius * 2.5
+        x = wrap_coordinate(
+            parent.x + math.cos(spawn_angle) * spawn_distance,
+            self.config.world.width,
+        )
+        y = wrap_coordinate(
+            parent.y + math.sin(spawn_angle) * spawn_distance,
+            self.config.world.height,
+        )
+
+        return Forager(
+            indiv=child_indiv,
+            x=x,
+            y=y,
+            heading=float(self.rng.uniform(0.0, math.tau)),
+            energy=self.config.forager.offspring_energy,
+            radius=self.config.forager.radius,
+        )
+
+    def _place_forager(self, indiv: Indiv, energy: float) -> Forager:
+        return Forager(
+            indiv=indiv,
+            x=float(self.rng.uniform(0.0, self.config.world.width)),
+            y=float(self.rng.uniform(0.0, self.config.world.height)),
+            heading=float(self.rng.uniform(0.0, math.tau)),
+            energy=energy,
+            radius=self.config.forager.radius,
+        )
+
+    def _make_food(self) -> Food:
+        return Food(
+            x=float(self.rng.uniform(0.0, self.config.world.width)),
+            y=float(self.rng.uniform(0.0, self.config.world.height)),
+            radius=self.config.food.radius,
+        )
+
+    def _make_poison(self) -> Poison:
+        return Poison(
+            x=float(self.rng.uniform(0.0, self.config.world.width)),
+            y=float(self.rng.uniform(0.0, self.config.world.height)),
+            radius=self.config.poison.radius,
+        )
+
+    @staticmethod
+    def _composite(forager: Forager) -> ParaComposite:
+        para = forager.indiv.para
+        if not isinstance(para, ParaComposite):
+            raise TypeError(
+                "Foraging individuals require a ParaComposite representation."
+            )
+        return para
+
+    def _controller(self, forager: Forager) -> EvoNet:
+        controller = self._composite(forager)["controller"]
+        if not isinstance(controller, EvoNet):
+            raise TypeError("Foraging requires an EvoNet 'controller' component.")
+        return controller
+
+    def _sensor_arrays(
+        self, forager: Forager
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Return aligned angle, FOV, and range arrays for one Forager."""
+        para = self._composite(forager)
+        angles = para["sensor_angles"]
+        fovs = para["sensor_fovs"]
+        ranges = para["sensor_ranges"]
+
+        if not (
+            isinstance(angles, Vector)
+            and isinstance(fovs, Vector)
+            and isinstance(ranges, Vector)
+        ):
+            raise TypeError("Foraging sensor components must be Vectors.")
+
+        return angles.vector, fovs.vector, ranges.vector
+
+    def _calculate_action(self, forager: Forager) -> ForagerAction:
+        outputs = self._controller(forager).calc(self.observation(forager))
+        if len(outputs) != 2:
+            raise ValueError("Foraging controller must return exactly two outputs.")
+
+        turn = float(np.clip(outputs[0], -1.0, 1.0))
+        throttle = float(np.clip(outputs[1], -1.0, 1.0))
+        return ForagerAction(turn=turn, throttle=throttle)
+
+    def _apply_actions(self, actions: list[ForagerAction]) -> None:
+        cfg = self.config.forager
+
+        for forager, action in zip(self.foragers, actions, strict=True):
+            forager.heading = (
+                forager.heading + action.turn * cfg.max_turn_rate
+            ) % math.tau
+
+            if action.throttle >= 0.0:
+                distance = action.throttle * cfg.max_speed
+            else:
+                distance = action.throttle * cfg.max_speed * cfg.reverse_factor
+
+            forager.x = wrap_coordinate(
+                forager.x + math.cos(forager.heading) * distance,
+                self.config.world.width,
+            )
+            forager.y = wrap_coordinate(
+                forager.y + math.sin(forager.heading) * distance,
+                self.config.world.height,
+            )
+
+            delta_heading = action.turn * cfg.max_turn_rate
+            forager.energy -= (
+                cfg.basal_cost
+                + cfg.movement_cost * abs(distance)
+                + cfg.movement_cost * cfg.turn_cost_factor * abs(delta_heading)
+            )
+            forager.age_steps += 1
+            if forager.feeding_cooldown > 0:
+                forager.feeding_cooldown -= 1
+
+    def _contact_candidates(
+        self,
+        resources: Sequence[Food | Poison],
+    ) -> list[tuple[float, int, int]]:
+        """Return sorted Forager-resource contacts for consumable objects."""
+        width = self.config.world.width
+        height = self.config.world.height
+        candidates: list[tuple[float, int, int]] = []
+
+        for forager_index, forager in enumerate(self.foragers):
+            for resource_index, resource in enumerate(resources):
+                consume_radius = forager.radius + resource.radius
+                distance_squared = toroidal_distance_squared(
+                    forager.x,
+                    forager.y,
+                    resource.x,
+                    resource.y,
+                    width,
+                    height,
+                )
+                if distance_squared <= consume_radius * consume_radius:
+                    candidates.append((distance_squared, forager_index, resource_index))
+
+        candidates.sort(key=lambda candidate: candidate[0])
+        return candidates
+
+    def _consume_food(self) -> None:
+        """Resolve food consumption based on distance, capacity, and cooldown."""
+        food_energy = self.config.food.energy
+        cfg = self.config.forager
+        candidates = self._contact_candidates(self.food)
+
+        consumed_food: set[int] = set()
+
+        for _, forager_index, food_index in candidates:
+            # A food resource can only be consumed once.
+            if food_index in consumed_food:
+                continue
+
+            forager = self.foragers[forager_index]
+
+            if forager.feeding_cooldown > 0:
+                continue
+
+            # An earlier consumption in this step may already have filled
+            # the forager's energy capacity.
+            if forager.energy >= cfg.energy_capacity:
+                continue
+
+            forager.energy = min(
+                forager.energy + food_energy,
+                cfg.energy_capacity,
+            )
+            forager.feeding_cooldown = cfg.feeding_cooldown_steps
+            consumed_food.add(food_index)
+            self.food_eaten += 1
+
+        # Keep only food resources that were not consumed this step.
+        self.food = [
+            resource
+            for food_index, resource in enumerate(self.food)
+            if food_index not in consumed_food
+        ]
+
+    def _consume_poison(self) -> None:
+        """Resolve poison consumption and apply configured damage."""
+        if not self.config.poison.enabled:
+            return
+
+        damage = self.config.poison.damage
+        candidates = self._contact_candidates(self.poison)
+        consumed_poison: set[int] = set()
+
+        for _, forager_index, poison_index in candidates:
+            if poison_index in consumed_poison:
+                continue
+
+            forager = self.foragers[forager_index]
+            if forager.energy <= 0.0:
+                continue
+
+            forager.energy -= damage
+            consumed_poison.add(poison_index)
+            self.poison_eaten += 1
+
+        self.poison = [
+            resource
+            for poison_index, resource in enumerate(self.poison)
+            if poison_index not in consumed_poison
+        ]
+
+    def _remove_dead_foragers(self) -> None:
+        max_age = self.config.forager.max_age_steps
+        living: list[Forager] = []
+
+        for forager in self.foragers:
+            age_expired = max_age > 0 and forager.age_steps >= max_age
+            if forager.energy <= 0.0 or age_expired:
+                self.deaths += 1
+            else:
+                living.append(forager)
+
+        self.foragers = living
+
+    def _reproduce(self) -> None:
+        cfg = self.config.forager
+        free_slots = self.config.world.max_population - len(self.foragers)
+        if free_slots <= 0:
+            return
+
+        eligible = [
+            forager
+            for forager in self.foragers
+            if forager.energy >= cfg.reproduction_threshold
+            and forager.age_steps >= cfg.min_reproduction_age_steps
+        ]
+        if not eligible:
+            return
+
+        order = self.rng.permutation(len(eligible))
+        children: list[Forager] = []
+
+        for index in order[:free_slots]:
+            parent = eligible[int(index)]
+            parent.energy -= cfg.reproduction_cost
+            children.append(self._make_offspring(parent))
+
+        self.foragers.extend(children)
+        self.births += len(children)
+
+    def _spawn_food(self) -> None:
+        free_slots = self.config.food.max_count - len(self.food)
+        if free_slots <= 0 or self.config.food.spawn_rate <= 0.0:
+            return
+
+        spawn_count = min(
+            free_slots,
+            int(self.rng.poisson(self.config.food.spawn_rate)),
+        )
+        self.food.extend(self._make_food() for _ in range(spawn_count))
+
+    def _spawn_poison(self) -> None:
+        if not self.config.poison.enabled:
+            return
+
+        free_slots = self.config.poison.max_count - len(self.poison)
+        if free_slots <= 0 or self.config.poison.spawn_rate <= 0.0:
+            return
+
+        spawn_count = min(
+            free_slots,
+            int(self.rng.poisson(self.config.poison.spawn_rate)),
+        )
+        self.poison.extend(self._make_poison() for _ in range(spawn_count))
