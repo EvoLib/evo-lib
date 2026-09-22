@@ -1,7 +1,16 @@
 ## Unreleased
 
 ### Added
-- Added Vector.from_config() and refactored vector initializers to delegate to the centralized configuration-based initialization path.
+
+* Added Vector.from_config() for configuration-based vector initialization.
+* Added EvoSim for persistent multi-agent evolutionary simulations.
+* Added Foraging simulation with resource competition, energy-based reproduction, evolvable controllers and sensor parameters, and optional poison resources.
+* Added Predator-Prey simulation with independently evolving populations and reciprocal selection through pursuit, escape, survival, and reproduction.
+
+### Changed
+
+* Refactored vector initializers to use the centralized Vector.from_config() initialization path.
+
 
 ## EvoLib 0.3.1
 
