@@ -18,8 +18,7 @@ Tasks use compact numerical observations and a small action space. They may invo
 * obstacle avoidance
 * target following
 * reward-shaping experiments
-* recurrent or memory-dependent behavior
-* small changes to controller or sensor structure
+* evolvable sensor geometry
 
 The current implementation supports single-agent environments. General batch
 execution and shared-world multi-agent environments are not yet implemented.
@@ -157,7 +156,7 @@ play -> rule -> train -> watch
 A useful sequence when exploring an environment is:
 
 1. Run `play` to understand the controls and task.
-2. Run `rule` to verify that the task is solvable with simple behavior.
+2. Run `rule` to inspect a simple hand-written baseline.
 3. Run `train` to evolve a controller.
 4. Run `watch` to inspect the saved result.
 

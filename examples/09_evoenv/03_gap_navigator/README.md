@@ -1,7 +1,6 @@
 # 03_gap_navigator – Gap Steering with Evolvable Sensors
 
-GapNavigator demonstrates the co-evolution of perception and control in a simple
-gap-steering task: a sensor module evolves ray lengths and angles, while an
+GapNavigator demonstrates the joint evolution of sensor geometry and controller behavior: a sensor module evolves ray lengths and angles, while an
 EvoNet controller evolves steering behavior based on the resulting sensor
 signals.
 

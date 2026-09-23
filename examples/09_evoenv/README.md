@@ -59,8 +59,7 @@ sensor input affect discrete behavior.
 
 An agent moves through successive obstacle rows and must steer toward open gaps.
 The example combines directional sensing, collision avoidance, and configurable
-sensor layouts. It is suited to experiments with small structural changes in a
-controller or its available sensors.
+sensor layouts. It is suited to experiments with evolved sensor geometry and controller behavior.
 
 [Open Gap Navigator](03_gap_navigator/)
 
