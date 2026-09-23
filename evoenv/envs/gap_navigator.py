@@ -73,7 +73,6 @@ class GapNavigatorEnv(Env):
         self.near_wall_penalty = float(near_wall_penalty)
 
         self.observation_size = self.max_sensors + 2
-        self.action_size = 1
 
         self.sensors: SensorLayout = sensors or self.default_sensors(
             max_sensors=self.max_sensors,
