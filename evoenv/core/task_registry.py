@@ -13,7 +13,6 @@ _TASK_LOADERS: dict[str, TaskLoader] = {}
 
 def register_task_loader(env_name: str, loader: TaskLoader) -> None:
     """Register a task loader for an environment name."""
-
     if env_name in _TASK_LOADERS:
         return
 
@@ -22,7 +21,6 @@ def register_task_loader(env_name: str, loader: TaskLoader) -> None:
 
 def load_task(checkpoint: EnvCheckpoint) -> Task:
     """Create the matching task for a checkpoint."""
-
     env_name = checkpoint.env.name
 
     try:
@@ -35,9 +33,3 @@ def load_task(checkpoint: EnvCheckpoint) -> Task:
         ) from exc
 
     return loader(checkpoint)
-
-
-def registered_task_names() -> list[str]:
-    """Return all registered task names."""
-
-    return sorted(_TASK_LOADERS)
