@@ -106,11 +106,6 @@ class LineFollowerRobot:
 
         return states
 
-    def sensor_position(self, sensor: LineSensor) -> tuple[float, float]:
-        """Return one sensor position in pixel coordinates."""
-        state = sensor.get_state(self.pose)
-        return state.x, state.y
-
     def touches_line(self, line_mask: pygame.mask.Mask) -> bool:
         """Return True if the robot body overlaps the line mask."""
         offset = (
