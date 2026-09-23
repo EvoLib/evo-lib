@@ -22,9 +22,6 @@ Gymnasium integration, EvoEnv environments, and persistent EvoSim simulations.
 | `09_evoenv/` | EvoEnv visual environments with play, rule, train, and watch workflow |
 | `10_evosim/` | Persistent multi-agent evolution, resource competition, and competitive coevolution |
 
-The examples are intentionally ordered by complexity and build upon
-previous concepts where possible.
-
 ---
 
 ## 01_basic_usage/
