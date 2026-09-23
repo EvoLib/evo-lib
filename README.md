@@ -7,7 +7,7 @@
 [![Project Status: Stable](https://img.shields.io/badge/status-stable-green.svg)](https://github.com/EvoLib/evo-lib)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/EvoLib/evolib/main/assets/evolib_256.png" alt="EvoLib Logo" width="256"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/assets/evolib_256.png" alt="EvoLib Logo" width="256"/>
 </p>
 
 EvoLib is a lightweight and transparent framework for evolutionary computation, focusing on simplicity, modularity, and clarity — aimed at experimentation, teaching, and small-scale research rather than industrial-scale applications.
@@ -17,16 +17,16 @@ EvoLib is a lightweight and transparent framework for evolutionary computation, 
 ## Key Features
 
 - **Transparent design**: configuration via YAML, type-checked validation, and clear module boundaries.  
-- **Modularity**: mutation, selection, crossover, and parameter representations can be freely combined.  
-- **Educational value**: examples and a clean API make it practical for illustrating evolutionary concepts.  
+- **Modular components**: configurable mutation, selection, crossover, and parameter representations.  
+- **Examples**: examples cover basic evolutionary mechanisms, neuroevolution, control tasks, and simulation.  
 - **Neuroevolution support**: evolvable neural networks with explicit topology, recurrence, delays, and structural mutation (EvoNet).  
 - **Gymnasium integration**: run [Gymnasium](https://gymnasium.farama.org) benchmarks (e.g. CartPole, LunarLander) via a simple wrapper.
 - **EvoEnv**: build small, controllable Pygame environments for evolutionary experiments.
-- **EvoSim**: lightweight support for persistent evolutionary simulations, with built-in examples for resource competition and competitive coevolution..
+- **EvoSim**: lightweight support for persistent evolutionary simulations, with built-in examples for resource competition and competitive coevolution.
 - **Parallel evaluation (optional)**: basic support for [Ray](https://www.ray.io/) to speed up fitness evaluations.  
 - **HELI (Hierarchical Evolution with Lineage Incubation)**  
   Runs short micro-evolutions ("incubations") for structure-mutated individuals, allowing new topologies to stabilize before rejoining the main population.  
-- **Type-checked**: static typing with mypy, PEP8-compliant and consistent code style.  
+- **Quality checks**: static typing with mypy and automated formatting, linting, and tests.  
 
 ---
 
@@ -53,56 +53,74 @@ pip install "evolib[parallel]"
 
 ---
 
+## Quick Start
 
-## Example Usage
+Create `quickstart.yaml`:
 
-```python
-from evolib import Pop
+```yaml
+parent_pool_size: 10
+offspring_pool_size: 30
+max_generations: 20
+num_elites: 1
+random_seed: 42
 
-def my_fitness(indiv):
-    # Custom fitness function (example: sum of vector)
-    indiv.fitness = sum(indiv.para["main"].vector)
+evolution:
+  strategy: mu_plus_lambda
 
-pop = Pop(config_path="config/my_experiment.yaml",
-          fitness_function=my_fitness)
+modules:
+  main:
+    type: vector
+    dim: 8
+    bounds: [-1.0, 1.0]
+    initializer: uniform
 
-# Run the evolutionary process
-pop.run()
+    mutation:
+      strategy: constant
+      probability: 1.0
+      strength: 0.05
 ```
 
-For full examples, see 📁[`examples/`](https://github.com/EvoLib/evo-lib/tree/main/examples) – including adaptive mutation, controller evolution, and network approximation.
+Create `run_quickstart.py` in the same directory:
+
+```python
+from evolib import Indiv, Pop, plot_fitness, sphere
+
+
+def fitness(indiv: Indiv) -> None:
+    """Evaluate one individual using the Sphere benchmark."""
+    vector = indiv.para["main"].vector
+    indiv.fitness = sphere(vector)
+
+
+population = Pop("quickstart.yaml", fitness_function=fitness)
+
+population.run(verbosity=1)
+plot_fitness(population, show=True)
+```
+
+Run the experiment:
+
+```bash
+python run_quickstart.py
+```
+
+For more examples, see the [`examples/`](examples/) directory.
 
 ---
 
-# Configuration Example (YAML)
+## Advanced Configuration
 
-A core idea of EvoLib is that experiments are defined entirely through YAML configuration files.
-This makes runs explicit, reproducible, and easy to adapt. The example below demonstrates
-different modules (vector + EvoNet) with mutation, structural growth, and stopping criteria.
-
+EvoLib configurations can combine multiple parameter representations and
+fine-grained mutation settings within the same individual. For example:
 
 ```yaml
-parent_pool_size: 20
-offspring_pool_size: 60
-max_generations: 100
-num_elites: 2
-max_indiv_age: 0
-
-stopping:
-  target_fitness: 0.01
-  patience: 20
-  min_delta: 0.0001
-  minimize: true
-
-evolution:
-  strategy: mu_comma_lambda
-
 modules:
   controller:
     type: vector
     dim: 8
     initializer: normal
     bounds: [-1.0, 1.0]
+
     mutation:
       strategy: adaptive_individual
       probability: 1.0
@@ -119,21 +137,11 @@ modules:
       scope: adjacent
       density: 1.0
 
-    weights:
-      initializer: uniform
-      bounds: [-1.0, 1.0]
-
-    bias:
-      initializer: normal
-      std: 0.1
-      bounds: [-0.5, 0.5]
-
     mutation:
       strategy: constant
       probability: 1.0
       strength: 0.05
 
-      # Optional fine-grained control
       activations:
         probability: 0.01
         allowed: [tanh, relu, sigmoid]
@@ -142,22 +150,18 @@ modules:
         add_neuron:
           probability: 0.015
           init_connection_ratio: 0.5
-[...]
 ```
 
 ---
 
-> ℹ️ Multiple parameter types (e.g. vector + evonet) can be combined in a single individual. Each component evolves independently, using its own configuration.
+## Documentation
+
+See the [EvoLib documentation](https://evolib.readthedocs.io/en/latest/)
+for configuration details, API documentation, and additional guides.
 
 ---
 
-## Documentation 
-
-Documentation for EvoLib is available at: 👉 https://evolib.readthedocs.io/en/latest/
-
----
-
-### Archival Record (Zenodo)
+## Archival Record (Zenodo)
 
 EvoLib is archived for long-term reproducibility on Zenodo.
 
@@ -166,21 +170,7 @@ EvoLib is archived for long-term reproducibility on Zenodo.
 ---
 
 
-## Use Cases
-
-EvoLib is developed for clarity, modularity, and exploration in evolutionary computation.  
-It can be applied to:
-
-- **Illustrating concepts**: simple, transparent examples for teaching and learning.  
-- **Neuroevolution**: evolve weights and network structures using EvoNet.  
-- **Multi-module evolution**: combine different parameter types (e.g. controller + brain).  
-- **Strategy comparison**: benchmark and visualize mutation, selection, and crossover operators.  
-- **Function optimization**: test behavior on benchmark functions (Sphere, Ackley, …).  
-- **Persistent multi-agent evolution**: study resource competition, survival, reproduction, ecological feedback, and coevolution with EvoSim.
-- **Showcases**: structural XOR, image approximation, and other demo tasks.  
-- **Rapid prototyping**: experiment with new evolutionary ideas in a lightweight environment.  
-
----
+## Integrations and Environments
 
 ### Gymnasium Integration
 
@@ -191,7 +181,7 @@ This allows you to evaluate evolutionary agents directly on well-known benchmark
 - **Visualization**: render episodes and save them as GIFs.
 - **Discrete & continuous action spaces** are both supported.
 
-👉 [Examples](https://github.com/EvoLib/evo-lib/tree/main/examples/08_gym)
+[Examples](https://github.com/EvoLib/evo-lib/tree/main/examples/08_gym)
 
 ```python
 from evolib import GymEnv
@@ -203,7 +193,7 @@ gif = env.visualize(indiv, gen=10)    # render & save as GIF
 
 ---
 
-## EvoEnv
+### EvoEnv
 
 EvoEnv provides small, controllable Pygame environments for
 evolutionary experiments with EvoLib. Environments separate headless simulation,
@@ -213,11 +203,12 @@ controller integration, and visualization.
 <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/04_collector/collector.gif" alt="EvoEnv Collector example" width="512"/>
 </p>
 
-👉 [Examples](https://github.com/EvoLib/evo-lib/tree/main/examples/09_evoenv/README.md)
+[EvoEnv documentation](evoenv/README.md)  
+[Examples](https://github.com/EvoLib/evo-lib/tree/main/examples/09_evoenv/README.md)
 
 ---
 
-## EvoSim
+### EvoSim
 
 EvoSim provides small, persistent multi-agent simulations for evolutionary
 experiments with EvoLib.
@@ -239,8 +230,8 @@ are part of the evolutionary process. The current simulations:
 
 EvoSim is aimed at small, inspectable simulations rather than large-scale agent-based simulation.
 
-👉 [EvoSim documentation](evosim/README.md)  
-👉 [Examples](examples/10_evosim/)
+[EvoSim documentation](evosim/README.md)  
+[Examples](examples/10_evosim/)
 
 ---
 
@@ -258,28 +249,11 @@ For deeper exploration, see the [full examples directory](examples/)
 
 ---
 
-## Roadmap
+## Acknowledgement
 
-- [X] Adaptive Mutation (global, individual, per-parameter)
-- [X] Flexible Crossover Strategies (BLX, intermediate, none)
-- [X] Structured Neural Representations (EvoNet)
-- [X] Composite Parameters (multi-module individuals)
-- [X] Neuroevolution
-- [X] Topological Evolution (neurons, edges)
-- [X] Ray Support for Parallel Evaluation
-- [X] Gymnasium Integration
-- [X] EvoEnv for small Pygame-based evolutionary environments
-- [X] EvoSim for persistent multi-agent evolutionary simulations
+ChatGPT (OpenAI) was used to support documentation, docstrings, language editing, and code refactoring.
 
 ---
-
-### Acknowledgement
-
-Parts of the documentation, docstrings, and code refactoring were supported by ChatGPT (OpenAI) for language clarity and consistency.
-All conceptual design, experiments, and implementation decisions were made by the author.
-
----
-
 
 ## License
 

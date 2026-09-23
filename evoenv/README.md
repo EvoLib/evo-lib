@@ -3,31 +3,23 @@
 EvoEnv provides small, configurable Pygame-based environments for evolutionary
 experiments with EvoLib.
 
-The environments use compact observations and actions, support headless
-training, and can be visualized with Pygame when behavior needs to be
-inspected.
-EvoEnv is intended for experiments where the complete task can be inspected directly
-from the code and configuration.
+The environments use compact numerical observations and actions, support headless
+evaluation, and can be visualized with Pygame for inspection.
 
 ## Scope and Intended Use
 
-EvoEnv is intended for small, controlled evolutionary experiments where the
-relationship between observations, actions, rewards, and behavior should remain
-easy to inspect.
+The focus is on small, controlled evolutionary experiments built around specific
+questions, with observations, actions, rewards, and behavior kept easy to inspect.
 
-Typical tasks use compact numerical observations and a small action space. They
-may involve:
+Tasks use compact numerical observations and a small action space. They may involve:
 
-- steering from local sensor input
-- action timing
-- obstacle avoidance
-- target following
-- reward-shaping experiments
-- recurrent or memory-dependent behavior
-- small changes to controller or sensor structure
-
-EvoEnv is intended for environments created for a specific experimental question
-rather than selected as a general benchmark.
+* steering from local sensor input
+* action timing
+* obstacle avoidance
+* target following
+* reward-shaping experiments
+* recurrent or memory-dependent behavior
+* small changes to controller or sensor structure
 
 The current implementation supports single-agent environments. General batch
 execution and shared-world multi-agent environments are not yet implemented.
@@ -37,12 +29,12 @@ high-performance game simulation are outside the intended scope.
 
 ## Built-in environments
 
-| Environment | Main focus |
-|---|---|
-| Line Follower | Local point sensors and continuous steering |
-| Jumper | Obstacle sensing and jump timing |
-| Gap Navigator | Directional ray sensors and horizontal navigation |
-| Collector | Target following, exploration, and obstacle avoidance |
+| Environment   | Main focus                                            |
+| ------------- | ----------------------------------------------------- |
+| Line Follower | Local point sensors and continuous steering           |
+| Jumper        | Obstacle sensing and jump timing                      |
+| Gap Navigator | Directional ray sensors and horizontal navigation     |
+| Collector     | Target following, exploration, and obstacle avoidance |
 
 ### Line Follower
 
@@ -83,20 +75,22 @@ Runnable examples and preview GIFs are available in the
 
 EvoEnv separates simulation, control, EvoLib integration, and visualization.
 
-| Component | Responsibility |
-|---|---|
-| `Env` | State, observations, rewards, and episode termination |
-| `Controller` | Mapping observations to actions |
-| `Task` | Connecting EvoLib individuals with an environment |
-| `Renderer` | Visualizing environment state with Pygame |
-| `Checkpoint` | Storing an individual together with task metadata |
-| `Task registry` | Reconstructing a task from checkpoint metadata |
+| Component       | Responsibility                                        |
+| --------------- | ----------------------------------------------------- |
+| `Env`           | State, observations, rewards, and episode termination |
+| `Controller`    | Mapping observations to actions                       |
+| `Task`          | Connecting EvoLib individuals with an environment     |
+| `Renderer`      | Visualizing environment state with Pygame             |
+| `Checkpoint`    | Storing an individual together with task metadata     |
+| `Task registry` | Reconstructing a task from checkpoint metadata        |
 
+### Task configuration
 
-### Task
+Each environment defines its own task configuration. It typically contains
+simulation parameters, reward terms, sensor settings, and environment-specific
+options.
 
-The task configuration controls the environment layout, reward terms, sensor
-geometry, and environment-specific options.
+For example, Gap Navigator uses:
 
 ```yaml
 env:
@@ -139,7 +133,6 @@ sensors:
   max_angle: 1.57079632679
 ```
 
-
 ### Renderer
 
 A renderer displays the current environment state. Rendering is separate from
@@ -154,12 +147,12 @@ Each EvoEnv example provides the same set of scripts:
 play -> rule -> train -> watch
 ```
 
-| Script | Purpose |
-|---|---|
-| `*_play.py` | Inspect the environment through manual control |
-| `*_rule.py` | Run a simple hand-written baseline |
+| Script       | Purpose                                          |
+| ------------ | ------------------------------------------------ |
+| `*_play.py`  | Inspect the environment through manual control   |
+| `*_rule.py`  | Run a simple hand-written baseline               |
 | `*_train.py` | Evolve a controller without continuous rendering |
-| `*_watch.py` | Load and visualize a saved checkpoint |
+| `*_watch.py` | Load and visualize a saved checkpoint            |
 
 A useful sequence when exploring an environment is:
 
@@ -218,8 +211,8 @@ exploration:
   # optional environment-specific settings
 ```
 
-The configuration is validated when it is loaded. Invalid combinations should
-produce an explicit error instead of silently changing the task.
+Configuration files are validated when loaded. Unknown fields and
+environment-specific validation errors are rejected explicitly.
 
 ## Headless training and visualization
 
@@ -227,7 +220,7 @@ Training and evaluation do not require an active display and can therefore run
 on remote servers and other headless systems.
 
 EvoEnv may use Pygame for geometry and simulation helpers, but a Pygame window
-is only required for interactive play and visualization. 
+is only required for interactive play and visualization.
 Headless evaluation and rendered runs use the same environment logic and
 therefore produce the same rewards and simulation behavior.
 
@@ -236,12 +229,12 @@ therefore produce the same rewards and simulation behavior.
 A checkpoint stores the evolved individual together with the information needed
 to reconstruct the task.
 
-This normally includes:
+This includes:
 
-- the environment name
-- the complete task configuration
-- the controller module name
-- the random seed
+* the environment name
+* the task configuration
+* the random seed
+* optional environment-specific metadata
 
 The corresponding `watch` script loads the checkpoint, reconstructs the task,
 and visualizes the stored individual.
@@ -258,8 +251,8 @@ be inspected under the same conditions.
 
 ## Building a custom environment
 
-A custom environment normally consists of three required parts and an optional
-renderer:
+To use a custom environment with EvoLib in the same way as the built-in
+examples, it normally consists of three parts and an optional renderer:
 
 1. A headless environment implementing `reset()` and `step()`.
 2. A controller that maps observations to actions.

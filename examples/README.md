@@ -1,11 +1,5 @@
 # EvoLib Examples
 
-This directory contains examples and tutorials for EvoLib.
-
-The examples are ordered from basic evolutionary mechanisms to neural networks,
-Gymnasium integration, EvoEnv environments, and persistent EvoSim simulations.
-
----
 
 ## Overview
 
