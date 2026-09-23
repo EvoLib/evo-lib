@@ -3,7 +3,7 @@
 This directory contains examples and tutorials for EvoLib.
 
 The examples are ordered from basic evolutionary mechanisms to neural networks,
-Gymnasium integration, EvoEnv environments.
+Gymnasium integration, EvoEnv environments, and persistent EvoSim simulations.
 
 ---
 
@@ -275,6 +275,35 @@ See: [`09_evoenv/README.md`](09_evoenv/README.md)
 
 ---
 
+## 10_evosim/ – EvoSim
+
+EvoSim contains persistent multi-agent simulations in which individuals coexist,
+reproduce, and pass mutated EvoLib parameters to their offspring.
+
+Unlike EvoEnv, individuals are not evaluated independently in episodic tasks.
+Selection emerges from survival, reproduction, resource competition, and
+interactions within a continuously running world.
+
+Current simulations:
+
+| Simulation          | Focus                                                         |
+| ------------------- | ------------------------------------------------------------- |
+| `01_foraging/`      | Resource competition, energy-based survival, and reproduction |
+| `02_predator_prey/` | Predator-prey interaction and competitive coevolution         |
+
+The simulations can be used to inspect population dynamics, ecological feedback,
+and evolutionary adaptation without explicit generations or fitness values.
+
+### Example output
+
+<p align="center">
+  <img src="./10_evosim/02_predator_prey/predator_prey.gif" alt="Predator-Prey simulation" width="512"/>
+</p>
+
+See: [`10_evosim/README.md`](10_evosim/README.md)
+
+---
+
 ## Requirements
 
 ### Core
@@ -287,7 +316,7 @@ See: [`09_evoenv/README.md`](09_evoenv/README.md)
 | Feature | Dependency |
 |---|---|
 | Gym examples | gymnasium |
-| EvoEnv visualizations | pygame |
+| EvoEnv and EvoSim visualizations | pygame |
 
 
 Install optional interactive environment dependency:
