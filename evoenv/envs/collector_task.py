@@ -9,7 +9,6 @@ from typing import Any
 from evoenv.core.checkpoint import EnvCheckpoint
 from evoenv.core.env import Action, Observation
 from evoenv.core.task import BaseTask
-from evoenv.core.task_registry import register_task_loader
 from evoenv.core.utils import clamp, clamp01
 from evoenv.envs.collector import CollectorEnv
 from evoenv.envs.collector_config import CollectorTaskConfig
@@ -74,6 +73,28 @@ class CollectorTask(BaseTask[CollectorEnv, CollectorController]):
             module=module,
         )
 
+    @classmethod
+    def from_checkpoint(cls, checkpoint: EnvCheckpoint) -> "CollectorTask":
+        """Create a task from checkpoint metadata."""
+        if checkpoint.env.name != "collector":
+            raise ValueError(
+                f"Expected 'collector' checkpoint, got {checkpoint.env.name!r}."
+            )
+
+        raw_task_config = checkpoint.env.params.get("task_config")
+        if raw_task_config is None:
+            raise ValueError("Collector checkpoint does not contain task_config.")
+
+        module = checkpoint.env.params.get("module", "brain")
+        if not isinstance(module, str):
+            raise ValueError("Collector checkpoint module must be a string.")
+
+        return cls(
+            task_config=CollectorTaskConfig.model_validate(raw_task_config),
+            seed=checkpoint.seed,
+            module=module,
+        )
+
     def make_env(self) -> CollectorEnv:
         """Create a fresh Collector environment instance."""
         return CollectorEnv(
@@ -135,26 +156,3 @@ class CollectorTask(BaseTask[CollectorEnv, CollectorController]):
             gif_fps=gif_fps,
             frame_skip=frame_skip,
         )
-
-
-def load_collector_task(checkpoint: EnvCheckpoint) -> CollectorTask:
-    """Create a Collector task from checkpoint metadata."""
-    raw_task_config = checkpoint.env.params.get("task_config")
-
-    if raw_task_config is None:
-        raise ValueError("Collector checkpoint does not contain task_config.")
-
-    module = checkpoint.env.params.get("module", "brain")
-    if not isinstance(module, str):
-        raise ValueError("Collector checkpoint module must be a string.")
-
-    return CollectorTask(
-        task_config=CollectorTaskConfig.model_validate(raw_task_config),
-        seed=checkpoint.seed,
-        module=module,
-    )
-
-
-def register_collector_task() -> None:
-    """Register the Collector task loader."""
-    register_task_loader("collector", load_collector_task)

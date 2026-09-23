@@ -10,7 +10,6 @@ from evoenv.core.env import Action, Observation
 from evoenv.core.evaluator import evaluate_episode
 from evoenv.core.sensors import RaySensor
 from evoenv.core.task import BaseTask
-from evoenv.core.task_registry import register_task_loader
 from evoenv.core.utils import clamp, clamp01
 from evoenv.envs.gap_navigator import GapNavigatorEnv, SensorLayout
 from evoenv.envs.gap_navigator_config import GapNavigatorTaskConfig
@@ -76,6 +75,24 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
             seed=seed,
             module=module,
             sensor_module=sensor_module,
+        )
+
+    @classmethod
+    def from_checkpoint(cls, checkpoint: EnvCheckpoint) -> "GapNavigatorTask":
+        """Create a task from checkpoint metadata."""
+        if checkpoint.env.name != "gap_navigator":
+            raise ValueError(
+                f"Expected 'gap_navigator' checkpoint, got {checkpoint.env.name!r}."
+            )
+
+        raw_task_config = checkpoint.env.params.get("task_config")
+        if raw_task_config is None:
+            raise ValueError("GapNavigator checkpoint does not contain task_config.")
+
+        return cls(
+            task_config=GapNavigatorTaskConfig.model_validate(raw_task_config),
+            seed=checkpoint.seed,
+            difficulty=checkpoint.env.difficulty or Difficulty.MEDIUM,
         )
 
     def make_env(self, sensors: SensorLayout | None = None) -> GapNavigatorEnv:
@@ -194,21 +211,3 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
             gif_fps=gif_fps,
             frame_skip=frame_skip,
         )
-
-
-def load_gap_navigator_task(checkpoint: EnvCheckpoint) -> GapNavigatorTask:
-    """Create a GapNavigator task from checkpoint metadata."""
-    raw_task_config = checkpoint.env.params.get("task_config")
-    if raw_task_config is None:
-        raise ValueError("GapNavigator checkpoint does not contain task_config.")
-
-    return GapNavigatorTask(
-        task_config=GapNavigatorTaskConfig.model_validate(raw_task_config),
-        seed=checkpoint.seed,
-        difficulty=checkpoint.env.difficulty or Difficulty.MEDIUM,
-    )
-
-
-def register_gap_navigator_task() -> None:
-    """Register the GapNavigator task loader."""
-    register_task_loader("gap_navigator", load_gap_navigator_task)

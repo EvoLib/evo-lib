@@ -3,17 +3,14 @@
 
 from evoenv.cli import parse_checkpoint_args
 from evoenv.core.checkpoint import load_checkpoint
-from evoenv.core.task_registry import load_task
-from evoenv.envs.collector_task import register_collector_task
+from evoenv.envs.collector_task import CollectorTask
 
 
 def main() -> None:
     """Load and visualize one trained Collector checkpoint."""
-    register_collector_task()
-
     args = parse_checkpoint_args()
     checkpoint = load_checkpoint(args.checkpoint)
-    task = load_task(checkpoint)
+    task = CollectorTask.from_checkpoint(checkpoint)
 
     task.visualize(
         checkpoint.indiv,

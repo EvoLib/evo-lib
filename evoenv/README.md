@@ -81,7 +81,6 @@ EvoEnv separates simulation, control, EvoLib integration, and visualization.
 | `Task`          | Connecting EvoLib individuals with an environment     |
 | `Renderer`      | Visualizing environment state with Pygame             |
 | `Checkpoint`    | Storing an individual together with task metadata     |
-| `Task registry` | Reconstructing a task from checkpoint metadata        |
 
 ### Task configuration
 

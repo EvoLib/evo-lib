@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MIT
-"""Base classes and protocols for environment tasks."""
+"""Base classes for environment tasks."""
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Generic, Protocol, TypeVar
+from typing import Generic, TypeVar
 
 from evoenv.core.controller import Controller
 from evoenv.core.env import Env
@@ -13,14 +13,6 @@ from evolib import Indiv
 
 EnvT = TypeVar("EnvT", bound=Env)
 ControllerT = TypeVar("ControllerT", bound=Controller)
-
-
-class Task(Protocol):
-    """Minimal protocol for tasks loaded from checkpoints."""
-
-    def visualize(self, *args: Any, **kwargs: Any) -> Path | None:
-        """Visualize an evaluated individual."""
-        ...
 
 
 class BaseTask(ABC, Generic[EnvT, ControllerT]):

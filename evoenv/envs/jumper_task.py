@@ -8,7 +8,6 @@ from evoenv.core.checkpoint import EnvCheckpoint
 from evoenv.core.env import Action, Observation
 from evoenv.core.sensors import RaySensor
 from evoenv.core.task import BaseTask
-from evoenv.core.task_registry import register_task_loader
 from evoenv.core.utils import clamp01
 from evoenv.envs.jumper import JumperEnv
 from evoenv.envs.jumper_config import JumperTaskConfig
@@ -79,6 +78,23 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
             angle=self.sensor_config.angle,
         )
 
+    @classmethod
+    def from_checkpoint(cls, checkpoint: EnvCheckpoint) -> "JumperTask":
+        """Create a task from checkpoint metadata."""
+        if checkpoint.env.name != "jumper":
+            raise ValueError(
+                f"Expected 'jumper' checkpoint, got {checkpoint.env.name!r}."
+            )
+
+        raw_task_config = checkpoint.env.params.get("task_config")
+        if raw_task_config is None:
+            raise ValueError("Jumper checkpoint does not contain task_config.")
+
+        return cls(
+            task_config=JumperTaskConfig.model_validate(raw_task_config),
+            seed=checkpoint.seed,
+        )
+
     def make_env(self) -> JumperEnv:
         """Create a fresh Jumper environment instance."""
         return JumperEnv(
@@ -134,21 +150,3 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
             gif_fps=gif_fps,
             frame_skip=frame_skip,
         )
-
-
-def load_jumper_task(checkpoint: EnvCheckpoint) -> JumperTask:
-    """Create a Jumper task from checkpoint metadata."""
-    raw_task_config = checkpoint.env.params.get("task_config")
-
-    if raw_task_config is None:
-        raise ValueError("Jumper checkpoint does not contain task_config.")
-
-    return JumperTask(
-        task_config=JumperTaskConfig.model_validate(raw_task_config),
-        seed=checkpoint.seed,
-    )
-
-
-def register_jumper_task() -> None:
-    """Register the Jumper task loader."""
-    register_task_loader("jumper", load_jumper_task)

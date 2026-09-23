@@ -8,7 +8,6 @@ from evoenv.core.checkpoint import EnvCheckpoint
 from evoenv.core.difficulty import Difficulty
 from evoenv.core.env import Action, Observation
 from evoenv.core.task import BaseTask
-from evoenv.core.task_registry import register_task_loader
 from evoenv.core.utils import clamp
 from evoenv.envs.line_follower import LineFollowerEnv
 from evoenv.envs.line_follower_config import LineFollowerTaskConfig
@@ -71,6 +70,24 @@ class LineFollowerTask(BaseTask[LineFollowerEnv, LineFollowerController]):
             difficulty=difficulty,
         )
 
+    @classmethod
+    def from_checkpoint(cls, checkpoint: EnvCheckpoint) -> "LineFollowerTask":
+        """Create a task from checkpoint metadata."""
+        if checkpoint.env.name != "line_follower":
+            raise ValueError(
+                f"Expected 'line_follower' checkpoint, got {checkpoint.env.name!r}."
+            )
+
+        raw_task_config = checkpoint.env.params.get("task_config")
+        if raw_task_config is None:
+            raise ValueError("LineFollower checkpoint does not contain task_config.")
+
+        return cls(
+            task_config=LineFollowerTaskConfig.model_validate(raw_task_config),
+            seed=checkpoint.seed,
+            difficulty=checkpoint.env.difficulty or Difficulty.MEDIUM,
+        )
+
     def make_env(self) -> LineFollowerEnv:
         """Create a fresh LineFollower environment instance."""
         return LineFollowerEnv(
@@ -119,21 +136,3 @@ class LineFollowerTask(BaseTask[LineFollowerEnv, LineFollowerController]):
             gif_fps=gif_fps,
             frame_skip=frame_skip,
         )
-
-
-def load_line_follower_task(checkpoint: EnvCheckpoint) -> LineFollowerTask:
-    """Create a LineFollower task from checkpoint metadata."""
-    raw_task_config = checkpoint.env.params.get("task_config")
-    if raw_task_config is None:
-        raise ValueError("LineFollower checkpoint does not contain task_config.")
-
-    return LineFollowerTask(
-        task_config=LineFollowerTaskConfig.model_validate(raw_task_config),
-        seed=checkpoint.seed,
-        difficulty=checkpoint.env.difficulty or Difficulty.MEDIUM,
-    )
-
-
-def register_line_follower_task() -> None:
-    """Register the LineFollower task loader."""
-    register_task_loader("line_follower", load_line_follower_task)

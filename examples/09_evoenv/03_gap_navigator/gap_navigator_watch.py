@@ -3,15 +3,12 @@
 
 from evoenv.cli import parse_checkpoint_args
 from evoenv.core.checkpoint import load_checkpoint
-from evoenv.core.task_registry import load_task
-from evoenv.envs import register_builtin_tasks
-
-register_builtin_tasks()
+from evoenv.envs.gap_navigator_task import GapNavigatorTask
 
 args = parse_checkpoint_args()
 checkpoint = load_checkpoint(args.checkpoint)
 
-task = load_task(checkpoint)
+task = GapNavigatorTask.from_checkpoint(checkpoint)
 
 task.visualize(
     checkpoint.indiv,
