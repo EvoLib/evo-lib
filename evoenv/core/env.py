@@ -10,7 +10,7 @@ The interface follows the common reinforcement-learning style:
     observation, reward, done, info = env.step(action)
 """
 
-from typing import Any, Protocol, TypeAlias, runtime_checkable
+from typing import Any, Protocol, TypeAlias
 
 InfoDict: TypeAlias = dict[str, Any]
 
@@ -19,7 +19,6 @@ Action: TypeAlias = list[float]
 StepResult: TypeAlias = tuple[Observation, float, bool, InfoDict]
 
 
-@runtime_checkable
 class Env(Protocol):
     """
     Minimal protocol for an evolib-envs environment.
