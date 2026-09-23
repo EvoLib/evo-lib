@@ -49,12 +49,9 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
         difficulty: str | Difficulty = Difficulty.MEDIUM,
     ) -> None:
         super().__init__(
-            width=task_config.env.width,
-            height=task_config.env.height,
             max_steps=task_config.env.max_steps,
             seed=seed,
             module=module,
-            difficulty=difficulty,
         )
         self.sensor_module = sensor_module
 

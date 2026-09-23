@@ -48,12 +48,9 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
         module: str = "brain",
     ) -> None:
         super().__init__(
-            width=task_config.env.width,
-            height=task_config.env.height,
             max_steps=task_config.env.max_steps,
             seed=seed,
             module=module,
-            difficulty="standard",
         )
         self.task_config = task_config
         self.env_config = task_config.env

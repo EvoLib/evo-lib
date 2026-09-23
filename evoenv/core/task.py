@@ -2,7 +2,6 @@
 """Base classes and protocols for environment tasks."""
 
 from abc import ABC, abstractmethod
-from enum import StrEnum
 from pathlib import Path
 from typing import Any, Generic, Protocol, TypeVar
 
@@ -35,19 +34,13 @@ class BaseTask(ABC, Generic[EnvT, ControllerT]):
     def __init__(
         self,
         *,
-        width: int,
-        height: int,
         max_steps: int,
         seed: int | None = None,
         module: str = "brain",
-        difficulty: str | StrEnum = "medium",
     ) -> None:
-        self.width = int(width)
-        self.height = int(height)
         self.max_steps = int(max_steps)
         self.seed = seed
         self.module = module
-        self.difficulty = difficulty
 
     @abstractmethod
     def make_env(self) -> EnvT:
@@ -61,7 +54,6 @@ class BaseTask(ABC, Generic[EnvT, ControllerT]):
 
     def evaluate(self, indiv: Indiv) -> float:
         """Run one full episode and return the accumulated reward."""
-
         env = self.make_env()
         controller = self.make_controller(indiv)
 
