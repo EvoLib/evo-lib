@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import Self
 
 from evoenv.core.config import StrictConfigModel, YamlConfigModel
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
 
 
 class CollectorEnvConfig(StrictConfigModel):
@@ -116,8 +116,6 @@ class CollectorSensorConfig(StrictConfigModel):
 
 class CollectorExplorationConfig(StrictConfigModel):
     """Configuration for the grid-based exploration bonus."""
-
-    model_config = ConfigDict(extra="forbid")
 
     cell_size: int = Field(gt=0)
 
