@@ -76,26 +76,6 @@ class LineFollowerEnv(Env):
 
         self._rng = random.Random()
 
-    @property
-    def x(self) -> float:
-        """Return robot x-position."""
-        return self.robot.x
-
-    @property
-    def y(self) -> float:
-        """Return robot y-position."""
-        return self.robot.y
-
-    @property
-    def angle(self) -> float:
-        """Return robot angle."""
-        return self.robot.angle
-
-    @property
-    def sensor_radius(self) -> int:
-        """Return the robot sensor radius."""
-        return self.robot.sensor_radius
-
     def reset(self, seed: int | None = None) -> Observation:
         """Reset the episode and return the initial observation."""
         if seed is not None:
