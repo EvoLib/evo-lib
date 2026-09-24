@@ -124,9 +124,9 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
         expected_size = max_sensors * 2
         vector = list(indiv.para["sensors"].vector)
 
-        if len(vector) < expected_size:
+        if len(vector) != expected_size:
             raise ValueError(
-                "Sensor module 'sensors' must contain at least "
+                "Sensor module 'sensors' must contain exactly "
                 f"{expected_size} values, got {len(vector)}."
             )
 
