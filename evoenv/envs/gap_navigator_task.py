@@ -9,7 +9,7 @@ from evoenv.core.env import Action, Observation
 from evoenv.core.evaluator import evaluate_episode
 from evoenv.core.sensors import RaySensor
 from evoenv.core.task import BaseTask
-from evoenv.core.utils import clamp, clamp01
+from evoenv.core.utils import clamp01
 from evoenv.envs.gap_navigator import GapNavigatorEnv, SensorLayout
 from evoenv.envs.gap_navigator_config import GapNavigatorTaskConfig
 from evoenv.envs.gap_navigator_defaults import DEFAULT_FPS
@@ -25,9 +25,9 @@ class GapNavigatorController:
         self.net: Any = indiv.para["brain"]
 
     def act(self, observation: Observation) -> Action:
-        """Return a clipped steering action in [-1, 1]."""
+        """Return the steering action produced by the controller."""
         output = self.net.calc(observation)
-        steering = clamp(output[0], -1.0, 1.0)
+        steering = float(output[0])
         return [steering]
 
 

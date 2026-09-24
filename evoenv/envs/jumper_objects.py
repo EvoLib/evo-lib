@@ -4,7 +4,6 @@
 from dataclasses import dataclass, field
 
 import pygame
-from evoenv.core.utils import clamp01
 
 
 class JumperPlayer(pygame.sprite.Sprite):
@@ -65,13 +64,10 @@ class JumperPlayer(pygame.sprite.Sprite):
         Returns:
             True if a jump was triggered in this step.
         """
-        clamped_signal = clamp01(jump_signal)
-        clamped_strength = clamp01(jump_strength)
-
         did_jump = False
 
-        if self.on_ground and clamped_signal > 0.5 and clamped_strength > 0.0:
-            self.velocity_y = -self.jump_velocity * clamped_strength
+        if self.on_ground and jump_signal > 0.5 and jump_strength > 0.0:
+            self.velocity_y = -self.jump_velocity * jump_strength
             did_jump = True
 
         self.velocity_y += self.gravity

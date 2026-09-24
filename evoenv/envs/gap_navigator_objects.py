@@ -41,9 +41,8 @@ class AvoiderPlayer(pygame.sprite.Sprite):
         self._sync_rect()
 
     def step(self, steering: float, *, min_x: float, max_x: float) -> None:
-        """Move horizontally using one clipped steering action."""
-        clamped_steering = clamp(steering, -1.0, 1.0)
-        self.velocity_x = clamped_steering * self.speed
+        """Move horizontally using one steering action."""
+        self.velocity_x = steering * self.speed
 
         previous_x = self.x
         self.x += self.velocity_x

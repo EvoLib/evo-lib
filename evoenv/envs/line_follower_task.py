@@ -7,7 +7,6 @@ from typing import Any
 from evoenv.core.checkpoint import EnvCheckpoint
 from evoenv.core.env import Action, Observation
 from evoenv.core.task import BaseTask
-from evoenv.core.utils import clamp
 from evoenv.envs.line_follower import LineFollowerEnv
 from evoenv.envs.line_follower_config import LineFollowerTaskConfig
 from evoenv.envs.line_follower_defaults import DEFAULT_FPS
@@ -23,9 +22,9 @@ class LineFollowerController:
         self.net: Any = indiv.para["brain"]
 
     def act(self, observation: Observation) -> Action:
-        """Return a clipped steering action in [-1, 1]."""
+        """Return the steering action produced by the controller."""
         output = self.net.calc(observation)
-        turn = clamp(output[0], -1.0, 1.0)
+        turn = float(output[0])
         return [turn]
 
 

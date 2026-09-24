@@ -9,7 +9,6 @@ from typing import Any
 from evoenv.core.checkpoint import EnvCheckpoint
 from evoenv.core.env import Action, Observation
 from evoenv.core.task import BaseTask
-from evoenv.core.utils import clamp, clamp01
 from evoenv.envs.collector import CollectorEnv
 from evoenv.envs.collector_config import CollectorTaskConfig
 from evoenv.envs.collector_defaults import DEFAULT_FPS
@@ -25,11 +24,11 @@ class CollectorController:
         self.net: Any = indiv.para["brain"]
 
     def act(self, observation: Observation) -> Action:
-        """Return clipped movement actions."""
+        """Return movement actions produced by the controller."""
         output = self.net.calc(observation)
 
-        turn = clamp(output[0], -1.0, 1.0)
-        throttle = clamp01((float(output[1]) + 1.0) * 0.5)
+        turn = float(output[0])
+        throttle = (float(output[1]) + 1.0) * 0.5
 
         return [turn, throttle]
 

@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 
 import pygame
 from evoenv.core.sensors import PointSensor, Pose2D, SensorPointState
-from evoenv.core.utils import clamp
 
 
 @dataclass(frozen=True)
@@ -80,10 +79,8 @@ class LineFollowerRobot:
         self.angle = float(angle)
 
     def step(self, turn: float) -> None:
-        """Advance the robot using one clipped steering action."""
-        clamped_turn = clamp(turn, -1.0, 1.0)
-
-        self.angle += clamped_turn * self.turn_strength
+        """Advance the robot using one steering action."""
+        self.angle += turn * self.turn_strength
         self.x += math.cos(self.angle) * self.base_speed
         self.y += math.sin(self.angle) * self.base_speed
 

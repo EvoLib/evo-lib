@@ -8,7 +8,6 @@ from evoenv.core.checkpoint import EnvCheckpoint
 from evoenv.core.env import Action, Observation
 from evoenv.core.sensors import RaySensor
 from evoenv.core.task import BaseTask
-from evoenv.core.utils import clamp01
 from evoenv.envs.jumper import JumperEnv
 from evoenv.envs.jumper_config import JumperTaskConfig
 from evoenv.envs.jumper_defaults import DEFAULT_FPS
@@ -24,11 +23,11 @@ class JumperController:
         self.net: Any = indiv.para["brain"]
 
     def act(self, observation: Observation) -> Action:
-        """Return clipped jump action values in [0, 1]."""
+        """Return jump action values produced by the controller."""
         output = self.net.calc(observation)
 
-        jump_signal = clamp01(output[0])
-        jump_strength = clamp01(output[1])
+        jump_signal = float(output[0])
+        jump_strength = float(output[1])
 
         return [jump_signal, jump_strength]
 
