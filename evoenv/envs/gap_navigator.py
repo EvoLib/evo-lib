@@ -74,8 +74,10 @@ class GapNavigatorEnv(Env):
 
         self.observation_size = self.max_sensors + 2
 
-        self.sensors: SensorLayout = sensors or self.default_sensors(
-            max_sensors=self.max_sensors,
+        self.sensors: SensorLayout = (
+            self.default_sensors(max_sensors=self.max_sensors)
+            if sensors is None
+            else sensors
         )
 
         if len(self.sensors) != self.max_sensors:

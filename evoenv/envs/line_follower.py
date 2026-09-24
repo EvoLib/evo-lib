@@ -70,7 +70,7 @@ class LineFollowerEnv(Env):
         self.robot = LineFollowerRobot(
             base_speed=float(base_speed),
             turn_strength=float(turn_strength),
-            sensors=sensors or DEFAULT_LINE_SENSORS,
+            sensors=DEFAULT_LINE_SENSORS if sensors is None else sensors,
         )
         self.observation_size = len(self.robot.sensors)
 
