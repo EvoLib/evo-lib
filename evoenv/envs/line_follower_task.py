@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any
 
 from evoenv.core.checkpoint import EnvCheckpoint
-from evoenv.core.difficulty import Difficulty
 from evoenv.core.env import Action, Observation
 from evoenv.core.task import BaseTask
 from evoenv.core.utils import clamp
@@ -39,7 +38,6 @@ class LineFollowerTask(BaseTask[LineFollowerEnv, LineFollowerController]):
         task_config: LineFollowerTaskConfig,
         seed: int | None = None,
         module: str = "brain",
-        difficulty: str | Difficulty = Difficulty.MEDIUM,
     ) -> None:
         super().__init__(
             max_steps=task_config.env.max_steps,
@@ -57,14 +55,12 @@ class LineFollowerTask(BaseTask[LineFollowerEnv, LineFollowerController]):
         *,
         seed: int | None = None,
         module: str = "brain",
-        difficulty: str | Difficulty = Difficulty.MEDIUM,
     ) -> "LineFollowerTask":
         """Create a task from a YAML task configuration file."""
         return cls(
             task_config=LineFollowerTaskConfig.from_yaml(path),
             seed=seed,
             module=module,
-            difficulty=difficulty,
         )
 
     @classmethod
@@ -82,7 +78,6 @@ class LineFollowerTask(BaseTask[LineFollowerEnv, LineFollowerController]):
         return cls(
             task_config=LineFollowerTaskConfig.model_validate(raw_task_config),
             seed=checkpoint.seed,
-            difficulty=checkpoint.env.difficulty or Difficulty.MEDIUM,
         )
 
     def make_env(self) -> LineFollowerEnv:

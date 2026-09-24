@@ -28,7 +28,6 @@ seed = pop.config.random_seed
 line_task = LineFollowerTask.from_yaml(
     task_config_path,
     seed=seed,
-    difficulty=args.difficulty,
 )
 
 

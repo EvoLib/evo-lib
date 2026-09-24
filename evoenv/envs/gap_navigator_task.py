@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any
 
 from evoenv.core.checkpoint import EnvCheckpoint
-from evoenv.core.difficulty import Difficulty
 from evoenv.core.env import Action, Observation
 from evoenv.core.evaluator import evaluate_episode
 from evoenv.core.sensors import RaySensor
@@ -42,7 +41,6 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
         seed: int | None = None,
         module: str = "brain",
         sensor_module: str = "sensors",
-        difficulty: str | Difficulty = Difficulty.MEDIUM,
     ) -> None:
         super().__init__(
             max_steps=task_config.env.max_steps,
@@ -89,7 +87,6 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
         return cls(
             task_config=GapNavigatorTaskConfig.model_validate(raw_task_config),
             seed=checkpoint.seed,
-            difficulty=checkpoint.env.difficulty or Difficulty.MEDIUM,
         )
 
     def make_env(self, sensors: SensorLayout | None = None) -> GapNavigatorEnv:

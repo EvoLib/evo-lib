@@ -15,7 +15,6 @@ FPS = DEFAULT_FPS
 args = parse_difficulty_args(description="Run a Line Follower agent.")
 task = LineFollowerTask.from_yaml(
     difficulty_task_path(args.difficulty),
-    difficulty=args.difficulty,
 )
 
 
