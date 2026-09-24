@@ -107,11 +107,8 @@ class ForagingSession:
             self.close()
 
     def _open_renderer(self) -> None:
-        from evosim.renderers.pygame_common import PygameWindow
-        from evosim.renderers.pygame_foraging import (
-            DEFAULT_FPS,
-            PygameForagingRenderer,
-        )
+        from evosim.renderers.pygame_common import DEFAULT_FPS, PygameWindow
+        from evosim.renderers.pygame_foraging import PygameForagingRenderer
 
         self._renderer = PygameForagingRenderer()
         self._window = PygameWindow(

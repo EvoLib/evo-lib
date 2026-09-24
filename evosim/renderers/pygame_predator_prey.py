@@ -13,7 +13,6 @@ from evosim.renderers.pygame_common import (
 from evosim.sims.predator_prey.objects import Agent
 from evosim.sims.predator_prey.simulation import PredatorPreySimulation
 
-DEFAULT_FPS = 60
 _PREY_LOW_COLOR = (31, 58, 95)
 _PREY_HIGH_COLOR = (86, 204, 242)
 _PREDATOR_LOW_COLOR = (110, 42, 42)

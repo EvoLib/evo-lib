@@ -13,7 +13,6 @@ from evosim.renderers.pygame_common import (
 from evosim.sims.foraging.objects import Forager
 from evosim.sims.foraging.simulation import ForagingSimulation
 
-DEFAULT_FPS = 60
 _LOW_ENERGY_COLOR = (31, 58, 95)
 _HIGH_ENERGY_COLOR = (86, 204, 242)
 _FOOD_COLOR = (80, 220, 120)

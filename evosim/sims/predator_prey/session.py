@@ -102,11 +102,8 @@ class PredatorPreySession:
             self.close()
 
     def _open_renderer(self) -> None:
-        from evosim.renderers.pygame_common import PygameWindow
-        from evosim.renderers.pygame_predator_prey import (
-            DEFAULT_FPS,
-            PygamePredatorPreyRenderer,
-        )
+        from evosim.renderers.pygame_common import DEFAULT_FPS, PygameWindow
+        from evosim.renderers.pygame_predator_prey import PygamePredatorPreyRenderer
 
         self._renderer = PygamePredatorPreyRenderer()
         self._window = PygameWindow(

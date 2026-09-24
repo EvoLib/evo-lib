@@ -3,6 +3,7 @@
 
 import pygame
 
+DEFAULT_FPS = 60
 DEFAULT_INFO_PANEL_WIDTH = 300
 
 
