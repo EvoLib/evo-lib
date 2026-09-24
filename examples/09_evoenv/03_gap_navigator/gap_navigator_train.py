@@ -3,11 +3,6 @@
 
 from evoenv.cli import parse_difficulty_args
 from evoenv.core.checkpoint import EnvCheckpoint, EnvSpec, save_checkpoint
-from evoenv.core.difficulty import (
-    difficulty_checkpoint_path,
-    difficulty_config_path,
-    difficulty_task_path,
-)
 from evoenv.envs.gap_navigator_task import GapNavigatorTask
 
 from evolib import Indiv, Pop
@@ -20,9 +15,10 @@ DEBUG_EVERY = 5
 args = parse_difficulty_args(description="Train a GapNavigator agent.")
 
 
-config_path = difficulty_config_path(args.difficulty)
-task_config_path = difficulty_task_path(args.difficulty)
-checkpoint_path = difficulty_checkpoint_path(ENV_NAME, args.difficulty)
+difficulty = args.difficulty
+config_path = f"config_{difficulty}.yaml"
+task_config_path = f"task_{difficulty}.yaml"
+checkpoint_path = f"{ENV_NAME}_{difficulty}.pkl"
 
 pop = Pop(config_path=str(config_path))
 seed = pop.config.random_seed
@@ -79,7 +75,7 @@ checkpoint = EnvCheckpoint(
     indiv=best_indiv,
     env=EnvSpec(
         name=ENV_NAME,
-        difficulty=args.difficulty,
+        difficulty=difficulty,
         params={
             "task_config": obstacle_task.task_config.to_yaml_dict(),
         },

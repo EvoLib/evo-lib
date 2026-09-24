@@ -3,7 +3,6 @@
 
 from evoenv.cli import parse_difficulty_args
 from evoenv.core.controller import CallbackController
-from evoenv.core.difficulty import difficulty_task_path
 from evoenv.core.env import Action, Observation
 from evoenv.envs.line_follower_task import LineFollowerTask
 from evoenv.renderers.pygame_common import DEFAULT_FPS, PygameWindow
@@ -12,9 +11,7 @@ from evoenv.renderers.pygame_line_follower import draw_env
 FPS = DEFAULT_FPS
 
 args = parse_difficulty_args(description="Run a Line Follower agent.")
-task = LineFollowerTask.from_yaml(
-    difficulty_task_path(args.difficulty),
-)
+task = LineFollowerTask.from_yaml(f"task_{args.difficulty}.yaml")
 
 
 def line_follower_rule(observation: Observation) -> Action:

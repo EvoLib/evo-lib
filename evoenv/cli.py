@@ -3,41 +3,22 @@
 
 import argparse
 from pathlib import Path
-from typing import Sequence
 
 DEFAULT_DIFFICULTIES: tuple[str, ...] = ("easy", "medium", "hard")
-
-
-def add_difficulty_arg(
-    parser: argparse.ArgumentParser,
-    *,
-    choices: Sequence[str] = DEFAULT_DIFFICULTIES,
-    default: str = "medium",
-    help_text: str = "Environment difficulty preset.",
-) -> None:
-    """Add a generic difficulty argument."""
-    parser.add_argument(
-        "--difficulty",
-        choices=choices,
-        default=default,
-        help=help_text,
-    )
 
 
 def parse_difficulty_args(
     *,
     description: str | None = None,
-    difficulty_choices: Sequence[str] = DEFAULT_DIFFICULTIES,
-    default_difficulty: str = "medium",
 ) -> argparse.Namespace:
     """Parse the shared difficulty argument for example scripts."""
     parser = argparse.ArgumentParser(description=description)
-    add_difficulty_arg(
-        parser,
-        choices=difficulty_choices,
-        default=default_difficulty,
+    parser.add_argument(
+        "--difficulty",
+        choices=DEFAULT_DIFFICULTIES,
+        default="medium",
+        help="Environment difficulty preset.",
     )
-
     return parser.parse_args()
 
 
