@@ -1,4 +1,4 @@
-## Unreleased
+## EvoLib 0.4.0
 
 ### Added
 
@@ -10,6 +10,16 @@
 ### Changed
 
 * Refactored vector initializers to use the centralized Vector.from_config() initialization path.
+* Simplified EvoEnv checkpoint reconstruction by moving it from the task registry into the individual task classes.
+* Simplified EvoEnv step results to return (observation, reward, done) without the unused info mapping.
+
+### Fixed
+
+* Fixed Vector mutation probability handling so an explicit 0.0 disables mutation instead of falling back to 1.0.
+
+### Removed
+
+* Removed the EvoEnv task registry and manual play scripts.
 
 
 ## EvoLib 0.3.1
