@@ -300,8 +300,8 @@ optionally written as a GIF.
 This is useful for checking sensor geometry, steering behavior, collisions, wall
 contact, and excessive oscillation.
 
-Set `DEBUG = True` in `gap_navigator_train.py` to enable debug visualization.
 Frames are written to the `frames/` directory every `DEBUG_EVERY` generations.
+Set `DEBUG = False` in `gap_navigator_train.py` to disable debug visualization.
 
 ---
 

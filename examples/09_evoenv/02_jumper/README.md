@@ -254,8 +254,8 @@ During debug training, the current best individual can be visualized.
 This is useful for checking jump timing, sensor activation, collision behavior,
 and excessive jump strength.
 
-Set `DEBUG = True` in `jumper_train.py` to enable debug visualization.
 Frames are written to the `frames/` directory every `DEBUG_EVERY` generations.
+Set `DEBUG = False` in `jumper_train.py` to disable debug visualization.
 
 ---
 

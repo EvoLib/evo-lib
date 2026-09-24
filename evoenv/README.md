@@ -167,14 +167,14 @@ python collector_train.py
 python collector_watch.py collector.pkl
 ```
 
-To enable debug rendering, set the following values in the training script:
+Debug rendering is enabled by default in the training scripts:
 
 ```python
-DEBUG = False
+DEBUG = True
 DEBUG_EVERY = 5
 ```
 
-Set `DEBUG = True` to periodically render the current best individual.
+Set `DEBUG = False` to run training without debug visualization.
 
 ## Configuration
 

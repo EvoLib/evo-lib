@@ -250,8 +250,8 @@ During debug training, the current best individual can be visualized.
 This is useful for checking steering behavior, line contact, reward shaping, and
 whether the robot loses the line early.
 
-Set `DEBUG = True` in `line_follower_train.py` to enable debug visualization.
 Frames are written to the `frames/` directory every `DEBUG_EVERY` generations.
+Set `DEBUG = False` in `line_follower_train.py` to disable debug visualization.
 
 ---
 

@@ -452,8 +452,8 @@ python collector_watch.py collector.pkl
 
 ## Debug Visualization
 
-Set `DEBUG = True` in `collector_train.py` to enable debug visualization.
 Frames are written to the `frames/` directory every `DEBUG_EVERY` generations.
+Set `DEBUG = False` in `collector_train.py` to disable debug visualization.
 
 ---
 
