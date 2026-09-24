@@ -288,15 +288,6 @@ class JumperEnv(Env):
 
         return clamp01((obstacle.height - min_height) / height_range)
 
-    def _nearest_obstacle_distance(self) -> float:
-        """Return normalized distance to the closest obstacle in front of the player."""
-        obstacle = self._nearest_obstacle()
-        if obstacle is None:
-            return 1.0
-
-        distance = max(0.0, float(obstacle.rect.left - self.player.rect.right))
-        return min(1.0, distance / max(1.0, float(self.width)))
-
     def _iter_obstacles(self) -> Iterator[JumperObstacle]:
         """Yield active Jumper obstacles."""
         for sprite in self.obstacle_group:
