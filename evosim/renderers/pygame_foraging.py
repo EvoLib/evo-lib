@@ -71,12 +71,12 @@ class PygameForagingRenderer:
                 int(round(food.radius)),
             )
 
-        for poisen in simulation.poison:
+        for poison in simulation.poison:
             pygame.draw.circle(
                 screen,
                 _POISON_COLOR,
-                (int(round(poisen.x)), int(round(poisen.y))),
-                int(round(poisen.radius)),
+                (int(round(poison.x)), int(round(poison.y))),
+                int(round(poison.radius)),
             )
 
         for forager in simulation.foragers:
