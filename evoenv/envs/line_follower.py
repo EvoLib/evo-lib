@@ -18,13 +18,7 @@ import pygame
 from evoenv.core.env import Action, Env, Observation, StepResult
 from evoenv.core.sensors import SensorPointState
 from evoenv.core.utils import clamp
-from evoenv.envs.line_follower_objects import (
-    DEFAULT_LINE_SENSORS,
-    LineFollowerRobot,
-    LineSensor,
-)
-
-SensorLayout = tuple[LineSensor, ...]
+from evoenv.envs.line_follower_objects import LineFollowerRobot
 
 
 class LineFollowerEnv(Env):
@@ -46,7 +40,6 @@ class LineFollowerEnv(Env):
         max_missed_line_steps: int,
         progress_reward_scale: float,
         missed_line_penalty: float,
-        sensors: SensorLayout | None = None,
     ) -> None:
         self.width = int(width)
         self.height = int(height)
@@ -70,9 +63,7 @@ class LineFollowerEnv(Env):
         self.robot = LineFollowerRobot(
             base_speed=float(base_speed),
             turn_strength=float(turn_strength),
-            sensors=DEFAULT_LINE_SENSORS if sensors is None else sensors,
         )
-        self.observation_size = len(self.robot.sensors)
 
         self._rng = random.Random()
 

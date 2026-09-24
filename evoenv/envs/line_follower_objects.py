@@ -46,16 +46,13 @@ class LineFollowerRobot:
     turn_strength: float = 0.12
     radius: int = 10
 
-    sensors: tuple[LineSensor, ...] = DEFAULT_LINE_SENSORS
-
     sensor_masks: tuple[pygame.mask.Mask, ...] = field(init=False, repr=False)
     body_mask: pygame.mask.Mask = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
-        if not self.sensors:
-            raise ValueError("LineFollowerRobot requires at least one sensor.")
-
-        self.sensor_masks = tuple(sensor.build_mask() for sensor in self.sensors)
+        self.sensor_masks = tuple(
+            sensor.build_mask() for sensor in DEFAULT_LINE_SENSORS
+        )
         self.body_mask = self._build_body_mask()
 
     @property
@@ -70,7 +67,7 @@ class LineFollowerRobot:
     @property
     def sensor_radius(self) -> int:
         """Return the shared sensor radius used by the renderer."""
-        return self.sensors[0].radius
+        return DEFAULT_LINE_SENSORS[0].radius
 
     def reset(self, *, x: float, y: float, angle: float) -> None:
         """Place the robot at a new pose."""
@@ -88,7 +85,7 @@ class LineFollowerRobot:
         """Return all sensor positions and binary line-contact values."""
         states: list[SensorPointState] = []
 
-        for sensor, sensor_mask in zip(self.sensors, self.sensor_masks):
+        for sensor, sensor_mask in zip(DEFAULT_LINE_SENSORS, self.sensor_masks):
             state = sensor.get_state(self.pose)
 
             value = self.sensor_touches_line(
