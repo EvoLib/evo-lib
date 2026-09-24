@@ -13,10 +13,7 @@ from evoenv.core.task import BaseTask
 from evoenv.core.utils import clamp, clamp01
 from evoenv.envs.gap_navigator import GapNavigatorEnv, SensorLayout
 from evoenv.envs.gap_navigator_config import GapNavigatorTaskConfig
-from evoenv.envs.gap_navigator_defaults import (
-    DEFAULT_DEBUG_EVERY_N_GENERATIONS,
-    DEFAULT_FPS,
-)
+from evoenv.envs.gap_navigator_defaults import DEFAULT_FPS
 from evoenv.renderers.pygame_gap_navigator import run_debug_episode
 
 from evolib import Indiv
@@ -185,8 +182,6 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
         self,
         indiv: Indiv,
         *,
-        generation: int,
-        every: int = DEFAULT_DEBUG_EVERY_N_GENERATIONS,
         steps: int | None = None,
         title: str | None = None,
         filename: str | Path | None = None,
@@ -194,16 +189,13 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
         frame_skip: int = 1,
     ) -> Path | None:
         """Render one debug episode for an individual."""
-        display_title = title or f"GapNavigator Training Debug - Gen {generation}"
+        display_title = title or "GapNavigator Debug"
         sensor_layout = self.make_sensor_layout(indiv)
         episode_steps = self.max_steps if steps is None else steps
 
         return run_debug_episode(
             self.make_env(sensors=sensor_layout),
             self.make_controller(indiv),
-            enabled=True,
-            generation=generation,
-            every=every,
             steps=episode_steps,
             seed=self.seed,
             title=display_title,

@@ -167,12 +167,14 @@ python collector_train.py
 python collector_watch.py collector.pkl
 ```
 
-Some training scripts provide a `--debug` option that periodically renders the
-current best individual:
+To enable debug rendering, set the following values in the training script:
 
-```bash
-python collector_train.py --debug
+```python
+DEBUG = False
+DEBUG_EVERY = 5
 ```
+
+Set `DEBUG = True` to periodically render the current best individual.
 
 ## Configuration
 

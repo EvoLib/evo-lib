@@ -11,10 +11,7 @@ from evoenv.core.task import BaseTask
 from evoenv.core.utils import clamp
 from evoenv.envs.line_follower import LineFollowerEnv
 from evoenv.envs.line_follower_config import LineFollowerTaskConfig
-from evoenv.envs.line_follower_defaults import (
-    DEFAULT_DEBUG_EVERY_N_GENERATIONS,
-    DEFAULT_FPS,
-)
+from evoenv.envs.line_follower_defaults import DEFAULT_FPS
 from evoenv.renderers.pygame_line_follower import run_debug_episode
 
 from evolib import Indiv
@@ -111,8 +108,6 @@ class LineFollowerTask(BaseTask[LineFollowerEnv, LineFollowerController]):
         self,
         indiv: Indiv,
         *,
-        generation: int,
-        every: int = DEFAULT_DEBUG_EVERY_N_GENERATIONS,
         steps: int | None = None,
         title: str | None = None,
         filename: str | Path | None = None,
@@ -120,15 +115,12 @@ class LineFollowerTask(BaseTask[LineFollowerEnv, LineFollowerController]):
         frame_skip: int = 1,
     ) -> Path | None:
         """Render one debug episode for an individual."""
-        display_title = title or f"Training Debug - Gen {generation}"
+        display_title = title or "LineFollower Debug"
         episode_steps = self.max_steps if steps is None else steps
 
         return run_debug_episode(
             self.make_env(),
             self.make_controller(indiv),
-            enabled=True,
-            generation=generation,
-            every=every,
             steps=episode_steps,
             seed=self.seed,
             title=display_title,

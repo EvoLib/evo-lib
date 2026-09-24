@@ -6,10 +6,7 @@ from pathlib import Path
 import pygame
 from evoenv.core.controller import Controller
 from evoenv.envs.gap_navigator import GapNavigatorEnv
-from evoenv.envs.gap_navigator_defaults import (
-    DEFAULT_DEBUG_EVERY_N_GENERATIONS,
-    DEFAULT_FPS,
-)
+from evoenv.envs.gap_navigator_defaults import DEFAULT_FPS
 from evoenv.renderers.pygame_common import (
     PygameDebugRenderer,
     draw_ray_sensors,
@@ -84,9 +81,6 @@ def run_debug_episode(
     env: GapNavigatorEnv,
     controller: Controller,
     *,
-    enabled: bool,
-    generation: int,
-    every: int = DEFAULT_DEBUG_EVERY_N_GENERATIONS,
     steps: int = 500,
     seed: int | None = None,
     title: str = "GapNavigator Debug",
@@ -94,10 +88,7 @@ def run_debug_episode(
     gif_fps: int = DEFAULT_FPS,
     frame_skip: int = 1,
 ) -> Path | None:
-    """Run debug rendering periodically during training."""
-    if not enabled or generation % every != 0:
-        return None
-
+    """Run one rendered debug episode."""
     return _DEBUG_RENDERER.run_episode(
         env,
         controller,

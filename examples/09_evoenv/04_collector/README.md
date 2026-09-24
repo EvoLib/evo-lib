@@ -445,17 +445,16 @@ Train an evolved controller:
 python collector_train.py
 ```
 
-Train with debug visualization:
-
-```bash
-python collector_train.py --debug
-```
-
 Watch a saved checkpoint:
 
 ```bash
 python collector_watch.py collector.pkl
 ```
+
+## Debug Visualization
+
+Set `DEBUG = True` in `collector_train.py` to enable debug visualization.
+Frames are written to the `frames/` directory every `DEBUG_EVERY` generations.
 
 ---
 

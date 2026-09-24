@@ -9,10 +9,7 @@ from pathlib import Path
 import pygame
 from evoenv.core.controller import Controller
 from evoenv.envs.collector import CollectorEnv
-from evoenv.envs.collector_defaults import (
-    DEFAULT_DEBUG_EVERY_N_GENERATIONS,
-    DEFAULT_FPS,
-)
+from evoenv.envs.collector_defaults import DEFAULT_FPS
 from evoenv.renderers.pygame_common import (
     PygameDebugRenderer,
     draw_ray_sensors,
@@ -102,9 +99,6 @@ def run_debug_episode(
     env: CollectorEnv,
     controller: Controller,
     *,
-    enabled: bool,
-    generation: int,
-    every: int = DEFAULT_DEBUG_EVERY_N_GENERATIONS,
     steps: int = 500,
     seed: int | None = None,
     title: str = "Collector Debug",
@@ -112,16 +106,7 @@ def run_debug_episode(
     gif_fps: int = DEFAULT_FPS,
     frame_skip: int = 1,
 ) -> Path | None:
-    """Run debug rendering periodically during training."""
-    if not enabled:
-        return None
-
-    if every <= 0:
-        raise ValueError("every must be greater than zero.")
-
-    if generation % every != 0:
-        return None
-
+    """Run one rendered debug episode."""
     return _DEBUG_RENDERER.run_episode(
         env,
         controller,

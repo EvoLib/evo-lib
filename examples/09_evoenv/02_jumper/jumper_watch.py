@@ -12,7 +12,5 @@ task = JumperTask.from_checkpoint(checkpoint)
 
 task.visualize(
     checkpoint.indiv,
-    generation=1,
-    every=1,
     title=f"Evolved {checkpoint.env.name}",
 )

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 """Train an EvoLib population on the LineFollower task."""
 
-from evoenv.cli import parse_env_args
+from evoenv.cli import parse_difficulty_args
 from evoenv.core.checkpoint import EnvCheckpoint, EnvSpec, save_checkpoint
 from evoenv.core.difficulty import (
     difficulty_checkpoint_path,
@@ -14,8 +14,10 @@ from evolib import Indiv, Pop
 
 ENV_NAME = "line_follower"
 FRAME_FOLDER = "frames"
+DEBUG = True
+DEBUG_EVERY = 5
 
-args = parse_env_args(description="Train a Line Follower agent.")
+args = parse_difficulty_args(description="Train a Line Follower agent.")
 config_path = difficulty_config_path(args.difficulty)
 task_config_path = difficulty_task_path(args.difficulty)
 checkpoint_path = difficulty_checkpoint_path(ENV_NAME, args.difficulty)
@@ -38,16 +40,14 @@ def eval_line_follower_fitness(indiv: Indiv) -> None:
 
 def on_generation_end(pop: Pop) -> None:
     """Optionally visualize the current best individual."""
-    if not args.debug:
-        return
-
-    line_task.visualize(
-        pop.best(sort=True),
-        generation=pop.generation_num,
-        filename=f"{FRAME_FOLDER}/gen_{pop.generation_num:03d}.gif",
-        frame_skip=2,
-        gif_fps=30,
-    )
+    if DEBUG and pop.generation_num % DEBUG_EVERY == 0:
+        line_task.visualize(
+            pop.best(sort=True),
+            title=f"Training Debug - Gen {pop.generation_num}",
+            filename=f"{FRAME_FOLDER}/gen_{pop.generation_num:03d}.gif",
+            frame_skip=2,
+            gif_fps=30,
+        )
 
 
 pop.set_fitness_function(eval_line_follower_fitness)

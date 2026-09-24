@@ -240,12 +240,6 @@ Train an evolved controller:
 python jumper_train.py
 ```
 
-Train with debug visualization:
-
-```bash
-python jumper_train.py --debug
-```
-
 Watch the saved individual:
 
 ```bash
@@ -261,7 +255,8 @@ During debug training, the current best individual can be visualized.
 This is useful for checking jump timing, sensor activation, collision behavior,
 and excessive jump strength.
 
-Debug frames are written to the `frames/` directory by default.
+Set `DEBUG = True` in `jumper_train.py` to enable debug visualization.
+Frames are written to the `frames/` directory every `DEBUG_EVERY` generations.
 
 ---
 

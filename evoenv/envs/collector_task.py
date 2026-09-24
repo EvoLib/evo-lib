@@ -12,10 +12,7 @@ from evoenv.core.task import BaseTask
 from evoenv.core.utils import clamp, clamp01
 from evoenv.envs.collector import CollectorEnv
 from evoenv.envs.collector_config import CollectorTaskConfig
-from evoenv.envs.collector_defaults import (
-    DEFAULT_DEBUG_EVERY_N_GENERATIONS,
-    DEFAULT_FPS,
-)
+from evoenv.envs.collector_defaults import DEFAULT_FPS
 from evoenv.renderers.pygame_collector import run_debug_episode
 
 from evolib import Indiv
@@ -131,8 +128,6 @@ class CollectorTask(BaseTask[CollectorEnv, CollectorController]):
         self,
         indiv: Indiv,
         *,
-        generation: int,
-        every: int = DEFAULT_DEBUG_EVERY_N_GENERATIONS,
         steps: int | None = None,
         title: str | None = None,
         filename: str | Path | None = None,
@@ -140,15 +135,12 @@ class CollectorTask(BaseTask[CollectorEnv, CollectorController]):
         frame_skip: int = 1,
     ) -> Path | None:
         """Render one debug episode for an individual."""
-        display_title = title or f"Collector Training Debug - Gen {generation}"
+        display_title = title or "Collector Debug"
         episode_steps = self.max_steps if steps is None else steps
 
         return run_debug_episode(
             self.make_env(),
             self.make_controller(indiv),
-            enabled=True,
-            generation=generation,
-            every=every,
             steps=episode_steps,
             seed=self.seed,
             title=display_title,

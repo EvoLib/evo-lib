@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 """Run a simple rule-based steering controller on LineFollowerEnv."""
 
-from evoenv.cli import parse_env_args
+from evoenv.cli import parse_difficulty_args
 from evoenv.core.controller import CallbackController
 from evoenv.core.difficulty import difficulty_task_path
 from evoenv.core.env import Action, Observation
@@ -12,7 +12,7 @@ from evoenv.renderers.pygame_line_follower import draw_env
 
 FPS = DEFAULT_FPS
 
-args = parse_env_args(description="Run a Line Follower agent.")
+args = parse_difficulty_args(description="Run a Line Follower agent.")
 task = LineFollowerTask.from_yaml(
     difficulty_task_path(args.difficulty),
     difficulty=args.difficulty,

@@ -215,12 +215,6 @@ Train an evolved controller:
 python line_follower_train.py
 ```
 
-Train with debug visualization:
-
-```bash
-python line_follower_train.py --debug
-```
-
 Watch the best saved individual:
 
 ```bash
@@ -257,7 +251,8 @@ During debug training, the current best individual can be visualized.
 This is useful for checking steering behavior, line contact, reward shaping, and
 whether the robot loses the line early.
 
-Debug frames are written to the `frames/` directory when `--debug` is enabled.
+Set `DEBUG = True` in `line_follower_train.py` to enable debug visualization.
+Frames are written to the `frames/` directory every `DEBUG_EVERY` generations.
 
 ---
 

@@ -11,10 +11,7 @@ from evoenv.core.task import BaseTask
 from evoenv.core.utils import clamp01
 from evoenv.envs.jumper import JumperEnv
 from evoenv.envs.jumper_config import JumperTaskConfig
-from evoenv.envs.jumper_defaults import (
-    DEFAULT_DEBUG_EVERY_N_GENERATIONS,
-    DEFAULT_FPS,
-)
+from evoenv.envs.jumper_defaults import DEFAULT_FPS
 from evoenv.renderers.pygame_jumper import run_debug_episode
 
 from evolib import Indiv
@@ -125,8 +122,6 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
         self,
         indiv: Indiv,
         *,
-        generation: int,
-        every: int = DEFAULT_DEBUG_EVERY_N_GENERATIONS,
         steps: int | None = None,
         title: str | None = None,
         filename: str | Path | None = None,
@@ -134,15 +129,12 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
         frame_skip: int = 1,
     ) -> Path | None:
         """Render one debug episode for an individual."""
-        display_title = title or f"Jumper Training Debug - Gen {generation}"
+        display_title = title or "Jumper Debug"
         episode_steps = self.max_steps if steps is None else steps
 
         return run_debug_episode(
             self.make_env(),
             self.make_controller(indiv),
-            enabled=True,
-            generation=generation,
-            every=every,
             steps=episode_steps,
             seed=self.seed,
             title=display_title,

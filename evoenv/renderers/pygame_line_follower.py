@@ -8,10 +8,7 @@ import pygame
 from evoenv.core.controller import Controller
 from evoenv.core.sensors import SensorPointState
 from evoenv.envs.line_follower import LineFollowerEnv
-from evoenv.envs.line_follower_defaults import (
-    DEFAULT_DEBUG_EVERY_N_GENERATIONS,
-    DEFAULT_FPS,
-)
+from evoenv.envs.line_follower_defaults import DEFAULT_FPS
 from evoenv.renderers.pygame_common import (
     PygameDebugRenderer,
     draw_text_panel,
@@ -121,9 +118,6 @@ def run_debug_episode(
     env: LineFollowerEnv,
     controller: Controller,
     *,
-    enabled: bool,
-    generation: int,
-    every: int = DEFAULT_DEBUG_EVERY_N_GENERATIONS,
     steps: int | None = None,
     seed: int | None = None,
     title: str = "Training Debug",
@@ -131,10 +125,7 @@ def run_debug_episode(
     gif_fps: int = DEFAULT_FPS,
     frame_skip: int = 1,
 ) -> Path | None:
-    """Run debug rendering periodically during training."""
-    if not enabled or generation % every != 0:
-        return None
-
+    """Run one rendered debug episode."""
     episode_steps = env.max_steps if steps is None else steps
 
     return _DEBUG_RENDERER.run_episode(

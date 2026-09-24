@@ -253,12 +253,6 @@ Train evolved sensors and an evolved controller:
 python gap_navigator_train.py
 ```
 
-Train with debug visualization:
-
-```bash
-python gap_navigator_train.py --debug
-```
-
 Watch the saved medium individual:
 
 ```bash
@@ -307,7 +301,8 @@ optionally written as a GIF.
 This is useful for checking sensor geometry, steering behavior, collisions, wall
 contact, and excessive oscillation.
 
-Debug frames are written to the `frames/` directory when `--debug` is enabled.
+Set `DEBUG = True` in `gap_navigator_train.py` to enable debug visualization.
+Frames are written to the `frames/` directory every `DEBUG_EVERY` generations.
 
 ---
 

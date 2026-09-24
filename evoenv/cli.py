@@ -8,16 +8,6 @@ from typing import Sequence
 DEFAULT_DIFFICULTIES: tuple[str, ...] = ("easy", "medium", "hard")
 
 
-def add_debug_arg(parser: argparse.ArgumentParser) -> None:
-    """Add the common debug flag."""
-
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Show debug visualization during training.",
-    )
-
-
 def add_difficulty_arg(
     parser: argparse.ArgumentParser,
     *,
@@ -26,7 +16,6 @@ def add_difficulty_arg(
     help_text: str = "Environment difficulty preset.",
 ) -> None:
     """Add a generic difficulty argument."""
-
     parser.add_argument(
         "--difficulty",
         choices=choices,
@@ -35,27 +24,19 @@ def add_difficulty_arg(
     )
 
 
-def parse_env_args(
+def parse_difficulty_args(
     *,
     description: str | None = None,
-    with_debug: bool = True,
-    with_difficulty: bool = True,
     difficulty_choices: Sequence[str] = DEFAULT_DIFFICULTIES,
     default_difficulty: str = "medium",
 ) -> argparse.Namespace:
-    """Parse common arguments for environment example scripts."""
-
+    """Parse the shared difficulty argument for example scripts."""
     parser = argparse.ArgumentParser(description=description)
-
-    if with_debug:
-        add_debug_arg(parser)
-
-    if with_difficulty:
-        add_difficulty_arg(
-            parser,
-            choices=difficulty_choices,
-            default=default_difficulty,
-        )
+    add_difficulty_arg(
+        parser,
+        choices=difficulty_choices,
+        default=default_difficulty,
+    )
 
     return parser.parse_args()
 
@@ -65,7 +46,6 @@ def parse_checkpoint_args(
     description: str = "Watch a trained environment checkpoint.",
 ) -> argparse.Namespace:
     """Parse CLI arguments for checkpoint-based scripts."""
-
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         "checkpoint",
