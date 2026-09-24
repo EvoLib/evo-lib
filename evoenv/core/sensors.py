@@ -25,25 +25,20 @@ class Pose2D:
 
 
 @dataclass(frozen=True)
-class SensorState:
+class SensorPointState:
     """Base sensor state for debugging and rendering."""
 
     value: float
-
-
-@dataclass(frozen=True)
-class SensorPointState(SensorState):
-    """State of a point-shaped sensor in world coordinates."""
-
     x: float
     y: float
     radius: int
 
 
 @dataclass(frozen=True)
-class SensorLineState(SensorState):
+class SensorLineState:
     """State of a line-shaped sensor in world coordinates."""
 
+    value: float
     start_x: float
     start_y: float
     end_x: float
