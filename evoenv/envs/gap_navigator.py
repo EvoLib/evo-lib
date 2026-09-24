@@ -212,12 +212,6 @@ class GapNavigatorEnv(Env):
         """Return fixed-size observation values for the EvoNet controller."""
         sensor_values = [self._sensor_value(sensor) for sensor in self.sensors]
 
-        if len(sensor_values) != self.max_sensors:
-            raise ValueError(
-                "Sensor layout size mismatch: "
-                f"expected {self.max_sensors}, got {len(sensor_values)}."
-            )
-
         normalized_x = self.player.x / self.width
         normalized_velocity_x = self.player.velocity_x / self.player.speed
 
