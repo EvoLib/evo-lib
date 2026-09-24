@@ -28,11 +28,9 @@ class BaseTask(ABC, Generic[EnvT, ControllerT]):
         *,
         max_steps: int,
         seed: int | None = None,
-        module: str = "brain",
     ) -> None:
         self.max_steps = int(max_steps)
         self.seed = seed
-        self.module = module
 
     @abstractmethod
     def make_env(self) -> EnvT:

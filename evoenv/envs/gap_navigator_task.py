@@ -21,8 +21,8 @@ from evolib import Indiv
 class GapNavigatorController:
     """Map an EvoLib individual to GapNavigator steering actions."""
 
-    def __init__(self, indiv: Indiv, *, module: str = "brain") -> None:
-        self.net: Any = indiv.para[module]
+    def __init__(self, indiv: Indiv) -> None:
+        self.net: Any = indiv.para["brain"]
 
     def act(self, observation: Observation) -> Action:
         """Return a clipped steering action in [-1, 1]."""
@@ -39,15 +39,11 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
         *,
         task_config: GapNavigatorTaskConfig,
         seed: int | None = None,
-        module: str = "brain",
-        sensor_module: str = "sensors",
     ) -> None:
         super().__init__(
             max_steps=task_config.env.max_steps,
             seed=seed,
-            module=module,
         )
-        self.sensor_module = sensor_module
 
         self.task_config = task_config
         self.env_config = task_config.env
@@ -61,15 +57,11 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
         path: str | Path,
         *,
         seed: int | None = None,
-        module: str = "brain",
-        sensor_module: str = "sensors",
     ) -> "GapNavigatorTask":
         """Create a task from a YAML task configuration file."""
         return cls(
             task_config=GapNavigatorTaskConfig.from_yaml(path),
             seed=seed,
-            module=module,
-            sensor_module=sensor_module,
         )
 
     @classmethod
@@ -115,7 +107,7 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
 
     def make_controller(self, indiv: Indiv) -> GapNavigatorController:
         """Create the default GapNavigator controller for one individual."""
-        return GapNavigatorController(indiv, module=self.module)
+        return GapNavigatorController(indiv)
 
     def make_sensor_layout(self, indiv: Indiv) -> SensorLayout:
         """
@@ -130,11 +122,11 @@ class GapNavigatorTask(BaseTask[GapNavigatorEnv, GapNavigatorController]):
         """
         max_sensors = self.sensor_config.max_sensors
         expected_size = max_sensors * 2
-        vector = list(indiv.para[self.sensor_module].vector)
+        vector = list(indiv.para["sensors"].vector)
 
         if len(vector) < expected_size:
             raise ValueError(
-                f"Sensor module {self.sensor_module!r} must contain at least "
+                "Sensor module 'sensors' must contain at least "
                 f"{expected_size} values, got {len(vector)}."
             )
 

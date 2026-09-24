@@ -20,8 +20,8 @@ from evolib import Indiv
 class JumperController:
     """Map an EvoLib individual to Jumper jump actions."""
 
-    def __init__(self, indiv: Indiv, *, module: str = "brain") -> None:
-        self.net: Any = indiv.para[module]
+    def __init__(self, indiv: Indiv) -> None:
+        self.net: Any = indiv.para["brain"]
 
     def act(self, observation: Observation) -> Action:
         """Return clipped jump action values in [0, 1]."""
@@ -41,12 +41,10 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
         *,
         task_config: JumperTaskConfig,
         seed: int | None = None,
-        module: str = "brain",
     ) -> None:
         super().__init__(
             max_steps=task_config.env.max_steps,
             seed=seed,
-            module=module,
         )
         self.task_config = task_config
         self.env_config = task_config.env
@@ -59,13 +57,11 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
         path: str | Path,
         *,
         seed: int | None = None,
-        module: str = "brain",
     ) -> "JumperTask":
         """Create a task from a YAML task configuration file."""
         return cls(
             task_config=JumperTaskConfig.from_yaml(path),
             seed=seed,
-            module=module,
         )
 
     def make_sensor(self) -> RaySensor:
@@ -116,7 +112,7 @@ class JumperTask(BaseTask[JumperEnv, JumperController]):
 
     def make_controller(self, indiv: Indiv) -> JumperController:
         """Create the default Jumper controller for one individual."""
-        return JumperController(indiv, module=self.module)
+        return JumperController(indiv)
 
     def visualize(
         self,

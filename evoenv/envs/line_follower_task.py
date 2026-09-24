@@ -19,8 +19,8 @@ from evolib import Indiv
 class LineFollowerController:
     """Map an EvoLib individual to LineFollower steering actions."""
 
-    def __init__(self, indiv: Indiv, *, module: str = "brain") -> None:
-        self.net: Any = indiv.para[module]
+    def __init__(self, indiv: Indiv) -> None:
+        self.net: Any = indiv.para["brain"]
 
     def act(self, observation: Observation) -> Action:
         """Return a clipped steering action in [-1, 1]."""
@@ -37,12 +37,10 @@ class LineFollowerTask(BaseTask[LineFollowerEnv, LineFollowerController]):
         *,
         task_config: LineFollowerTaskConfig,
         seed: int | None = None,
-        module: str = "brain",
     ) -> None:
         super().__init__(
             max_steps=task_config.env.max_steps,
             seed=seed,
-            module=module,
         )
         self.task_config = task_config
         self.env_config = task_config.env
@@ -54,13 +52,11 @@ class LineFollowerTask(BaseTask[LineFollowerEnv, LineFollowerController]):
         path: str | Path,
         *,
         seed: int | None = None,
-        module: str = "brain",
     ) -> "LineFollowerTask":
         """Create a task from a YAML task configuration file."""
         return cls(
             task_config=LineFollowerTaskConfig.from_yaml(path),
             seed=seed,
-            module=module,
         )
 
     @classmethod
@@ -97,7 +93,7 @@ class LineFollowerTask(BaseTask[LineFollowerEnv, LineFollowerController]):
 
     def make_controller(self, indiv: Indiv) -> LineFollowerController:
         """Create the default LineFollower controller for one individual."""
-        return LineFollowerController(indiv, module=self.module)
+        return LineFollowerController(indiv)
 
     def visualize(
         self,

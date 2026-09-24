@@ -21,8 +21,8 @@ from evolib import Indiv
 class CollectorController:
     """Map an EvoLib individual to Collector movement actions."""
 
-    def __init__(self, indiv: Indiv, *, module: str = "brain") -> None:
-        self.net: Any = indiv.para[module]
+    def __init__(self, indiv: Indiv) -> None:
+        self.net: Any = indiv.para["brain"]
 
     def act(self, observation: Observation) -> Action:
         """Return clipped movement actions."""
@@ -42,12 +42,10 @@ class CollectorTask(BaseTask[CollectorEnv, CollectorController]):
         *,
         task_config: CollectorTaskConfig,
         seed: int | None = None,
-        module: str = "brain",
     ) -> None:
         super().__init__(
             max_steps=task_config.env.max_steps,
             seed=seed,
-            module=module,
         )
         self.task_config = task_config
         self.env_config = task_config.env
@@ -61,13 +59,11 @@ class CollectorTask(BaseTask[CollectorEnv, CollectorController]):
         path: str | Path,
         *,
         seed: int | None = None,
-        module: str = "brain",
     ) -> "CollectorTask":
         """Create a task from a YAML task configuration file."""
         return cls(
             task_config=CollectorTaskConfig.from_yaml(path),
             seed=seed,
-            module=module,
         )
 
     @classmethod
@@ -82,14 +78,9 @@ class CollectorTask(BaseTask[CollectorEnv, CollectorController]):
         if raw_task_config is None:
             raise ValueError("Collector checkpoint does not contain task_config.")
 
-        module = checkpoint.env.params.get("module", "brain")
-        if not isinstance(module, str):
-            raise ValueError("Collector checkpoint module must be a string.")
-
         return cls(
             task_config=CollectorTaskConfig.model_validate(raw_task_config),
             seed=checkpoint.seed,
-            module=module,
         )
 
     def make_env(self) -> CollectorEnv:
@@ -122,7 +113,7 @@ class CollectorTask(BaseTask[CollectorEnv, CollectorController]):
 
     def make_controller(self, indiv: Indiv) -> CollectorController:
         """Create the default Collector controller for one individual."""
-        return CollectorController(indiv, module=self.module)
+        return CollectorController(indiv)
 
     def visualize(
         self,

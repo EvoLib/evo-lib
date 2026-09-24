@@ -47,7 +47,6 @@ def main() -> None:
             name=ENV_NAME,
             params={
                 "task_config": collector_task.task_config.to_yaml_dict(),
-                "module": collector_task.module,
             },
         ),
         seed=seed,
