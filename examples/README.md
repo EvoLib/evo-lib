@@ -13,7 +13,7 @@
 | `06_netvector/` | NetVector as a simplified neural computation representation |
 | `07_evonet/` | EvoNet, structural mutation, and evolvable neural networks |
 | `08_gym/` | Integration with Gymnasium environments |
-| `09_evoenv/` | EvoEnv visual environments with play, rule, train, and watch workflow |
+| `09_evoenv/` | EvoEnv visual environments with rule, train, and watch workflow |
 | `10_evosim/` | Persistent multi-agent evolution, resource competition, and competitive coevolution |
 
 ---
@@ -238,13 +238,12 @@ and understanding evolutionary controller behavior.
 The environments are designed around a consistent workflow:
 
 ```text
-play -> rule -> train -> watch
+rule -> train -> watch
 ```
 
 | Step | Script type | Purpose |
 |---|---|---|
-| `play.py` | Manual control | Understand the task and controls |
-| `rule.py` | Rule-based baseline | Show a simple hand-written policy |
+| `rule.py` | Rule-based baseline | Check the task with a simple hand-written policy |
 | `train.py` | Evolutionary training | Evolve an EvoNet controller with EvoLib |
 | `watch.py` | Visualization | Load and inspect the best saved individual |
 

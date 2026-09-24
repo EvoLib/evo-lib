@@ -209,7 +209,6 @@ reason to adapt jump strength.
 |---|---|
 | `config.yaml` | EvoLib training config for the Jumper controller |
 | `task.yaml` | Jumper environment, reward, and sensor config |
-| `jumper_play.py` | Manual control with the space bar |
 | `jumper_rule.py` | Simple sensor-based rule controller |
 | `jumper_train.py` | Evolves an EvoNet controller |
 | `jumper_watch.py` | Loads and visualizes a trained checkpoint |
@@ -228,12 +227,6 @@ Package-side support files:
 ---
 
 ## Run
-
-Manual control:
-
-```bash
-python jumper_play.py
-```
 
 Rule-based controller:
 

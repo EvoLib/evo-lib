@@ -48,12 +48,11 @@ actions.
 The example follows the standard EvoEnv workflow:
 
 ```text
-play -> rule -> train -> watch
+rule -> train -> watch
 ```
 
 | File | Purpose |
 |---|---|
-| `collector_play.py` | Explore the environment with manual controls. |
 | `collector_rule.py` | Run a simple hand-written baseline controller. |
 | `collector_train.py` | Evolve an EvoNet controller. |
 | `collector_watch.py` | Load and visualize a saved checkpoint. |
@@ -433,12 +432,6 @@ Package-side support files:
 ---
 
 ## Run
-
-Manual control:
-
-```bash
-python collector_play.py
-```
 
 Rule-based controller:
 

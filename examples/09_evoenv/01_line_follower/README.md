@@ -172,14 +172,6 @@ Typical changes between difficulties:
 - steering strength
 - tolerated missed-line steps
 
-Examples:
-
-```bash
-python line_follower_play.py --difficulty easy
-python line_follower_play.py --difficulty medium
-python line_follower_play.py --difficulty hard
-```
-
 ---
 
 ## Files
@@ -192,7 +184,6 @@ python line_follower_play.py --difficulty hard
 | `task_easy.yaml` | LineFollower task config for the easy preset |
 | `task_medium.yaml` | LineFollower task config for the medium preset |
 | `task_hard.yaml` | LineFollower task config for the hard preset |
-| `line_follower_play.py` | Manual steering with keyboard input |
 | `line_follower_rule.py` | Simple rule-based steering controller |
 | `line_follower_train.py` | Evolves an EvoNet controller |
 | `line_follower_watch.py` | Loads and visualizes a trained checkpoint |
@@ -211,12 +202,6 @@ Package-side support files:
 ---
 
 ## Run
-
-Manual control:
-
-```bash
-python line_follower_play.py
-```
 
 Rule-based controller:
 
@@ -248,17 +233,6 @@ Use a specific difficulty:
 python line_follower_train.py --difficulty hard
 python line_follower_watch.py line_follower_hard.pkl
 ```
-
----
-
-## Manual Controls
-
-| Key | Action |
-|---|---|
-| Left arrow | Steer left |
-| Right arrow | Steer right |
-| `R` | Reset episode |
-| `ESC` | Quit |
 
 ---
 

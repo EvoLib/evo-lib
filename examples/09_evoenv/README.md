@@ -6,12 +6,11 @@ controllers.
 Each example follows the same workflow:
 
 ```text
-play -> rule -> train -> watch
+rule -> train -> watch
 ```
 
 | Script | Purpose |
 |---|---|
-| `*_play.py` | Explore the environment manually |
 | `*_rule.py` | Run a simple hand-written baseline |
 | `*_train.py` | Evolve an EvoLib controller |
 | `*_watch.py` | Visualize a saved checkpoint |

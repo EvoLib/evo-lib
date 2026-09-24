@@ -216,7 +216,6 @@ example code.
 
 | File | Purpose |
 |---|---|
-| `gap_navigator_play.py` | Manual control with left/right keys or A/D |
 | `gap_navigator_rule.py` | Simple sensor-based baseline controller |
 | `gap_navigator_train.py` | Evolves sensors and an EvoNet controller |
 | `gap_navigator_watch.py` | Loads and visualizes a trained checkpoint |
@@ -241,12 +240,6 @@ Package-side support files:
 ---
 
 ## Run
-
-Manual control with the default difficulty:
-
-```bash
-python gap_navigator_play.py
-```
 
 Rule-based controller:
 
@@ -275,21 +268,9 @@ python gap_navigator_watch.py gap_navigator_medium.pkl
 Use a specific difficulty:
 
 ```bash
-python gap_navigator_play.py --difficulty easy
 python gap_navigator_train.py --difficulty hard
 python gap_navigator_watch.py gap_navigator_hard.pkl
 ```
-
----
-
-## Manual Controls
-
-| Key | Action |
-|---|---|
-| Left arrow / `A` | Steer left |
-| Right arrow / `D` | Steer right |
-| `R` | Reset episode |
-| `ESC` | Quit |
 
 ---
 

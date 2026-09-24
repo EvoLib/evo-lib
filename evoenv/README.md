@@ -139,32 +139,29 @@ for interactive inspection.
 
 ## Example scripts
 
-Each EvoEnv example provides the same set of scripts:
+Each EvoEnv example provides a small set of scripts:
 
 ```text
-play -> rule -> train -> watch
+rule -> train -> watch
 ```
 
 | Script       | Purpose                                          |
 | ------------ | ------------------------------------------------ |
-| `*_play.py`  | Inspect the environment through manual control   |
 | `*_rule.py`  | Run a simple hand-written baseline               |
 | `*_train.py` | Evolve a controller without continuous rendering |
 | `*_watch.py` | Load and visualize a saved checkpoint            |
 
 A useful sequence when exploring an environment is:
 
-1. Run `play` to understand the controls and task.
-2. Run `rule` to inspect a simple hand-written baseline.
-3. Run `train` to evolve a controller.
-4. Run `watch` to inspect the saved result.
+1. Run `rule` to inspect a simple hand-written baseline.
+2. Run `train` to evolve a controller.
+3. Run `watch` to inspect the saved result.
 
 For example:
 
 ```bash
 cd examples/09_evoenv/04_collector
 
-python collector_play.py
 python collector_rule.py
 python collector_train.py
 python collector_watch.py collector.pkl
@@ -218,7 +215,7 @@ Training and evaluation do not require an active display and can therefore run
 on remote servers and other headless systems.
 
 EvoEnv may use Pygame for geometry and simulation helpers, but a Pygame window
-is only required for interactive play and visualization.
+is only required for visualization.
 Headless evaluation and rendered runs use the same environment logic and
 therefore produce the same rewards and simulation behavior.
 
