@@ -3,9 +3,8 @@
 
 from evoenv.core.controller import CallbackController
 from evoenv.core.env import Action, Observation
-from evoenv.envs.jumper_defaults import DEFAULT_FPS
 from evoenv.envs.jumper_task import JumperTask
-from evoenv.renderers.pygame_common import PygameWindow
+from evoenv.renderers.pygame_common import DEFAULT_FPS, PygameWindow
 from evoenv.renderers.pygame_jumper import draw_env
 
 TASK_CONFIG_PATH = "task.yaml"

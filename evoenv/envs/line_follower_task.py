@@ -9,7 +9,7 @@ from evoenv.core.env import Action, Observation
 from evoenv.core.task import BaseTask
 from evoenv.envs.line_follower import LineFollowerEnv
 from evoenv.envs.line_follower_config import LineFollowerTaskConfig
-from evoenv.envs.line_follower_defaults import DEFAULT_FPS
+from evoenv.renderers.pygame_common import DEFAULT_FPS
 from evoenv.renderers.pygame_line_follower import run_debug_episode
 
 from evolib import Indiv

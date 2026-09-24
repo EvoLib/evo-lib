@@ -13,11 +13,10 @@ from evoenv.core.sensors import (
     cast_ray_against_rects,
 )
 from evoenv.core.utils import clamp01
-from evoenv.envs.jumper_defaults import (
-    DEFAULT_GROUND_Y_OFFSET,
-    DEFAULT_PLAYER_X_OFFSET,
-)
 from evoenv.envs.jumper_objects import JumperObstacle, JumperPlayer
+
+DEFAULT_PLAYER_X_OFFSET: int = 110
+DEFAULT_GROUND_Y_OFFSET: int = 70
 
 
 class JumperEnv(Env):

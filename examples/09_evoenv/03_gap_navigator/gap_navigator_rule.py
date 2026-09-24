@@ -5,9 +5,8 @@ from evoenv.cli import parse_difficulty_args
 from evoenv.core.controller import CallbackController
 from evoenv.core.difficulty import difficulty_task_path
 from evoenv.core.env import Action, Observation
-from evoenv.envs.gap_navigator_defaults import DEFAULT_FPS
 from evoenv.envs.gap_navigator_task import GapNavigatorTask
-from evoenv.renderers.pygame_common import PygameWindow
+from evoenv.renderers.pygame_common import DEFAULT_FPS, PygameWindow
 from evoenv.renderers.pygame_gap_navigator import draw_env
 
 args = parse_difficulty_args(description="Run a GapNavigator rule agent.")

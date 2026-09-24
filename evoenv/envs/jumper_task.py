@@ -10,7 +10,7 @@ from evoenv.core.sensors import RaySensor
 from evoenv.core.task import BaseTask
 from evoenv.envs.jumper import JumperEnv
 from evoenv.envs.jumper_config import JumperTaskConfig
-from evoenv.envs.jumper_defaults import DEFAULT_FPS
+from evoenv.renderers.pygame_common import DEFAULT_FPS
 from evoenv.renderers.pygame_jumper import run_debug_episode
 
 from evolib import Indiv

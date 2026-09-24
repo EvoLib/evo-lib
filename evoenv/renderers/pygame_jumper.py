@@ -6,8 +6,8 @@ from pathlib import Path
 import pygame
 from evoenv.core.controller import Controller
 from evoenv.envs.jumper import JumperEnv
-from evoenv.envs.jumper_defaults import DEFAULT_FPS
 from evoenv.renderers.pygame_common import (
+    DEFAULT_FPS,
     PygameDebugRenderer,
     draw_ray_sensors,
     draw_text_panel,

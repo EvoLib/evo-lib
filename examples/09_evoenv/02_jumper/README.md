@@ -220,7 +220,6 @@ Package-side support files:
 | `evoenv/envs/jumper.py` | Headless environment logic |
 | `evoenv/envs/jumper_objects.py` | Player and obstacle sprites |
 | `evoenv/envs/jumper_config.py` | Pydantic task configuration models |
-| `evoenv/envs/jumper_defaults.py` | Shared size and debug defaults |
 | `evoenv/envs/jumper_task.py` | EvoLib task integration |
 | `evoenv/renderers/pygame_jumper.py` | Pygame visualization |
 

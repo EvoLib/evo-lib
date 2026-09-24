@@ -11,8 +11,8 @@ from evoenv.core.env import Action, Observation
 from evoenv.core.task import BaseTask
 from evoenv.envs.collector import CollectorEnv
 from evoenv.envs.collector_config import CollectorTaskConfig
-from evoenv.envs.collector_defaults import DEFAULT_FPS
 from evoenv.renderers.pygame_collector import run_debug_episode
+from evoenv.renderers.pygame_common import DEFAULT_FPS
 
 from evolib import Indiv
 

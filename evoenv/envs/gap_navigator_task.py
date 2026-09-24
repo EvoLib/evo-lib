@@ -12,7 +12,7 @@ from evoenv.core.task import BaseTask
 from evoenv.core.utils import clamp01
 from evoenv.envs.gap_navigator import GapNavigatorEnv, SensorLayout
 from evoenv.envs.gap_navigator_config import GapNavigatorTaskConfig
-from evoenv.envs.gap_navigator_defaults import DEFAULT_FPS
+from evoenv.renderers.pygame_common import DEFAULT_FPS
 from evoenv.renderers.pygame_gap_navigator import run_debug_episode
 
 from evolib import Indiv

@@ -8,8 +8,8 @@ import pygame
 from evoenv.core.controller import Controller
 from evoenv.core.sensors import SensorPointState
 from evoenv.envs.line_follower import LineFollowerEnv
-from evoenv.envs.line_follower_defaults import DEFAULT_FPS
 from evoenv.renderers.pygame_common import (
+    DEFAULT_FPS,
     PygameDebugRenderer,
     draw_text_panel,
     split_debug_screen,

@@ -9,8 +9,8 @@ from pathlib import Path
 import pygame
 from evoenv.core.controller import Controller
 from evoenv.envs.collector import CollectorEnv
-from evoenv.envs.collector_defaults import DEFAULT_FPS
 from evoenv.renderers.pygame_common import (
+    DEFAULT_FPS,
     PygameDebugRenderer,
     draw_ray_sensors,
     draw_text_panel,

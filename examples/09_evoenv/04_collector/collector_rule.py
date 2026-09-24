@@ -3,10 +3,9 @@
 
 from evoenv.core.controller import CallbackController
 from evoenv.core.env import Action, Observation
-from evoenv.envs.collector_defaults import DEFAULT_FPS
 from evoenv.envs.collector_task import CollectorTask
 from evoenv.renderers.pygame_collector import draw_env
-from evoenv.renderers.pygame_common import PygameWindow
+from evoenv.renderers.pygame_common import DEFAULT_FPS, PygameWindow
 
 TASK_CONFIG_PATH = "task.yaml"
 FPS = DEFAULT_FPS

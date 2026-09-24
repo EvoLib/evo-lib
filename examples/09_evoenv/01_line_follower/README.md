@@ -196,7 +196,6 @@ Package-side support files:
 | `evoenv/envs/line_follower_config.py` | Pydantic task configuration models |
 | `evoenv/envs/line_follower_task.py` | EvoLib task integration |
 | `evoenv/envs/line_follower_objects.py` | Robot and sensor objects |
-| `evoenv/envs/line_follower_defaults.py` | Shared runtime defaults |
 | `evoenv/renderers/pygame_line_follower.py` | Pygame visualization |
 
 ---

@@ -234,7 +234,6 @@ Package-side support files:
 | `evoenv/envs/gap_navigator_objects.py` | Player, gap row, and block sprite objects |
 | `evoenv/envs/gap_navigator_task.py` | EvoLib task integration, sensor decoding, reward calculation |
 | `evoenv/envs/gap_navigator_config.py` | Pydantic task configuration models |
-| `evoenv/envs/gap_navigator_defaults.py` | Shared defaults |
 | `evoenv/renderers/pygame_gap_navigator.py` | Pygame visualization and GIF recording support |
 
 ---

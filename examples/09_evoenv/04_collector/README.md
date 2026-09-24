@@ -425,7 +425,6 @@ Package-side support files:
 | `evoenv/envs/collector.py` | Headless simulation, observations, rewards, and spawning. |
 | `evoenv/envs/collector_objects.py` | Agent, food, obstacle, and geometry helpers. |
 | `evoenv/envs/collector_config.py` | Pydantic task configuration models and validation. |
-| `evoenv/envs/collector_defaults.py` | Shared runtime defaults. |
 | `evoenv/envs/collector_task.py` | EvoLib controller and task integration. |
 | `evoenv/renderers/pygame_collector.py` | Pygame visualization and GIF export. |
 

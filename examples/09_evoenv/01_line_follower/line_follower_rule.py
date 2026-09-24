@@ -5,9 +5,8 @@ from evoenv.cli import parse_difficulty_args
 from evoenv.core.controller import CallbackController
 from evoenv.core.difficulty import difficulty_task_path
 from evoenv.core.env import Action, Observation
-from evoenv.envs.line_follower_defaults import DEFAULT_FPS
 from evoenv.envs.line_follower_task import LineFollowerTask
-from evoenv.renderers.pygame_common import PygameWindow
+from evoenv.renderers.pygame_common import DEFAULT_FPS, PygameWindow
 from evoenv.renderers.pygame_line_follower import draw_env
 
 FPS = DEFAULT_FPS

@@ -19,6 +19,7 @@ DrawFunction = Callable[
     None,
 ]
 
+DEFAULT_FPS: int = 60
 INFO_PANEL_WIDTH = 300
 
 
