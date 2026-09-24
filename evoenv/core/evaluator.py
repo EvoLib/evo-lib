@@ -22,7 +22,7 @@ def evaluate_episode(
         action = controller.act(observation)
         validate_action(env, action)
 
-        observation, reward, done, _ = env.step(action)
+        observation, reward, done = env.step(action)
         validate_observation(env, observation)
 
         total_reward += reward

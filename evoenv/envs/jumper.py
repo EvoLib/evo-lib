@@ -5,7 +5,7 @@ import random
 from collections.abc import Iterator
 
 import pygame
-from evoenv.core.env import Action, Env, InfoDict, Observation, StepResult
+from evoenv.core.env import Action, Env, Observation, StepResult
 from evoenv.core.sensors import (
     Pose2D,
     RaySensor,
@@ -144,23 +144,7 @@ class JumperEnv(Env):
         if has_collision and self.terminate_on_collision:
             done = True
 
-        info: InfoDict = {
-            "x": self.player.x,
-            "y": self.player.y,
-            "jump_signal": jump_signal,
-            "jump_strength": jump_strength,
-            "player_height": self.player.normalized_height,
-            "on_ground": self.player.on_ground,
-            "sensor_value": self._sensor_value(),
-            "normalized_obstacle_height": self._normalized_nearest_obstacle_height(),
-            "nearest_obstacle_distance": self._nearest_obstacle_distance(),
-            "passed_obstacles": self.passed_obstacles,
-            "passed_obstacle": passed_obstacle,
-            "collision": self.collision_count,
-            "has_collision": has_collision,
-        }
-
-        return self._observe(), reward, done, info
+        return self._observe(), reward, done
 
     def get_sensor_states(self) -> list[SensorLineState]:
         """Return current sensor state for rendering and debugging."""

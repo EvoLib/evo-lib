@@ -186,7 +186,7 @@ class PygameDebugRenderer(Generic[EnvT]):
                 return recorder.save()
 
             action = controller.act(observation)
-            observation, reward, done, _info = env.step(action)
+            observation, reward, done = env.step(action)
             total_reward += reward
 
             self.draw_env(window.screen, env, total_reward, window.font, title)

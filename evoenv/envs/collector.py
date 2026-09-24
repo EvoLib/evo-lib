@@ -8,7 +8,7 @@ import random
 from collections.abc import Iterator
 
 import pygame
-from evoenv.core.env import Action, Env, InfoDict, Observation, StepResult
+from evoenv.core.env import Action, Env, Observation, StepResult
 from evoenv.core.sensors import (
     Pose2D,
     RaySensor,
@@ -191,21 +191,7 @@ class CollectorEnv(Env):
         if has_collision and self.terminate_on_collision:
             done = True
 
-        info: InfoDict = {
-            "x": self.agent.x,
-            "y": self.agent.y,
-            "heading": self.agent.heading,
-            "turn": turn,
-            "throttle": throttle,
-            "food_left": len(self.food_items),
-            "food_collected": self.food_collected,
-            "collected_now": collected_now,
-            "collision_count": self.collision_count,
-            "has_collision": has_collision,
-            "visited_cells": len(self.visited_cells),
-        }
-
-        return self._observe(), reward, done, info
+        return self._observe(), reward, done
 
     def get_sensor_states(self) -> list[SensorLineState]:
         """Return current sensor states for rendering and debugging."""

@@ -7,16 +7,14 @@ This module defines the minimal interface for single-agent environments.
 The interface follows the common reinforcement-learning style:
 
     observation = env.reset(seed=42)
-    observation, reward, done, info = env.step(action)
+    observation, reward, done = env.step(action)
 """
 
-from typing import Any, Protocol, TypeAlias
-
-InfoDict: TypeAlias = dict[str, Any]
+from typing import Protocol, TypeAlias
 
 Observation: TypeAlias = list[float]
 Action: TypeAlias = list[float]
-StepResult: TypeAlias = tuple[Observation, float, bool, InfoDict]
+StepResult: TypeAlias = tuple[Observation, float, bool]
 
 
 class Env(Protocol):
@@ -55,11 +53,10 @@ class Env(Protocol):
                 ``action_size``.
 
         Returns:
-            A tuple ``(observation, reward, done, info)``:
+            A tuple ``(observation, reward, done)``:
             - observation: next observation as a flat list of floats
             - reward: scalar reward for this step
             - done: True if the episode has ended
-            - info: optional diagnostic values for debugging, rendering, or logging
         """
         ...
 

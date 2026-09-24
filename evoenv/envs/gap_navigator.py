@@ -5,7 +5,7 @@ import random
 from collections.abc import Iterator
 
 import pygame
-from evoenv.core.env import Action, Env, InfoDict, Observation, StepResult
+from evoenv.core.env import Action, Env, Observation, StepResult
 from evoenv.core.sensors import (
     Pose2D,
     RaySensor,
@@ -187,18 +187,7 @@ class GapNavigatorEnv(Env):
         if has_collision and self.terminate_on_collision:
             done = True
 
-        info: InfoDict = {
-            "x": self.player.x,
-            "steering": clamped_steering,
-            "passed_rows": self.passed_rows,
-            "collision": self.collision,
-            "has_collision": has_collision,
-            "row_passed": row_passed,
-            "gap_alignment": gap_alignment,
-            "near_wall": near_wall,
-        }
-
-        return self._observe(), reward, done, info
+        return self._observe(), reward, done
 
     def get_sensor_states(self) -> list[SensorLineState]:
         """Return current sensor states for rendering and debugging."""

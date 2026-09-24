@@ -102,8 +102,6 @@ class LineFollowerEnv(Env):
         self.step_count += 1
 
         observation = self._observe()
-        left_sensor = observation[0] if len(observation) >= 1 else 0.0
-        right_sensor = observation[1] if len(observation) >= 2 else 0.0
 
         progress = max(0.0, self.robot.x - self.previous_x)
         self.previous_x = self.robot.x
@@ -125,17 +123,7 @@ class LineFollowerEnv(Env):
             or self._is_out_of_bounds(self.robot.x, self.robot.y)
         )
 
-        info = {
-            "x": self.robot.x,
-            "y": self.robot.y,
-            "angle": self.robot.angle,
-            "turn": turn,
-            "left_sensor": left_sensor,
-            "right_sensor": right_sensor,
-            "missed_line_steps": self.missed_line_steps,
-        }
-
-        return observation, reward, done, info
+        return observation, reward, done
 
     def get_sensor_states(self) -> list[SensorPointState]:
         """Return current sensor states using the environment line mask."""

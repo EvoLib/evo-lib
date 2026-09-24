@@ -52,7 +52,7 @@ def main() -> None:
             break
 
         action = controller.act(observation)
-        observation, reward, done, _ = env.step(action)
+        observation, reward, done = env.step(action)
         total_reward += reward
 
         if done:
