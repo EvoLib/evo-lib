@@ -64,11 +64,6 @@ class LineFollowerRobot:
             heading=self.angle + math.pi / 2.0,
         )
 
-    @property
-    def sensor_radius(self) -> int:
-        """Return the shared sensor radius used by the renderer."""
-        return DEFAULT_LINE_SENSORS[0].radius
-
     def reset(self, *, x: float, y: float, angle: float) -> None:
         """Place the robot at a new pose."""
         self.x = float(x)

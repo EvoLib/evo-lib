@@ -47,7 +47,7 @@ def draw_sensors(
         color = pygame.Color("red" if sensor_state.value != 0.0 else "green")
 
         pygame.draw.line(screen, (100, 100, 100), robot_pos, sensor_pos, 1)
-        pygame.draw.circle(screen, color, sensor_pos, robot.sensor_radius)
+        pygame.draw.circle(screen, color, sensor_pos, sensor_state.radius)
 
 
 def draw_world(screen: pygame.Surface, env: LineFollowerEnv) -> None:
