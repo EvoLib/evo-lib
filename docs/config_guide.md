@@ -1,78 +1,81 @@
 # Configuration Guide
 
-EvoLib experiments are defined via **YAML configuration files**.
-This makes setups explicit, reproducible, and easy to adapt.
+EvoLib experiments are configured with YAML files. A configuration defines the
+population, evolutionary strategy, and one or more evolvable parameter modules.
 
-Below you find three representative configurations:
+This guide focuses on common configurations. For the complete list of fields,
+defaults, and constraints, see the
+[Configuration Parameters](config_parameter.md) reference.
 
-- **A minimal example** – the smallest viable run.
-- **A full vector-based setup** – showing multiple modules, selection, and replacement.
-- **A full EvoNet setup** – demonstrating weight, delay, and structural mutation.
+## Basic Structure
 
----
+A small configuration usually contains:
 
-## A) Minimal configuration
+- population sizes and the generation limit,
+- an evolutionary strategy,
+- one or more modules under `modules`.
 
-This is the smallest possible (μ + λ) run.
-It demonstrates the core building blocks: pools, a single vector module, and constant mutation.
-A fitness function (e.g. `sphere`) must still be provided in practice.
+The following configuration defines a two-dimensional vector optimized with a
+(μ + λ) strategy:
 
 ```yaml
-# Minimum configuration — smallest viable building block for a (μ + λ) run.
-parent_pool_size: 2         # μ: number of parents kept
-offspring_pool_size: 4      # λ: number of offspring produced
-max_generations: 10         # hard stop
-num_elites: 0               # no elitism
+parent_pool_size: 20
+offspring_pool_size: 40
+max_generations: 100
+num_elites: 2
 
 evolution:
-  strategy: mu_plus_lambda  # classic (μ + λ) evolution strategy
+  strategy: mu_plus_lambda
 
 modules:
-  test-vector:              # logical module name
+  parameters:
     type: vector
-    initializer: uniform
     dim: 2
-    bounds: [-1.0, 1.0]
-
+    initializer: uniform
+    bounds: [-5.0, 5.0]
     mutation:
-      strategy: constant    # fixed-strength perturbation
-      strength: 0.01
+      strategy: constant
       probability: 1.0
+      strength: 0.1
 ```
 
-Minimal Python usage:
+A fitness function can then be attached to the population:
 
 ```python
-from evolib import Pop
 import numpy as np
 
-def sphere(indiv) -> None:
-    # Example: sum of squares on a 2D vector module named "test-vector"
-    x = np.asarray(indiv.para["test-vector"].vector, dtype=float)
-    indiv.fitness = float(np.sum(x**2))
+from evolib import Individual, Population
 
-pop = Pop(config_path="population.yaml", initialize=True)
-pop.set_fitness_function(sphere)
-pop.run(verbosity=1)
+
+def sphere_fitness(indiv: Individual) -> float:
+    values = np.asarray(indiv.para["parameters"].vector, dtype=float)
+    return float(np.sum(values**2))
+
+
+pop = Population(
+    config_path="population.yaml",
+    fitness_function=sphere_fitness,
+)
+pop.run()
 ```
 
----
+Fitness functions may return a numeric fitness value. Assigning
+`indiv.fitness` directly is also supported.
 
-## B) Maximum Vector configuration
+## Selection, Replacement, and Stopping
 
-This example shows a more complete setup: tournament selection, steady-state replacement, stopping criteria, and two vector modules with different operator settings.
+Additional operators can be configured independently. For example, a flexible
+strategy can use tournament selection and steady-state replacement:
 
 ```yaml
-random_seed: 42             # reproducibility
-
 parent_pool_size: 40
 offspring_pool_size: 80
 max_generations: 120
-max_indiv_age: 2
 num_elites: 4
 
 stopping:
   target_fitness: 0.001
+  patience: 20
 
 evolution:
   strategy: flexible
@@ -86,63 +89,33 @@ replacement:
   num_replace: 5
 
 modules:
-  xs:
+  parameters:
     type: vector
     dim: 6
     initializer: uniform
-    bounds: [0.0, 6.283185307]   # [0, 2π]
+    bounds: [-1.0, 1.0]
     mutation:
       strategy: adaptive_individual
       probability: 0.8
       min_strength: 0.01
       max_strength: 0.05
-
-  ys:
-    type: vector
-    dim: 6
-    initializer: zero
-    bounds: [-1.5, 1.5]
-    mutation:
-      strategy: constant
-      probability: 0.8
-      strength: 0.06
-    crossover:
-      strategy: constant
-      probability: 0.3
-      operator: blx
 ```
 
----
+The available strategies and their strategy-specific parameters are listed in
+the parameter reference.
 
-## C) Maximum EvoNet configuration
+## EvoNet Configuration
 
-This configuration demonstrates EvoNet evolution: weight mutation, bias-specific overrides, activation mutation, delay mutation, and structural mutation.
+An EvoNet module defines the network dimensions, initial connectivity, parameter
+initialization, and evolutionary operators.
 
-`dim: [2, 0, 0, 1]` starts with empty hidden layers, letting structural mutation grow nodes and edges.
-
-Connectivity:
-- `scope` controls which feedforward edges are allowed at initialization.
-- `density` controls how many of those allowed edges are actually created at init.
-- `recurrent` enables recurrent edge kinds (empty list means none).
-
-Topology constraints:
-- `max_neurons` and `max_connections` keep growth bounded (these are the current names; avoid older `max_nodes/max_edges`).
-
-Delay:
-- `delay:` initializes delays of recurrent connections at build time.
-- `mutation.delay:` mutates delays during evolution (recurrent connections only).
-
-
+This example starts with a small feedforward network:
 
 ```yaml
 parent_pool_size: 20
 offspring_pool_size: 40
 max_generations: 200
-max_indiv_age: 0
 num_elites: 0
-
-stopping:
-  target_fitness: 0.001
 
 evolution:
   strategy: mu_plus_lambda
@@ -150,112 +123,131 @@ evolution:
 modules:
   brain:
     type: evonet
-    dim: [2, 0, 0, 1]       # hidden layers start empty
-    activation: [linear, tanh, tanh, sigmoid]
+    dim: [2, 4, 1]
+    activation: [linear, tanh, linear]
+    initializer: default
 
     connectivity:
-      scope: crosslayer          # adjacent | crosslayer
-      density: 1.0               # (0, 1]
-      recurrent: [direct]        # [], [direct], [lateral], [indirect]
-    
+      scope: adjacent
+      density: 1.0
+      recurrent: none
+
     weights:
       initializer: normal
       std: 0.5
       bounds: [-5.0, 5.0]
-    
-    bias:      
-      initializer: normal
-      std: 0.5
-      bounds: [-1.0, 1.0]
 
-    # NOTE: Delays only apply to recurrent connections.
-    # If `recurrent` is not enabled, this block has no effect.
-    delay:
-      initializer: uniform   # uniform | fixed
-      bounds: [1, 8]
-      # value: 3            # only for fixed
+    bias:
+      initializer: zero
+      bounds: [-1.0, 1.0]
 
     mutation:
       strategy: constant
       probability: 1.0
-      strength: 0.1
-
-      # Optional override for biases
-      biases:
-        strategy: constant
-        probability: 0.8
-        strength: 0.05
-
-      # Optional activation mutation
-      activations:
-        probability: 0.01
-        allowed: [tanh, relu, sigmoid]
-
-      # Optional delay mutation (recurrent connections only)
-      delay:
-        probability: 0.05
-        bounds: [1, 16]
-        mode: delta_step     # delta_step | resample
-        delta: 1
-
-      # Structural mutation
-      structural:
-
-        add_neuron:
-          probability: 0.015
-          init_connection_ratio: 0.5
-          activations_allowed: [tanh]
-          init: random
-
-        remove_neuron:
-          probability: 0.015
-
-        add_connection:
-          probability: 0.05
-          max: 3
-          init: random
-
-        remove_connection:
-          probability: 0.05
-          max: 3
-
-        topology:
-          recurrent: none
-          connection_scope: crosslayer
-          max_neurons: 25
-          max_connections: 50
+      strength: 0.05
 ```
 
----
+`scope` determines which feedforward connections are allowed during
+initialization, while `density` determines how many of those connections are
+created. `recurrent: none` disables recurrent connections.
 
-## D) Parallel Evaluation (optional)
+## Structural Evolution
 
-For expensive problems, EvoLib can evaluate individuals in parallel using Ray.
+Structural mutation can be added to the EvoNet `mutation` block. The following
+fragment extends the previous network with neuron and connection mutation:
 
-Install the optional parallel evaluation support before selecting the Ray
-backend:
+```yaml
+mutation:
+  strategy: constant
+  probability: 1.0
+  strength: 0.05
+
+  structural:
+    add_neuron:
+      probability: 0.01
+      init_connection_ratio: 0.5
+      activations_allowed: [tanh]
+      init: random
+
+    remove_neuron:
+      probability: 0.01
+
+    add_connection:
+      probability: 0.05
+      max: 2
+      init: random
+
+    remove_connection:
+      probability: 0.05
+      max: 2
+
+    topology:
+      recurrent: none
+      connection_scope: crosslayer
+      max_neurons: 20
+      max_connections: 50
+```
+
+The topology block constrains structural growth. It does not replace the
+`connectivity` block used to build the initial network.
+
+## Recurrent Connections and Delays
+
+Recurrent connection kinds are enabled in `connectivity.recurrent`. Delays can
+then be initialized and mutated separately:
+
+```yaml
+connectivity:
+  scope: adjacent
+  density: 1.0
+  recurrent: [direct]
+
+delay:
+  initializer: uniform
+  bounds: [1, 8]
+
+mutation:
+  strategy: constant
+  probability: 1.0
+  strength: 0.05
+
+  delay:
+    probability: 0.05
+    mode: delta_step
+    delta: 1
+    bounds: [1, 16]
+```
+
+The top-level `delay` block initializes delays when the network is built.
+`mutation.delay` controls how existing recurrent delays change during
+evolution.
+
+## Parallel Evaluation
+
+Fitness evaluation can optionally use Ray. Install the parallel extra first:
 
 ```bash
 pip install "evolib[parallel]"
 ```
 
+Then select the Ray backend:
+
 ```yaml
 parallel:
-  backend: ray         # backend: none | ray
-  num_cpus: 2          # number of logical CPUs (only used in local mode)
-  address: auto        # "auto" = local Ray; or "ray://host:10001" for remote
+  backend: ray
+  num_cpus: 4
 ```
 
-If omitted, EvoLib runs in single-threaded mode.
+If `num_cpus` is omitted, Ray selects the available resources. The optional
+`address` field is passed directly to `ray.init()` when connecting to a Ray
+cluster.
 
----
+Without a `parallel` block, fitness evaluation is sequential.
 
-## Further examples
+## Further Examples
 
-For complete, runnable examples including fitness definitions and visualization,
-please refer to the GitHub repository:
+Runnable examples are available in the
+[EvoLib examples](https://github.com/EvoLib/evo-lib/tree/main/examples).
 
-👉 [EvoLib Examples on GitHub](https://github.com/EvoLib/evo-lib/tree/main/examples)
-
-For a complete list of all available configuration fields,
-see the [Configuration Parameters](config_parameter.md) reference.
+For all available fields and constraints, see
+[Configuration Parameters](config_parameter.md).
