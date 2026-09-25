@@ -62,8 +62,10 @@ class GymEnv:
         Args:
             env_name: Name of the Gymnasium environment, e.g. "FrozenLake-v1".
             max_steps: Maximum number of steps per episode.
+            deterministic_init: If True, initialize the environment state to zero
+                after each reset.
             **env_kwargs: Extra arguments passed directly to gym.make(),
-                          e.g. is_slippery=False for FrozenLake.
+                e.g. is_slippery=False for FrozenLake.
         """
         self.env_name = env_name
         self.max_steps = max_steps
@@ -84,8 +86,9 @@ class GymEnv:
 
         Args:
             indiv: Individual whose network acts in the environment.
-            module: Which module in para to use for decision making.
-            episodes: How many episodes to average over (default: 1).
+            module: Parameter module containing the network.
+            episodes: Number of episodes to average over.
+            seed: Optional seed passed to the environment reset.
 
         Returns:
             Average total reward across all episodes.
@@ -151,17 +154,18 @@ class GymEnv:
         seed: int | None = None,
     ) -> str:
         """
-        Render an episode with the given individual and save as GIF using imageio.
+        Render an episode with the given individual and save it as a GIF.
 
         Args:
-            indiv: Individual to visualize.
-            gen: Generation number (used in default filename).
-            filename: Optional filename for output GIF.
-            fps: Frames per second for GIF.
-            module: Which module in para to use for decision making.
+            indiv: Individual whose network acts in the environment.
+            gen: Generation number used in the default filename.
+            filename: Optional output filename.
+            fps: Frames per second for the GIF.
+            module: Parameter module containing the network.
+            seed: Optional seed passed to the environment reset.
 
         Returns:
-            Path to saved GIF.
+            Path to the saved GIF.
         """
         env = gym.make(
             self.env_name,
