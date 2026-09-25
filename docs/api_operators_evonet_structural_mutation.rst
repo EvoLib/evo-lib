@@ -1,4 +1,4 @@
-Evonet Structural Mutation
+EvoNet Structural Mutation
 ==========================
 
 .. automodule:: evolib.operators.evonet_structural_mutation
