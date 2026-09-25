@@ -1,7 +1,8 @@
 """
-NetVector usage: Approximating sin(x) using a feedforward network defined via
-Vector.  The network structure is configured in YAML using dim_type = 'net'
-and interpreted with NetVector at evaluation time.
+Approximate sin(x) using a feedforward network represented by a Vector.
+
+The network structure is configured in YAML using ``structure: net`` and interpreted
+with NetVector during evaluation.
 """
 
 import numpy as np
