@@ -19,7 +19,9 @@ selected and combined separately.
 * **Gymnasium integration** — evaluation and visualization using Gymnasium
   environments.
 * **EvoEnv** — small Pygame-based environments for controlled evolutionary
-  experiments and teaching examples.
+  experiments.
+* **EvoSim** — persistent multi-agent simulations with survival, reproduction,
+  mutation, and interaction in a shared world.
 * **Parallel evaluation** — optional Ray-based fitness evaluation.
 
 ## Start here
@@ -30,7 +32,8 @@ New users should begin with the
 
 The [configuration parameter reference](config_parameter.md) lists the
 available YAML settings. Documentation for the included Pygame-based
-environments is available under [EvoEnv](evoenv.md).
+environments is available under [EvoEnv](evoenv.md), while persistent
+multi-agent simulations are covered under [EvoSim](evosim.md).
 
 ```{toctree}
 :maxdepth: 1

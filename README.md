@@ -189,10 +189,10 @@ fitness = env.evaluate(indiv)         # run one episode
 gif = env.visualize(indiv, gen=10)    # render & save as GIF
 ```
 <p align="center">
-  <img src="./04_frames/04_lunarlander.gif" alt="LunarLander Evolution" width="512"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/04_frames/04_lunarlander.gif" alt="LunarLander Evolution" width="512"/>
 </p>
 
-[Examples](https://github.com/EvoLib/evo-lib/tree/main/examples/08_gym)
+[Examples](examples/08_gym)
 
 ---
 
@@ -211,7 +211,7 @@ and experiments with evolvable sensor structure.
 <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/04_collector/collector.gif" alt="EvoEnv Collector example" width="512"/>
 </p>
 
-[EvoEnv documentation](evoenv/)
+[EvoEnv documentation](evoenv/)  
 [Examples](examples/09_evoenv/)
 
 ---
