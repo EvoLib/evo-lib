@@ -332,10 +332,10 @@ def plot_approximation(
         residuals_alpha: Transparency for residual drawing.
         residuals_linewidth: Line width for residual drawing.
 
-        extra_lines: Iterable of (x, y, label, style_dict). Each will be plotted via
-                     ax.plot(x, y, **style_dict). Use it e.g. for a noisy
-                     target line: (X, Y_noisy, "Noisy target",
-                     {"ls": ":", "alpha": 0.6})
+        extra_lines: Iterable of ``(x, y, label, style_dict)`` tuples. Each is plotted
+             via ``ax.plot(x, y, **style_dict)``. Use it, for example, for a
+             noisy target line: ``(X, Y_noisy, "Noisy target",
+             {"ls": ":", "alpha": 0.6})``.
     """
     y_true = np.asarray(y_true, dtype=float).ravel()
     y_pred = np.asarray(y_pred, dtype=float).ravel()

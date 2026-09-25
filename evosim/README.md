@@ -62,8 +62,7 @@ controller and selected sensor properties.
 
 There is no explicit fitness function or generation boundary.
 
-See
-[`examples/10_evosim/01_foraging/`](../examples/10_evosim/01_foraging/).
+[Foraging example](https://github.com/EvoLib/evo-lib/tree/main/examples/10_evosim/01_foraging)
 
 ### Predator-Prey
 
@@ -75,8 +74,7 @@ The two populations deliberately use different life-history rules: Prey die only
 through predation and reproduce on a time-based schedule, while Predator survival and
 reproduction depend on energy gained from successful captures.
 
-See
-[`examples/10_evosim/02_predator_prey/`](../examples/10_evosim/02_predator_prey/).
+[Predator-Prey example](https://github.com/EvoLib/evo-lib/tree/main/examples/10_evosim/02_predator_prey)
 
 ## Configuration
 
