@@ -44,6 +44,7 @@ getting_started
 config_guide
 config_parameter
 evoenv
+evosim
 ```
 
 ```{toctree}
