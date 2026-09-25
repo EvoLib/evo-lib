@@ -1,4 +1,4 @@
-NetVecor
+NetVector
 ===================
 
 .. automodule:: evolib.representation.netvector
