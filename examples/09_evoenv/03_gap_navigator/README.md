@@ -148,15 +148,12 @@ This matches the default medium task setup:
 
 ## Reward
 
-The environment itself returns `0.0` as step reward. The task computes the
-training reward from the environment `info` dictionary.
-
-The task-level reward encourages:
+The environment computes the step reward from:
 
 - horizontal alignment with the next relevant gap
-- avoiding obstacle collisions
-- avoiding unnecessary movement
-- avoiding positions near screen edges
+- obstacle collisions
+- unnecessary movement
+- positions near screen edges
 
 The default medium task configuration uses shaped feedback:
 
