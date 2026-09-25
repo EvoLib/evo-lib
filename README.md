@@ -189,7 +189,7 @@ fitness = env.evaluate(indiv)         # run one episode
 gif = env.visualize(indiv, gen=10)    # render & save as GIF
 ```
 <p align="center">
-  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/04_frames/04_lunarlander.gif" alt="LunarLander Evolution" width="512"/>
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/08_gym/04_frames/04_lunarlander.gif" alt="LunarLander Evolution" width="512"/>
 </p>
 
 [Examples](examples/08_gym)
