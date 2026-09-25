@@ -67,6 +67,14 @@ api_representation_evonet
 ```
 
 ```{toctree}
+:maxdepth: 1
+:hidden:
+:caption: API – Environments
+
+api_envs_gym
+```
+
+```{toctree}
 :maxdepth: 2
 :hidden:
 :caption: API – Operators
