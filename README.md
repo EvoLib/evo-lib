@@ -181,8 +181,6 @@ This allows you to evaluate evolutionary agents directly on well-known benchmark
 - **Visualization**: render episodes and save them as GIFs.
 - **Discrete & continuous action spaces** are both supported.
 
-[Examples](https://github.com/EvoLib/evo-lib/tree/main/examples/08_gym)
-
 ```python
 from evolib import GymEnv
 
@@ -190,21 +188,31 @@ env = GymEnv("CartPole-v1", max_steps=500)
 fitness = env.evaluate(indiv)         # run one episode
 gif = env.visualize(indiv, gen=10)    # render & save as GIF
 ```
+<p align="center">
+  <img src="./04_frames/04_lunarlander.gif" alt="LunarLander Evolution" width="512"/>
+</p>
+
+[Examples](https://github.com/EvoLib/evo-lib/tree/main/examples/08_gym)
 
 ---
 
 ### EvoEnv
 
-EvoEnv provides small, controllable Pygame environments for
-evolutionary experiments with EvoLib. Environments separate headless simulation,
-controller integration, and visualization.
+### EvoEnv
+
+EvoEnv provides small, controllable Pygame environments for evolutionary
+experiments with EvoLib. Environments use episodic evaluation and separate
+headless simulation, controller integration, and visualization.
+
+The included tasks cover compact sensor-based control, action timing, navigation,
+and experiments with evolvable sensor structure.
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/09_evoenv/04_collector/collector.gif" alt="EvoEnv Collector example" width="512"/>
 </p>
 
-[EvoEnv documentation](evoenv/README.md)  
-[Examples](https://github.com/EvoLib/evo-lib/tree/main/examples/09_evoenv/README.md)
+[EvoEnv documentation](evoenv/)
+[Examples](examples/09_evoenv/)
 
 ---
 
@@ -213,24 +221,18 @@ controller integration, and visualization.
 EvoSim provides small, persistent multi-agent simulations for evolutionary
 experiments with EvoLib.
 
-Unlike EvoEnv, EvoSim does not evaluate one controller in a sequence of isolated
-episodes. Multiple individuals coexist in the same world while resources,
-population size, birth, and death change continuously. Selection pressure can
-therefore emerge directly from survival, reproduction, competition, and
-interaction between agents.
+Unlike episodic environments, individuals coexist, reproduce, and die in a
+continuously changing world. Selection can emerge from resource competition,
+survival, reproduction, and interactions between populations.
 
-EvoSim is intended for experiments where the population and the persistent world
-are part of the evolutionary process. The current simulations:
+Current examples include resource competition in **Foraging** and competitive
+coevolution in **Predator-Prey**.
 
-- **Foraging** – agents compete for shared resources while sensor parameters evolve
-  and energy, reproduction, and population size change continuously.
-  
-- **Predator-Prey** – two independently evolving populations create reciprocal
-  selection pressure through pursuit, escape, survival, and reproduction.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/EvoLib/evo-lib/main/examples/10_evosim/02_predator_prey/predator_prey.gif" alt="Predator-Prey sample" width="512"/>
+</p>
 
-EvoSim is aimed at small, inspectable simulations rather than large-scale agent-based simulation.
-
-[EvoSim documentation](evosim/README.md)  
+[EvoSim documentation](evosim/)  
 [Examples](examples/10_evosim/)
 
 ---
