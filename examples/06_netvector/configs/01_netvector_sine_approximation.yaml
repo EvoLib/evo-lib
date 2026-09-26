@@ -11,8 +11,7 @@ evolution:
 
 modules:
   nnet:
-    type: vector
-    structure: net
+    type: vectornet
     dim: [1, 16, 16, 1]
     initializer: normal
     activation: tanh

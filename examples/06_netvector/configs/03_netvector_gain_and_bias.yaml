@@ -21,8 +21,7 @@ modules:
       probability: 1.0
 
   nnet:
-    type: vector
-    structure: net
+    type: vectornet
     dim: [1, 16, 8, 1]
     activation: tanh
     initializer: normal
