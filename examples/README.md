@@ -10,7 +10,7 @@
 | `03_comparisons/` | Logging, plotting, and comparing evolutionary runs |
 | `04_function_approximation/` | Evolutionary approximation of mathematical target functions |
 | `05_advanced_topics/` | Constraints, multi-objective fitness, landscapes, and vector-based control |
-| `06_netvector/` | NetVector as a simplified neural computation representation |
+| `06_vectornet/` | VectorNet fixed-topology neural networks with flat parameter vectors |
 | `07_evonet/` | EvoNet, structural mutation, and evolvable neural networks |
 | `08_gym/` | Integration with Gymnasium environments |
 | `09_evoenv/` | EvoEnv visual environments with rule, train, and watch workflow |
@@ -164,19 +164,16 @@ See: [`05_advanced_topics/README.md`](05_advanced_topics/README.md)
 
 ---
 
-## 06_netvector/
+## 06_vectornet/
 
-Demonstrates NetVector, a simplified vector-based representation of neural computation.
+VectorNet represents fixed-topology feedforward neural networks whose weights and
+biases are evolved as one flat parameter vector.
 
-NetVector is intended as an intermediate step between plain parameter vectors
-and fully structured EvoNet architectures. It allows simple neuron-like
-computation and signal flow without the complexity of dynamic topology growth.
+Unlike EvoNet, VectorNet does not evolve topology, recurrence, or structural
+connections. The examples cover function approximation and composition with
+small Vector modules.
 
-This makes NetVector useful for core concepts such as weighted signal
-processing, controller behavior, and evolutionary optimization before
-introducing structurally evolving neural networks.
-
-See: [`06_netvector/README.md`](06_netvector/README.md)
+See: [`06_vectornet/README.md`](06_vectornet/README.md)
 
 ---
 

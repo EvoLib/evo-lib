@@ -64,5 +64,5 @@ Visualizes differences between true function, noisy samples, and approximation.
 
 * [`../02_strategies/`](../02_strategies) — step-by-step operator application and strategies.
 * [`../03_comparisons/`](../03_comparisons) — mutation, crossover, and selection comparisons.
-* [`../06_netvector/`](../06_netvector) — neural-network-based function approximations.
+* [`../06_vectornet/`](../06_vectornet) — neural-network-based function approximations.
 

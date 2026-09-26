@@ -98,7 +98,7 @@ The optional `logging` block controls runtime logging.
 ## Modules
 
 The `modules` mapping defines the evolvable parameter representations of
-an individual. EvoLib currently provides `vector` and `evonet` modules.
+an individual. EvoLib currently provides `vector`, `vectornet`, and `evonet` modules.
 
 If `type` is omitted, the module is interpreted as a `vector`.
 
@@ -109,13 +109,11 @@ A vector module stores evolvable numeric parameters.
 | Parameter | Type | Default | Description |
 | --- | --- | ---: | --- |
 | `type` | `"vector"` | `"vector"` | Module type. |
-| `dim` | int \\| list\[int\] | --- | Vector length for `flat` or network layer sizes for `net`. |
-| `structure` | str | `flat` | `flat` or `net`. |
+| `dim` | int | --- | Number of scalar parameters. Must be greater than 0. |
 | `initializer` | str | --- | `normal`, `uniform`, `zero`, `fixed`, or `adaptive`. |
 | `bounds` | tuple\[float, float\] | `[-1.0, 1.0]` | Hard value bounds. |
 | `init_bounds` | tuple\[float, float\] \\| null | `null` | Optional initialization bounds. |
 | `values` | list\[float\] \\| null | `null` | Values used by `initializer: fixed`. |
-| `activation` | str \\| null | `null` | Activation used by `structure: net`. |
 | `mean` | float \\| null | `0.0` | Mean used by applicable initializers. |
 | `std` | float \\| null | `1.0` | Standard deviation used by applicable initializers. |
 | `mutation` | dict | --- | Required mutation configuration. |
@@ -123,15 +121,35 @@ A vector module stores evolvable numeric parameters.
 | `tau` | float \\| null | `0.0` | Scale factor used by self-adaptive mutation strategies. |
 | `crossover` | dict \\| null | `null` | Optional crossover configuration. |
 
-`dim` must be a positive integer for `structure: flat`. For `structure: net`,
-it must contain at least two positive layer sizes and the initializer must
-currently be `normal`. With `initializer: fixed`, `values` is required and
-`dim` is inferred from `values` when omitted.
+With `initializer: fixed`, `values` is required and `dim` is inferred from
+`values` when omitted.
+
+## VectorNet Module
+
+A VectorNet module represents a fixed-topology feedforward neural network whose
+weights and biases are stored and evolved as one flat parameter vector.
+
+| Parameter | Type | Default | Description |
+| --- | --- | ---: | --- |
+| `type` | `"vectornet"` | `"vectornet"` | Module type. |
+| `dim` | list\[int\] | --- | Positive layer sizes including input and output layers. |
+| `activation` | str | `tanh` | Hidden-layer activation: `tanh`, `relu`, or `linear`. |
+| `initializer` | str | `normal` | Parameter initializer. Currently `normal` only. |
+| `mean` | float | `0.0` | Mean of the normal initializer. |
+| `std` | float | `1.0` | Standard deviation of the normal initializer. |
+| `bounds` | tuple\[float, float\] | `[-1.0, 1.0]` | Hard parameter bounds. |
+| `init_bounds` | tuple\[float, float\] \\| null | `null` | Optional initialization bounds. |
+| `mutation` | dict | --- | Required mutation configuration. |
+| `tau` | float | `0.0` | Scale factor used by self-adaptive mutation strategies. |
+| `crossover` | dict \\| null | `null` | Optional crossover configuration. |
+
+`dim` must contain at least input and output layers, and every layer size must
+be greater than 0.
 
 ## Mutation Configuration
 
-`MutationConfig` is shared by vector mutation and the main weight
-mutation of EvoNet.
+`MutationConfig` is shared by Vector and VectorNet mutation and by the main
+weight mutation of EvoNet.
 
 ### Mutation strategies
 
@@ -166,7 +184,7 @@ must be non-negative.
 
 ## Crossover Configuration
 
-Vector and EvoNet modules can contain an optional `crossover` block.
+Vector, VectorNet, and EvoNet modules can contain an optional `crossover` block.
 
 | Parameter | Type | Default | Description |
 | --- | --- | ---: | --- |

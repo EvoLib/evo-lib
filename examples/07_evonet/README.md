@@ -1,7 +1,7 @@
 # 07_evonet – Evolvable Neural Networks
 
 This folder contains examples using **EvoNet**, an evolvable neural network representation with explicit topology.  
-Unlike fixed NetVectors, EvoNet supports **both parameter and structural evolution**, enabling more flexible and interpretable controllers.
+Unlike fixed VectorNet networks, EvoNet supports **both parameter and structural evolution**, enabling more flexible and interpretable controllers.
 
 ---
 
@@ -183,6 +183,6 @@ Frames show both the price series with trade markers and the resulting equity cu
 
 ## See Also
 
-* [`../06_netvector/`](../06_netvector) — fixed-topology networks as vectors.  
+* [`../06_vectornet/`](../06_vectornet) — fixed-topology networks as vectors.
 * [`../05_advanced_topics/`](../05_advanced_topics) — advanced control and function-approximation setups.
 

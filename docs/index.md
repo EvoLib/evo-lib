@@ -11,7 +11,7 @@ selected and combined separately.
 
 * **Evolutionary strategies** — configurable selection, reproduction,
   replacement, crossover, and mutation.
-* **Parameter representations** — vectors, network vectors, and EvoNet neural
+* **Parameter representations** — vectors, VectorNet fixed-topology networks, and EvoNet neural
   networks.
 * **Neuroevolution** — evolution of weights, biases, activation functions,
   recurrent connections, delays, and network structures.
@@ -62,7 +62,7 @@ api_core_individual
 :caption: API – Representations
 
 api_representation_vector
-api_representation_netvector
+api_representation_vectornet
 api_representation_evonet
 ```
 

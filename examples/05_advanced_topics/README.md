@@ -85,6 +85,6 @@ Useful for tasks where both **input positions and outputs** must be co-optimized
 ## See Also
 
 * [`../04_function_approximation/`](../04_function_approximation) — function approximation tasks.
-* [`../06_netvector/`](../06_netvector) — neural-network-based encodings.
+* [`../06_vectornet/`](../06_vectornet) — neural-network-based encodings.
 * [`../07_evonet/`](../07_evonet) — structural neuroevolution examples.
 

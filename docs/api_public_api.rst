@@ -6,7 +6,7 @@ commonly used by applications and examples.
 
 .. code-block:: python
 
-    from evolib import Population, Individual, Vector, EvoNet, NetVector
+    from evolib import Population, Individual, Vector, VectorNet, EvoNet
     from evolib import plot_fitness, rastrigin, mse_loss
     from evolib import save_checkpoint, resume_from_checkpoint
 
@@ -20,7 +20,7 @@ Core Classes
 - ``Individual``
 - ``Vector``
 - ``EvoNet``
-- ``NetVector``
+- ``VectorNet``
 - ``HistoryLogger``
 
 Environment Integration
