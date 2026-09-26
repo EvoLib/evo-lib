@@ -13,6 +13,7 @@ from evolib.io.checkpoint import (
 from evolib.representation.evonet import EvoNet
 from evolib.representation.netvector import NetVector
 from evolib.representation.vector import Vector
+from evolib.representation.vectornet import VectorNet
 from evolib.utils.benchmarks import (
     ackley,
     ackley_2d,
@@ -59,6 +60,7 @@ __all__ = [
     "Population",
     "Individual",
     "Vector",
+    "VectorNet",
     "EvoNet",
     "EvoNetComponentConfig",
     "NetVector",
