@@ -36,7 +36,7 @@ class VectorNet(Vector):
         self._configure_topology(layer_dims, activation)
 
     @classmethod
-    def from_config(cls, cfg: VectorNetComponentConfig) -> Self:
+    def from_config(cls, cfg: ModuleConfig) -> Self:
         """
         Build and initialize a VectorNet from a validated component config.
 
@@ -46,6 +46,9 @@ class VectorNet(Vector):
         Returns:
             Fully configured and initialized VectorNet.
         """
+        if not isinstance(cfg, VectorNetComponentConfig):
+            raise TypeError("Expected VectorNetComponentConfig")
+
         para = cls(layer_dims=cfg.dim, activation=cfg.activation)
         para.apply_config(cfg)
 

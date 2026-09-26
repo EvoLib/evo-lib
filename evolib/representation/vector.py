@@ -47,7 +47,7 @@ class Vector(ParaBase):
         self.evo_params = EvoControlParams()
 
     @classmethod
-    def from_config(cls, cfg: VectorComponentConfig) -> Self:
+    def from_config(cls, cfg: ModuleConfig) -> Self:
         """
         Build and initialize a Vector from a validated component config.
 
@@ -57,6 +57,9 @@ class Vector(ParaBase):
         Returns:
             Fully configured and initialized Vector.
         """
+        if not isinstance(cfg, VectorComponentConfig):
+            raise TypeError("Expected VectorComponentConfig")
+
         para = cls()
         para.apply_config(cfg)
 
