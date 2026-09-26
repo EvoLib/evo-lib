@@ -27,7 +27,7 @@ class VectorComponentConfig(BaseModel):
           weights:
             type: vector
             structure: flat              # "flat" | "net"
-            dim: 16                      # or a list for structured cases
+            dim: 16
             initializer: normal          # name from the initializer registry
             bounds: [-1.0, 1.0]
             mutation:
@@ -46,21 +46,21 @@ class VectorComponentConfig(BaseModel):
 
     # Optional structural interpretation; affects how 'dim' (and sometimes `activation`)
     # are interpreted downstream in Vector.apply_config().
-    structure: Optional[Literal["flat", "net", "tensor", "blocks", "grouped"]] = Field(
+    structure: Optional[Literal["flat", "net"]] = Field(
         default="flat",
         description=(
             "Optional structural interpretation of the data. "
-            "'flat' keeps a 1D vector; 'net' maps to a simple feed-forward layout; "
-            "'tensor' treats dim as shape; 'blocks'/'grouped' flatten sums of blocks."
+            "'flat' uses a one-dimensional parameter vector; "
+            "'net' maps layer sizes to a simple feed-forward layout."
         ),
     )
 
-    # Dimensionality: an integer for flat vectors, or a list for structured layouts.
+    # Dimensionality: an integer for flat vectors or layer sizes for net structures.
     dim: Union[int, list[int]] = Field(
         ...,
         description=(
-            "Vector length (int) or a list of positive integers for structured cases. "
-            "Validation ensures positive sizes."
+            "Vector length for structure='flat' or positive layer sizes for "
+            "structure='net'."
         ),
     )
 
@@ -82,14 +82,7 @@ class VectorComponentConfig(BaseModel):
         ),
     )
 
-    # Optional explicit shape or fixed values for the fixed initializer.
-    shape: Optional[Tuple[int, ...]] = Field(
-        default=None,
-        description=(
-            "Optional explicit shape. If provided with flat dims, Vector flattens "
-            "to dim = prod(shape) and retains shape for display/reshaping."
-        ),
-    )
+    # Optional fixed values for the fixed initializer.
     values: Optional[list[float]] = Field(
         default=None,
         description=(
@@ -174,16 +167,25 @@ class VectorComponentConfig(BaseModel):
 
     @field_validator("dim")
     @classmethod
-    def validate_dim(cls, dim: Union[int, list[int]]) -> Union[int, list[int]]:
-        """Require a positive integer or a non-empty list of positive integers."""
-        if isinstance(dim, int):
-            if dim <= 0:
-                raise ValueError("dim must be a positive integer")
-        elif isinstance(dim, list):
-            if not dim or not all(isinstance(d, int) and d > 0 for d in dim):
-                raise ValueError("dim must be a non-empty list of positive integers")
-        else:
-            raise TypeError("dim must be an int or list of ints")
+    def validate_dim(
+        cls, dim: Union[int, list[int]], info: ValidationInfo
+    ) -> Union[int, list[int]]:
+        """Validate dimension type and sizes for the selected structure."""
+        structure = info.data.get("structure") or "flat"
+
+        if structure == "net":
+            if (
+                not isinstance(dim, list)
+                or len(dim) < 2
+                or not all(isinstance(d, int) and d > 0 for d in dim)
+            ):
+                raise ValueError(
+                    "structure='net' requires at least two positive layer sizes"
+                )
+            return dim
+
+        if not isinstance(dim, int) or dim <= 0:
+            raise ValueError("structure='flat' requires dim as a positive integer")
         return dim
 
     @field_validator("initializer")

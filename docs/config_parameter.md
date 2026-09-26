@@ -109,12 +109,11 @@ A vector module stores evolvable numeric parameters.
 | Parameter | Type | Default | Description |
 | --- | --- | ---: | --- |
 | `type` | `"vector"` | `"vector"` | Module type. |
-| `dim` | int \\| list\[int\] | --- | Vector length or dimensions for a structured representation. |
-| `structure` | str | `flat` | `flat`, `net`, `tensor`, `blocks`, or `grouped`. |
+| `dim` | int \\| list\[int\] | --- | Vector length for `flat` or network layer sizes for `net`. |
+| `structure` | str | `flat` | `flat` or `net`. |
 | `initializer` | str | --- | `normal`, `uniform`, `zero`, `fixed`, or `adaptive`. |
 | `bounds` | tuple\[float, float\] | `[-1.0, 1.0]` | Hard value bounds. |
 | `init_bounds` | tuple\[float, float\] \\| null | `null` | Optional initialization bounds. |
-| `shape` | tuple\[int, ...\] \\| null | `null` | Optional explicit shape metadata. |
 | `values` | list\[float\] \\| null | `null` | Values used by `initializer: fixed`. |
 | `activation` | str \\| null | `null` | Activation used by `structure: net`. |
 | `mean` | float \\| null | `0.0` | Mean used by applicable initializers. |
@@ -124,10 +123,10 @@ A vector module stores evolvable numeric parameters.
 | `tau` | float \\| null | `0.0` | Scale factor used by self-adaptive mutation strategies. |
 | `crossover` | dict \\| null | `null` | Optional crossover configuration. |
 
-`dim` must contain positive values. With `initializer: fixed`, `values`
-is required and `dim` is inferred from `values` when omitted.
-
-For `structure: net`, the initializer must currently be `normal`.
+`dim` must be a positive integer for `structure: flat`. For `structure: net`,
+it must contain at least two positive layer sizes and the initializer must
+currently be `normal`. With `initializer: fixed`, `values` is required and
+`dim` is inferred from `values` when omitted.
 
 ## Mutation Configuration
 

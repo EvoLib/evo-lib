@@ -131,16 +131,15 @@ def test_vector_from_config_supports_net_structure() -> None:
 
 def test_vector_from_config_does_not_modify_config() -> None:
     cfg = VectorComponentConfig(
-        structure="tensor",
-        dim=[2, 3],
-        initializer="zero",
+        structure="net",
+        dim=[2, 3, 1],
+        activation="linear",
+        initializer="normal",
         bounds=(-1.0, 1.0),
         mutation=_constant_mutation(),
     )
     before = cfg.model_dump()
 
-    para = Vector.from_config(cfg)
+    Vector.from_config(cfg)
 
-    assert para.dim == 6
-    assert para.shape == (2, 3)
     assert cfg.model_dump() == before

@@ -29,15 +29,13 @@ class Vector(ParaBase):
     """
     A parameter vector representation used as an evolutionary module.
 
-    This class supports different structural interpretations of the parameter dimension
-    (flat, tensor, net, etc.), bounds, mutation strategies, and crossover.
+    This class supports flat vectors and network-shaped parameter vectors, bounds,
+    mutation strategies, and crossover.
     """
 
     def __init__(self) -> None:
         # Core parameter vector
         self.vector: np.ndarray = np.zeros(1)
-        self.shape: tuple[int, ...] = (1,)
-
         # Whether to randomize initial mutation strengths
         self.randomize_mutation_strengths: bool | None = None
 
@@ -53,25 +51,20 @@ class Vector(ParaBase):
         """
         Build and initialize a Vector from a validated component config.
 
-        The supplied config is deep-copied because apply_config() normalizes
-        structured dimensions in-place.
-
         Args:
             cfg: Validated VectorComponentConfig.
 
         Returns:
             Fully configured and initialized Vector.
         """
-        config = cfg.model_copy(deep=True)
-
         para = cls()
-        para.apply_config(config)
+        para.apply_config(cfg)
 
-        match config.initializer:
+        match cfg.initializer:
             case "normal":
                 para.vector = np.random.normal(
-                    loc=config.mean or 0.0,
-                    scale=config.std or 1.0,
+                    loc=cfg.mean or 0.0,
+                    scale=cfg.std or 1.0,
                     size=para.dim,
                 )
 
@@ -94,10 +87,10 @@ class Vector(ParaBase):
                 para.vector = np.zeros(para.dim)
 
             case "fixed":
-                if config.values is None:
+                if cfg.values is None:
                     raise ValueError("values must be defined for fixed initialization.")
 
-                para.vector = np.asarray(config.values, dtype=float)
+                para.vector = np.asarray(cfg.values, dtype=float)
 
             case "adaptive":
                 if para.init_bounds is None:
@@ -138,9 +131,7 @@ class Vector(ParaBase):
                     )
 
             case _:
-                raise ValueError(
-                    f"Unsupported vector initializer: {config.initializer!r}"
-                )
+                raise ValueError(f"Unsupported vector initializer: {cfg.initializer!r}")
 
         return para
 
@@ -157,48 +148,18 @@ class Vector(ParaBase):
 
         evo_params = self.evo_params
 
-        # Interpret dimension based on structure type
-        structure = getattr(cfg, "structure", "flat")
-
-        if structure == "net":
-            # Map to a neural-network-like parameter vector
+        if cfg.structure == "net":
             if not isinstance(cfg.dim, list):
-                raise ValueError("structure='net' requires dim as list[int]")
+                raise TypeError("structure='net' requires dim as list[int]")
             net = NetVector(dim=cfg.dim, activation=cfg.activation or "tanh")
-            cfg.shape = (int(net.n_parameters),)
-            cfg.dim = int(net.n_parameters)
-
-        elif structure == "tensor":
-            if not isinstance(cfg.dim, list):
-                raise ValueError("structure='tensor' requires dim as list[int]")
-            cfg.shape = tuple(cfg.dim)
-            cfg.dim = int(np.prod(cfg.shape))
-
-        elif structure == "blocks":
-            if not isinstance(cfg.dim, list):
-                raise ValueError("structure='blocks' requires dim as list[int]")
-            cfg.shape = None
-            cfg.dim = sum(cfg.dim)
-
-        elif structure == "grouped":
-            if not isinstance(cfg.dim, list):
-                raise ValueError("structure='grouped' requires dim as list[int]")
-            cfg.shape = None
-            cfg.dim = sum(cfg.dim)
-
-        elif structure == "flat":
-            if isinstance(cfg.dim, list):
-                cfg.shape = tuple(cfg.dim)
-                cfg.dim = int(np.prod(cfg.shape))
-            else:
-                cfg.shape = (cfg.dim,)
+            dim = int(net.n_parameters)
         else:
-            raise ValueError(f"Unknown structure type: '{structure}'")
+            if not isinstance(cfg.dim, int):
+                raise TypeError("structure='flat' requires dim as int")
+            dim = cfg.dim
 
-        # Assign dimensions and allocate vector
-        self.dim = cfg.dim
-        self.shape = cfg.shape or (cfg.dim,)
-        self.vector = np.zeros(self.dim)
+        self.dim = dim
+        self.vector = np.zeros(dim)
 
         # Bounds
         self.bounds = cfg.bounds
