@@ -13,9 +13,6 @@ from evolib.initializers.evonet_initializers import (
     initializer_unconnected_evonet,
 )
 
-# NetVector initializer (Vector with structure='net')
-from evolib.initializers.net_initializers import initializer_normal_net
-
 # Vector initializers
 from evolib.initializers.vector_initializers import (
     initializer_adaptive_vector,
@@ -33,21 +30,12 @@ from evolib.representation.composite import ParaComposite
 InitializerFunction = Callable[[FullConfig, str], ParaBase]
 
 
-def _resolve_vector_initializer(name: str, *, structure: str) -> InitializerFunction:
-    """
-    Resolve vector initializer by name and structure.
-
-    Design:
-    - 'structure: net' uses the NetVector-compatible initializer for 'normal'
-    - all other cases use vector initializers
-    """
+def _resolve_vector_initializer(name: str) -> InitializerFunction:
+    """Resolve Vector initializer by name."""
     name = str(name)
-    structure = str(structure or "flat")
 
     match name:
         case "normal":
-            if structure == "net":
-                return initializer_normal_net
             return initializer_normal_vector
         case "uniform":
             return initializer_random_vector
@@ -98,8 +86,7 @@ def resolve_initializer_fn(cfg: ModuleConfig) -> InitializerFunction:
 
     match mod_type:
         case RepresentationType.VECTOR:
-            structure = getattr(cfg, "structure", "flat") or "flat"
-            return _resolve_vector_initializer(str(init_name), structure=str(structure))
+            return _resolve_vector_initializer(str(init_name))
         case RepresentationType.VECTORNET:
             return _resolve_vectornet_initializer(str(init_name))
         case RepresentationType.EVONET:

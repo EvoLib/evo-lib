@@ -22,15 +22,14 @@ from evolib.representation._apply_config_mapping import (
 )
 from evolib.representation.base import ParaBase
 from evolib.representation.evo_params import EvoControlParams
-from evolib.representation.netvector import NetVector
 
 
 class Vector(ParaBase):
     """
     A parameter vector representation used as an evolutionary module.
 
-    This class supports flat vectors and network-shaped parameter vectors, bounds,
-    mutation strategies, and crossover.
+    This class supports flat parameter vectors, bounds, mutation strategies, and
+    crossover.
     """
 
     def __init__(self) -> None:
@@ -143,26 +142,16 @@ class Vector(ParaBase):
         Apply a configuration object to initialize this Vector.
 
         Args:
-            cfg: A VectorComponentConfig defining dimension, structure,
-                 initialization, and mutation/crossover strategies.
+            cfg: A VectorComponentConfig defining dimension, initialization,
+                and mutation/crossover strategies.
         """
         if not isinstance(cfg, VectorComponentConfig):
             raise TypeError("Expected VectorComponentConfig")
 
         evo_params = self.evo_params
 
-        if cfg.structure == "net":
-            if not isinstance(cfg.dim, list):
-                raise TypeError("structure='net' requires dim as list[int]")
-            net = NetVector(dim=cfg.dim, activation=cfg.activation or "tanh")
-            dim = int(net.n_parameters)
-        else:
-            if not isinstance(cfg.dim, int):
-                raise TypeError("structure='flat' requires dim as int")
-            dim = cfg.dim
-
-        self.dim = dim
-        self.vector = np.zeros(dim)
+        self.dim = cfg.dim
+        self.vector = np.zeros(cfg.dim)
 
         # Bounds
         self.bounds = cfg.bounds

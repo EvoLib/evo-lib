@@ -3,7 +3,6 @@ import numpy as np
 from evolib.config.base_component_config import MutationConfig
 from evolib.config.vector_component_config import VectorComponentConfig
 from evolib.interfaces.enums import MutationStrategy
-from evolib.representation.netvector import NetVector
 from evolib.representation.vector import Vector
 
 
@@ -108,32 +107,9 @@ def test_vector_from_config_adaptive_initializes_sigmas() -> None:
     assert np.all(strengths <= 0.1)
 
 
-def test_vector_from_config_supports_net_structure() -> None:
-    layer_dims = [2, 3, 1]
-    expected = NetVector(dim=layer_dims, activation="linear")
-
-    cfg = VectorComponentConfig(
-        structure="net",
-        dim=layer_dims,
-        activation="linear",
-        initializer="normal",
-        bounds=(-1.0, 1.0),
-        mean=0.0,
-        std=0.5,
-        mutation=_constant_mutation(),
-    )
-
-    para = Vector.from_config(cfg)
-
-    assert para.dim == expected.n_parameters
-    assert para.vector.shape == (expected.n_parameters,)
-
-
 def test_vector_from_config_does_not_modify_config() -> None:
     cfg = VectorComponentConfig(
-        structure="net",
-        dim=[2, 3, 1],
-        activation="linear",
+        dim=6,
         initializer="normal",
         bounds=(-1.0, 1.0),
         mutation=_constant_mutation(),

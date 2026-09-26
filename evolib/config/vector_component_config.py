@@ -1,77 +1,34 @@
 # SPDX-License-Identifier: MIT
-from typing import Any, Literal, Optional, Tuple, Union
+from typing import Any, Optional, Tuple
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    ValidationInfo,
-    field_validator,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from evolib.config.base_component_config import CrossoverConfig, MutationConfig
 from evolib.interfaces.enums import RepresentationType
 
 
 class VectorComponentConfig(BaseModel):
-    """
-    Configuration schema for vector-based modules (used by Vector/NetVector).
-
-    Selected when a module has ``type: "vector"``. Defines dimensionality and (optional)
-    structural interpretation, initialization, numeric bounds, and evolutionary
-    operators.
-
-    Minimal example:
-        modules:
-          weights:
-            type: vector
-            structure: flat              # "flat" | "net"
-            dim: 16
-            initializer: normal          # name from the initializer registry
-            bounds: [-1.0, 1.0]
-            mutation:
-              strategy: constant
-              probability: 1.0
-              strength: 0.05
-    """
+    """Configuration schema for flat vector modules."""
 
     model_config = ConfigDict(extra="forbid")
 
-    # Fixed module type: "vector"
     type: RepresentationType = Field(
         default=RepresentationType.VECTOR,
         description='Fixed module discriminator; must be "vector" for this schema.',
     )
 
-    # Optional structural interpretation; affects how 'dim' (and sometimes `activation`)
-    # are interpreted downstream in Vector.apply_config().
-    structure: Optional[Literal["flat", "net"]] = Field(
-        default="flat",
-        description=(
-            "Optional structural interpretation of the data. "
-            "'flat' uses a one-dimensional parameter vector; "
-            "'net' maps layer sizes to a simple feed-forward layout."
-        ),
-    )
-
-    # Dimensionality: an integer for flat vectors or layer sizes for net structures.
-    dim: Union[int, list[int]] = Field(
+    dim: int = Field(
         ...,
-        description=(
-            "Vector length for structure='flat' or positive layer sizes for "
-            "structure='net'."
-        ),
+        gt=0,
+        description="Number of scalar parameters in the vector.",
     )
 
-    # Name of the initializer function (resolved via the initializer registry).
     initializer: str = Field(
         ...,
         description="Initializer identifier registered in "
         "evolib.initializers.registry.",
     )
 
-    # Numeric bounds used by initialization/mutation; init_bounds may override at init.
     bounds: Tuple[float, float] = Field(
         default=(-1.0, 1.0), description="Hard clamp range for values (min, max)."
     )
@@ -82,7 +39,6 @@ class VectorComponentConfig(BaseModel):
         ),
     )
 
-    # Optional fixed values for the fixed initializer.
     values: Optional[list[float]] = Field(
         default=None,
         description=(
@@ -91,16 +47,6 @@ class VectorComponentConfig(BaseModel):
         ),
     )
 
-    # Activation (only meaningful when structure='net').
-    activation: Optional[str] = Field(
-        default=None,
-        description=(
-            "Activation for structure='net'. The Vector net mapping may use this "
-            "to parameterize an internal NetVector layout."
-        ),
-    )
-
-    # Evolution (mutation / crossover)
     mutation: MutationConfig = Field(
         description=(
             "Mutation configuration. By default, 'probability' is an element-wise rate "
@@ -136,8 +82,6 @@ class VectorComponentConfig(BaseModel):
         ),
     )
 
-    # Validators
-
     @model_validator(mode="before")
     @classmethod
     def set_dim_for_fixed_vector(cls, config: dict[str, Any]) -> dict[str, Any]:
@@ -165,52 +109,17 @@ class VectorComponentConfig(BaseModel):
             raise ValueError("Bounds must be specified as (min, max) with min <= max")
         return bounds
 
-    @field_validator("dim")
-    @classmethod
-    def validate_dim(
-        cls, dim: Union[int, list[int]], info: ValidationInfo
-    ) -> Union[int, list[int]]:
-        """Validate dimension type and sizes for the selected structure."""
-        structure = info.data.get("structure") or "flat"
-
-        if structure == "net":
-            if (
-                not isinstance(dim, list)
-                or len(dim) < 2
-                or not all(isinstance(d, int) and d > 0 for d in dim)
-            ):
-                raise ValueError(
-                    "structure='net' requires at least two positive layer sizes"
-                )
-            return dim
-
-        if not isinstance(dim, int) or dim <= 0:
-            raise ValueError("structure='flat' requires dim as a positive integer")
-        return dim
-
     @field_validator("initializer")
     @classmethod
-    def validate_initializer(cls, name: str, info: ValidationInfo) -> str:
-        """Validate allowed initializer names and provide clear errors for deprecated
-        names."""
+    def validate_initializer(cls, name: str) -> str:
+        """Validate the initializer name."""
         if not isinstance(name, str) or not name.strip():
             raise ValueError("initializer must be a non-empty string")
 
         name = name.strip()
-
         allowed = {"normal", "uniform", "zero", "fixed", "adaptive"}
         if name not in allowed:
             raise ValueError(
                 f"Unknown initializer '{name}'. Allowed: {sorted(allowed)}"
             )
-
-        # structure-aware check (only if structure is available in the data)
-        data = info.data or {}
-        structure = data.get("structure") or "flat"
-        if structure == "net" and name != "normal":
-            raise ValueError(
-                "For structure='net', initializer must be 'normal' "
-                "(use initializer: normal and structure: net)."
-            )
-
         return name
