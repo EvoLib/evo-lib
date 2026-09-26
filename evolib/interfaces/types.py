@@ -12,6 +12,7 @@ from typing import Callable, Optional, Protocol
 
 from evolib.config.evonet_component_config import EvoNetComponentConfig
 from evolib.config.vector_component_config import VectorComponentConfig
+from evolib.config.vectornet_component_config import VectorNetComponentConfig
 from evolib.interfaces.structs import MutationParams
 from evolib.representation.base import ParaBase
 
@@ -23,7 +24,9 @@ CrossoverFunction = Callable[
 ]
 ParaInitializer = Callable[["Pop"], ParaBase]
 
-ModuleConfig = Union[VectorComponentConfig, EvoNetComponentConfig]
+ModuleConfig = Union[
+    VectorComponentConfig, VectorNetComponentConfig, EvoNetComponentConfig
+]
 
 # Base type for all population-related hooks
 PopulationHook = Callable[["Pop"], None]

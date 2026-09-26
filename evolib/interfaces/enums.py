@@ -20,6 +20,7 @@ class Origin(Enum):
 
 class RepresentationType(Enum):
     VECTOR = "vector"
+    VECTORNET = "vectornet"
     EVONET = "evonet"
 
 

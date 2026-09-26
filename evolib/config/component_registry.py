@@ -5,10 +5,12 @@ from pydantic import BaseModel
 
 from evolib.config.evonet_component_config import EvoNetComponentConfig
 from evolib.config.vector_component_config import VectorComponentConfig
+from evolib.config.vectornet_component_config import VectorNetComponentConfig
 
 # Mapping from 'type' field to corresponding ComponentConfig class
 _COMPONENT_MAP: dict[str, Type[BaseModel]] = {
     "vector": VectorComponentConfig,
+    "vectornet": VectorNetComponentConfig,
     "evonet": EvoNetComponentConfig,
     # "composite": CompositeConfig,
     # "torch": TorchComponentConfig,

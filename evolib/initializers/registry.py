@@ -24,6 +24,7 @@ from evolib.initializers.vector_initializers import (
     initializer_random_vector,
     initializer_zero_vector,
 )
+from evolib.initializers.vectornet_initializers import initializer_normal_vectornet
 from evolib.interfaces.enums import RepresentationType
 from evolib.interfaces.types import ModuleConfig
 from evolib.representation.base import ParaBase
@@ -63,6 +64,13 @@ def _resolve_vector_initializer(name: str, *, structure: str) -> InitializerFunc
             )
 
 
+def _resolve_vectornet_initializer(name: str) -> InitializerFunction:
+    """Resolve VectorNet initializer by name."""
+    if name == "normal":
+        return initializer_normal_vectornet
+    raise ValueError(f"Unknown vectornet initializer '{name}'. Allowed: normal.")
+
+
 def _resolve_evonet_initializer(name: str) -> InitializerFunction:
     """Resolve EvoNet topology presets via initializer name."""
     name = str(name)
@@ -92,6 +100,8 @@ def resolve_initializer_fn(cfg: ModuleConfig) -> InitializerFunction:
         case RepresentationType.VECTOR:
             structure = getattr(cfg, "structure", "flat") or "flat"
             return _resolve_vector_initializer(str(init_name), structure=str(structure))
+        case RepresentationType.VECTORNET:
+            return _resolve_vectornet_initializer(str(init_name))
         case RepresentationType.EVONET:
             return _resolve_evonet_initializer(str(init_name))
         case _:
