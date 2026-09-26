@@ -1,3 +1,18 @@
+## Unreleased
+
+### Added
+
+* Added `VectorNet`, a fixed-topology feedforward neural network representation whose weights and biases are evolved as a flat parameter vector.
+
+### Changed
+
+* Migrated fixed-topology neural network examples and configuration from `NetVector` to `VectorNet`.
+
+### Removed
+
+* BREAKING: Removed `NetVector` and legacy structured `Vector` modes. `Vector` now represents flat parameter vectors only.
+
+
 ## EvoLib 0.4.0
 
 ### Added
