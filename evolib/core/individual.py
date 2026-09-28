@@ -194,7 +194,6 @@ class Indiv:
         reset_id: bool = True,
         reset_fitness: bool = False,
         reset_age: bool = False,
-        reset_evaluation: bool = False,
         reset_origin: bool = False,
     ) -> "Indiv":
         """
