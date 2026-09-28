@@ -65,7 +65,7 @@ def plot_fitness_landscape_with_path(
 # Main experiment loop
 def run_experiment() -> None:
     pop = Pop(CONFIG_FILE)
-    pop.set_functions(fitness_function=fitness_function)
+    pop.set_fitness_function(fitness_function)
 
     path_points: list[tuple[float, float]] = []
 

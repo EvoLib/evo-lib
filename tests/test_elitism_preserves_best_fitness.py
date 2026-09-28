@@ -17,7 +17,7 @@ def test_elitism_preserves_best_fitness() -> None:
     random.seed(42)
 
     pop = Pop(config_path="./tests/configs/elitism_test.yaml")
-    pop.set_functions(fitness_function=fitness_function)
+    pop.set_fitness_function(fitness_function)
 
     best_fitnesses = []
     for _ in range(pop.max_generations):

@@ -11,8 +11,7 @@ in a modular form. Each function encapsulates one full generation cycle:
 - statistics update
 
 These functions assume that `Pop` has:
-- a configured mutation strategy
-- a registered fitness function via `set_functions()`
+- a configured fitness function
 
 Functions:
 - evolve_mu_plus_lambda: Classical (μ + λ) strategy with elitism.

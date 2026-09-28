@@ -335,17 +335,6 @@ class Pop:
             raise TypeError("Fitness function must be callable.")
         self.fitness_function = func
 
-    def set_functions(self, fitness_function: FitnessFunction) -> None:
-        """
-        [DEPRECATED] Use set_fitness_function() or constructor argument instead.
-
-        Registers the fitness function used during evolution.
-
-        Args:
-            fitness_function (Callable): Function to assign fitness to an individual.
-        """
-        self.fitness_function = fitness_function
-
     def evaluate_fitness(self) -> None:
         """Evaluate the fitness function for all individuals in the population."""
         if self.fitness_function is None:

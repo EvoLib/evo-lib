@@ -18,6 +18,7 @@
 * BREAKING: Removed `NetVector` and legacy structured `Vector` modes. `Vector` now represents flat parameter vectors only.
 * BREAKING: Removed `max_indiv_age` and automatic age-based survivor removal.
 * Removed unused population-level strategy state for mutation, pairing, crossover, selection, and replacement.
+* BREAKING: Removed deprecated `Pop.set_functions()`; use `set_fitness_function()` or the constructor argument instead.
 
 
 ## EvoLib 0.4.0
