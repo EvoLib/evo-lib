@@ -33,7 +33,6 @@ from evolib.interfaces.enums import (
     EvolutionStrategy,
     OptimizationDirection,
     Origin,
-    ReplacementStrategy,
 )
 from evolib.interfaces.types import (
     FitnessFunction,
@@ -100,14 +99,9 @@ class Pop:
         random_seed = cfg.random_seed
         set_random_seed(random_seed)
 
-        # Strategies (initially None – set externally later)
-        self.mutation_strategy = None
-        self.selection_strategy = None
+        # Runtime strategy functions
         self.selection_fn: Optional[SelectionFunction] = None
-        self.pairing_strategy = None
-        self.crossover_strategy = None
         self.evolution_strategy = None
-        self.replacement_strategy: Optional[ReplacementStrategy] = None
         self._replacement_fn: Optional[ReplaceFunction] = None
 
         # Evolution
@@ -118,18 +112,15 @@ class Pop:
 
         # Selection
         if cfg.selection is not None:
-            self.selection_strategy = cfg.selection.strategy
             self._selection_registry = build_selection_registry(cfg.selection)
-            self.selection_fn = self._selection_registry[self.selection_strategy]
+            self.selection_fn = self._selection_registry[cfg.selection.strategy]
 
         # Replacement
         if cfg.replacement is not None:
-            self.replacement_strategy = cfg.replacement.strategy
             self._replacement_registry = build_replacement_registry(cfg.replacement)
-            self._replacement_fn = self._replacement_registry[self.replacement_strategy]
+            self._replacement_fn = self._replacement_registry[cfg.replacement.strategy]
 
         else:
-            self.replacement_strategy = None
             self._replacement_registry = {}
             self._replacement_fn = None
 
