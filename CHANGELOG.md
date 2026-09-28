@@ -8,12 +8,14 @@
 
 * Migrated fixed-topology neural network examples and configuration from `NetVector` to `VectorNet`.
 * REAKING: Replaced selection- and stopping-specific optimization flags with the global `optimization_direction` setting (`minimize` or `maximize`).
+* Exponential rank selection now requires `exp_base >= 1.0`; `1.0` gives uniform selection.
 
 ### Fixed
 
 * Fixed diversity EMA initialization so the first value uses measured diversity instead of being biased toward zero.
 * Fixed `Pop.run()` overrides so explicit zero values for `max_generations` and `min_delta` are preserved.
 * Fixed stochastic replacement weighting so worse non-elite individuals are more likely to be replaced.
+* Corrected rank-selection documentation to reflect that rank 0 is the best individual.
 
 ### Removed
 

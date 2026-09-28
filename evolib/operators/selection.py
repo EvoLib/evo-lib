@@ -34,7 +34,7 @@ def _calculate_rank_probabilities(
     Calculates selection probabilities based on ranks.
 
     Args:
-        ranks (np.ndarray): Array of ranks (0 = worst, N-1 = best individual).
+        ranks (np.ndarray): Array of ranks (0 = best, N-1 = worst individual).
         population_size (int): Number of individuals in the population.
         mode (str): Selection mode, either 'linear' or 'exponential'.
         exp_base (float): Base used for exponential probability calculation.
@@ -54,11 +54,11 @@ def _calculate_rank_probabilities(
         probabilities = weights / np.sum(weights)
 
     elif mode == "exponential":
-        if exp_base <= 0:
-            raise ValueError("exp_base must be greater than 0")
+        if exp_base < 1.0:
+            raise ValueError("exp_base must be greater than or equal to 1.0")
 
-        # With exp_base > 1.0: best gets highest probability
-        # rank 0 -> exp_base^0 = 1, rank 1 -> exp_base^-1, ...
+        # Rank 0 is best. exp_base > 1.0 favors lower ranks more strongly,
+        # while exp_base == 1.0 gives uniform probabilities.
         weights = np.power(exp_base, -ranks)
         probabilities = weights / np.sum(weights)
 
@@ -140,15 +140,16 @@ def selection_rank_based(
     Performs rank-based selection using linear or exponential probability distribution.
 
     Selection probabilities are based on fitness ranks:
-    - Linear:    p(i) = 2*(N-i)/(N*(N+1)), where i is the rank (0 = worst, N-1 = best).
-    - Exponential: p(i) = base^i / sum(base^j), where base is a positive float.
+    - Linear: p(i) = 2*(N-i)/(N*(N+1)), where rank 0 is best.
+    - Exponential: p(i) is proportional to base^(-i), where rank 0 is best.
 
     Args:
         num_parents (int): Number of parents to select.
         mode (str): Selection mode: 'linear' or 'exponential'. Default: 'linear'.
         remove_selected (bool): If True, selected individuals are removed from future
         selection. Default: False.
-        exp_base (float): Base used in exponential probability calculation. Must be > 0.
+        exp_base (float): Base used in exponential probability calculation.
+            Must be >= 1.0. A value of 1.0 gives uniform probabilities.
 
     Returns:
         List[Any]: List of selected individuals (copies).
@@ -167,11 +168,8 @@ def selection_rank_based(
         raise ValueError(
             "num_parents cannot exceed population size when remove_selected=True"
         )
-    if exp_base <= 0:
-        raise ValueError("exp_base must be greater than 0")
-
-    if mode == "exponential" and exp_base is None:
-        raise ValueError("exp_base must be set when using exponential rank selection.")
+    if mode == "exponential" and exp_base < 1.0:
+        raise ValueError("exp_base must be greater than or equal to 1.0")
 
     fitnesses = [indiv.fitness for indiv in pop.indivs]
     if any(f is None or np.isnan(f) for f in fitnesses):
@@ -188,7 +186,7 @@ def selection_rank_based(
     precomputed_probabilities: Optional[np.ndarray] = None
     if not remove_selected:
         population_size = len(available_indices)
-        ranks = np.arange(population_size)  # Rank 0 = worst, N-1 = best
+        ranks = np.arange(population_size)  # Rank 0 = best, N-1 = worst
         precomputed_probabilities = _calculate_rank_probabilities(
             ranks, population_size, mode, exp_base
         )
