@@ -36,35 +36,22 @@ def build_selection_registry(
         SelectionStrategy.TOURNAMENT: partial(
             selection_tournament,
             tournament_size=cfg.tournament_size or 3,
-            fitness_maximization=cfg.fitness_maximization or False,
         ),
-        SelectionStrategy.ROULETTE: partial(
-            selection_roulette,
-            fitness_maximization=cfg.fitness_maximization or False,
-        ),
+        SelectionStrategy.ROULETTE: selection_roulette,
         SelectionStrategy.RANK_LINEAR: partial(
             selection_rank_based,
             mode="linear",
-            fitness_maximization=cfg.fitness_maximization or False,
         ),
         SelectionStrategy.RANK_EXPONENTIAL: partial(
             selection_rank_based,
             mode="exponential",
             exp_base=cfg.exp_base or 2.0,
-            fitness_maximization=cfg.fitness_maximization or False,
         ),
-        SelectionStrategy.SUS: partial(
-            selection_sus,
-            fitness_maximization=cfg.fitness_maximization or False,
-        ),
+        SelectionStrategy.SUS: selection_sus,
         SelectionStrategy.BOLTZMANN: partial(
             selection_boltzmann,
             temperature=cfg.exp_base or 1.0,
-            fitness_maximization=cfg.fitness_maximization or False,
         ),
-        SelectionStrategy.TRUNCATION: partial(
-            selection_truncation,
-            fitness_maximization=cfg.fitness_maximization or False,
-        ),
+        SelectionStrategy.TRUNCATION: selection_truncation,
         SelectionStrategy.RANDOM: lambda pop, n: selection_random(pop)[:n],
     }

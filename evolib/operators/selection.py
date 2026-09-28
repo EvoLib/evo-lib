@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING, Any, List, Optional
 import numpy as np
 
 from evolib.core.individual import Indiv
+from evolib.interfaces.enums import OptimizationDirection
 
 if TYPE_CHECKING:
     from evolib.core.population import Pop
@@ -72,7 +73,6 @@ def selection_tournament(
     num_parents: int,
     tournament_size: int = 3,
     remove_selected: bool = False,
-    fitness_maximization: bool = False,
 ) -> List[Indiv]:
     """
     Performs tournament selection to select parents from the population.
@@ -83,9 +83,6 @@ def selection_tournament(
                                       Defaults to 3.
         remove_selected (bool, optional): If True, selected individuals are removed
                                         from future tournaments. Defaults to False.
-        minimize (bool, optional): If True, select individuals with lowest fitness
-                                 (minimization). If False, select highest fitness
-                                 (maximization). Defaults to True.
 
     Returns:
         list: List of selected parents.
@@ -114,17 +111,12 @@ def selection_tournament(
             available_indices, min(tournament_size, len(available_indices))
         )
 
-        # Beste Fitness finden
-        if fitness_maximization is False:
-            best_idx, _ = min(
-                ((i, pop.indivs[i].fitness) for i in tournament_indices),
-                key=lambda x: x[1],
-            )
+        # Select the best individual according to the global optimization direction.
+        candidates = ((i, pop.indivs[i].fitness) for i in tournament_indices)
+        if pop.optimization_direction == OptimizationDirection.MAXIMIZE:
+            best_idx, _ = max(candidates, key=lambda x: x[1])
         else:
-            best_idx, _ = max(
-                ((i, pop.indivs[i].fitness) for i in tournament_indices),
-                key=lambda x: x[1],
-            )
+            best_idx, _ = min(candidates, key=lambda x: x[1])
 
         # Kopie des besten Individuums hinzufuegen
         selected_parents.append(pop.indivs[best_idx].copy())
@@ -143,7 +135,6 @@ def selection_rank_based(
     mode: str = "linear",
     remove_selected: bool = False,
     exp_base: float = 1.0,
-    fitness_maximization: bool = False,
 ) -> List[Any]:
     """
     Performs rank-based selection using linear or exponential probability distribution.
@@ -158,8 +149,6 @@ def selection_rank_based(
         remove_selected (bool): If True, selected individuals are removed from future
         selection. Default: False.
         exp_base (float): Base used in exponential probability calculation. Must be > 0.
-        fitness_maximization (bool): If True, higher fitness is better.
-        Default: False (minimization).
 
     Returns:
         List[Any]: List of selected individuals (copies).
@@ -188,10 +177,9 @@ def selection_rank_based(
     if any(f is None or np.isnan(f) for f in fitnesses):
         raise TypeError("All fitness values must be valid (not None or NaN)")
 
-    # Sort individuals by fitness (ascending by default for minimization)
     sorted_indices = np.argsort(fitnesses)
-    if fitness_maximization:
-        sorted_indices = sorted_indices[::-1]  # Reverse for maximization
+    if pop.optimization_direction == OptimizationDirection.MAXIMIZE:
+        sorted_indices = sorted_indices[::-1]
 
     selected_parents = []
     available_indices = sorted_indices.tolist()
@@ -271,15 +259,12 @@ def selection_random(pop: "Pop", remove_selected: bool = False) -> List[Indiv]:
     return selected_parents
 
 
-def selection_roulette(
-    pop: "Pop", num_parents: int, fitness_maximization: bool = False
-) -> List[Any]:
+def selection_roulette(pop: "Pop", num_parents: int) -> List[Any]:
     """
     Selects parents using fitness-proportional roulette wheel selection.
 
     Args:
         num_parents (int): Number of individuals to select.
-        fitness_maximization (bool): If True, higher fitness is better.
 
     Returns:
         List[Any]: List of selected individuals (copies).
@@ -291,9 +276,10 @@ def selection_roulette(
     if any(np.isnan(fitnesses)) or any(f is None for f in fitnesses):
         raise TypeError("Invalid fitness values")
 
-    if not fitness_maximization:
-        max_fitness = np.max(fitnesses)
-        fitnesses = max_fitness - fitnesses + 1e-12  # Prevent zero or negative values
+    if pop.optimization_direction == OptimizationDirection.MAXIMIZE:
+        fitnesses = fitnesses - np.min(fitnesses) + 1e-12
+    else:
+        fitnesses = np.max(fitnesses) - fitnesses + 1e-12
 
     total_fitness = np.sum(fitnesses)
     if total_fitness == 0:
@@ -305,15 +291,12 @@ def selection_roulette(
     return [pop.indivs[i].copy() for i in indices]
 
 
-def selection_sus(
-    pop: "Pop", num_parents: int, fitness_maximization: bool = False
-) -> List[Any]:
+def selection_sus(pop: "Pop", num_parents: int) -> List[Any]:
     """
     Selects individuals using Stochastic Universal Sampling (SUS).
 
     Args:
         num_parents (int): Number of individuals to select.
-        fitness_maximization (bool): If True, higher fitness is better.
 
     Returns:
         List[Any]: Selected individuals (copies).
@@ -325,9 +308,10 @@ def selection_sus(
     if any(np.isnan(fitnesses)) or any(f is None for f in fitnesses):
         raise TypeError("Invalid fitness values")
 
-    if not fitness_maximization:
-        max_fitness = np.max(fitnesses)
-        fitnesses = max_fitness - fitnesses + 1e-12
+    if pop.optimization_direction == OptimizationDirection.MAXIMIZE:
+        fitnesses = fitnesses - np.min(fitnesses) + 1e-12
+    else:
+        fitnesses = np.max(fitnesses) - fitnesses + 1e-12
 
     total_fitness = np.sum(fitnesses)
     if total_fitness == 0:
@@ -354,7 +338,6 @@ def selection_boltzmann(
     pop: "Pop",
     num_parents: int,
     temperature: float = 1.0,
-    fitness_maximization: bool = False,
 ) -> List[Any]:
     """
     Selects individuals using Boltzmann (Softmax) selection.
@@ -362,7 +345,6 @@ def selection_boltzmann(
     Args:
         num_parents (int): Number of individuals to select.
         temperature (float): Controls selection pressure (higher = more uniform).
-        fitness_maximization (bool): If True, higher fitness is better.
 
     Returns:
         List[Any]: Selected individuals (copies).
@@ -378,7 +360,7 @@ def selection_boltzmann(
 
     fitnesses = np.array(fitnesses, dtype=np.float64)
 
-    if fitness_maximization:
+    if pop.optimization_direction == OptimizationDirection.MAXIMIZE:
         scaled = fitnesses / temperature
     else:
         scaled = -fitnesses / temperature
@@ -391,15 +373,12 @@ def selection_boltzmann(
     return [pop.indivs[i].copy() for i in indices]
 
 
-def selection_truncation(
-    pop: "Pop", num_parents: int, fitness_maximization: bool = False
-) -> List[Any]:
+def selection_truncation(pop: "Pop", num_parents: int) -> List[Any]:
     """
     Selects the top individuals (by fitness) deterministically.
 
     Args:
         num_parents (int): Number of individuals to select.
-        fitness_maximization (bool): If True, selects best fitness; else lowest.
 
     Returns:
         List[Any]: Selected individuals (copies).
@@ -414,7 +393,7 @@ def selection_truncation(
         raise TypeError("Invalid fitness values")
 
     sorted_indices = np.argsort(fitnesses)
-    if fitness_maximization:
+    if pop.optimization_direction == OptimizationDirection.MAXIMIZE:
         sorted_indices = sorted_indices[::-1]
 
     selected_indices = sorted_indices[:num_parents]

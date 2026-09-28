@@ -14,6 +14,7 @@ For usage-oriented examples, see the configuration guide.
 | `max_generations` | int | --- | Maximum number of generations. Must be greater than 0. |
 | `num_elites` | int | --- | Number of elite individuals preserved each generation. Must be between 0 and `parent_pool_size`. |
 | `max_indiv_age` | int | `0` | Maximum individual age in generations. `0` disables aging. |
+| `optimization_direction` | str | `minimize` | Global fitness optimization direction: `minimize` or `maximize`. |
 | `random_seed` | int \\| null | `null` | Global random seed. Use an integer for reproducible runs. |
 
 ## Evolution
@@ -51,7 +52,6 @@ The optional `selection` block configures parent selection.
 | `num_parents` | int \\| null | `null` | Optional number of parents selected by the strategy. |
 | `tournament_size` | int \\| null | `null` | Tournament size for tournament selection. |
 | `exp_base` | float \\| null | `null` | Base used by exponential ranking selection. |
-| `fitness_maximization` | bool | `false` | If true, higher fitness values are considered better. |
 
 Only parameters used by the selected strategy need to be specified.
 
@@ -71,8 +71,7 @@ The optional `stopping` block controls early termination.
 
 | Parameter | Type | Default | Description |
 | --- | --- | ---: | --- |
-| `target_fitness` | float \\| null | `null` | Stop when the target fitness is reached. |
-| `minimize` | bool | `true` | If true, lower fitness values are considered better. |
+| `target_fitness` | float \\| null | `null` | Stop when the target fitness is reached according to `optimization_direction`. |
 | `patience` | int \\| null | `null` | Stop after this many generations without sufficient improvement. |
 | `min_delta` | float | `0.0` | Minimum fitness change considered an improvement. |
 | `time_limit_s` | float \\| null | `null` | Wall-clock time limit in seconds. |
@@ -489,12 +488,12 @@ offspring_pool_size: 40
 max_generations: 100
 num_elites: 1
 max_indiv_age: 0
+optimization_direction: minimize
 
 stopping:
   target_fitness: 0.01
   patience: 20
   min_delta: 0.0001
-  minimize: true
   time_limit_s: 30.0
 
 selection:

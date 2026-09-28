@@ -3,6 +3,7 @@ from evolib.config.vectornet_component_config import VectorNetComponentConfig
 from evolib.core.individual import Indiv as Individual
 from evolib.core.population import Pop as Population
 from evolib.envs.gym_wrapper import GymEnv
+from evolib.interfaces.enums import OptimizationDirection
 from evolib.interfaces.types import FitnessFunction
 from evolib.io.checkpoint import (
     load_best_indiv,
@@ -64,6 +65,7 @@ __all__ = [
     "VectorNetComponentConfig",
     "EvoNet",
     "EvoNetComponentConfig",
+    "OptimizationDirection",
     "HistoryLogger",
     "plot_fitness",
     "plot_approximation",

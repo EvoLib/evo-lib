@@ -1,5 +1,5 @@
 """
-Example: Recurrent Trading Strategy
+Example: Recurrent Trading Strategy.
 
 This example demonstrates how to evolve a recurrent EvoNet to act as a
 simple trading strategy. Unlike function approximation tasks, the network
@@ -129,7 +129,6 @@ def run_trading_episode(
         EpisodeResult: profit, accuracy, equity curve, aligned time indices
         and trade marks.
     """
-
     net = indiv.para[module].net
     net.reset(full=True)
 
@@ -190,7 +189,6 @@ def run_trading_episode(
 # Fitness function
 def evaluate(indiv: Individual) -> None:
     """Evaluate an individual using multiple trading episodes."""
-
     total_profit = 0.0
     total_correct = 0.0
     total_samples = 0
@@ -214,7 +212,7 @@ def evaluate(indiv: Individual) -> None:
     avg_profit = total_profit / EVAL_RUNS
     accuracy = total_correct / max(1, total_samples)
 
-    indiv.fitness = -avg_profit  # minimize negative profit
+    indiv.fitness = avg_profit
     indiv.extra_metrics["accuracy"] = accuracy
     indiv.extra_metrics["profit"] = avg_profit
 
@@ -227,7 +225,6 @@ def save_plot(pop: Population) -> None:
     A fixed test sequence (generated with PLOT_SEED) is used to ensure that the
     visualizations are reproducible across runs and generations.
     """
-
     checkpoint(pop)  # save checkpoint
 
     best = pop.best()

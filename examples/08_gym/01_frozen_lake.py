@@ -1,10 +1,9 @@
 """
 Example: Training on the FrozenLake-v1 environment.
 
-FrozenLake is a task where the agent must reach the goal while
-avoiding holes on a slippery surface.
-This example demonstrates how stochastic transitions make
-evolutionary training noisy and challenging.
+FrozenLake is a task where the agent must reach the goal while avoiding holes on a
+slippery surface. This example demonstrates how stochastic transitions make evolutionary
+training noisy and challenging.
 """
 
 from evolib import GymEnv, Individual, Population, resume_or_create
@@ -22,17 +21,15 @@ def eval_fitness(indiv: Individual) -> None:
     Assign fitness to an individual by running several FrozenLake episodes.
 
     The agent controls discrete moves (left, down, right, up) on an 8x8 grid. Fitness is
-    defined as the negative average reward across 5 episodes, encouraging robust
-    policies that consistently reach the goal while avoiding holes.
+    defined as the average reward across 5 episodes, encouraging robust policies that
+    consistently reach the goal while avoiding holes.
     """
-
-    fitness = gym_env.evaluate(indiv, module="brain", episodes=5)
-    indiv.fitness = -fitness
+    reward = gym_env.evaluate(indiv, module="brain", episodes=5)
+    indiv.fitness = reward
 
 
 def on_generation_end(pop: Population) -> None:
     """Visualize the best individual of the current generation as a GIF."""
-
     best = pop.best()
     gif = gym_env.visualize(
         best,

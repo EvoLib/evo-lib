@@ -31,6 +31,11 @@ class EvolutionStrategy(Enum):
     FLEXIBLE = "flexible"
 
 
+class OptimizationDirection(Enum):
+    MINIMIZE = "minimize"
+    MAXIMIZE = "maximize"
+
+
 class MutationStrategy(Enum):
     EXPONENTIAL_DECAY = "exponential_decay"
     ADAPTIVE_GLOBAL = "adaptive_global"

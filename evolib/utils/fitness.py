@@ -1,28 +1,32 @@
 # SPDX-License-Identifier: MIT
-from typing import List
+import math
+from typing import TYPE_CHECKING, List
 
-from evolib.core.population import Indiv
+from evolib.interfaces.enums import OptimizationDirection
+
+if TYPE_CHECKING:
+    from evolib.core.individual import Indiv
 
 
-def sort_by_fitness(indivs: List[Indiv], maximize: bool = False) -> List[Indiv]:
+def sort_by_fitness(
+    indivs: List["Indiv"], optimization_direction: OptimizationDirection
+) -> List["Indiv"]:
     """
-    Sorts individuals by fitness.
+    Sort individuals with the best fitness first.
 
-    Unevaluated individuals (fitness is None) are treated as worst:
-    - For minimization: +inf (they will end up at the end)
-    - For maximization: -inf (they will end up at the end)
+    Unevaluated or non-finite fitness values are always treated as worst.
 
     Args:
-        indivs: List of individuals to sort.
-        maximize: If True, sort descending (higher fitness is better).
-                  If False, sort ascending (lower fitness is better).
+        indivs: Individuals to sort.
+        optimization_direction: Whether lower or higher fitness values are better.
 
     Returns:
         Sorted list of individuals.
     """
+    maximize = optimization_direction == OptimizationDirection.MAXIMIZE
 
     def fitness_key(ind: "Indiv") -> float:
-        if ind.fitness is None:
+        if ind.fitness is None or not math.isfinite(ind.fitness):
             return float("-inf") if maximize else float("inf")
         return ind.fitness
 

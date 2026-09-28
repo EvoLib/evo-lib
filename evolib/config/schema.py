@@ -7,6 +7,7 @@ from evolib.config.base_component_config import HeliConfig
 from evolib.config.component_registry import get_component_config_class
 from evolib.interfaces.enums import (
     EvolutionStrategy,
+    OptimizationDirection,
     ReplacementStrategy,
     SelectionStrategy,
 )
@@ -58,9 +59,6 @@ class SelectionConfig(BaseModel):
     exp_base: Optional[float] = Field(
         None, description="Base for exponential ranking selection."
     )
-    fitness_maximization: Optional[bool] = Field(
-        False, description="If True, higher fitness is considered better."
-    )
 
 
 class ReplacementConfig(BaseModel):
@@ -90,10 +88,7 @@ class StoppingCriteria(BaseModel):
 
     target_fitness: Optional[float] = Field(
         None,
-        description="Stop once fitness is below (or above if maximize) this value.",
-    )
-    minimize: bool = Field(
-        True, description="Whether the problem is a minimization task (default: True)."
+        description="Stop once the configured target fitness is reached.",
     )
     patience: Optional[int] = Field(
         None, description="Stop if no improvement for this many generations."
@@ -168,6 +163,10 @@ class FullConfig(BaseModel):
     )
     num_elites: int = Field(
         ..., description="Number of elite individuals preserved each generation."
+    )
+    optimization_direction: OptimizationDirection = Field(
+        default=OptimizationDirection.MINIMIZE,
+        description="Whether lower or higher fitness values are considered better.",
     )
     random_seed: Optional[int] = Field(
         None,

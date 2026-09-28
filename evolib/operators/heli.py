@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from evolib.core.individual import Indiv
     from evolib.core.population import Pop
 
+from evolib.interfaces.enums import OptimizationDirection
 from evolib.utils.fitness import sort_by_fitness
 from evolib.utils.heli_utils import (
     apply_heli_overrides,
@@ -57,11 +58,7 @@ def evaluate_heli_drift(
             print("[HELI] Skipped drift check: no HELI config found.")
         return None
 
-    maximize = (
-        getattr(pop.config.selection, "fitness_maximization", False)
-        if pop.config.selection
-        else False
-    )
+    maximize = pop.optimization_direction == OptimizationDirection.MAXIMIZE
 
     # Reference values from main population
     fit_seed = float(best.fitness or 0.0)
@@ -162,7 +159,9 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
     if len(struct_mutants) > max_seeds:
         if seed_policy == "fitness":
             pop.evaluate_indivs(struct_mutants)
-            struct_mutants = sort_by_fitness(struct_mutants)
+            struct_mutants = sort_by_fitness(
+                struct_mutants, optimization_direction=pop.optimization_direction
+            )
 
         elif seed_policy == "random":
 

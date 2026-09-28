@@ -2,6 +2,7 @@ parent_pool_size: 50
 offspring_pool_size: 250
 max_generations: 200
 num_elites: 5
+optimization_direction: maximize
 
 evolution:
   strategy: mu_plus_lambda

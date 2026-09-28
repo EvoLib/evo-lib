@@ -1,10 +1,9 @@
 """
-Example: BipedalWalker
+Example: BipedalWalker.
 
-This script demonstrates how to evolve a neural network controller
-for the continuous-control **BipedalWalker-v3** Gymnasium environment.
-The walker must learn to coordinate its legs and joints to move
-forward without falling.
+This script demonstrates how to evolve a neural network controller for the continuous-
+control **BipedalWalker-v3** Gymnasium environment. The walker must learn to coordinate
+its legs and joints to move forward without falling.
 """
 
 from evolib import GymEnv, Individual, Population, resume_or_create, save_checkpoint
@@ -21,7 +20,7 @@ gym_env = GymEnv("BipedalWalker-v3", max_steps=MAX_STEPS)
 
 def eval_walker_fitness(indiv: Individual) -> None:
     reward = gym_env.evaluate(indiv, module="brain", episodes=3)
-    indiv.fitness = -reward
+    indiv.fitness = reward
 
 
 def checkpoint(pop: Population) -> None:

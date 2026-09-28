@@ -23,6 +23,7 @@ parent_pool_size: 20
 offspring_pool_size: 40
 max_generations: 100
 num_elites: 2
+optimization_direction: minimize
 
 evolution:
   strategy: mu_plus_lambda
@@ -61,6 +62,10 @@ pop.run()
 
 Fitness functions may return a numeric fitness value. Assigning
 `indiv.fitness` directly is also supported.
+
+`optimization_direction` is global and determines whether lower or higher fitness
+values are considered better. It defaults to `minimize`; use `maximize` for
+objectives such as reward or profit.
 
 ## Selection, Replacement, and Stopping
 

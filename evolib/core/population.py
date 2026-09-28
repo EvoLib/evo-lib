@@ -31,6 +31,7 @@ from evolib.initializers.registry import build_composite_initializer
 from evolib.interfaces.enums import (
     DiversityMethod,
     EvolutionStrategy,
+    OptimizationDirection,
     Origin,
     ReplacementStrategy,
 )
@@ -48,6 +49,7 @@ from evolib.registry.replacement_registry import build_replacement_registry
 from evolib.registry.selection_registry import build_selection_registry
 from evolib.registry.strategy_registry import strategy_registry
 from evolib.utils.config_loader import load_config
+from evolib.utils.fitness import sort_by_fitness as sort_indivs_by_fitness
 from evolib.utils.history_logger import HistoryLogger
 from evolib.utils.parallel import map_fitness
 from evolib.utils.random import set_random_seed
@@ -203,6 +205,11 @@ class Pop:
     @property
     def lambda_(self) -> int:
         return self.offspring_pool_size
+
+    @property
+    def optimization_direction(self) -> OptimizationDirection:
+        """Return the configured global optimization direction."""
+        return self.config.optimization_direction
 
     @property
     def sample_indiv(self) -> Indiv:
@@ -517,26 +524,15 @@ class Pop:
             values if include_none else [v for v in values if v is not None]
         )
 
-    def sort_by_fitness(self, reverse: bool = False) -> None:
-        """
-        Sorts the individuals in the population by their fitness (ascending by default).
-
-        Args:
-            reverse (bool): If True, sort in descending order.
-        """
-
-        # Filter or safely handle None fitness
-        def safe_key(indiv: Indiv) -> float:
-            # Treat unevaluated individuals as +inf (worst) for ascending sort
-            if indiv.fitness is None or not math.isfinite(indiv.fitness):
-                return math.inf if not reverse else -math.inf
-            return indiv.fitness
-
-        self.indivs.sort(key=safe_key, reverse=reverse)
+    def sort_by_fitness(self) -> None:
+        """Sort individuals with the best fitness first."""
+        self.indivs = sort_indivs_by_fitness(
+            self.indivs, optimization_direction=self.optimization_direction
+        )
 
     def best(self, sort: bool = True) -> Indiv:
         """
-        Return the best individual (lowest fitness).
+        Return the best individual for the configured optimization direction.
 
         Args:
             sort (bool): If True, sort the population before returning the best.
@@ -620,8 +616,13 @@ class Pop:
         if fitnesses.size == 0:
             raise ValueError("No valid fitness values to compute statistics.")
 
-        self.best_fitness = min(fitnesses)
-        self.worst_fitness = max(fitnesses)
+        if self.optimization_direction == OptimizationDirection.MINIMIZE:
+            self.best_fitness = min(fitnesses)
+            self.worst_fitness = max(fitnesses)
+        else:
+            self.best_fitness = max(fitnesses)
+            self.worst_fitness = min(fitnesses)
+
         self.mean_fitness = np.mean(fitnesses)
         self.std_fitness = np.std(fitnesses)
         self.median_fitness = np.median(fitnesses)
@@ -810,7 +811,6 @@ class Pop:
         strategy: EvolutionStrategy | None = None,
         max_generations: Optional[int] = None,
         target_fitness: Optional[float] = None,
-        minimize: Optional[bool] = None,
         patience: Optional[int] = None,
         min_delta: float = 0.0,
         time_limit_s: Optional[float] = None,
@@ -829,7 +829,6 @@ class Pop:
             max_generations: Maximum number of generations to run
                              (fallback: self.max_generations).
             target_fitness: Desired fitness threshold to stop evolution early.
-            minimize: If True, lower fitness is better; else maximize. Defaults to True.
             patience: Stop if no improvement after this many generations.
             min_delta: Minimum improvement to reset patience counter.
             time_limit_s: Stop evolution after this many seconds (wall clock).
@@ -859,8 +858,6 @@ class Pop:
             cfg = self.config.stopping
             if target_fitness is None:
                 target_fitness = cfg.target_fitness
-            if minimize is None:
-                minimize = cfg.minimize
             if patience is None:
                 patience = cfg.patience
             if min_delta == 0.0 and cfg.min_delta != 0.0:
@@ -868,9 +865,7 @@ class Pop:
             if time_limit_s is None:
                 time_limit_s = cfg.time_limit_s
 
-        # Fallback to default: minimize = True
-        if minimize is None:
-            minimize = True
+        maximize = self.optimization_direction == OptimizationDirection.MAXIMIZE
 
         # Determine maximum number of generations
         gen_cap = max_generations or self.max_generations
@@ -884,7 +879,7 @@ class Pop:
             )
 
         start_time = time.time()
-        best_fitness = math.inf if minimize else -math.inf
+        best_fitness = -math.inf if maximize else math.inf
         no_improve = 0
 
         # ON_START
@@ -909,10 +904,10 @@ class Pop:
                 current_fitness is not None
             ), "Strategy must evaluate fitness each generation"
 
-            if minimize:
-                has_improved = (best_fitness - current_fitness) > min_delta
-            else:
+            if maximize:
                 has_improved = (current_fitness - best_fitness) > min_delta
+            else:
+                has_improved = (best_fitness - current_fitness) > min_delta
 
             # ON_IMPROVEMENT
             if has_improved:
@@ -927,11 +922,11 @@ class Pop:
             if target_fitness is not None:
 
                 fitness_reached = False
-                if minimize:
-                    if current_fitness <= target_fitness:
+                if maximize:
+                    if current_fitness >= target_fitness:
                         fitness_reached = True
                 else:
-                    if current_fitness >= target_fitness:
+                    if current_fitness <= target_fitness:
                         fitness_reached = True
 
                 if fitness_reached:

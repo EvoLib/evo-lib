@@ -1,12 +1,11 @@
 """
-Example: LunarLander with EvoLib
+Example: LunarLander with EvoLib.
 
-This script demonstrates how to evolve a neural network controller
-for the classic **LunarLander-v3** Gymnasium environment.
-Each individual’s network is evaluated by running a full episode
-and using the negative cumulative reward as fitness (minimization).
-At the end of selected generations, the best agent is visualized
-and exported as an animated GIF for inspection.
+This script demonstrates how to evolve a neural network controller for the classic
+**LunarLander-v3** Gymnasium environment. Each individual’s network is evaluated by
+running a full episode and using the negative cumulative reward as fitness
+(minimization). At the end of selected generations, the best agent is visualized and
+exported as an animated GIF for inspection.
 """
 
 from evolib import GymEnv, Individual, Population, resume_or_create
@@ -21,8 +20,8 @@ gym_env = GymEnv("LunarLander-v3", max_steps=MAX_STEPS)
 
 def eval_lunar_fitness(indiv: Individual) -> None:
     """Assign fitness to an individual by running one LunarLander episode."""
-    fitness = gym_env.evaluate(indiv, module="brain")
-    indiv.fitness = -fitness
+    reward = gym_env.evaluate(indiv, module="brain")
+    indiv.fitness = reward
 
 
 def on_generation_end(pop: Population) -> None:

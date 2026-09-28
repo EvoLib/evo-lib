@@ -95,7 +95,7 @@ Evolves a neural-network controller for the [LunarLander](https://gymnasium.fara
 The agent learns to control a lander with discrete thruster commands in order to 
 land safely between the flags.  
 
-* Fitness: negative cumulative reward from one episode (minimization).  
+* Fitness: cumulative reward from one episode (minimization).  
 * Observation space: continuous (position, velocity, angle, contact flags).  
 * Action space: discrete thruster commands.  
 * Visualization: every 20 generations (and at the end), the best individual is rendered and saved as an animated GIF.
@@ -113,7 +113,7 @@ Evolves a neural-network controller for the
 
 This is a continuous-control benchmark with a bipedal robot and a high-dimensional state space.
 
-* Fitness: negative cumulative reward (minimization), averaged across multiple episodes (variance reduction).
+* Fitness: cumulative reward (minimization), averaged across multiple episodes (variance reduction).
 * Observation space: continuous (24 floats).
 * Action space: continuous (4 floats).
 * Visualization: on improvements, the best individual is rendered and saved as an animated GIF in `05_frames/`.

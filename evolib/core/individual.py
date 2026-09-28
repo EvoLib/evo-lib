@@ -117,11 +117,6 @@ class Indiv:
         self.heli_reintegrated = False
         self.is_structural_mutant = False
 
-    def __lt__(self, other: "Indiv") -> bool:
-        if self.fitness is None or other.fitness is None:
-            raise ValueError("Comparison attempted with unevaluated individuals")
-        return self.fitness < other.fitness
-
     @property
     def is_evaluated(self) -> bool:
         """Return True if the individual has a valid fitness value."""

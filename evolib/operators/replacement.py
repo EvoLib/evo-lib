@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from evolib.core.population import Pop
 
 from evolib.core.population import Indiv
-from evolib.interfaces.enums import Origin
+from evolib.interfaces.enums import OptimizationDirection, Origin
 from evolib.utils.fitness import sort_by_fitness
 from evolib.utils.lineage_logger import LineageLogger
 
@@ -34,9 +34,7 @@ def _mark_removed_indivs(
         )
 
 
-def replace_truncation(
-    pop: "Pop", pool: List[Indiv], fitness_maximization: bool = False
-) -> None:
+def replace_truncation(pop: "Pop", pool: List[Indiv]) -> None:
     """
     Generic truncation replacement selecting the top μ individuals from a given pool.
     Pass a pool that already contains what should compete (e.g., parents+offspring for
@@ -45,7 +43,6 @@ def replace_truncation(
     Args:
         pop: Population handle (μ taken from pop.parent_pool_size).
         pool: Candidate list to pick survivors from.
-        fitness_maximization: If True, higher fitness is better.
     """
     if not pool:
         raise ValueError("Pool must not be empty.")
@@ -54,7 +51,9 @@ def replace_truncation(
     if len(pool) < pop.parent_pool_size:
         raise ValueError("Pool smaller than parent_pool_size; cannot truncate cleanly.")
 
-    sorted_pool = sort_by_fitness(pool, maximize=fitness_maximization)
+    sorted_pool = sort_by_fitness(
+        pool, optimization_direction=pop.optimization_direction
+    )
     survivors = sorted_pool[: pop.parent_pool_size]
 
     # Deduplicate and mark removed
@@ -68,9 +67,7 @@ def replace_truncation(
         indiv.origin = Origin.PARENT
 
 
-def replace_mu_plus_lambda(
-    pop: "Pop", offspring: List[Indiv], fitness_maximization: bool = False
-) -> None:
+def replace_mu_plus_lambda(pop: "Pop", offspring: List[Indiv]) -> None:
     """
     (μ + λ) replacement: parents and offspring compete together; keep best μ.
 
@@ -85,19 +82,17 @@ def replace_mu_plus_lambda(
     Args:
         pop: Population object (parents in pop.indivs).
         offspring: Newly generated offspring.
-        fitness_maximization: Whether fitness is to be maximized.
     """
     if not offspring:
         raise ValueError("Offspring list must not be empty.")
 
     combined = pop.indivs + offspring
-    replace_truncation(pop, combined, fitness_maximization)
+    replace_truncation(pop, combined)
 
 
 def replace_mu_comma_lambda(
     pop: "Pop",
     offspring: list[Indiv],
-    fitness_maximization: bool = False,
 ) -> None:
     """
     (mu, lambda) replacement: ONLY offspring compete; keep best mu offspring, top
@@ -111,7 +106,6 @@ def replace_mu_comma_lambda(
     Args:
         pop: Population object (current parents are in pop.indivs).
         offspring: Newly generated and evaluated offspring.
-        fitness_maximization: Whether fitness is to be maximized.
     """
     if not offspring:
         raise ValueError("Offspring list must not be empty.")
@@ -128,7 +122,9 @@ def replace_mu_comma_lambda(
     _mark_removed_indivs(old_non_elites, [], pop.generation_num, pop.lineage_logger)
 
     # Select best (mu - num_elites) offspring
-    sorted_offspring = sort_by_fitness(offspring, maximize=fitness_maximization)
+    sorted_offspring = sort_by_fitness(
+        offspring, optimization_direction=pop.optimization_direction
+    )
     survivors = elites + sorted_offspring[: pop.parent_pool_size - len(elites)]
 
     # Mark any remaining offspring that were not chosen as removed
@@ -144,7 +140,6 @@ def replace_generational(
     pop: "Pop",
     offspring: List[Indiv],
     max_age: int = 0,
-    fitness_maximization: bool = False,
 ) -> None:
     """
     Replace the population with offspring, preserving elites and optionally applying
@@ -157,7 +152,6 @@ def replace_generational(
         pop (Pop): The population object.
         offspring (List[Indiv]): Newly generated offspring.
         max_age (int): Maximum allowed individual age (0 = disabled).
-        fitness_maximization (bool): If True, higher fitness is better.
 
     Raises:
         ValueError: On invalid configuration or population state.
@@ -189,7 +183,9 @@ def replace_generational(
         survivors = combined
 
     # Sort by fitness (best first)
-    sorted_survivors = sort_by_fitness(survivors, maximize=fitness_maximization)
+    sorted_survivors = sort_by_fitness(
+        survivors, optimization_direction=pop.optimization_direction
+    )
 
     # Mark old parents and non-selected offspring as removed
     all_candidates = pop.indivs + offspring
@@ -205,7 +201,6 @@ def replace_steady_state(
     pop: "Pop",
     offspring: List[Indiv],
     num_replace: int = 0,
-    fitness_maximization: bool = False,
 ) -> None:
     """
     Replace the worst individuals in the population with offspring, preserving elite
@@ -216,7 +211,6 @@ def replace_steady_state(
         offspring (List[Indiv]): New individuals to insert.
         num_replace (int): Number of individuals to replace.
             If 0, replaces len(offspring).
-        fitness_maximization (bool): Whether higher fitness is better.
 
     Raises:
         ValueError: If replacement configuration is invalid.
@@ -258,10 +252,14 @@ def replace_steady_state(
         )
 
     # Sort non-elites by fitness (worst at the end)
-    sorted_non_elites = sort_by_fitness(non_elites, maximize=fitness_maximization)
+    sorted_non_elites = sort_by_fitness(
+        non_elites, optimization_direction=pop.optimization_direction
+    )
 
     # Replace worst non-elites with best offspring
-    sorted_offspring = sort_by_fitness(offspring, maximize=fitness_maximization)
+    sorted_offspring = sort_by_fitness(
+        offspring, optimization_direction=pop.optimization_direction
+    )
 
     survivors = (
         elites + sorted_non_elites[:-num_replace] + sorted_offspring[:num_replace]
@@ -274,7 +272,9 @@ def replace_steady_state(
     )
 
     # Final sort for consistency
-    survivors = sort_by_fitness(survivors, maximize=fitness_maximization)
+    survivors = sort_by_fitness(
+        survivors, optimization_direction=pop.optimization_direction
+    )
     pop.indivs = survivors
 
 
@@ -336,7 +336,6 @@ def replace_weighted_stochastic(
     pop: "Pop",
     offspring: List[Indiv],
     temperature: float = 1.0,
-    fitness_maximization: bool = False,
 ) -> None:
     """
     Replace individuals in the population using inverse-fitness-weighted softmax
@@ -346,7 +345,6 @@ def replace_weighted_stochastic(
         pop (Pop): The population object.
         offspring (List[Indiv]): List of new individuals.
         temperature (float): Softmax temperature (> 0).
-        fitness_maximization (bool): Whether higher fitness is better.
 
     Raises:
         ValueError: On invalid input or if not enough non-elites are available.
@@ -379,10 +377,10 @@ def replace_weighted_stochastic(
     fitness = np.array([indiv.fitness for indiv in non_elites], dtype=np.float64)
 
     # Compute inverse-scaled softmax probabilities
-    if not fitness_maximization:
-        scaled = -fitness / temperature
-    else:
+    if pop.optimization_direction == OptimizationDirection.MAXIMIZE:
         scaled = fitness / temperature
+    else:
+        scaled = -fitness / temperature
 
     exp_scores = np.exp(scaled - np.max(scaled))  # numerical stability
     probabilities = exp_scores / np.sum(exp_scores)
@@ -405,5 +403,7 @@ def replace_weighted_stochastic(
     )
 
     # Recombine and sort
-    survivors = sort_by_fitness(survivors, maximize=fitness_maximization)
+    survivors = sort_by_fitness(
+        survivors, optimization_direction=pop.optimization_direction
+    )
     pop.indivs = survivors
