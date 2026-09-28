@@ -321,8 +321,8 @@ def replace_weighted_stochastic(
     temperature: float = 1.0,
 ) -> None:
     """
-    Replace individuals in the population using inverse-fitness-weighted softmax
-    sampling, preserving elite individuals.
+    Replace individuals using softmax sampling that gives worse non-elites a higher
+    replacement probability while preserving elite individuals.
 
     Args:
         pop (Pop): The population object.
@@ -359,11 +359,11 @@ def replace_weighted_stochastic(
     # Extract fitness values from non-elites
     fitness = np.array([indiv.fitness for indiv in non_elites], dtype=np.float64)
 
-    # Compute inverse-scaled softmax probabilities
+    # Compute softmax probabilities that favor worse individuals for replacement.
     if pop.optimization_direction == OptimizationDirection.MAXIMIZE:
-        scaled = fitness / temperature
-    else:
         scaled = -fitness / temperature
+    else:
+        scaled = fitness / temperature
 
     exp_scores = np.exp(scaled - np.max(scaled))  # numerical stability
     probabilities = exp_scores / np.sum(exp_scores)

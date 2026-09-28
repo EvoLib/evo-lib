@@ -13,6 +13,7 @@
 
 * Fixed diversity EMA initialization so the first value uses measured diversity instead of being biased toward zero.
 * Fixed `Pop.run()` overrides so explicit zero values for `max_generations` and `min_delta` are preserved.
+* Fixed stochastic replacement weighting so worse non-elite individuals are more likely to be replaced.
 
 ### Removed
 
