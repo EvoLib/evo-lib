@@ -605,7 +605,7 @@ class Pop:
         Computes population diversity based on fitness values.
 
         Args:
-            method (str): One of ['iqr', 'std', 'var', 'range', 'normalized_std']
+            method: Diversity metric to use.
 
         Returns:
             float: Diversity score.
@@ -942,7 +942,6 @@ def _is_valid_fitness(x: float | None) -> bool:
 def compute_fitness_diversity(
     fitnesses: list[float],
     method: DiversityMethod = DiversityMethod.IQR,
-    epsilon: float = 1e-8,
 ) -> float:
     """
     Computes a diversity metric for a list of fitness values.
@@ -950,7 +949,6 @@ def compute_fitness_diversity(
     Args:
         fitnesses (list[float]): Fitness values of individuals.
         method (DiversityMethod): Diversity metric to use.
-        epsilon (float): Small constant to prevent division by zero.
 
     Returns:
         float: Computed diversity score.
@@ -959,27 +957,18 @@ def compute_fitness_diversity(
         return 0.0
 
     values = np.array(fitnesses)
-    median = np.median(values)
 
     if method == DiversityMethod.IQR:
         return float(np.percentile(fitnesses, 75) - np.percentile(fitnesses, 25))
 
-    if method == DiversityMethod.RELATIVE_IQR:
-        q75, q25 = np.percentile(values, [75, 25])
-        median = np.median(values)
-        return (q75 - q25) / (median + epsilon)
-
     if method == DiversityMethod.STD:
-        return np.std(values)
+        return float(np.std(values))
 
     if method == DiversityMethod.VAR:
-        return np.var(values)
+        return float(np.var(values))
 
     if method == DiversityMethod.RANGE:
-        return (np.max(values) - np.min(values)) / (median + epsilon)
-
-    if method == DiversityMethod.NORMALIZED_STD:
-        return np.std(values) / (median + epsilon)
+        return float(np.max(values) - np.min(values))
 
     raise ValueError(f"Unsupported diversity method: '{method}'")
 

@@ -60,11 +60,9 @@ class CrossoverOperator(Enum):
 
 class DiversityMethod(Enum):
     IQR = "iqr"
-    RELATIVE_IQR = "relative_iqr"  # (IQR / median)
     STD = "std"
     VAR = "var"
     RANGE = "range"
-    NORMALIZED_STD = "normalized_std"
 
 
 class SelectionStrategy(Enum):

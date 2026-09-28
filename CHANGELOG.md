@@ -16,6 +16,7 @@
 * Fixed `Pop.run()` overrides so explicit zero values for `max_generations` and `min_delta` are preserved.
 * Fixed stochastic replacement weighting so worse non-elite individuals are more likely to be replaced.
 * Corrected rank-selection documentation to reflect that rank 0 is the best individual.
+* Fixed `DiversityMethod.RANGE` to return the unnormalized fitness range.
 
 ### Removed
 
@@ -23,6 +24,7 @@
 * BREAKING: Removed `max_indiv_age` and automatic age-based survivor removal.
 * Removed unused population-level strategy state for mutation, pairing, crossover, selection, and replacement.
 * BREAKING: Removed deprecated `Pop.set_functions()`; use `set_fitness_function()` or the constructor argument instead.
+* Removed the unused `relative_iqr` and `normalized_std` diversity methods.
 
 
 ## EvoLib 0.4.0
