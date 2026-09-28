@@ -5,7 +5,6 @@ random_seed: 42  # Global random seed for reproducibility.
 parent_pool_size: 50
 offspring_pool_size: 100
 max_generations: 50
-max_indiv_age: 0
 num_elites: 1
 
 evolution:

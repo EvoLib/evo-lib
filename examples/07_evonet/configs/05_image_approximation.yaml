@@ -5,7 +5,6 @@ random_seed: 1
 parent_pool_size: 70
 offspring_pool_size: 420
 max_generations: 500
-max_indiv_age: 0
 num_elites: 7
 
 evolution:

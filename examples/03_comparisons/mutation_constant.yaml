@@ -4,7 +4,6 @@ parent_pool_size: 40
 offspring_pool_size: 40
 
 max_generations: 100
-max_indiv_age: 0
 num_elites: 1
 
 evolution:

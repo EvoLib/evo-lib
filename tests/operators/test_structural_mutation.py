@@ -20,7 +20,6 @@ def make_minimal_evonet() -> EvoNet:
         "parent_pool_size": 10,
         "offspring_pool_size": 20,
         "max_generations": 5,
-        "max_indiv_age": 0,
         "num_elites": 1,
         "evolution": {"strategy": "mu_plus_lambda"},
         "modules": {

@@ -95,7 +95,6 @@ class Pop:
         self.parent_pool_size = cfg.parent_pool_size
         self.offspring_pool_size = cfg.offspring_pool_size
         self.max_generations = cfg.max_generations
-        self.max_indiv_age = cfg.max_indiv_age
         self.num_elites = cfg.num_elites
 
         random_seed = cfg.random_seed
@@ -295,7 +294,6 @@ class Pop:
         pop.parent_pool_size = cfg.parent_pool_size
         pop.offspring_pool_size = cfg.offspring_pool_size
         pop.max_generations = cfg.max_generations
-        pop.max_indiv_age = cfg.max_indiv_age
         pop.num_elites = cfg.num_elites
 
         if initialize:
@@ -546,45 +544,6 @@ class Pop:
             self.sort_by_fitness()
 
         return self.indivs[0]
-
-    def remove_old_indivs(self) -> int:
-        """
-        Removes individuals whose age exceeds the maximum allowed age, excluding elite
-        individuals.
-
-        Returns:
-            int: Number of individuals removed.
-        """
-        if self.max_indiv_age <= 0:
-            return 0
-
-        elite_cutoff = self.num_elites if self.num_elites > 0 else 0
-
-        survivors = self.indivs[:elite_cutoff] + [
-            indiv
-            for indiv in self.indivs[elite_cutoff:]
-            if indiv.age < self.max_indiv_age
-        ]
-
-        # Identify removed individuals
-        removed = [indiv for indiv in self.indivs if indiv not in survivors]
-        removed_count = len(removed)
-
-        if not survivors:
-            survivors = [self.best()]
-            print(
-                f"[Warning] All individuals exceeded max_age={self.max_indiv_age}. "
-                "Keeping best individual to prevent population collapse."
-            )
-
-        if removed_count > 0:
-            # Mark removed individuals with their exit generation
-            for indiv in removed:
-                indiv.exit_gen = self.generation_num
-
-            self.indivs = survivors
-
-        return removed_count
 
     def age_indivs(self) -> None:
         """

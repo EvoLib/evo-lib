@@ -136,22 +136,16 @@ def replace_mu_comma_lambda(
         indiv.origin = Origin.PARENT
 
 
-def replace_generational(
-    pop: "Pop",
-    offspring: List[Indiv],
-    max_age: int = 0,
-) -> None:
+def replace_generational(pop: "Pop", offspring: List[Indiv]) -> None:
     """
-    Replace the population with offspring, preserving elites and optionally applying
-    age-based filtering. Resulting population is sorted by fitness.
+    Replace the population with offspring while preserving elites.
 
-    This function implements generational replacement with elitism and
-    optional aging. The final population size will be at most pop.parent_pool_size.
+    The resulting population is sorted by fitness and contains at most
+    pop.parent_pool_size individuals.
 
     Args:
         pop (Pop): The population object.
         offspring (List[Indiv]): Newly generated offspring.
-        max_age (int): Maximum allowed individual age (0 = disabled).
 
     Raises:
         ValueError: On invalid configuration or population state.
@@ -165,22 +159,11 @@ def replace_generational(
             f"num_elites ({pop.num_elites}) cannot exceed population size "
             f"({len(pop.indivs)})."
         )
-    if max_age < 0:
-        raise ValueError("max_age must be ≥ 0.")
 
     # Sort and mark elites
     elites = pop.get_elites()
 
-    # Combine offspring with current population (needed for aging step)
-    combined = elites + offspring
-
-    # Filter by age if aging is active
-    if max_age > 0:
-        survivors = [
-            indiv for indiv in combined if indiv.is_elite or indiv.age < max_age
-        ]
-    else:
-        survivors = combined
+    survivors = elites + offspring
 
     # Sort by fitness (best first)
     sorted_survivors = sort_by_fitness(

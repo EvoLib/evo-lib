@@ -3,7 +3,6 @@ offspring_pool_size: 4
 optimization_direction: maximize
 
 max_generations: 20
-max_indiv_age: 0
 num_elites: 0
 
 modules:

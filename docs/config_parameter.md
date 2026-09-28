@@ -13,7 +13,6 @@ For usage-oriented examples, see the configuration guide.
 | `offspring_pool_size` | int | --- | Number of offspring produced per generation. Must be greater than 0. |
 | `max_generations` | int | --- | Maximum number of generations. Must be greater than 0. |
 | `num_elites` | int | --- | Number of elite individuals preserved each generation. Must be between 0 and `parent_pool_size`. |
-| `max_indiv_age` | int | `0` | Maximum individual age in generations. `0` disables aging. |
 | `optimization_direction` | str | `minimize` | Global fitness optimization direction: `minimize` or `maximize`. |
 | `random_seed` | int \\| null | `null` | Global random seed. Use an integer for reproducible runs. |
 
@@ -487,7 +486,6 @@ parent_pool_size: 20
 offspring_pool_size: 40
 max_generations: 100
 num_elites: 1
-max_indiv_age: 0
 optimization_direction: minimize
 
 stopping:

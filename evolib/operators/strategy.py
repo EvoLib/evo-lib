@@ -80,9 +80,6 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
     # Select the best individuals
     replace_mu_plus_lambda(pop, offspring)
 
-    # Remove individuals that exceed max_age
-    pop.remove_old_indivs()
-
     # Lineage Logging
     if pop.lineage_logger is not None:
         pop.lineage_logger.log_population(
@@ -232,9 +229,6 @@ def evolve_steady_state(pop: "Pop") -> None:
     # Replace worst individuals (excluding elites)
     replace_steady_state(pop, offspring, num_replace=pop.lambda_)
 
-    # Remove individuals that exceed max_age
-    pop.remove_old_indivs()
-
     # Lineage Logging
     if pop.lineage_logger is not None:
         pop.lineage_logger.log_population(
@@ -306,9 +300,6 @@ def evolve_flexible(pop: "Pop") -> None:
 
     # Replacement (via configured strategy)
     pop._replacement_fn(pop, offspring)
-
-    # Remove individuals that exceed max_age
-    pop.remove_old_indivs()
 
     # Lineage Logging
     if pop.lineage_logger is not None:

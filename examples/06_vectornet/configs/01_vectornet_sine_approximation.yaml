@@ -3,7 +3,6 @@
 parent_pool_size: 20
 offspring_pool_size: 140
 max_generations: 150
-max_indiv_age: 0
 num_elites: 2
 
 evolution:

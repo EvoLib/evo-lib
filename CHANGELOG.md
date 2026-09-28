@@ -12,6 +12,7 @@
 ### Removed
 
 * BREAKING: Removed `NetVector` and legacy structured `Vector` modes. `Vector` now represents flat parameter vectors only.
+* BREAKING: Removed `max_indiv_age` and automatic age-based survivor removal.
 
 
 ## EvoLib 0.4.0

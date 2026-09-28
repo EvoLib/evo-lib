@@ -13,7 +13,6 @@ def minimal_config_yaml(tmp_path: Path) -> Path:
         "parent_pool_size": 10,
         "offspring_pool_size": 20,
         "max_generations": 5,
-        "max_indiv_age": 0,
         "num_elites": 1,
         "evolution": {"strategy": "mu_plus_lambda"},
         "modules": {

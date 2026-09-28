@@ -157,10 +157,6 @@ class FullConfig(BaseModel):
     max_generations: int = Field(
         ..., description="Maximum number of generations to run."
     )
-    max_indiv_age: int = Field(
-        0,
-        description="Maximum allowed individual age in generations; 0 disables aging.",
-    )
     num_elites: int = Field(
         ..., description="Number of elite individuals preserved each generation."
     )
@@ -245,6 +241,4 @@ class FullConfig(BaseModel):
             raise ValueError("num_elites cannot exceed parent_pool_size")
         if self.max_generations <= 0:
             raise ValueError("max_generations must be > 0")
-        if self.max_indiv_age < 0:
-            raise ValueError("max_indiv_age must be >= 0")
         return self

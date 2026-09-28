@@ -40,11 +40,8 @@ class Indiv:
     #: None means the individual has not yet been evaluated.
     fitness: float | None
 
-    #: age (int): Current age of the individual. 0 means "no limit".
+    #: age (int): Current age of the individual in generations.
     age: int
-
-    #: max_age (Optional[int]): Maximum allowed age of the individual.
-    max_age: int
 
     #: origin (str): Origin of the individual (e.g. Origin.PARENT, Origin.OFFSPRING).
     origin: Origin
@@ -86,7 +83,6 @@ class Indiv:
         "para",
         "fitness",
         "age",
-        "max_age",
         "origin",
         "extra_metrics",
         "is_elite",
@@ -104,7 +100,6 @@ class Indiv:
         self.para = para if para is not None else ParaDummy()
         self.fitness = None
         self.age = 0
-        self.max_age = 0
         self.origin = Origin.PARENT
         self.is_elite = False
         self.extra_metrics = {}
@@ -163,7 +158,6 @@ class Indiv:
         print("Individual:")
         print(f"  Fitness: {self.fitness}")
         print(f"  Age: {self.age}")
-        print(f"  Max Age: {self.max_age}")
         print(f"  Origin: {self.origin}")
 
         print(f"   ID: {self.id}")

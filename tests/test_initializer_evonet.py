@@ -9,7 +9,6 @@ def test_default_initializer_evonet_builds_expected_structure() -> None:
         offspring_pool_size=1,
         max_generations=1,
         num_elites=0,
-        max_indiv_age=0,
         modules={
             "brain": {
                 "type": "evonet",
