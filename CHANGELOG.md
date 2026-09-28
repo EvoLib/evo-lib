@@ -12,6 +12,7 @@
 ### Fixed
 
 * Fixed diversity EMA initialization so the first value uses measured diversity instead of being biased toward zero.
+* Fixed `Pop.run()` overrides so explicit zero values for `max_generations` and `min_delta` are preserved.
 
 ### Removed
 

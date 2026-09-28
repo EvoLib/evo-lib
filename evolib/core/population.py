@@ -751,7 +751,7 @@ class Pop:
         max_generations: Optional[int] = None,
         target_fitness: Optional[float] = None,
         patience: Optional[int] = None,
-        min_delta: float = 0.0,
+        min_delta: Optional[float] = None,
         time_limit_s: Optional[float] = None,
         verbosity: int = 1,
         on_start: OnStartHook = None,
@@ -769,7 +769,8 @@ class Pop:
                              (fallback: self.max_generations).
             target_fitness: Desired fitness threshold to stop evolution early.
             patience: Stop if no improvement after this many generations.
-            min_delta: Minimum improvement to reset patience counter.
+            min_delta: Minimum improvement to reset patience counter
+                       (fallback: configured value, otherwise 0.0).
             time_limit_s: Stop evolution after this many seconds (wall clock).
             verbosity: 0 = silent, 1 = status messages (default).
             on_start: Optional callback(pop)
@@ -799,15 +800,18 @@ class Pop:
                 target_fitness = cfg.target_fitness
             if patience is None:
                 patience = cfg.patience
-            if min_delta == 0.0 and cfg.min_delta != 0.0:
+            if min_delta is None:
                 min_delta = cfg.min_delta
             if time_limit_s is None:
                 time_limit_s = cfg.time_limit_s
 
+        if min_delta is None:
+            min_delta = 0.0
+
         maximize = self.optimization_direction == OptimizationDirection.MAXIMIZE
 
         # Determine maximum number of generations
-        gen_cap = max_generations or self.max_generations
+        gen_cap = self.max_generations if max_generations is None else max_generations
         if gen_cap <= 0:
             return 0
 
