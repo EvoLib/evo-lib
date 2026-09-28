@@ -322,11 +322,10 @@ class EvoNet(ParaBase):
                 ep, generation, max_generations
             )
 
-        elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
-            if diversity_ema is None:
-                raise ValueError(
-                    "diversity_ema must be provided for ADAPTIVE_GLOBAL strategy"
-                )
+        elif (
+            ep.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL
+            and diversity_ema is not None
+        ):
             if ep.mutation_strength is None:
                 raise ValueError(
                     "mutation_strength must be provided for ADAPTIVE_GLOBAL strategy"
@@ -383,11 +382,10 @@ class EvoNet(ParaBase):
                     bep, generation, max_generations
                 )
 
-            elif bias_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
-                if diversity_ema is None:
-                    raise ValueError(
-                        "diversity_ema must be provided for ADAPTIVE_GLOBAL (biases)"
-                    )
+            elif (
+                bias_strategy == MutationStrategy.ADAPTIVE_GLOBAL
+                and diversity_ema is not None
+            ):
                 if bep.mutation_strength is None or bep.mutation_probability is None:
                     raise ValueError(
                         "biases override for ADAPTIVE_GLOBAL requires both "

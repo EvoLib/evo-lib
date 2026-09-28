@@ -179,7 +179,7 @@ class Pop:
         self.std_fitness = 0.0
         self.iqr_fitness = 0.0
         self.diversity = 0.0
-        self.diversity_ema = 0.0
+        self.diversity_ema: float | None = None
 
         # Lineage Logging
         self.lineage_logger = None
@@ -270,7 +270,7 @@ class Pop:
         pop.std_fitness = 0.0
         pop.iqr_fitness = 0.0
         pop.diversity = 0.0
-        pop.diversity_ema = 0.0
+        pop.diversity_ema = None
 
         # Parallel backend (same as parent)
         pop.parallel_backend = cfg.parallel.backend if cfg.parallel else "none"
@@ -655,7 +655,7 @@ class Pop:
         self.std_fitness = 0.0
         self.iqr_fitness = 0.0
         self.diversity = 0.0
-        self.diversity_ema = 0.0
+        self.diversity_ema = None
 
         self.history_logger.reset()
 

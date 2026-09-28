@@ -9,6 +9,10 @@
 * Migrated fixed-topology neural network examples and configuration from `NetVector` to `VectorNet`.
 * REAKING: Replaced selection- and stopping-specific optimization flags with the global `optimization_direction` setting (`minimize` or `maximize`).
 
+### Fixed
+
+* Fixed diversity EMA initialization so the first value uses measured diversity instead of being biased toward zero.
+
 ### Removed
 
 * BREAKING: Removed `NetVector` and legacy structured `Vector` modes. `Vector` now represents flat parameter vectors only.

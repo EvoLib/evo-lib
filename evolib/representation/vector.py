@@ -280,7 +280,7 @@ class Vector(ParaBase):
             generation: Current generation index.
             max_generations: Maximum number of generations planned.
             diversity_ema: Exponential moving average of population diversity
-                           (required for adaptive-global strategies).
+                           used by adaptive-global strategies when available.
         """
         ep = self.evo_params
         """Update mutation parameters based on strategy and generation."""
@@ -293,11 +293,10 @@ class Vector(ParaBase):
                 ep, generation, max_generations
             )
 
-        elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL:
-            if diversity_ema is None:
-                raise ValueError(
-                    "diversity_ema must be provided for ADAPTIVE_GLOBAL strategy"
-                )
+        elif (
+            ep.mutation_strategy == MutationStrategy.ADAPTIVE_GLOBAL
+            and diversity_ema is not None
+        ):
             if ep.mutation_strength is None:
                 raise ValueError(
                     "mutation_strength must be provided for ADAPTIVE_GLOBAL strategy"
