@@ -7,6 +7,7 @@
 ### Changed
 
 * Migrated fixed-topology neural network examples and configuration from `NetVector` to `VectorNet`.
+* REAKING: Replaced selection- and stopping-specific optimization flags with the global `optimization_direction` setting (`minimize` or `maximize`).
 
 ### Removed
 
