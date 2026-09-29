@@ -548,12 +548,12 @@ class Pop:
         Raises:
             ValueError: If no individuals have a valid fitness value.
         """
-        self.generation_num += 1
-
         fitnesses = self.get_fitness_array()
 
         if fitnesses.size == 0:
             raise ValueError("No valid fitness values to compute statistics.")
+
+        self.generation_num += 1
 
         if self.optimization_direction == OptimizationDirection.MINIMIZE:
             self.best_fitness = min(fitnesses)
@@ -588,7 +588,13 @@ class Pop:
             "diversity": self.diversity,
         }
 
-        para = getattr(self.best(), "para", None)
+        best_indiv = None
+        for indiv in self.indivs:
+            if indiv.fitness == self.best_fitness:
+                best_indiv = indiv
+                break
+
+        para = getattr(best_indiv, "para", None)
 
         get_history = getattr(para, "get_history", None)
         if callable(get_history):

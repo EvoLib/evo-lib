@@ -17,6 +17,7 @@
 * Fixed stochastic replacement weighting so worse non-elite individuals are more likely to be replaced.
 * Corrected rank-selection documentation to reflect that rank 0 is the best individual.
 * Fixed `DiversityMethod.RANGE` to return the unnormalized fitness range.
+* Fixed `Pop.update_statistics()` so statistics logging no longer reorders the population; failed updates leave the generation counter unchanged.
 
 ### Removed
 
