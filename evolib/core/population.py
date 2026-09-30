@@ -86,91 +86,10 @@ class Pop:
 
         cfg: FullConfig = load_config(config_path)
 
-        self.config = cfg
-        self.para_initializer = build_composite_initializer(cfg)
-        self.indivs: List[Any] = []
+        self._configure_from_config(cfg)
+        self._initialize_runtime_state()
 
-        # Core parameters
-        self.parent_pool_size = cfg.parent_pool_size
-        self.offspring_pool_size = cfg.offspring_pool_size
-        self.max_generations = cfg.max_generations
-        self.num_elites = cfg.num_elites
-
-        random_seed = cfg.random_seed
-        set_random_seed(random_seed)
-
-        # Runtime strategy functions
-        self.selection_fn: Optional[SelectionFunction] = None
-        self.evolution_strategy = None
-        self._replacement_fn: Optional[ReplaceFunction] = None
-
-        # Evolution
-        if cfg.evolution is not None:
-            self.evolution_strategy = cfg.evolution.strategy
-        else:
-            self.evolution_strategy = None
-
-        # Selection
-        if cfg.selection is not None:
-            self._selection_registry = build_selection_registry(cfg.selection)
-            self.selection_fn = self._selection_registry[cfg.selection.strategy]
-
-        # Replacement
-        if cfg.replacement is not None:
-            self._replacement_registry = build_replacement_registry(cfg.replacement)
-            self._replacement_fn = self._replacement_registry[cfg.replacement.strategy]
-
-        else:
-            self._replacement_registry = {}
-            self._replacement_fn = None
-
-        # Parallel backend
-        if cfg.parallel:
-            self.parallel_backend = cfg.parallel.backend
-            self.parallel_num_cpus = cfg.parallel.num_cpus
-            self.parallel_address = cfg.parallel.address
-        else:
-            self.parallel_backend = "none"
-            self.parallel_num_cpus = None
-            self.parallel_address = None
-
-        # HELI parameters
-        self.heli_enabled = False
-        self.heli_verbosity = 2
-        if cfg.evolution is not None and cfg.evolution.heli:
-            self.heli_enabled = True
-            self.heli_generations = cfg.evolution.heli.generations
-            self.heli_offspring_per_seed = cfg.evolution.heli.offspring_per_seed
-            self.heli_max_fraction = cfg.evolution.heli.max_fraction
-            self.heli_reduce_sigma_factor = cfg.evolution.heli.reduce_sigma_factor
-        else:
-            self.heli_generations = 0
-            self.heli_offspring_per_seed = 0
-            self.heli_max_fraction = 0.0
-            self.heli_reduce_sigma_factor = 1.0
-
-        # Statistics
-        self.history_logger = HistoryLogger(
-            columns=[
-                "generation",
-                "best_fitness",
-                "worst_fitness",
-                "mean_fitness",
-                "median_fitness",
-                "std_fitness",
-                "iqr_fitness",
-                "diversity",
-            ]
-        )
-        self.generation_num = 0
-        self.best_fitness = 0.0
-        self.worst_fitness = 0.0
-        self.mean_fitness = 0.0
-        self.median_fitness = 0.0
-        self.std_fitness = 0.0
-        self.iqr_fitness = 0.0
-        self.diversity = 0.0
-        self.diversity_ema: float | None = None
+        set_random_seed(cfg.random_seed)
 
         # Lineage Logging
         self.lineage_logger = None
@@ -178,11 +97,6 @@ class Pop:
             from evolib.utils.lineage_logger import LineageLogger
 
             self.lineage_logger = LineageLogger(filename=lineage_file)
-
-        # Evaluation statistics
-        self.fitness_evaluations_total = 0
-        self.heli_fitness_evaluations_total = 0
-        self.heli_fitness_evaluations_gen = 0
 
         # Autoinitialize Population
         if initialize is True:
@@ -234,14 +148,73 @@ class Pop:
         fitness_function: Optional[FitnessFunction] = None,
         initialize: bool = False,
     ) -> "Pop":
-        """Create a new population from an existing validated config."""
-        pop = cls.__new__(cls)
-        pop.config = cfg
-        pop.fitness_function = fitness_function
+        """
+        Create a new population from an existing validated config.
 
-        # Core runtime fields
-        pop.indivs = []
-        pop.history_logger = HistoryLogger(
+        This path does not reset the global random seed or create a lineage logger.
+        """
+        pop = cls.__new__(cls)
+        pop.fitness_function = fitness_function
+        pop._configure_from_config(cfg)
+        pop._initialize_runtime_state()
+        pop.lineage_logger = None
+
+        if initialize:
+            pop.initialize_population()
+
+        return pop
+
+    def _configure_from_config(self, cfg: FullConfig) -> None:
+        """Configure population behavior from an existing validated config."""
+        self.config = cfg
+        self.para_initializer = build_composite_initializer(cfg)
+
+        self.parent_pool_size = cfg.parent_pool_size
+        self.offspring_pool_size = cfg.offspring_pool_size
+        self.max_generations = cfg.max_generations
+        self.num_elites = cfg.num_elites
+
+        self.evolution_strategy = (
+            cfg.evolution.strategy if cfg.evolution is not None else None
+        )
+
+        self.selection_fn: Optional[SelectionFunction] = None
+        if cfg.selection is not None:
+            selection_registry = build_selection_registry(cfg.selection)
+            self.selection_fn = selection_registry[cfg.selection.strategy]
+
+        self._replacement_fn: Optional[ReplaceFunction] = None
+        if cfg.replacement is not None:
+            replacement_registry = build_replacement_registry(cfg.replacement)
+            self._replacement_fn = replacement_registry[cfg.replacement.strategy]
+
+        if cfg.parallel:
+            self.parallel_backend = cfg.parallel.backend
+            self.parallel_num_cpus = cfg.parallel.num_cpus
+            self.parallel_address = cfg.parallel.address
+        else:
+            self.parallel_backend = "none"
+            self.parallel_num_cpus = None
+            self.parallel_address = None
+
+        self.heli_enabled = False
+        self.heli_verbosity = 2
+        if cfg.evolution is not None and cfg.evolution.heli is not None:
+            self.heli_enabled = True
+            self.heli_generations = cfg.evolution.heli.generations
+            self.heli_offspring_per_seed = cfg.evolution.heli.offspring_per_seed
+            self.heli_max_fraction = cfg.evolution.heli.max_fraction
+            self.heli_reduce_sigma_factor = cfg.evolution.heli.reduce_sigma_factor
+        else:
+            self.heli_generations = 0
+            self.heli_offspring_per_seed = 0
+            self.heli_max_fraction = 0.0
+            self.heli_reduce_sigma_factor = 1.0
+
+    def _initialize_runtime_state(self) -> None:
+        """Initialize mutable state for a new population instance."""
+        self.indivs: List[Any] = []
+        self.history_logger = HistoryLogger(
             columns=[
                 "generation",
                 "best_fitness",
@@ -253,44 +226,19 @@ class Pop:
                 "diversity",
             ]
         )
-        pop.generation_num = 0
-        pop.best_fitness = 0.0
-        pop.worst_fitness = 0.0
-        pop.mean_fitness = 0.0
-        pop.median_fitness = 0.0
-        pop.std_fitness = 0.0
-        pop.iqr_fitness = 0.0
-        pop.diversity = 0.0
-        pop.diversity_ema = None
+        self.generation_num = 0
+        self.best_fitness = 0.0
+        self.worst_fitness = 0.0
+        self.mean_fitness = 0.0
+        self.median_fitness = 0.0
+        self.std_fitness = 0.0
+        self.iqr_fitness = 0.0
+        self.diversity = 0.0
+        self.diversity_ema: float | None = None
 
-        # Parallel backend (same as parent)
-        pop.parallel_backend = cfg.parallel.backend if cfg.parallel else "none"
-        pop.parallel_num_cpus = cfg.parallel.num_cpus if cfg.parallel else None
-        pop.parallel_address = cfg.parallel.address if cfg.parallel else None
-
-        # HELI
-        if cfg.evolution is not None and cfg.evolution.heli is not None:
-            pop.heli_generations = cfg.evolution.heli.generations
-            pop.heli_offspring_per_seed = cfg.evolution.heli.offspring_per_seed
-            pop.heli_max_fraction = cfg.evolution.heli.max_fraction
-            pop.heli_reduce_sigma_factor = cfg.evolution.heli.reduce_sigma_factor
-
-        # Evaluation statistics
-        pop.fitness_evaluations_total = 0
-        pop.heli_fitness_evaluations_total = 0
-        pop.heli_fitness_evaluations_gen = 0
-
-        # Initializer + sizes
-        pop.para_initializer = build_composite_initializer(cfg)
-        pop.parent_pool_size = cfg.parent_pool_size
-        pop.offspring_pool_size = cfg.offspring_pool_size
-        pop.max_generations = cfg.max_generations
-        pop.num_elites = cfg.num_elites
-
-        if initialize:
-            pop.initialize_population()
-
-        return pop
+        self.fitness_evaluations_total = 0
+        self.heli_fitness_evaluations_total = 0
+        self.heli_fitness_evaluations_gen = 0
 
     def initialize_population(
         self, initializer: Callable[["Pop"], Any] | None = None
