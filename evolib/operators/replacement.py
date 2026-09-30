@@ -163,10 +163,15 @@ def replace_generational(pop: "Pop", offspring: List[Indiv]) -> None:
     # Sort and mark elites
     elites = pop.get_elites()
 
-    survivors = elites + offspring
+    # Reserve elite slots and fill the remaining places with the best offspring
+    sorted_offspring = sort_by_fitness(
+        offspring, optimization_direction=pop.optimization_direction
+    )
+    remaining_slots = pop.parent_pool_size - len(elites)
+    survivors = elites + sorted_offspring[:remaining_slots]
 
     # Sort by fitness (best first)
-    sorted_survivors = sort_by_fitness(
+    survivors = sort_by_fitness(
         survivors, optimization_direction=pop.optimization_direction
     )
 
@@ -176,8 +181,7 @@ def replace_generational(pop: "Pop", offspring: List[Indiv]) -> None:
         all_candidates, survivors, pop.generation_num, pop.lineage_logger
     )
 
-    # Truncate to desired population size
-    pop.indivs = sorted_survivors[: pop.parent_pool_size]
+    pop.indivs = survivors
 
 
 def replace_steady_state(
