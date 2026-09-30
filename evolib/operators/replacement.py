@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from evolib.core.population import Pop
 
 from evolib.core.population import Indiv
-from evolib.interfaces.enums import OptimizationDirection, Origin
+from evolib.interfaces.enums import OptimizationDirection
 from evolib.utils.fitness import sort_by_fitness
 from evolib.utils.lineage_logger import LineageLogger
 
@@ -63,8 +63,6 @@ def replace_truncation(pop: "Pop", pool: List[Indiv]) -> None:
     )
 
     pop.indivs = survivors
-    for indiv in pop.indivs:
-        indiv.origin = Origin.PARENT
 
 
 def replace_mu_plus_lambda(pop: "Pop", offspring: List[Indiv]) -> None:
@@ -132,8 +130,6 @@ def replace_mu_comma_lambda(
 
     # Replace population
     pop.indivs = survivors
-    for indiv in pop.indivs:
-        indiv.origin = Origin.PARENT
 
 
 def replace_generational(pop: "Pop", offspring: List[Indiv]) -> None:
