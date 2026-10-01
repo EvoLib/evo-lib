@@ -10,6 +10,7 @@
 * REAKING: Replaced selection- and stopping-specific optimization flags with the global `optimization_direction` setting (`minimize` or `maximize`).
 * Exponential rank selection now requires `exp_base >= 1.0`; `1.0` gives uniform selection.
 * Unified `Pop` initialization so constructor and `from_config()` share the same configuration and runtime setup.
+* Truncation replacement now selects the best individuals from parents and offspring, including in flexible evolution.
 
 
 ### Fixed

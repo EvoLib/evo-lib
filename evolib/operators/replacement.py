@@ -34,20 +34,21 @@ def _mark_removed_indivs(
         )
 
 
-def replace_truncation(pop: "Pop", pool: List[Indiv]) -> None:
+def replace_truncation(pop: "Pop", offspring: List[Indiv]) -> None:
     """
-    Generic truncation replacement selecting the top μ individuals from a given pool.
-    Pass a pool that already contains what should compete (e.g., parents+offspring for
-    μ+λ, or offspring only for μ,λ).
+    Select the top μ individuals from parents and offspring.
 
     Args:
         pop: Population handle (μ taken from pop.parent_pool_size).
-        pool: Candidate list to pick survivors from.
+        offspring: Newly generated offspring.
     """
-    if not pool:
-        raise ValueError("Pool must not be empty.")
+    if not offspring:
+        raise ValueError("Offspring list must not be empty.")
     if pop.parent_pool_size <= 0:
         raise ValueError("Parent pool size (mu) must be positive.")
+
+    pool = pop.indivs + offspring
+
     if len(pool) < pop.parent_pool_size:
         raise ValueError("Pool smaller than parent_pool_size; cannot truncate cleanly.")
 
@@ -56,8 +57,7 @@ def replace_truncation(pop: "Pop", pool: List[Indiv]) -> None:
     )
     survivors = sorted_pool[: pop.parent_pool_size]
 
-    # Deduplicate and mark removed
-    all_candidates = list({x.id: x for x in (pop.indivs + pool)}.values())
+    all_candidates = list({x.id: x for x in pool}.values())
     _mark_removed_indivs(
         all_candidates, survivors, pop.generation_num, pop.lineage_logger
     )
@@ -81,11 +81,7 @@ def replace_mu_plus_lambda(pop: "Pop", offspring: List[Indiv]) -> None:
         pop: Population object (parents in pop.indivs).
         offspring: Newly generated offspring.
     """
-    if not offspring:
-        raise ValueError("Offspring list must not be empty.")
-
-    combined = pop.indivs + offspring
-    replace_truncation(pop, combined)
+    replace_truncation(pop, offspring)
 
 
 def replace_mu_comma_lambda(
