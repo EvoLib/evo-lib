@@ -252,7 +252,7 @@ For deeper exploration, see the [full examples directory](examples/)
 
 ## Acknowledgement
 
-ChatGPT (OpenAI) was used to support documentation, docstrings, language editing, and code refactoring.
+ChatGPT (OpenAI) was used to support documentation, docstrings, language editing, code refactoring, and test generation.
 
 ---
 
