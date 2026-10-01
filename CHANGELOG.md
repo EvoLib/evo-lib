@@ -21,7 +21,7 @@
 * Fixed generational replacement so configured parent elites are always preserved.
 * Fixed replacement lineage tracking so removed individuals receive `exit_gen` and surviving offspring retain their offspring origin until the next generation.
 * Fixed Vector adaptive mutation bounds and probability handling, and corrected initialization with `std: 0` and explicit `init_bounds: null`.
-
+* Fix random selection checkpointing
 
 ### Removed
 

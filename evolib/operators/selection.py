@@ -218,38 +218,34 @@ def selection_rank_based(
     return selected_parents
 
 
-def selection_random(pop: "Pop", remove_selected: bool = False) -> List[Indiv]:
+def selection_random(
+    pop: "Pop",
+    num_parents: int,
+    remove_selected: bool = False,
+) -> List[Indiv]:
     """
-    Performs random selection to select offspring from a population.
+    Select parents uniformly at random.
 
-    Parameter:
-        population: List of individuals, each with a fitness attribute.
-        num_offspring: Number of offspring to select.
+    Args:
+        pop: Population to select from.
+        num_parents: Number of parents to select.
+        remove_selected: If True, do not select the same individual twice.
 
-    return:
-        List of selected individuals (offspring).
+    Returns:
+        List of selected parent copies.
     """
-    # Input validation
-    # if tournament_size <= 0 or tournament_size > len(pop.indivs):
-    #    raise ValueError(f"Tournament size must be between 1 and {len(pop.indivs)}")
-
-    if pop.offspring_pool_size < 0:
-        raise ValueError("Number of offspring must be non-negative")
+    if num_parents < 0:
+        raise ValueError("Number of parents must be non-negative")
 
     selected_parents = []
     available_indivs = pop.indivs.copy()
 
-    for _ in range(min(pop.offspring_pool_size, len(pop.indivs))):
+    for _ in range(min(num_parents, len(pop.indivs))):
         if not available_indivs:
-            print("Warning: available_indivs == 0")
             break
 
-        # Randomly select individual from the population
         selected_parent = random.choice(available_indivs)
-        parent = selected_parent.copy()
-
-        # Append the best individual to offspring
-        selected_parents.append(parent)
+        selected_parents.append(selected_parent.copy())
 
         if remove_selected:
             available_indivs.remove(selected_parent)

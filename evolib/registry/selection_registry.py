@@ -53,5 +53,5 @@ def build_selection_registry(
             temperature=cfg.exp_base or 1.0,
         ),
         SelectionStrategy.TRUNCATION: selection_truncation,
-        SelectionStrategy.RANDOM: lambda pop, n: selection_random(pop)[:n],
+        SelectionStrategy.RANDOM: selection_random,
     }
