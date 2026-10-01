@@ -5,7 +5,6 @@ random_seed: 42
 parent_pool_size: 20
 offspring_pool_size: 60
 max_generations: 500
-num_elites: 2
 
 evolution:
   strategy: mu_plus_lambda

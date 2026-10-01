@@ -1,7 +1,6 @@
 parent_pool_size: 10
 offspring_pool_size: 20
 max_generations: 50
-num_elites: 2
 optimization_direction: maximize
 
 evolution:

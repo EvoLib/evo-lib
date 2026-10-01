@@ -6,7 +6,6 @@ parent_pool_size: 50
 offspring_pool_size: 100
 
 max_generations: 50
-num_elites: 1
 
 evolution:
   strategy: "flexible"

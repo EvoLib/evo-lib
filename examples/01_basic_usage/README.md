@@ -22,7 +22,6 @@ A minimal example (`population.yaml`) is provided here for illustration:
 parent_pool_size: 2
 offspring_pool_size: 4
 max_generations: 10
-num_elites: 0
 
 evolution:
   strategy: mu_plus_lambda

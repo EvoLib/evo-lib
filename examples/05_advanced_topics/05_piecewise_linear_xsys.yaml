@@ -3,7 +3,6 @@
 parent_pool_size: 40
 offspring_pool_size: 80
 max_generations: 120
-num_elites: 0
 
 #random_seed: 42
 
