@@ -165,6 +165,10 @@ class EvoNet(ParaBase):
     def calc(self, input_values: list[float]) -> list[float]:
         return self.net.calc(input_values)
 
+    def reset(self, *, full: bool = True) -> None:
+        """Reset the network runtime state."""
+        self.net.reset(full=full)
+
     def mutate(self) -> None:
 
         self._has_structural_change = False

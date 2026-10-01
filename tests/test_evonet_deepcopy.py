@@ -77,3 +77,27 @@ def test_evonet_deepcopy_clears_delay_buffers() -> None:
     assert recurrent2, "Copied net must still have recurrent connections"
 
     assert all(c._history is None or len(c._history) == 0 for c in recurrent2)
+
+
+def test_evonet_reset_clears_delay_buffers() -> None:
+    ev = _build_minimal_recurrent_evonet(delay=3)
+
+    ev.net.calc([1.0])
+    ev.net.calc([0.0])
+
+    recurrent = [
+        connection
+        for connection in ev.net.get_all_connections()
+        if connection.type is ConnectionType.RECURRENT
+    ]
+    assert any(
+        connection._history is not None and len(connection._history) > 0
+        for connection in recurrent
+    )
+
+    ev.reset()
+
+    assert all(
+        connection._history is None or len(connection._history) == 0
+        for connection in recurrent
+    )

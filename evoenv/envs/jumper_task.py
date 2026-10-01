@@ -21,6 +21,7 @@ class JumperController:
 
     def __init__(self, indiv: Indiv) -> None:
         self.net: Any = indiv.para["brain"]
+        self.net.reset()
 
     def act(self, observation: Observation) -> Action:
         """Return jump action values produced by the controller."""

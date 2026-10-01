@@ -20,6 +20,7 @@ class LineFollowerController:
 
     def __init__(self, indiv: Indiv) -> None:
         self.net: Any = indiv.para["brain"]
+        self.net.reset()
 
     def act(self, observation: Observation) -> Action:
         """Return the steering action produced by the controller."""
