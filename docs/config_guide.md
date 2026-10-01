@@ -22,7 +22,6 @@ The following configuration defines a two-dimensional vector optimized with a
 parent_pool_size: 20
 offspring_pool_size: 40
 max_generations: 100
-num_elites: 2
 optimization_direction: minimize
 
 evolution:
@@ -120,7 +119,6 @@ This example starts with a small feedforward network:
 parent_pool_size: 20
 offspring_pool_size: 40
 max_generations: 200
-num_elites: 0
 
 evolution:
   strategy: mu_plus_lambda

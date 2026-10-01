@@ -158,7 +158,11 @@ class FullConfig(BaseModel):
         ..., description="Maximum number of generations to run."
     )
     num_elites: int = Field(
-        ..., description="Number of elite individuals preserved each generation."
+        default=0,
+        description=(
+            "Number of parent elites explicitly preserved by strategies that support "
+            "elite preservation."
+        ),
     )
     optimization_direction: OptimizationDirection = Field(
         default=OptimizationDirection.MINIMIZE,

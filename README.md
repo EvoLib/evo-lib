@@ -61,7 +61,6 @@ Create `quickstart.yaml`:
 parent_pool_size: 10
 offspring_pool_size: 30
 max_generations: 20
-num_elites: 1
 random_seed: 42
 
 evolution:

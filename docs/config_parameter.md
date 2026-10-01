@@ -12,9 +12,12 @@ For usage-oriented examples, see the configuration guide.
 | `parent_pool_size` | int | --- | Number of parents retained in each generation. Must be greater than 0. |
 | `offspring_pool_size` | int | --- | Number of offspring produced per generation. Must be greater than 0. |
 | `max_generations` | int | --- | Maximum number of generations. Must be greater than 0. |
-| `num_elites` | int | --- | Number of elite individuals preserved each generation. Must be between 0 and `parent_pool_size`. |
+| `num_elites` | int | `0` | Number of parent elites explicitly preserved by strategies that support elite preservation. Must be between 0 and `parent_pool_size`. |
 | `optimization_direction` | str | `minimize` | Global fitness optimization direction: `minimize` or `maximize`. |
 | `random_seed` | int \\| null | `null` | Global random seed. Use an integer for reproducible runs. |
+
+`num_elites` is not used by `mu_plus_lambda` or truncation replacement. In these
+strategies, parents survive only if they rank among the best candidates.
 
 ## Evolution
 
@@ -372,7 +375,6 @@ random_seed: 42
 parent_pool_size: 20
 offspring_pool_size: 40
 max_generations: 100
-num_elites: 2
 
 evolution:
   strategy: mu_plus_lambda
@@ -395,7 +397,6 @@ modules:
 parent_pool_size: 20
 offspring_pool_size: 40
 max_generations: 200
-num_elites: 0
 
 evolution:
   strategy: mu_plus_lambda
