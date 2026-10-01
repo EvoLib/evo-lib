@@ -12,7 +12,6 @@ This example optimizes the classic **Sphere function** in five dimensions.
 parent_pool_size: 20
 offspring_pool_size: 40
 max_generations: 50
-num_elites: 0
 
 evolution:
   strategy: mu_comma_lambda

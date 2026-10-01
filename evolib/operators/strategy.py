@@ -14,8 +14,9 @@ These functions assume that `Pop` has:
 - a configured fitness function
 
 Functions:
-- evolve_mu_plus_lambda: Classical (μ + λ) strategy with elitism.
-- evolve_mu_comma_lambda: Classical (μ, λ) strategy without elitism.
+- evolve_mu_plus_lambda: Classical (μ + λ) strategy where parents and offspring
+  compete for survival.
+- evolve_mu_comma_lambda: Classical (μ, λ) strategy with optional parent elitism.
 
 All strategies are compatible with `strategy_registry` and `pop.run_one_generation()`.
 """
@@ -37,8 +38,8 @@ from evolib.operators.reproduction import generate_cloned_offspring
 
 
 def evolve_mu_plus_lambda(pop: "Pop") -> None:
-    """Elites and selected parents generate offspring, then mu best individuals are
-    selected from parents + offspring."""
+    """Generate offspring from the current population, then keep the best μ individuals
+    from parents and offspring."""
     if pop.fitness_function is None:
         raise ValueError("No fitness function set in population.")
     if not pop.indivs:
@@ -97,8 +98,8 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
     """
     if pop.fitness_function is None:
         raise ValueError(
-            "No fitness function set in population."
-            "Use pop.set_functions() before evolving."
+            "No fitness function set in population. "
+            "Pass fitness_function to Pop or call set_fitness_function()."
         )
     if not pop.indivs:
         raise ValueError("Population is empty.")
@@ -166,13 +167,17 @@ def evolve_steady_state(pop: "Pop") -> None:
     Notes:
     - The number of replaced individuals per generation is defined by `pop.lambda_`
     - Elites (top `pop.num_elites` individuals) are preserved
-    - All individuals age automatically via `pop.update_statistics()`
+    - Current population members age at the start of the generation via
+      `pop.age_indivs()`
 
     Raises:
         ValueError: If population is uninitialized or fitness function is missing
     """
     if pop.fitness_function is None:
-        raise ValueError("No fitness function set. Use pop.set_functions() first.")
+        raise ValueError(
+            "No fitness function set. "
+            "Pass fitness_function to Pop or call set_fitness_function()."
+        )
     if not pop.indivs:
         raise ValueError("Population is empty.")
     if pop.selection_fn is None:
@@ -234,7 +239,7 @@ def evolve_steady_state(pop: "Pop") -> None:
             pop.indivs, pop.generation_num, event="survived"
         )
 
-    # Update population statistics (including aging, diversity, fitness metrics)
+    # Update population statistics
     pop.update_statistics()
 
 
