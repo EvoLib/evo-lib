@@ -2,7 +2,6 @@ parent_pool_size: 2
 offspring_pool_size: 4
 
 max_generations: 20
-num_elites: 0
 
 modules:
   population_test:
