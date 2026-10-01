@@ -66,7 +66,7 @@ class Vector(ParaBase):
             case "normal":
                 para.vector = np.random.normal(
                     loc=cfg.mean or 0.0,
-                    scale=cfg.std or 1.0,
+                    scale=1.0 if cfg.std is None else cfg.std,
                     size=para.dim,
                 )
 
@@ -177,6 +177,13 @@ class Vector(ParaBase):
         - Per-parameter mutation strengths (`mutation_strengths` defined).
         - Global mutation strength with optional mutation probability.
         """
+        prob = (
+            self.evo_params.mutation_probability
+            if self.evo_params.mutation_probability is not None
+            else 1.0
+        )
+        mask = np.random.rand(len(self.vector)) < prob
+
         if self.evo_params.mutation_strengths is not None:
 
             # Adaptive per-parameter mutation
@@ -184,7 +191,7 @@ class Vector(ParaBase):
                 loc=0.0, scale=self.evo_params.mutation_strengths, size=len(self.vector)
             )
 
-            self.vector += noise
+            self.vector += noise * mask
         else:
             if self.evo_params.mutation_strength is None:
                 raise ValueError("mutation_strength must be set.")
@@ -192,12 +199,6 @@ class Vector(ParaBase):
             noise = np.random.normal(
                 loc=0.0, scale=self.evo_params.mutation_strength, size=self.vector.shape
             )
-            prob = (
-                self.evo_params.mutation_probability
-                if self.evo_params.mutation_probability is not None
-                else 1.0
-            )
-            mask = (np.random.rand(len(self.vector)) < prob).astype(np.float64)
             self.vector += noise * mask
 
         if self.bounds is not None:
@@ -324,8 +325,11 @@ class Vector(ParaBase):
                 raise ValueError(
                     "min_mutation_strength and max_mutation_strength must be defined."
                 )
-            if self.bounds is None:
-                raise ValueError("bounds must be set")
+            strength_bounds = (
+                ep.min_mutation_strength,
+                ep.max_mutation_strength,
+            )
+
             # Ensure mutation_strength is initialized
             if ep.mutation_strength is None:
                 ep.mutation_strength = np.random.uniform(
@@ -333,7 +337,7 @@ class Vector(ParaBase):
                 )
 
             # Perform adaptive update
-            ep.mutation_strength = adapt_mutation_strength(ep, self.bounds)
+            ep.mutation_strength = adapt_mutation_strength(ep, strength_bounds)
 
         elif ep.mutation_strategy == MutationStrategy.ADAPTIVE_PER_PARAMETER:
             # Ensure tau is initialized
@@ -346,8 +350,10 @@ class Vector(ParaBase):
                     "min_mutation_strength and max_mutation_strength must be defined."
                 )
 
-            if self.bounds is None:
-                raise ValueError("bounds must be set")
+            strength_bounds = (
+                ep.min_mutation_strength,
+                ep.max_mutation_strength,
+            )
 
             if ep.mutation_strengths is None:
                 ep.mutation_strengths = np.random.uniform(
@@ -357,7 +363,7 @@ class Vector(ParaBase):
                 )
 
             # Perform adaptive update
-            ep.mutation_strengths = adapt_mutation_strengths(ep, self.bounds)
+            ep.mutation_strengths = adapt_mutation_strengths(ep, strength_bounds)
 
     def crossover_with(self, partner: "ParaBase") -> None:
         """

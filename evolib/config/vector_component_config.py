@@ -102,8 +102,13 @@ class VectorComponentConfig(BaseModel):
 
     @field_validator("bounds", "init_bounds")
     @classmethod
-    def check_bounds(cls, bounds: Tuple[float, float]) -> Tuple[float, float]:
+    def check_bounds(
+        cls, bounds: Optional[Tuple[float, float]]
+    ) -> Optional[Tuple[float, float]]:
         """Validate that bounds are well-formed (min <= max)."""
+        if bounds is None:
+            return None
+
         low, high = bounds
         if low > high:
             raise ValueError("Bounds must be specified as (min, max) with min <= max")

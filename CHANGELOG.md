@@ -1,4 +1,4 @@
-## Unreleased
+## EvoLib 0.5.0
 
 ### Added
 
@@ -6,30 +6,30 @@
 
 ### Changed
 
-* Migrated fixed-topology neural network examples and configuration from `NetVector` to `VectorNet`.
-* REAKING: Replaced selection- and stopping-specific optimization flags with the global `optimization_direction` setting (`minimize` or `maximize`).
-* Exponential rank selection now requires `exp_base >= 1.0`; `1.0` gives uniform selection.
-* Unified `Pop` initialization so constructor and `from_config()` share the same configuration and runtime setup.
+* BREAKING: Replaced selection- and stopping-specific optimization flags with the global `optimization_direction` setting (`minimize` or `maximize`).
+* BREAKING: Exponential rank selection now requires `exp_base >= 1.0`; `1.0` gives uniform selection.
 * Truncation replacement now selects the best individuals from parents and offspring, including in flexible evolution.
-
+* `num_elites` now defaults to `0` and is only used by strategies with explicit elite preservation.
 
 ### Fixed
 
 * Fixed diversity EMA initialization so the first value uses measured diversity instead of being biased toward zero.
 * Fixed `Pop.run()` overrides so explicit zero values for `max_generations` and `min_delta` are preserved.
 * Fixed stochastic replacement weighting so worse non-elite individuals are more likely to be replaced.
-* Corrected rank-selection documentation to reflect that rank 0 is the best individual.
 * Fixed `DiversityMethod.RANGE` to return the unnormalized fitness range.
-* Fixed `Pop.update_statistics()` so statistics logging no longer reorders the population; failed updates leave the generation counter unchanged.
+* Fixed `Pop.update_statistics()` so statistics logging no longer reorders the population and failed updates do not advance the generation counter.
+* Fixed generational replacement so configured parent elites are always preserved.
+* Fixed replacement lineage tracking so removed individuals receive `exit_gen` and surviving offspring retain their offspring origin until the next generation.
+* Fixed Vector adaptive mutation bounds and probability handling, and corrected initialization with `std: 0` and explicit `init_bounds: null`.
+
 
 ### Removed
 
 * BREAKING: Removed `NetVector` and legacy structured `Vector` modes. `Vector` now represents flat parameter vectors only.
 * BREAKING: Removed `max_indiv_age` and automatic age-based survivor removal.
-* Removed unused population-level strategy state for mutation, pairing, crossover, selection, and replacement.
 * BREAKING: Removed deprecated `Pop.set_functions()`; use `set_fitness_function()` or the constructor argument instead.
-* Removed the unused `relative_iqr` and `normalized_std` diversity methods.
-
+* BREAKING: Removed the unused `Indiv.crossover()` method and `reset_evaluation` argument from `Indiv.copy()`.
+* BREAKING: Removed the `relative_iqr` and `normalized_std` diversity methods.
 
 ## EvoLib 0.4.0
 

@@ -119,3 +119,99 @@ def test_vector_from_config_does_not_modify_config() -> None:
     Vector.from_config(cfg)
 
     assert cfg.model_dump() == before
+
+
+def test_vector_from_config_normal_respects_zero_std() -> None:
+    cfg = VectorComponentConfig(
+        dim=4,
+        initializer="normal",
+        mean=0.25,
+        std=0.0,
+        bounds=(-1.0, 1.0),
+        mutation=_constant_mutation(),
+    )
+
+    para = Vector.from_config(cfg)
+
+    assert np.array_equal(para.vector, np.full(4, 0.25))
+
+
+def test_vector_config_accepts_explicit_null_init_bounds() -> None:
+    cfg = VectorComponentConfig(
+        dim=4,
+        initializer="uniform",
+        bounds=(-0.5, 0.5),
+        init_bounds=None,
+        mutation=_constant_mutation(),
+    )
+
+    para = Vector.from_config(cfg)
+
+    assert para.init_bounds == (-0.5, 0.5)
+
+
+def test_adaptive_individual_uses_mutation_strength_bounds() -> None:
+    np.random.seed(1)
+    cfg = VectorComponentConfig(
+        dim=4,
+        initializer="zero",
+        bounds=(10.0, 20.0),
+        mutation=MutationConfig(
+            strategy=MutationStrategy.ADAPTIVE_INDIVIDUAL,
+            probability=1.0,
+            min_strength=0.01,
+            max_strength=0.05,
+        ),
+    )
+    para = Vector.from_config(cfg)
+
+    para.update_mutation_parameters(generation=1, max_generations=10)
+
+    assert para.evo_params.mutation_strength is not None
+    assert 0.01 <= para.evo_params.mutation_strength <= 0.05
+
+
+def test_adaptive_per_parameter_uses_mutation_strength_bounds() -> None:
+    np.random.seed(1)
+    cfg = VectorComponentConfig(
+        dim=4,
+        initializer="zero",
+        bounds=(10.0, 20.0),
+        mutation=MutationConfig(
+            strategy=MutationStrategy.ADAPTIVE_PER_PARAMETER,
+            probability=1.0,
+            min_strength=0.01,
+            max_strength=0.05,
+        ),
+    )
+    para = Vector.from_config(cfg)
+
+    para.update_mutation_parameters(generation=1, max_generations=10)
+
+    strengths = para.evo_params.mutation_strengths
+    assert strengths is not None
+    assert np.all(strengths >= 0.01)
+    assert np.all(strengths <= 0.05)
+
+
+def test_adaptive_per_parameter_respects_zero_probability() -> None:
+    np.random.seed(1)
+    cfg = VectorComponentConfig(
+        dim=4,
+        initializer="adaptive",
+        bounds=(-1.0, 1.0),
+        init_bounds=(-0.5, 0.5),
+        randomize_mutation_strengths=True,
+        mutation=MutationConfig(
+            strategy=MutationStrategy.ADAPTIVE_PER_PARAMETER,
+            probability=0.0,
+            min_strength=0.01,
+            max_strength=0.05,
+        ),
+    )
+    para = Vector.from_config(cfg)
+    before = para.vector.copy()
+
+    para.mutate()
+
+    assert np.array_equal(para.vector, before)
