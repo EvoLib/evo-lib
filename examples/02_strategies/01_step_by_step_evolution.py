@@ -95,7 +95,7 @@ pop.evaluate_indivs(offspring)
 print_indivs("5) Evaluate offspring: ", offspring)
 
 # Step 6) Replacement (μ from parents + offspring)
-replace_mu_plus_lambda(pop, pop.indivs + offspring)
+replace_mu_plus_lambda(pop, offspring)
 print_indivs("6) Replacement: ", pop.indivs)
 
 # Step 7) Stats / logging (increments generation)
