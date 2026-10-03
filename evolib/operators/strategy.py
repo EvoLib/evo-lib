@@ -193,6 +193,9 @@ def evolve_steady_state(pop: "Pop") -> None:
     # Age all current individuals
     pop.age_indivs()
 
+    # Ensure valid fitness before parent selection and replacement
+    pop.ensure_evaluated()
+
     # Select parents (configurable)
     if (
         pop.config.selection is not None
@@ -228,7 +231,7 @@ def evolve_steady_state(pop: "Pop") -> None:
         pop.heli_fitness_evaluations_total += pop.heli_fitness_evaluations_gen
 
     # Evaluate offspring fitness
-    pop.evaluate_indivs(offspring)
+    pop.ensure_evaluated_indivs(offspring)
 
     # Replace worst individuals (excluding elites)
     replace_steady_state(pop, offspring, num_replace=pop.lambda_)
