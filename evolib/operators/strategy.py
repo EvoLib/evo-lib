@@ -93,8 +93,8 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
     """
     Only offspring compete for survival; parents are replaced.
 
-    If `num_elites > 0`, top elite parents are preserved and their fitness is re-
-    evaluated before offspring generation.
+    If `num_elites > 0`, top elite parents are preserved and their fitness is re- used
+    if already valid.
     """
     if pop.fitness_function is None:
         raise ValueError(
@@ -109,7 +109,7 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
 
     # Evaluate current parents only if elites will be preserved
     if pop.num_elites > 0:
-        pop.evaluate_fitness()
+        pop.ensure_evaluated()
 
     # CREATE OFFSPRING
     offspring = generate_cloned_offspring(
@@ -136,7 +136,7 @@ def evolve_mu_comma_lambda(pop: "Pop") -> None:
         pop.heli_fitness_evaluations_total += pop.heli_fitness_evaluations_gen
 
     # Evaluate offspring fitness
-    pop.evaluate_indivs(offspring)
+    pop.ensure_evaluated_indivs(offspring)
 
     # REPLACE PARENTS
     replace_mu_comma_lambda(pop, offspring)
