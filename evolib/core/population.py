@@ -874,16 +874,17 @@ class Pop:
         return self.selection_fn(self, num_parents)
 
     def ensure_evaluated(self) -> None:
-        """Evaluate individuals that have no valid fitness yet."""
-        no_fitness = [ind for ind in self.indivs if not _is_valid_fitness(ind.fitness)]
-        if no_fitness:
-            if self.fitness_function is None:
-                raise ValueError(
-                    "No fitness_function set, but evaluation is required. "
-                    "Provide it via Population(..., fitness_function=...) "
-                    "or pop.set_fitness_function(...)."
-                )
-            self.evaluate_indivs(no_fitness)
+        """Ensure that all population individuals have valid fitness."""
+        self.ensure_evaluated_indivs(self.indivs)
+
+    def ensure_evaluated_indivs(self, indivs: list[Indiv]) -> None:
+        """Evaluate individuals from a supplied list that lack valid fitness."""
+        unevaluated = [
+            indiv for indiv in indivs if not _is_valid_fitness(indiv.fitness)
+        ]
+
+        if unevaluated:
+            self.evaluate_indivs(unevaluated)
 
 
 ##############################################################################
