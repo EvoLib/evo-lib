@@ -74,8 +74,8 @@ def evolve_mu_plus_lambda(pop: "Pop") -> None:
 
     combined = pop.indivs + offspring
 
-    # Evaluate fitness of all
-    pop.evaluate_indivs(combined)
+    # Evaluate only individuals without valid fitness
+    pop.ensure_evaluated_indivs(combined)
 
     # Select the best individuals
     replace_mu_plus_lambda(pop, offspring)
