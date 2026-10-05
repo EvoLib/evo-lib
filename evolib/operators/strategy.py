@@ -272,7 +272,7 @@ def evolve_flexible(pop: "Pop") -> None:
     pop.age_indivs()
 
     # Fitness
-    pop.evaluate_fitness()
+    pop.ensure_evaluated()
 
     # Selection
     if (
@@ -303,7 +303,7 @@ def evolve_flexible(pop: "Pop") -> None:
     mutate_offspring(pop, offspring)
 
     # Evaluate
-    pop.evaluate_indivs(offspring)
+    pop.ensure_evaluated_indivs(offspring)
 
     # Replacement (via configured strategy)
     pop._replacement_fn(pop, offspring)
