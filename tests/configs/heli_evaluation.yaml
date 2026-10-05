@@ -1,0 +1,25 @@
+parent_pool_size: 2
+offspring_pool_size: 2
+
+max_generations: 20
+
+evolution:
+  strategy: mu_plus_lambda
+  heli:
+    generations: 3
+    offspring_per_seed: 2
+    max_fraction: 1.0
+    reduce_sigma_factor: 0.5
+    seed_selection: none
+
+modules:
+  test-vector:
+    type: vector
+    initializer: uniform
+    dim: 1
+    bounds: [-1.0, 1.0]
+
+    mutation:
+      strategy: constant
+      strength: 0.01
+      probability: 1.0

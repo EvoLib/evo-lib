@@ -1,0 +1,35 @@
+from evolib.core.individual import Indiv
+from evolib.core.population import Pop
+from evolib.operators.heli import run_heli
+from evolib.operators.reproduction import generate_cloned_offspring
+
+
+def test_heli_counts_only_incubation_offspring() -> None:
+    evaluated_ids: list[str] = []
+
+    def fitness(indiv: Indiv) -> None:
+        evaluated_ids.append(indiv.id)
+        indiv.fitness = 0.0
+
+    pop = Pop(
+        config_path="./tests/configs/heli_evaluation.yaml",
+        fitness_function=fitness,
+    )
+    pop.generation_num = 1
+
+    offspring = generate_cloned_offspring(
+        pop.indivs,
+        1,
+        current_gen=pop.generation_num,
+    )
+    offspring[0].para._has_structural_change = True
+
+    heli_evaluations = run_heli(pop, offspring)
+
+    expected_heli = pop.heli_generations * pop.heli_offspring_per_seed
+
+    assert pop.fitness_evaluations_total == 1
+    assert heli_evaluations == expected_heli
+    assert len(evaluated_ids) == 1 + expected_heli
+    assert len(offspring) == 1
+    assert offspring[0].fitness is not None

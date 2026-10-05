@@ -119,6 +119,8 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
     -----
     - Structure-mutated individuals are *temporarily removed* from `offspring`
       to avoid double evaluation.
+    - Seed fitness is evaluated as part of the main evolution before incubation.
+    - The returned count contains only additional incubation evaluations.
     - Only the best individual from each incubation subpopulation is returned.
     - Mutation strength can be damped by `reduce_sigma_factor`.
     """
@@ -180,6 +182,10 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
             print(f"[HELI] Gen: {pop.generation_num} - No Seed")
         return fitness_evaluations
 
+    # Ensure seeds have valid fitness before incubation.
+    # Any required evaluations are counted by the main population, not as HELI overhead.
+    pop.ensure_evaluated_indivs(seeds)
+
     # Remove selected seeds from the main offspring pool
     for seed in seeds:
         if seed in offspring:
@@ -233,7 +239,7 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
             if drift == float("inf") or drift == float("-inf"):
                 break  # abort incubation early
 
-        fitness_evaluations += gen * subpop.offspring_pool_size
+        fitness_evaluations += subpop.fitness_evaluations_total
 
         # Restore evo_params
         para_dict = vars(best.para)

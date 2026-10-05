@@ -1,3 +1,11 @@
+## Unreleased
+
+### Fixed
+
+* Fixed evolution strategies to reuse valid fitness values instead of redundantly reevaluating unchanged individuals.
+* Fixed steady-state evolution so the initial population is evaluated before fitness-dependent parent selection.
+* Fixed HELI evaluation accounting to count actual incubation evaluations and exclude seed evaluation from HELI overhead.
+
 ## EvoLib 0.5.0
 
 ### Added
