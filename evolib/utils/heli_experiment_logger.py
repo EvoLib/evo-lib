@@ -33,6 +33,7 @@ class HeliExperimentLogger:
                 "heli_overhead_percent_gen",
                 "fitness_evaluations_total",
                 "heli_fitness_evaluations_total",
+                "total_fitness_evaluations",
             ]
         )
         self._file.flush()
@@ -49,6 +50,9 @@ class HeliExperimentLogger:
         base_gen = pop.fitness_evaluations_total - self._last_fitness_evaluations_total
         self._last_fitness_evaluations_total = pop.fitness_evaluations_total
         overhead_pct_gen = (heli_gen / base_gen * 100.0) if base_gen > 0 else 0.0
+        total_evaluations = (
+            pop.fitness_evaluations_total + pop.heli_fitness_evaluations_total
+        )
 
         weights, neurons = [], []
 
@@ -70,6 +74,7 @@ class HeliExperimentLogger:
                 overhead_pct_gen,
                 pop.fitness_evaluations_total,
                 pop.heli_fitness_evaluations_total,
+                total_evaluations,
             ]
         )
         self._file.flush()
