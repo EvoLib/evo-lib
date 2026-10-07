@@ -142,15 +142,17 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
     if not offspring or not pop.heli_enabled:
         return fitness_evaluations
 
+    # 1: Identify and count structural mutants
+    struct_mutants = [indiv for indiv in offspring if indiv.para.has_structural_change]
+    pop.structural_mutants_gen = len(struct_mutants)
+
     # Skip HELI in generation 0 (no evaluation baseline yet)
     if pop.generation_num == 0:
         if pop.heli_verbosity >= 1:
             print("[HELI] Skipped: main population not yet evaluated.")
         return fitness_evaluations
 
-    # 1: Select structure-mutated offspring
-    struct_mutants = [indiv for indiv in offspring if indiv.para.has_structural_change]
-    pop.structural_mutants_gen = len(struct_mutants)
+    # Check for structural mutants
     if not struct_mutants:
         if pop.heli_verbosity >= 2:
             print(f"[HELI] Gen: {pop.generation_num} - No struct_mutants")
@@ -263,6 +265,7 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
 
         pop.heli_lineage_records_gen.append(
             {
+                "generation": pop.generation_num,
                 "seed_id": seed.id,
                 "seed_fitness": seed_fitness,
                 "result_id": best.id,

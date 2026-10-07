@@ -41,6 +41,7 @@ def test_heli_counts_only_incubation_offspring() -> None:
     assert len(pop.heli_lineage_records_gen) == 1
 
     record = pop.heli_lineage_records_gen[0]
+    assert record["generation"] == 1
     assert record["seed_fitness"] == 0.0
     assert record["result_fitness"] == 0.0
     assert record["fitness_improvement"] == 0.0
@@ -73,6 +74,8 @@ def test_heli_total_budget_matches_actual_fitness_calls(
 
     pop.run_one_generation(strategy=EvolutionStrategy.MU_PLUS_LAMBDA)
 
+    assert pop.structural_mutants_gen == pop.lambda_
+    assert pop.heli_seeds_gen == 0
     assert pop.fitness_evaluations_total == pop.mu + pop.lambda_
     assert pop.heli_fitness_evaluations_gen == 0
     assert pop.heli_fitness_evaluations_total == 0
@@ -95,6 +98,7 @@ def test_heli_total_budget_matches_actual_fitness_calls(
     assert len(pop.heli_lineage_records_gen) == pop.lambda_
 
     for record in pop.heli_lineage_records_gen:
+        assert record["generation"] == 1
         assert record["incubation_evaluations"] == (
             pop.heli_generations * pop.heli_offspring_per_seed
         )

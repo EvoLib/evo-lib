@@ -111,7 +111,7 @@ class HeliExperimentLogger:
             for record in pop.heli_lineage_records_gen:
                 self._heli_lineage_writer.writerow(
                     [
-                        pop.generation_num,
+                        record["generation"],
                         record["seed_id"],
                         record["seed_fitness"],
                         record["result_id"],
