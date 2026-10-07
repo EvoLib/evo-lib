@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import random
 from copy import deepcopy
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, cast
 
 if TYPE_CHECKING:
     from evolib.core.individual import Indiv
@@ -127,6 +127,10 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
     from evolib.core.population import Pop
     from evolib.operators.strategy import evolve_mu_plus_lambda
 
+    pop.structural_mutants_gen = 0
+    pop.heli_seeds_gen = 0
+    pop.heli_lineage_records_gen = []
+
     fitness_evaluations = 0
 
     heli_cfg = getattr(pop.config.evolution, "heli", None)
@@ -146,6 +150,7 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
 
     # 1: Select structure-mutated offspring
     struct_mutants = [indiv for indiv in offspring if indiv.para.has_structural_change]
+    pop.structural_mutants_gen = len(struct_mutants)
     if not struct_mutants:
         if pop.heli_verbosity >= 2:
             print(f"[HELI] Gen: {pop.generation_num} - No struct_mutants")
@@ -176,6 +181,7 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
             raise ValueError(f"Unknown HELI seed_selection: {seed_policy}")
 
     seeds = struct_mutants[:max_seeds]
+    pop.heli_seeds_gen = len(seeds)
 
     if len(seeds) < 1:
         if pop.heli_verbosity >= 2:
@@ -200,6 +206,8 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
     for seed_idx, seed in enumerate(seeds):
         if pop.heli_verbosity >= 1:
             print(f"[HELI] Seed: {seed_idx+1}")
+
+        seed_fitness = cast(float, seed.fitness)
 
         # Create SubPopulation
         cfg = deepcopy(pop.config)
@@ -230,8 +238,10 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
             apply_heli_overrides(module, pop.heli_reduce_sigma_factor)
 
         # Run short local evolution
+        completed_generations = 0
         for gen in range(pop.heli_generations):
             evolve_mu_plus_lambda(subpop)
+            completed_generations += 1
             best = subpop.best()
 
             # Drift evaluation
@@ -239,7 +249,29 @@ def run_heli(pop: "Pop", offspring: List["Indiv"]) -> int:
             if drift == float("inf") or drift == float("-inf"):
                 break  # abort incubation early
 
-        fitness_evaluations += subpop.fitness_evaluations_total
+        incubation_evaluations = subpop.fitness_evaluations_total
+        fitness_evaluations += incubation_evaluations
+
+        if best.fitness is None:
+            raise RuntimeError("HELI result must have valid fitness after incubation.")
+
+        result_fitness = float(best.fitness)
+        if pop.optimization_direction == OptimizationDirection.MINIMIZE:
+            fitness_improvement = seed_fitness - result_fitness
+        else:
+            fitness_improvement = result_fitness - seed_fitness
+
+        pop.heli_lineage_records_gen.append(
+            {
+                "seed_id": seed.id,
+                "seed_fitness": seed_fitness,
+                "result_id": best.id,
+                "result_fitness": result_fitness,
+                "fitness_improvement": fitness_improvement,
+                "incubation_generations": completed_generations,
+                "incubation_evaluations": incubation_evaluations,
+            }
+        )
 
         # Restore evo_params
         para_dict = vars(best.para)

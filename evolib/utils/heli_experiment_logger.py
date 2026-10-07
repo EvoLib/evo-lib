@@ -19,7 +19,11 @@ class HeliExperimentLogger:
     Logs generation-wise aggregates about population structure (weights / neurons)
     """
 
-    def __init__(self, filename: str | Path):
+    def __init__(
+        self,
+        filename: str | Path,
+        heli_lineage_filename: str | Path | None = None,
+    ):
         self.filename = Path(filename)
         self._file = open(self.filename, "w", newline="")
         self._writer = csv.writer(self._file)
@@ -28,6 +32,8 @@ class HeliExperimentLogger:
                 "generation",
                 "mean_num_weights",
                 "mean_num_neurons",
+                "structural_mutants_gen",
+                "heli_seeds_gen",
                 "base_fitness_evaluations_gen",
                 "heli_fitness_evaluations_gen",
                 "heli_overhead_percent_gen",
@@ -38,6 +44,26 @@ class HeliExperimentLogger:
         )
         self._file.flush()
         self._last_fitness_evaluations_total = 0
+        self._heli_lineage_file = None
+        self._heli_lineage_writer = None
+
+        if heli_lineage_filename is not None:
+            lineage_path = Path(heli_lineage_filename)
+            self._heli_lineage_file = open(lineage_path, "w", newline="")
+            self._heli_lineage_writer = csv.writer(self._heli_lineage_file)
+            self._heli_lineage_writer.writerow(
+                [
+                    "generation",
+                    "seed_id",
+                    "seed_fitness",
+                    "result_id",
+                    "result_fitness",
+                    "fitness_improvement",
+                    "incubation_generations",
+                    "incubation_evaluations",
+                ]
+            )
+            self._heli_lineage_file.flush()
 
     def log_generation(self, pop: Pop) -> None:
         """
@@ -69,6 +95,8 @@ class HeliExperimentLogger:
                 pop.generation_num,
                 mean_num_weights,
                 mean_num_neurons,
+                pop.structural_mutants_gen,
+                pop.heli_seeds_gen,
                 base_gen,
                 heli_gen,
                 overhead_pct_gen,
@@ -79,10 +107,30 @@ class HeliExperimentLogger:
         )
         self._file.flush()
 
+        if self._heli_lineage_writer is not None:
+            for record in pop.heli_lineage_records_gen:
+                self._heli_lineage_writer.writerow(
+                    [
+                        pop.generation_num,
+                        record["seed_id"],
+                        record["seed_fitness"],
+                        record["result_id"],
+                        record["result_fitness"],
+                        record["fitness_improvement"],
+                        record["incubation_generations"],
+                        record["incubation_evaluations"],
+                    ]
+                )
+
+            if self._heli_lineage_file is not None:
+                self._heli_lineage_file.flush()
+
     def close(self) -> None:
         """Close the CSV file cleanly."""
         if not self._file.closed:
             self._file.close()
+        if self._heli_lineage_file is not None and not self._heli_lineage_file.closed:
+            self._heli_lineage_file.close()
 
     def __enter__(self) -> HeliExperimentLogger:
         return self

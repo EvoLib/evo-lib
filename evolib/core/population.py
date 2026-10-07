@@ -239,6 +239,9 @@ class Pop:
         self.fitness_evaluations_total = 0
         self.heli_fitness_evaluations_total = 0
         self.heli_fitness_evaluations_gen = 0
+        self.structural_mutants_gen = 0
+        self.heli_seeds_gen = 0
+        self.heli_lineage_records_gen: list[dict[str, Any]] = []
 
     def initialize_population(
         self, initializer: Callable[["Pop"], Any] | None = None
