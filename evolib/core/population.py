@@ -224,6 +224,8 @@ class Pop:
                 "std_fitness",
                 "iqr_fitness",
                 "diversity",
+                "fitness_evaluations_total",
+                "heli_fitness_evaluations_total",
             ]
         )
         self.generation_num = 0
@@ -537,6 +539,8 @@ class Pop:
             "std_fitness": self.std_fitness,
             "iqr_fitness": self.iqr_fitness,
             "diversity": self.diversity,
+            "fitness_evaluations_total": self.fitness_evaluations_total,
+            "heli_fitness_evaluations_total": self.heli_fitness_evaluations_total,
         }
 
         best_indiv = None
